@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MapController {
 
-/*    @Autowired
+    @Autowired
     private MapManager mapManager;
 
     @RequestMapping(value = "/world/{worldId}", method = RequestMethod.GET)
     public ResponseEntity<World> getWorldMap(@Param("worldId") long worldId){
         World world = mapManager.getWorld(worldId);
         return ResponseEntity.ok(world);
-    }*/
+    }
 }

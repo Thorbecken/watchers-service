@@ -4,26 +4,28 @@ import javax.persistence.*;
 import java.awt.*;
 
 @Entity
+@Table(name = "tile")
 public class Tile {
 
-   /* @Id
+    @Id
     @GeneratedValue
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @ManyToOne
-    private long WorldId;
+    @JoinColumn(name = "world_id", nullable = false)
+    private World world;
 
-    @OneToOne
-    @JoinTable
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "coordinate_id", referencedColumnName = "id")
     private Coordinate coordinate;
 
     @Column(name = "color")
     private Color color;
 
-    public Tile(long xCoord, long yCoord, Color color, long worldId){
+    public Tile(long xCoord, long yCoord, Color color, World world){
         this.coordinate = new Coordinate(xCoord, yCoord);
-        this.WorldId = worldId;
+        this.world = world;
         this.color = color;
     }
 
@@ -44,7 +46,7 @@ public class Tile {
         return coordinate;
     }
 
-    public long getWorldId() {
-        return WorldId;
-    }*/
+    public World getWorldId() {
+        return world;
+    }
 }

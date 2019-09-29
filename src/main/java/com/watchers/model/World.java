@@ -1,24 +1,25 @@
 package com.watchers.model;
 
 import javax.persistence.*;
-import java.util.Map;
+import java.util.Set;
 
 @Entity
+@Table(name = "world")
 public class World {
 
-/*    @Id
+    @Id
     @GeneratedValue
     @Column(name = "id")
-    @OneToMany
-    private long id;
+    private Long id;
 
-    private Map<Coordinate, Tile> tileMap;
+    @OneToMany(mappedBy = "world")
+    private Set<Tile> tiles;
 
-    public Map<Coordinate, Tile> getTileMap() {
-        return tileMap;
+    public Set<Tile> getTiles() {
+        return tiles;
     }
 
-    public void setTileMap(Map<Coordinate, Tile> tileMap) {
-        this.tileMap = tileMap;
-    }*/
+    public void setTiles(Set<Tile> tiles) {
+        this.tiles = tiles;
+    }
 }

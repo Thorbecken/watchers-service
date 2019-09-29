@@ -1,14 +1,17 @@
 package com.watchers.model;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "coordinate")
 public class Coordinate {
     @Id
     @GeneratedValue
     @Column(name = "id")
-    private long id;
+    private Long id;
+
+    @OneToOne(mappedBy = "coordinate")
+    private Tile tile;
 
     @Column(name = "xCoord")
     private long xCoord;
