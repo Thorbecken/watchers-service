@@ -3,10 +3,12 @@ package com.watchers.manager;
 import com.watchers.model.Coordinate;
 import com.watchers.model.Tile;
 import com.watchers.model.World;
+import com.watchers.repository.TileRepository;
 import com.watchers.repository.WorldRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.*;
 import java.util.*;
@@ -18,20 +20,16 @@ public class MapManager {
     @Autowired
     private WorldRepository worldRepository;
 
+    @Autowired
+    private TileRepository tileRepository;
+
     public World getWorld(Long worldId) {
-        World world = new World();
-        Map<Coordinate, Tile> tileMap = new HashMap<>();
-        Set<Tile> worldTiles = worldRepository.findById(worldId).get().getTiles();
+       Optional<World> world = worldRepository.findById(worldId);
 
-        if(worldTiles.isEmpty()){
-            return createWorld(worldId);
-        }
-
-        worldTiles.forEach(tile -> tileMap.put(tile.getCoordinate(), tile));
-
-        return world;
+        return world.orElseGet(() -> createWorld(worldId));
     }
 
+    @Transactional
     public World createWorld(long worldId){
         Random rand = new Random();
 
@@ -49,6 +47,7 @@ public class MapManager {
 
                 Color color = new Color(r,g,b);
                 Tile tile = new Tile(xCoord,yCoord, color, world);
+                tileRepository.save(tile);
                 worldTiles.add(tile);
             }
         }
@@ -56,6 +55,8 @@ public class MapManager {
         world.setTiles(worldTiles);
 
         log.info(String.format("World number %s created", worldId));
+        worldRepository.save(world);
+
         return world;
     }
 }

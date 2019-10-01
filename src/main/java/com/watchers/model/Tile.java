@@ -8,7 +8,8 @@ import java.awt.*;
 public class Tile {
 
     @Id
-    @GeneratedValue
+    @SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1)
+    @GeneratedValue(generator="Tile_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
     private Long id;
 
@@ -38,7 +39,7 @@ public class Tile {
         this.color = color;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

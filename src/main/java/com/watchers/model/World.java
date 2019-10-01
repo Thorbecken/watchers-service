@@ -8,7 +8,8 @@ import java.util.Set;
 public class World {
 
     @Id
-    @GeneratedValue
+    @SequenceGenerator(name="World_Gen", sequenceName="World_Seq", allocationSize = 1)
+    @GeneratedValue(generator="World_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
     private Long id;
 
