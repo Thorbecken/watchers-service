@@ -23,6 +23,9 @@ public class MapManager {
     @Autowired
     private TileRepository tileRepository;
 
+    @PersistenceContext
+    private EntityManager em;
+    
     public World getWorld(Long worldId) {
        Optional<World> world = worldRepository.findById(worldId);
 
@@ -57,6 +60,8 @@ public class MapManager {
         log.info(String.format("World number %s created", worldId));
         worldRepository.save(world);
 
+        em.flush();
+        
         return world;
     }
 }
