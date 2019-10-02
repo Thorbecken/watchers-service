@@ -5,10 +5,10 @@ import java.awt.*;
 
 @Entity
 @Table(name = "tile")
+@SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1, allocationSize = 1)
 public class Tile {
 
     @Id
-    @SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1)
     @GeneratedValue(generator="Tile_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
     private Long id;
