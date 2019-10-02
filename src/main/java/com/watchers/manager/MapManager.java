@@ -28,8 +28,8 @@ public class MapManager {
 
         return world.orElseGet(() -> createWorld(worldId));
     }
-
-    @Transactional
+    
+    @Transactional(propagation = Propagation.REQUIRED)
     public World createWorld(long worldId){
         Random rand = new Random();
 
