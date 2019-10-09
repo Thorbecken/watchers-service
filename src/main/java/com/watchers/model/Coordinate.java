@@ -28,6 +28,8 @@ public class Coordinate {
         this.zCoord = xCoord - yCoord;
     }
 
+    private Coordinate(){}
+
     public long getxCoord() {
         return xCoord;
     }

@@ -1,6 +1,5 @@
 package com.watchers.manager;
 
-import com.watchers.model.Coordinate;
 import com.watchers.model.Tile;
 import com.watchers.model.World;
 import com.watchers.repository.TileRepository;
@@ -8,8 +7,9 @@ import com.watchers.repository.WorldRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.awt.*;
 import java.util.*;
 
@@ -32,7 +32,7 @@ public class MapManager {
         return world.orElseGet(() -> createWorld(worldId));
     }
     
-    @Transactional(propagation = Propagation.REQUIRED)
+    //@Transactional(propagation = Propagation.REQUIRED)
     public World createWorld(long worldId){
         Random rand = new Random();
 
@@ -60,7 +60,7 @@ public class MapManager {
         log.info(String.format("World number %s created", worldId));
         worldRepository.save(world);
 
-        em.flush();
+        //em.flush();
         
         return world;
     }

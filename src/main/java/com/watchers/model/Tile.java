@@ -5,15 +5,15 @@ import java.awt.*;
 
 @Entity
 @Table(name = "tile")
-@SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1, allocationSize = 1)
+@SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1)
 public class Tile {
 
     @Id
     @GeneratedValue(generator="Tile_Gen", strategy = GenerationType.SEQUENCE)
-    @Column(name = "id")
+    @Column(name = "tile_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
@@ -30,6 +30,7 @@ public class Tile {
         this.color = color;
     }
 
+    private Tile(){}
 
     public Color getColor() {
         return color;

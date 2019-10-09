@@ -10,10 +10,10 @@ public class World {
     @Id
     @SequenceGenerator(name="World_Gen", sequenceName="World_Seq", allocationSize = 1)
     @GeneratedValue(generator="World_Gen", strategy = GenerationType.SEQUENCE)
-    @Column(name = "id")
+    @Column(name = "world_id")
     private Long id;
 
-    @OneToMany(mappedBy = "world")
+    @OneToMany(mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Tile> tiles;
 
     public Set<Tile> getTiles() {
