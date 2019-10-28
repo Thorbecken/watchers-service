@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.awt.*;
 import java.util.*;
 
@@ -22,9 +20,6 @@ public class MapManager {
 
     @Autowired
     private TileRepository tileRepository;
-
-    @PersistenceContext
-    private EntityManager em;
     
     public World getWorld(Long worldId) {
        Optional<World> world = worldRepository.findById(worldId);
@@ -59,8 +54,6 @@ public class MapManager {
 
         log.info(String.format("World number %s created", worldId));
         worldRepository.save(world);
-
-        //em.flush();
         
         return world;
     }

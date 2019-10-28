@@ -1,5 +1,9 @@
 package com.watchers.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.awt.*;
 
@@ -9,27 +13,31 @@ import java.awt.*;
 public class Tile {
 
     @Id
+    @JsonIgnore
     @GeneratedValue(generator="Tile_Gen", strategy = GenerationType.SEQUENCE)
-    @Column(name = "tile_id")
+    @Column(name = "tile_id", nullable = false)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "coordinate_id", referencedColumnName = "id")
+    @JsonProperty("coordinate")
+    @OneToOne(mappedBy = "tile", cascade=CascadeType.ALL)
     private Coordinate coordinate;
 
+    @JsonProperty("color")
     @Column(name = "color")
     private Color color;
 
     public Tile(long xCoord, long yCoord, Color color, World world){
-        this.coordinate = new Coordinate(xCoord, yCoord);
+        this.coordinate = new Coordinate(xCoord, yCoord, this);
         this.world = world;
         this.color = color;
     }
 
+    @JsonCreator
     private Tile(){}
 
     public Color getColor() {
