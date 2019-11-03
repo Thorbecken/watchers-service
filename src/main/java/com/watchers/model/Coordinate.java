@@ -55,6 +55,7 @@ public class Coordinate {
         return zCoord;
     }
 
+    @JsonIgnore
     public Tile getTile() {
         return tile;
     }

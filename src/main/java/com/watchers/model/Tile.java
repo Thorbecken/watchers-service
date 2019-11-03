@@ -56,6 +56,7 @@ public class Tile {
         return coordinate;
     }
 
+    @JsonIgnore
     public World getWorldId() {
         return world;
     }
