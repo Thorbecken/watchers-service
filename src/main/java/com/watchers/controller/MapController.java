@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin
 @RestController
 public class MapController {
 
@@ -16,6 +17,7 @@ public class MapController {
     @RequestMapping(value = "/world/{worldId}", method = RequestMethod.GET)
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId){
         World world = mapManager.getWorld(worldId);
+        System.out.println("Returned a world");
         return ResponseEntity.ok(world);
     }
 }
