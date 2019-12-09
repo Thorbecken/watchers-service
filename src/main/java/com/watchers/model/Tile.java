@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
-import java.awt.*;
 
 @Entity
 @Table(name = "tile")
@@ -27,26 +26,17 @@ public class Tile {
     @OneToOne(mappedBy = "tile", cascade=CascadeType.ALL)
     private Coordinate coordinate;
 
-    @JsonProperty("color")
-    @Column(name = "color")
-    private Color color;
+    @JsonProperty("landType")
+    @Column(name = "landType")
+    private String landType;
 
-    public Tile(long xCoord, long yCoord, Color color, World world){
+    public Tile(long xCoord, long yCoord, World world){
         this.coordinate = new Coordinate(xCoord, yCoord, this);
         this.world = world;
-        this.color = color;
     }
 
     @JsonCreator
     private Tile(){}
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
 
     public Long getId() {
         return id;
@@ -59,5 +49,13 @@ public class Tile {
     @JsonIgnore
     public World getWorldId() {
         return world;
+    }
+
+    public String getLandType() {
+        return landType;
+    }
+
+    public void setLandType(String landType) {
+        this.landType = landType;
     }
 }

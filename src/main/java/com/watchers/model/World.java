@@ -19,6 +19,10 @@ public class World {
     @Column(name = "world_id")
     private Long id;
 
+    private Long xSize;
+
+    private Long ySize;
+
     @JsonProperty("tiles")
     @OneToMany(mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Tile> tiles;
@@ -29,5 +33,21 @@ public class World {
 
     public void setTiles(Set<Tile> tiles) {
         this.tiles = tiles;
+    }
+
+    public Long getxSize() {
+        return xSize;
+    }
+
+    public void setxSize(Long xSize) {
+        this.xSize = xSize;
+    }
+
+    public Long getySize() {
+        return ySize;
+    }
+
+    public void setySize(Long ySize) {
+        this.ySize = ySize;
     }
 }

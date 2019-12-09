@@ -31,20 +31,18 @@ public class MapManager {
     public World createWorld(long worldId){
         Random rand = new Random();
 
-        long xSize = 10L;
-        long ySize = 10L;
-
         World world = new World();
+        world.setxSize(58L);
+        world.setySize(28L);
+
 
         Set<Tile> worldTiles = new HashSet<>();
-        for (long xCoord = 1; xCoord <= xSize; xCoord++){
-            for (long yCoord = 1; yCoord <= ySize; yCoord++){
-                float r = rand.nextFloat();
-                float g = rand.nextFloat();
-                float b = rand.nextFloat();
+        for (long xCoord = 1; xCoord <= world.getxSize(); xCoord++){
+            for (long yCoord = 1; yCoord <= world.getySize(); yCoord++){
+                Tile tile = new Tile(xCoord, yCoord, world);
 
-                Color color = new Color(r,g,b);
-                Tile tile = new Tile(xCoord,yCoord, color, world);
+                tile.setLandType("water");
+
                 tileRepository.save(tile);
                 worldTiles.add(tile);
             }
