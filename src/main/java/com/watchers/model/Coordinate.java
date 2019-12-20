@@ -3,9 +3,12 @@ package com.watchers.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Objects;
 
+@Data
 @Entity
 @Table(name = "coordinate")
 public class Coordinate {
@@ -43,20 +46,18 @@ public class Coordinate {
     @JsonCreator
     private Coordinate(){}
 
-    public long getxCoord() {
-        return xCoord;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Coordinate)) return false;
+        Coordinate that = (Coordinate) o;
+        return xCoord == that.xCoord &&
+                yCoord == that.yCoord;
     }
 
-    public long getyCoord() {
-        return yCoord;
-    }
+    @Override
+    public int hashCode() {
 
-    public long getzCoord() {
-        return zCoord;
-    }
-
-    @JsonIgnore
-    public Tile getTile() {
-        return tile;
+        return Objects.hash(xCoord, yCoord);
     }
 }

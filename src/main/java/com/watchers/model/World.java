@@ -3,13 +3,18 @@ package com.watchers.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
+@Data
 @Entity
 @JsonSerialize
 @Table(name = "world")
+@EqualsAndHashCode(exclude= {"tiles", "continents"})
 public class World {
 
     @Id
@@ -27,27 +32,18 @@ public class World {
     @OneToMany(mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Tile> tiles;
 
-    public Set<Tile> getTiles() {
-        return tiles;
-    }
+    @JsonProperty("continents")
+    @OneToMany(mappedBy = "world", cascade=CascadeType.ALL)
+    private Set<Continent> continents;
 
-    public void setTiles(Set<Tile> tiles) {
-        this.tiles = tiles;
-    }
-
-    public Long getxSize() {
-        return xSize;
-    }
-
-    public void setxSize(Long xSize) {
+    public World(long xSize, long ySize){
         this.xSize = xSize;
-    }
-
-    public Long getySize() {
-        return ySize;
-    }
-
-    public void setySize(Long ySize) {
         this.ySize = ySize;
+        this.tiles = new HashSet<>();
+        this.continents = new HashSet<>();
+    }
+
+    private World(){
+
     }
 }
