@@ -33,7 +33,7 @@ public class MockContinent {
         int getInt = random.nextInt(possibleTiles.size());
         Tile newTile = possibleTiles.get(getInt);
         Optional<Tile> openTile = openTiles.stream().filter(
-                tile -> tile.getCoordinate().equals(newTile.getCoordinate())
+                tile -> tile.coordinateEquals(newTile)
         ).findFirst();
 
         if(openTile.isPresent()){
@@ -44,7 +44,7 @@ public class MockContinent {
             this.possibleTiles.removeAll(this.tiles);
             this.possibleTiles = this.possibleTiles.stream()
                     .filter(tile -> takenTiles.stream().noneMatch(
-                            takenTile -> tile.getCoordinate().equals(takenTile.getCoordinate())
+                            tile::coordinateEquals
                     )).collect(Collectors.toList());
         } else {
             possibleTiles.remove(newTile);
@@ -56,7 +56,7 @@ public class MockContinent {
         Continent continent = this.continent;
         continent.setTiles(new HashSet<>());
         this.tiles.forEach(
-                mockTile -> continent.getTiles().add(new Tile(mockTile.getCoordinate().getXCoord(), mockTile.getCoordinate().getYCoord(), continent.getWorld() , continent))
+                mockTile -> continent.getTiles().add(new Tile(mockTile.getXCoord(), mockTile.getYCoord(), continent.getWorld() , continent))
         );
         return continent;
     }

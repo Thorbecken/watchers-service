@@ -29,7 +29,7 @@ class TileTest {
     @SuppressWarnings("all")
     @CsvSource({"1,1", "1,2", "1,3", "2,1", "2,2", "2,3", "3,1", "3,3", "3,3"})
     void getNeighbours(long x, long y) {
-        Tile tile = world.getTiles().stream().filter(worldTile -> worldTile.getCoordinate().getXCoord() == x && worldTile.getCoordinate().getYCoord() == y).findFirst().get();
+        Tile tile = world.getTiles().stream().filter(worldTile -> worldTile.getXCoord() == x && worldTile.getYCoord() == y).findFirst().get();
         List<Tile> neighbours = tile.getNeighbours(continent);
 
         if(y == 1 || y == 3){

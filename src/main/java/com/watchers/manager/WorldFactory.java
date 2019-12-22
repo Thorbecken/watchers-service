@@ -65,7 +65,7 @@ class WorldFactory {
         Tile startingTile = new Tile(xCoord, yCoord, world, continent);
         if (world.getContinents().stream().anyMatch(
                 continent1 -> continent.getTiles().stream().anyMatch(
-                        tile -> startingTile.getCoordinate().equals(tile.getCoordinate())
+                        startingTile::coordinateEquals
                 )
         )) {
            return generateStartingTile(world, continent);

@@ -35,7 +35,7 @@ public class WorldFactoryDTO {
         List<Tile> startingTiles = openTiles.stream().filter(
                 openTile -> world.getContinents().stream().anyMatch(
                         continent -> continent.getTiles().stream().anyMatch(
-                                continentTile -> continentTile.getCoordinate().equals(openTile.getCoordinate())
+                                continentTile -> continentTile.coordinateEquals(openTile)
                         )
                 )
         ).collect(Collectors.toList());
@@ -47,7 +47,7 @@ public class WorldFactoryDTO {
         return openTiles.stream().filter(
                 tile -> world.getContinents().stream().anyMatch(
                         continent -> continent.getTiles().stream().anyMatch(
-                                continentTile -> !continentTile.getCoordinate().equals(tile.getCoordinate())
+                                continentTile -> !continentTile.coordinateEquals(tile)
                         )
                 )
         ).collect(Collectors.toList());
