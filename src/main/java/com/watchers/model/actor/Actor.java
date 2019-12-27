@@ -9,19 +9,23 @@ import lombok.EqualsAndHashCode;
 import javax.persistence.*;
 
 @Data
+@Entity
+@Table(name = "actor")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@SequenceGenerator(name="Actor_Gen", sequenceName="Actor_Seq", allocationSize = 1)
 public abstract class Actor implements SerialTask {
 
     @Id
     @JsonIgnore
-    @SequenceGenerator(name="Continent_Gen", sequenceName="Continent_Seq", allocationSize = 1)
-    @GeneratedValue(generator="Continent_Gen", strategy = GenerationType.SEQUENCE)
-    @Column(name = "continent_id")
+    @SequenceGenerator(name="Actor_Gen", sequenceName="Actor_Seq", allocationSize = 1)
+    @GeneratedValue(generator="Actor_Gen", strategy = GenerationType.SEQUENCE)
+    @Column(name = "actor_id")
     private Long id;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name = "tile_id", nullable = false)
+    @JoinColumn(name = "tile_id")
     private Tile tile;
 
 

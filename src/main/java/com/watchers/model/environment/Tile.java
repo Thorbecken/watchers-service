@@ -14,7 +14,7 @@ import java.util.*;
 @Entity
 @Table(name = "tile")
 @SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1)
-@EqualsAndHashCode(exclude= {"world", "continent"})
+@EqualsAndHashCode(exclude= {"world", "continent", "actors", "biome"})
 public class Tile {
 
     @Id
@@ -41,12 +41,11 @@ public class Tile {
     private World world;
 
     @JsonProperty("biome")
-    @OneToOne(mappedBy = "biome", cascade=CascadeType.ALL)
+    @OneToOne(mappedBy = "tile", cascade=CascadeType.ALL)
     private Biome biome;
 
     @JsonProperty("actors")
     @OneToMany(mappedBy = "tile", cascade=CascadeType.ALL)
-    @EqualsAndHashCode.Exclude
     private Set<Actor> actors;
 
     @JsonIgnore
@@ -64,13 +63,14 @@ public class Tile {
         this.continent = continent;
         this.surfaceType = continent.getType();
         this.actors = new HashSet<>();
-        this.biome = new Biome(1, 10, 1);
+        this.biome = new Biome(1, 10, 1, this);
         this.world = world;
     }
 
     @JsonCreator
     private Tile(){}
 
+    @JsonIgnore
     public List<Tile> getNeighbours() {
         boolean down = yCoord > 1L;
         boolean up = yCoord < this.world.getYSize();
@@ -102,6 +102,7 @@ public class Tile {
     }
 */
 
+    @JsonIgnore
     private Tile getNeighbouringTile(long xCoord, long yCoord) {
         return world.getTiles().stream()
                 .filter(
@@ -110,6 +111,7 @@ public class Tile {
                 .orElse(null);
     }
 
+    @JsonIgnore
     public List<Tile> getNeighboursContinental(Continent continent) {
         boolean up = yCoord > 1L;
         boolean down = yCoord < this.world.getYSize();
@@ -134,6 +136,7 @@ public class Tile {
         return returnTiles;
     }
 
+    @JsonIgnore
     private long getRightCoordinate() {
         if(xCoord == this.world.getXSize()){
             return 1;
@@ -142,6 +145,7 @@ public class Tile {
         }
     }
 
+    @JsonIgnore
     private long getLeftCoordinate() {
         if(xCoord == 1){
             return this.world.getXSize();
@@ -150,7 +154,7 @@ public class Tile {
         }
     }
 
-    public boolean coordinateEquals(Object o) {
+    boolean coordinateEquals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Tile)) return false;
         Tile that = (Tile) o;

@@ -1,18 +1,30 @@
 package com.watchers.model.actor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.watchers.helper.RandomHelper.getRandom;
 
 @Data
+@Entity
+@Table(name = "animal")
 @EqualsAndHashCode(callSuper=true)
+@SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
 public abstract class Animal extends Actor {
+
+    @Id
+    @JsonIgnore
+    @SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
+    @GeneratedValue(generator="Animal_Gen", strategy = GenerationType.SEQUENCE)
+    @Column(name = "animal_id")
+    private Long id;
 
     static int FORAGING_RANGE = 3;
 

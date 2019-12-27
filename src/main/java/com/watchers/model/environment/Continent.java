@@ -27,6 +27,7 @@ public class Continent {
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
+    @JsonIgnore
     @JsonProperty("tiles")
     @OneToMany(mappedBy = "continent", cascade=CascadeType.ALL)
     private Set<Tile> tiles;

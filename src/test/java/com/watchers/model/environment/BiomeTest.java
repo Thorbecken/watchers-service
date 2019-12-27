@@ -11,7 +11,7 @@ class BiomeTest {
 
     @BeforeEach
     void biomeSetup() {
-        biome = new Biome(0f,10f,1f);
+        biome = new Biome(0f,10f,1f, null);
     }
 
     @Test

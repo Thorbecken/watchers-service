@@ -22,7 +22,7 @@ class AnimalTest {
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {
                 Tile tile = new Tile(x, y, rabbitWorld, rabbitContinent);
-                tile.setBiome(new Biome(2f, 3f, 1f));
+                tile.setBiome(new Biome(2f, 3f, 1f, tile));
                 rabbitWorld.getTiles().add(tile);
             }
         }

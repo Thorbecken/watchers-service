@@ -3,12 +3,14 @@ package com.watchers.model.environment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.ParallelTask;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Data
 @Entity
 @Table(name = "biome")
+@NoArgsConstructor
 @SequenceGenerator(name="Biome_Gen", sequenceName="Biome_Seq", allocationSize = 1)
 public class Biome implements ParallelTask {
 
@@ -27,10 +29,11 @@ public class Biome implements ParallelTask {
     @JoinColumn(name = "tile_id", nullable = false)
     private Tile tile;
 
-    public Biome(float currentFood, float maxFood, float fertility){
+    public Biome(float currentFood, float maxFood, float fertility, Tile tile){
         this.currentFood = currentFood;
         this.maxFood = maxFood;
         this.fertility = fertility;
+        this.tile = tile;
     }
 
     @Override
