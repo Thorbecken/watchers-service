@@ -1,5 +1,9 @@
 package com.watchers.model;
 
+import com.watchers.model.environment.Continent;
+import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.environment.Tile;
+import com.watchers.model.environment.World;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -15,7 +19,7 @@ class TileTest {
 
     @BeforeEach
     void setup(){
-        this.continent = new Continent(world);
+        this.continent = new Continent(world, SurfaceType.OCEANIC);
 
         this.world = new World(3, 3);
         for (int x = 1; x <= 3; x++) {
@@ -30,7 +34,7 @@ class TileTest {
     @CsvSource({"1,1", "1,2", "1,3", "2,1", "2,2", "2,3", "3,1", "3,3", "3,3"})
     void getNeighbours(long x, long y) {
         Tile tile = world.getTiles().stream().filter(worldTile -> worldTile.getXCoord() == x && worldTile.getYCoord() == y).findFirst().get();
-        List<Tile> neighbours = tile.getNeighbours(continent);
+        List<Tile> neighbours = tile.getNeighboursContinental(continent);
 
         if(y == 1 || y == 3){
             assertEquals(3, neighbours.size());

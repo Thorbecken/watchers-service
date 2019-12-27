@@ -1,4 +1,4 @@
-package com.watchers.model;
+package com.watchers.model.environment;
 
 import lombok.Data;
 
@@ -18,7 +18,7 @@ public class MockContinent {
 
         this.tiles.addAll(continent.getTiles());
         this.tiles.forEach(
-                tile -> this.possibleTiles.addAll(tile.getNeighbours(this.continent))
+                tile -> this.possibleTiles.addAll(tile.getNeighboursContinental(this.continent))
         );
     }
 
@@ -40,7 +40,7 @@ public class MockContinent {
             this.tiles.add(newTile);
             takenTiles.add(newTile);
             openTiles.remove(openTile.get());
-            this.possibleTiles.addAll(newTile.getNeighbours(this.continent));
+            this.possibleTiles.addAll(newTile.getNeighboursContinental(this.continent));
             this.possibleTiles.removeAll(this.tiles);
             this.possibleTiles = this.possibleTiles.stream()
                     .filter(tile -> takenTiles.stream().noneMatch(

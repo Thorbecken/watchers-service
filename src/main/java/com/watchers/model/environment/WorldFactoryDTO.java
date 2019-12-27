@@ -1,4 +1,4 @@
-package com.watchers.model;
+package com.watchers.model.environment;
 
 import lombok.Data;
 
@@ -21,13 +21,13 @@ public class WorldFactoryDTO {
 
     private List<Tile> generateOpenTiles(World world) {
         List<Tile> openTiles = new ArrayList<>();
-        Continent mockContinent = new Continent(world);
-        mockContinent.setType(LandType.WATER);
+        Continent mockContinent = new Continent(world, SurfaceType.OCEANIC);
+        mockContinent.setType(SurfaceType.OCEANIC);
 
         for (long xCoord = 1L; xCoord <= world.getXSize(); xCoord++){
             for (long yCoord = 1L; yCoord <= world.getYSize(); yCoord++){
                 Tile tile = new Tile(xCoord, yCoord, world, mockContinent);
-                tile.setLandType(LandType.WATER);
+                tile.setSurfaceType(SurfaceType.OCEANIC);
                 openTiles.add(tile);
             }
         }

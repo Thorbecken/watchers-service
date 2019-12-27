@@ -1,4 +1,4 @@
-package com.watchers.model;
+package com.watchers.model.environment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,13 +32,13 @@ public class Continent {
     private Set<Tile> tiles;
 
     @JsonProperty("type")
-    private LandType type;
+    private SurfaceType type;
 
-    public Continent(World world){
+    public Continent(World world, SurfaceType surfaceType){
         this.tiles = new HashSet<>();
         this.world = world;
+        this.type = surfaceType;
     }
 
     private Continent(){}
-
 }

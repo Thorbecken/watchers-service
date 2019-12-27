@@ -1,6 +1,6 @@
 package com.watchers.manager;
 
-import com.watchers.model.*;
+import com.watchers.model.environment.*;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.util.*;
@@ -10,10 +10,9 @@ class WorldFactory {
     World generateWorld(long xSize, long ySize, long continents){
         World world = new World(xSize, ySize);
         for (int i = 0; i < continents; i++) {
-            Continent generatedContinent = new Continent(world);
             Random random = new Random();
             boolean land = random.nextBoolean();
-            generatedContinent.setType(land ? LandType.LAND : LandType.WATER);
+            Continent generatedContinent = new Continent(world, land ? SurfaceType.CONTINENTAL : SurfaceType.OCEANIC);
 
             Tile startingTile = generateStartingTile(world, generatedContinent);
 

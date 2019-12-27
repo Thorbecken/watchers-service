@@ -1,6 +1,6 @@
 package com.watchers.manager;
 
-import com.watchers.model.World;
+import com.watchers.model.environment.World;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

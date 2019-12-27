@@ -1,4 +1,4 @@
-package com.watchers.model;
+package com.watchers.model.environment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
