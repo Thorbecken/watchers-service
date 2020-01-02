@@ -36,20 +36,20 @@ public class Tile {
     private long zCoord;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
     @JsonProperty("biome")
-    @OneToOne(mappedBy = "tile", cascade=CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL)
     private Biome biome;
 
     @JsonProperty("actors")
-    @OneToMany(mappedBy = "tile", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL)
     private Set<Actor> actors;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinColumn(name = "continent_id", nullable = false)
     private Continent continent;
 
@@ -63,12 +63,18 @@ public class Tile {
         this.continent = continent;
         this.surfaceType = continent.getType();
         this.actors = new HashSet<>();
-        this.biome = new Biome(1, 10, 1, this);
+        this.biome = new Biome(1, 10, 0.5f, this);
         this.world = world;
     }
 
     @JsonCreator
     private Tile(){}
+
+    @JsonIgnore
+    public Set<Actor> getConcurrentActors() {
+        return new HashSet<>(actors);
+    }
+
 
     @JsonIgnore
     public List<Tile> getNeighbours() {
@@ -154,7 +160,7 @@ public class Tile {
         }
     }
 
-    boolean coordinateEquals(Object o) {
+    public boolean coordinateEquals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Tile)) return false;
         Tile that = (Tile) o;

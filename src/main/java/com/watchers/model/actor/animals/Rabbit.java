@@ -4,14 +4,18 @@ import com.watchers.model.actor.Animal;
 import com.watchers.model.actor.AnimalType;
 import com.watchers.model.actor.NaturalHabitat;
 import com.watchers.model.actor.StateType;
-import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 
+import javax.persistence.Entity;
+
+@Entity
 public class Rabbit extends Animal {
     @Override
     public void generateOffspring(Tile tile, float foodPassed) {
         tile.getActors().add(new Rabbit(tile, foodPassed));
     }
+
+    private Rabbit(){}
 
     public Rabbit(Tile tile, float StartingFood){
         super.setFoodReserve(StartingFood);

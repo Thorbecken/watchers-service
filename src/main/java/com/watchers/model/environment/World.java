@@ -29,11 +29,11 @@ public class World {
     private Long ySize;
 
     @JsonProperty("tiles")
-    @OneToMany(mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Tile> tiles;
 
     @JsonProperty("continents")
-    @OneToMany(mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents;
 
     public World(long xSize, long ySize){
@@ -43,7 +43,11 @@ public class World {
         this.continents = new HashSet<>();
     }
 
-    private World(){
+    private World(){}
 
+
+    @JsonIgnore
+    public Set<Tile> getConcurrentTiles() {
+        return new HashSet<>(tiles);
     }
 }

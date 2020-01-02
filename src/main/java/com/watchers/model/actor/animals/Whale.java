@@ -6,12 +6,17 @@ import com.watchers.model.actor.NaturalHabitat;
 import com.watchers.model.actor.StateType;
 import com.watchers.model.environment.Tile;
 
+import javax.persistence.Entity;
+
+@Entity
 public class Whale extends Animal {
 
     @Override
     public void generateOffspring(Tile tile, float foodPassed) {
         tile.getActors().add(new Whale(tile, foodPassed));
     }
+
+    private Whale(){}
 
     public Whale(Tile tile, float StartingFood){
         super.setFoodReserve(StartingFood);
@@ -26,6 +31,5 @@ public class Whale extends Animal {
         super.setStateType(StateType.ALIVE);
 
         super.setTile(tile);
-
     }
 }

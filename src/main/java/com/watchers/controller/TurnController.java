@@ -6,15 +6,15 @@ import com.watchers.model.environment.World;
 
 public class TurnController {
 
-    public void processTurn(World world){
-        world.getTiles().parallelStream().forEach(
+    public static void processTurn(World world){
+        world.getConcurrentTiles().parallelStream().forEach(
                 worldTile -> worldTile.getBiome().processParallelTask()
         );
 
-        world.getTiles().forEach(
+        world.getConcurrentTiles().forEach(
                 worldTile -> {
-                    worldTile.getActors().forEach(Actor::processSerialTask);
-                    worldTile.getActors().removeIf(actor -> actor.getStateType() == StateType.DEAD);
+                    worldTile.getConcurrentActors().forEach(Actor::processSerialTask);
+                    worldTile.getConcurrentActors().removeIf(actor -> actor.getStateType() == StateType.DEAD);
         });
     }
 }
