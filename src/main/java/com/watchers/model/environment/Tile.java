@@ -172,4 +172,36 @@ public class Tile {
 
         return Objects.hash(xCoord, yCoord);
     }
+
+    @JsonIgnore
+    public List<Tile> getNeighboursWithinRange(List<Tile> tiles, int range) {
+        if(range>=1) {
+            List<Tile> returnList = new ArrayList<>();
+            tiles.forEach(
+                    tile -> returnList.addAll(tile.getNeighbours())
+            );
+
+            return getNeighboursWithinRange(returnList, tiles, range-1);
+        } else {
+            return tiles;
+        }
+    }
+
+    @JsonIgnore
+    private List<Tile> getNeighboursWithinRange(List<Tile> tiles, List<Tile> oldTiles, int range) {
+        if(range>=1) {
+            List<Tile> returnList = new ArrayList<>();
+            tiles.forEach(
+                    tile -> {
+                        if(!oldTiles.contains(tile)){
+                            returnList.addAll(tile.getNeighbours());
+                        }
+                    }
+            );
+
+            return getNeighboursWithinRange(returnList, tiles, range-1);
+        } else {
+            return tiles;
+        }
+    }
 }

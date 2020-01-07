@@ -46,8 +46,11 @@ public class MapManager {
 
     private AnimalType selectAnimalSeed(SurfaceType type) {
         switch (type){
-            case OCEANIC: return AnimalType.WHALE;
             case CONTINENTAL: return AnimalType.RABBIT;
+            case COASTAL:
+            case OCEANIC:
+            case DEEP_OCEAN:
+                return AnimalType.WHALE;
             default: return AnimalType.RABBIT;
         }
     }

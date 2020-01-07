@@ -6,12 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.watchers.model.environment.SurfaceType.CONTINENTAL;
-import static com.watchers.model.environment.SurfaceType.OCEANIC;
+import static com.watchers.model.environment.SurfaceType.*;
 
 
 public enum NaturalHabitat {
-    AQUATIC(Collections.singletonList(OCEANIC)),
+    AQUATIC(Arrays.asList(OCEANIC,DEEP_OCEAN,COASTAL)),
     TERRESTRIAL(Collections.singletonList(CONTINENTAL)),
     ALL(Arrays.asList(OCEANIC,CONTINENTAL));
 
