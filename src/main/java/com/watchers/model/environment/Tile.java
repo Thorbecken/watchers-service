@@ -82,39 +82,20 @@ public class Tile {
         boolean up = yCoord < this.world.getYSize();
 
         List<Tile> returnTiles = new ArrayList<>();
-        returnTiles.add(getNeighbouringTile(getLeftCoordinate(), yCoord));
-        returnTiles.add(getNeighbouringTile(getRightCoordinate(), yCoord));
+        returnTiles.add(world.getTile(getLeftCoordinate(), yCoord));
+        returnTiles.add(world.getTile(getRightCoordinate(), yCoord));
 
 
         if(down) {
-            Tile downTile = getNeighbouringTile(xCoord, yCoord - 1);
+            Tile downTile = world.getTile(xCoord, yCoord - 1);
             returnTiles.add(downTile);
         }
         if(up) {
-            Tile upTile = getNeighbouringTile(xCoord, yCoord + 1);
+            Tile upTile = world.getTile(xCoord, yCoord + 1);
             returnTiles.add(upTile);
         }
 
         return returnTiles;
-    }
-
-/*
-    public List<Tile> getNeighboursInRange(int range) {
-        List<Tile> neighbours = getNeighbours();
-        for (int i = 1; i < range; i++) {
-
-        }
-        return neighbours;
-    }
-*/
-
-    @JsonIgnore
-    private Tile getNeighbouringTile(long xCoord, long yCoord) {
-        return world.getTiles().stream()
-                .filter(
-                        worldTile -> worldTile.getXCoord() == xCoord && worldTile.getYCoord() == yCoord
-                ).findFirst()
-                .orElse(null);
     }
 
     @JsonIgnore
@@ -125,7 +106,7 @@ public class Tile {
         List<Tile> returnTiles = new ArrayList<>();
 
         Tile leftTile = new Tile(getLeftCoordinate(), yCoord, this.world, continent);
-        Tile rightTile =new Tile(getRightCoordinate(), yCoord, this.world, continent);
+        Tile rightTile = new Tile(getRightCoordinate(), yCoord, this.world, continent);
 
         returnTiles.add(leftTile);
         returnTiles.add(rightTile);

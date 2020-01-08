@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -32,6 +34,10 @@ public class World {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Tile> tiles;
 
+    @Transient
+    @JsonIgnore
+    private Map<Long, Map<Long, Tile>> tileMap;
+
     @JsonProperty("continents")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents;
@@ -45,6 +51,30 @@ public class World {
 
     private World(){}
 
+    @JsonIgnore
+    public Tile getTile(Long x, Long y){
+        if(tileMap == null || tileMap.isEmpty()){
+            setTiles();
+        }
+
+        return tileMap.get(x).get(y);
+    }
+
+    private void setTiles(){
+        tileMap = new HashMap<>();
+
+        for (int i = 1; i <= xSize; i++) {
+            final long xCoord = i;
+            Map<Long, Tile> hashMap = new HashMap<>();
+            tiles.stream()
+                    .filter(tile -> tile.getXCoord() == xCoord)
+                    .forEach(
+                    tile -> hashMap.put(tile.getYCoord(), tile)
+            );
+
+            tileMap.put(xCoord,hashMap);
+        }
+    }
 
     @JsonIgnore
     public Set<Tile> getConcurrentTiles() {
