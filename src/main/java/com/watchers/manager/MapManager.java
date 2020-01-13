@@ -32,7 +32,7 @@ public class MapManager {
         populateWorld(newWorld);
 
         log.info(String.format("World number %s created", worldId));
-
+        worldRepository.save(newWorld);
         return newWorld;
     }
 
