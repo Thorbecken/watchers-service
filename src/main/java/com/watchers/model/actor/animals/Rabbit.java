@@ -29,5 +29,7 @@ public class Rabbit extends Animal {
         super.setNaturalHabitat(NaturalHabitat.TERRESTRIAL);
         super.setStateType(StateType.ALIVE);
         super.setTile(tile);
+
+        getTile().getWorld().getNewActors().add(this);
     }
 }

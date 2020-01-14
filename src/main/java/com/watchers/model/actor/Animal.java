@@ -43,8 +43,6 @@ public abstract class Animal extends Actor {
     private void metabolize(){
         if(metabolisme > foodReserve){
             setStateType(StateType.DEAD);
-            getTile().getActors().remove(this);
-            setTile(null);
         } else {
             foodReserve = foodReserve - metabolisme;
         }
@@ -147,6 +145,9 @@ public abstract class Animal extends Actor {
 
     @Override
     public void processSerialTask() {
+        if(StateType.DEAD.equals(getStateType())){
+            System.out.println("Animal with ID " + id + " is dead but still walking the world");
+        }
         this.metabolize();
         if(getStateType() != StateType.DEAD) {
             this.move();

@@ -29,7 +29,8 @@ public class Whale extends Animal {
         super.setAnimalType(AnimalType.WHALE);
         super.setNaturalHabitat(NaturalHabitat.AQUATIC);
         super.setStateType(StateType.ALIVE);
-
         super.setTile(tile);
+
+        getTile().getWorld().getNewActors().add(this);
     }
 }

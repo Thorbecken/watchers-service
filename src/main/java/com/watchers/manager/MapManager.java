@@ -23,6 +23,7 @@ public class MapManager {
 
     public World getWorld(Long worldId) {
        Optional<World> world = worldRepository.findById(worldId);
+       world.ifPresent(World::fillTransactionals);
 
         return world.orElseGet(() -> createWorld(worldId));
     }
