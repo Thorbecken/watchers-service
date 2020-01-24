@@ -3,6 +3,8 @@ package com.watchers.service;
 import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
+import com.watchers.model.environment.Biome;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import com.watchers.repository.WorldRepository;
 import lombok.Data;
@@ -86,7 +88,18 @@ public class WorldService {
     }
 
     private void processTurn(World world){
-        world.getConcurrentTiles().parallelStream().forEach(
+        log.info("There is currently " + world.getTiles().stream()
+                        .map(Tile::getBiome)
+                        .map(Biome::getCurrentFood)
+                        .reduce(0f, (tile1, tile2) -> tile1 + tile2)
+        + "food in the world"
+        );
+        log.info("The total fertility in the world amounts to " + world.getTiles().parallelStream()
+                .map(Tile::getBiome)
+                .map(Biome::getFertility)
+                .reduce(0f, (tile1, tile2) -> tile1 + tile2, (tile1, tile2) -> tile1 + tile2)
+                + "food");
+        world.getTiles().parallelStream().forEach(
                 worldTile -> worldTile.getBiome().processParallelTask()
         );
 

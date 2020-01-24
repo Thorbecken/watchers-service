@@ -126,9 +126,4 @@ public class World {
             tile -> actorList.addAll(tile.getActors())
         );
     }
-
-    @JsonIgnore
-    public Set<Tile> getConcurrentTiles() {
-        return new HashSet<>(tiles);
-    }
 }

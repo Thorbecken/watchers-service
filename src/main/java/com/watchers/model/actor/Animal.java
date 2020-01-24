@@ -51,20 +51,11 @@ public abstract class Animal extends Actor {
     private void move(){
         float localFood = getTile().getBiome().getCurrentFood();
         if (localFood < foraging) {
-            List<Tile> neighbours = getTile().getNeighbours()
-                    .stream().filter(tile -> this.getNaturalHabitat().movavableSurfaces.contains(
-                            tile.getSurfaceType()))
-                    .collect(Collectors.toList());
-            Optional<Float> bestForagingValue = neighbours.stream().max(Comparator.comparing(tile -> tile.getBiome().getCurrentFood())).map(Tile::getBiome).map(Biome::getCurrentFood);
-            if(!bestForagingValue.isPresent()){
-                moveToTile(neighbours.get(getRandom(neighbours.size())));
-            } else {
-                neighbours = neighbours.stream()
-                        .filter(tile -> tile.getBiome().getCurrentFood() >= bestForagingValue.get())
-                        .collect(Collectors.toList());
-                int random = getRandom(neighbours.size());
-                moveToTile(neighbours.get(random));
-            }
+            getTile().getNeighbours().stream()
+                    .filter(tile -> this.getNaturalHabitat().movavableSurfaces
+                            .contains(tile.getSurfaceType()))
+                    .max((tile1, tile2) -> Math.round(tile1.getBiome().getCurrentFood() - tile2.getBiome().getCurrentFood()))
+                    .ifPresent(this::moveToTile);
 
             /*
             // advanced logic
