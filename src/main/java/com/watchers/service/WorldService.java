@@ -93,7 +93,7 @@ public class WorldService {
         log.info(world.getActorList().size() + " Actors at the start of this turn");
         log.info(world.getActorList().stream()
                 .filter(actor -> actor.getStateType() == StateType.DEAD)
-                .collect(Collectors.toList()).size() + " Actors where dead at the start of this turn");
+                .count() + " Actors where dead at the start of this turn");
 
         world.getActorList().forEach(Actor::processSerialTask);
 
