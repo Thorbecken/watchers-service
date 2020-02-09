@@ -15,8 +15,8 @@ public class MapController {
 
     @RequestMapping(value = "/world/{worldId}", method = RequestMethod.GET)
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId){
-        World world = mapManager.getWorld(worldId);
-        System.out.println("Returned a world");
+        World world = mapManager.getUninitiatedWorld(worldId);
+        System.out.println("Returned a world with " + world.getActorList().size() + " actors in it");
         return ResponseEntity.ok(world);
     }
 }

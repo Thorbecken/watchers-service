@@ -63,7 +63,7 @@ public class Tile {
         this.continent = continent;
         this.surfaceType = continent.getType();
         this.actors = new HashSet<>();
-        this.biome = new Biome(1, 10, 0.5f, this);
+        this.biome = new Biome(2, 10, 0.25f, this);
         this.world = world;
     }
 
