@@ -13,6 +13,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 @Configuration
@@ -61,7 +62,7 @@ public class PersistentDatabaseConfiguration {
     @Bean
     public DataSource persistentDataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(env.getProperty("spring.persistent.datasource.driverClassName"));
+        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.persistent.datasource.driverClassName")));
         dataSource.setUrl(env.getProperty("spring.persistent.datasource.url"));
         dataSource.setUsername(env.getProperty("spring.persistent.datasource.username"));
         dataSource.setPassword(env.getProperty("spring.persistent.datasource.password"));
