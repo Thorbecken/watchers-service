@@ -16,6 +16,9 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Objects;
 
+// https://github.com/spring-framework-guru/sfg-blog-posts/blob/master/multiple-data-sources/src/main/resources/application.properties 
+// moet doorgevoerd worden voor zowel de h2, postgres en quartz datasources
+
 @Configuration
 @EnableJpaRepositories(basePackages = "com.watchers.repository.inMemory",
 
