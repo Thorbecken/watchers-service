@@ -75,6 +75,17 @@
             <artifactId>postgresql</artifactId>
             <version>42.2.9</version>
         </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+            <!-- version number must be equal tot that of hibernate -->
+            <version>5.4.9.Final</version>
+        </dependency>
     </dependencies>
 
     <build>
