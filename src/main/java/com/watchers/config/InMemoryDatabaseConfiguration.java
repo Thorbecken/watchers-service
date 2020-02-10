@@ -1,7 +1,6 @@
 package com.watchers.config;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import com.watchers.model.environment.World;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -20,7 +19,7 @@ import java.util.Objects;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.watchers.repository.inMemory",
+        basePackages = "com.watchers.repository.inmemory",
         entityManagerFactoryRef = "inmemoryDatabaseEntityManagerFactory",
         transactionManagerRef = "inmemoryDatabaseTransactionManager")
 @EnableTransactionManagement
@@ -29,7 +28,7 @@ public class InMemoryDatabaseConfiguration {
     @Bean
     @Primary
     @SuppressWarnings("WeakerAccess")
-    @ConfigurationProperties("datasource.h2")
+    @ConfigurationProperties("datasource.inmemory")
     public DataSourceProperties inMemoryDataSourceProperties() {
         return new DataSourceProperties();
     }
@@ -38,7 +37,7 @@ public class InMemoryDatabaseConfiguration {
     @Bean
     @Primary
     @SuppressWarnings("WeakerAccess")
-    @ConfigurationProperties("datasource.h2.configuration")
+    @ConfigurationProperties("datasource.inmemory.configuration")
     public DataSource inMemoryDataSource() {
         return inMemoryDataSourceProperties().initializeDataSourceBuilder()
                 .type(BasicDataSource.class).build();
@@ -49,7 +48,7 @@ public class InMemoryDatabaseConfiguration {
     public LocalContainerEntityManagerFactoryBean inmemoryDatabaseEntityManagerFactory(EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(inMemoryDataSource())
-                .packages(World.class)
+                .packages("com.watchers.model")
                 .build();
     }
 

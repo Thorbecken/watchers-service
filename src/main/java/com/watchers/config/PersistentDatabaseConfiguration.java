@@ -1,7 +1,6 @@
 package com.watchers.config;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import com.watchers.model.environment.World;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -43,7 +42,7 @@ public class PersistentDatabaseConfiguration {
             EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(persistentDataSource())
-                .packages(World.class)
+                .packages("com.watchers.model")
                 .build();
     }
 
