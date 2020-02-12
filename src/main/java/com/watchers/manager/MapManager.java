@@ -3,7 +3,6 @@ package com.watchers.manager;
 import com.watchers.helper.RandomHelper;
 import com.watchers.model.actor.AnimalType;
 import com.watchers.model.actor.animals.AnimalFactory;
-import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
@@ -30,19 +29,16 @@ public class MapManager {
     
     private World createWorld(long worldId){
         World newWorld = new WorldFactory().generateWorld(58L, 28L, 13);
-        populateWorld(newWorld);
 
         log.info(String.format("World number %s created", worldId));
         worldRepository.save(newWorld);
         return newWorld;
     }
 
-    private void populateWorld(World newWorld) {
-        for (Continent continent: newWorld.getContinents()) {
-            AnimalType animalType = selectAnimalSeed(continent.getType());
-            Tile seedingTile = ((Tile) continent.getTiles().toArray()[RandomHelper.getRandom(continent.getTiles().size())]);
-            seedingTile.getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile));
-        }
+    public void seedLife(World world, Long xCoord, Long yCoord) {
+        Tile seedingTile = world.getTile(xCoord, yCoord);
+        AnimalType animalType = selectAnimalSeed(seedingTile.getContinent().getType());
+        seedingTile.getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile));
     }
 
     private AnimalType selectAnimalSeed(SurfaceType type) {

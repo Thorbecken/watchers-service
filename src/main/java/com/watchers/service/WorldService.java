@@ -18,7 +18,6 @@ import javax.annotation.PostConstruct;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
@@ -33,7 +32,7 @@ public class WorldService {
     private MapManager mapManager;
 
     @Transient
-    private List<World> activeWorlds;
+    private List<Long> activeWorlds;
 
     public WorldService(){
         this.activeWorlds = new ArrayList<>();
@@ -41,21 +40,32 @@ public class WorldService {
 
     @PostConstruct
     private void init(){
-        activeWorlds.add(mapManager.getWorld(1L));
+        activeWorlds.add(1L);
     }
 
     public void startWorld(Long id){
-        Optional<World> optionalWorld = activeWorlds.stream()
-                .filter(world -> world.getId().equals(id))
-                .findFirst();
-        if(!optionalWorld.isPresent()){
-            activeWorlds.add(mapManager.getWorld(1L));
+        Long activeWorldID = activeWorlds.stream()
+            .filter(world -> world.equals(id))
+            .findFirst()
+            .orElse(mapManager.getWorld(id).getId());
+        if(!activeWorlds.contains(activeWorldID)){
+            activeWorlds.add(activeWorldID);
         }
     }
+
+/*
+    turened off till double datasources are available
 
     public void saveAndShutdownAll(){
         activeWorlds.forEach(worldRepository::save);
         activeWorlds.clear();
+    }
+
+    public void shutdownWorld(Long id){
+        activeWorlds.stream()
+                .filter(world -> world.equals(id))
+                .findFirst()
+                .ifPresent(activeWorlds::remove);
     }
 
     public void saveAndShutdown(Long id){
@@ -63,28 +73,23 @@ public class WorldService {
         shutdownWorld(id);
     }
 
-    public void shutdownWorld(Long id){
-        activeWorlds.stream()
-                .filter(world -> world.getId().equals(id))
-                .findFirst()
-                .ifPresent(activeWorlds::remove);
-    }
-
     public void saveWorlds(){
+        turned off till doubles datasources are available
         getActiveWorlds().stream().map(World::getId).forEach(
-                this::saveWorld
+        this::saveWorld
         );
     }
 
     public void saveWorld(Long id){
         activeWorlds.stream()
-                .filter(world -> world.getId().equals(id))
+                .filter(world -> world.equals(id))
                 .findFirst()
                 .ifPresent(worldRepository::save);
     }
+*/
 
     public void processTurns(){
-        activeWorlds.forEach(this::processTurn);
+        activeWorlds.forEach(worldId -> processTurn(mapManager.getWorld(worldId)));
     }
 
     private void processTurn(World world){
