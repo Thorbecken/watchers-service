@@ -1,12 +1,10 @@
 package com.watchers.model.actor.animals;
 
-import com.watchers.model.actor.Animal;
-import com.watchers.model.actor.AnimalType;
-import com.watchers.model.actor.NaturalHabitat;
-import com.watchers.model.actor.StateType;
+import com.watchers.model.actor.*;
 import com.watchers.model.environment.Tile;
 
 import javax.persistence.Entity;
+import java.util.List;
 
 @Entity
 public class Whale extends Animal {
@@ -31,6 +29,9 @@ public class Whale extends Animal {
         super.setStateType(StateType.ALIVE);
         super.setTile(tile);
 
-        getTile().getWorld().getNewActors().add(this);
+        List<Actor> newActors = getTile().getWorld().getNewActors();
+        if(newActors != null){
+            newActors.add(this);
+        }
     }
 }
