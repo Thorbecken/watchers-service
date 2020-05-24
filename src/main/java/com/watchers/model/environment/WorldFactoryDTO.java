@@ -16,10 +16,10 @@ public class WorldFactoryDTO {
     public WorldFactoryDTO(World world){
         this.world = world;
         this.takenTiles = new ArrayList<>();
-        this.openTiles = generateOpenTiles(world);
+        this.openTiles = generateOpenAndTakenTiles(world);
     }
 
-    private List<Tile> generateOpenTiles(World world) {
+    private List<Tile> generateOpenAndTakenTiles(World world) {
         List<Tile> openTiles = new ArrayList<>();
         Continent mockContinent = new Continent(world, SurfaceType.OCEANIC);
         mockContinent.setType(SurfaceType.OCEANIC);
@@ -27,6 +27,7 @@ public class WorldFactoryDTO {
         for (long xCoord = 1L; xCoord <= world.getXSize(); xCoord++){
             for (long yCoord = 1L; yCoord <= world.getYSize(); yCoord++){
                 Tile tile = new Tile(xCoord, yCoord, world, mockContinent);
+                tile.getCoordinate().setWorld(world);
                 tile.setSurfaceType(SurfaceType.OCEANIC);
                 openTiles.add(tile);
             }

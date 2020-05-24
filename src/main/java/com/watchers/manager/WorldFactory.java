@@ -2,13 +2,20 @@ package com.watchers.manager;
 
 import com.watchers.model.environment.*;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
+@Component
 class WorldFactory {
 
-    private static int COASTAL_ZONE = 2;
-    private static int OCEANIC_ZONE = 5;
+    @Value("${watch.coastalZone}")
+    private int COASTAL_ZONE = 2;
+
+    @Value("${watch.oceanicZone}")
+    private int OCEANIC_ZONE = 5;
 
     World generateWorld(long xSize, long ySize, long continents){
         World world = new World(xSize, ySize);
@@ -24,6 +31,8 @@ class WorldFactory {
         }
 
         fillInWorld(world);
+        world.fillTransactionals();
+
         specifyWaterZones(world);
 
         return world;
@@ -52,14 +61,12 @@ class WorldFactory {
                 continent -> mockContinents.add(new MockContinent(continent))
                 );
 
-        mockContinents.forEach(
-                mockContinent -> dto.getTakenTiles().addAll(mockContinent.getTiles())
-        );
-
         while(dto.getOpenTiles().size() >= 1){
             System.out.println("In loop: " + dto.getOpenTiles().size() + " tiles left");
-            mockContinents.forEach(
-                    mockContinent -> mockContinent.addRandomTile(dto)
+            mockContinents.stream()
+                    .filter(mockContinent -> !CollectionUtils.isEmpty(mockContinent.getPossibleTiles()))
+                    .forEach(
+                        mockContinent -> mockContinent.addRandomTile(dto)
             );
         }
 

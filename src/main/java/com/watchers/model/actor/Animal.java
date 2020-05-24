@@ -1,16 +1,11 @@
 package com.watchers.model.actor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.watchers.helper.RandomHelper.getRandom;
 
 @Data
 @Entity

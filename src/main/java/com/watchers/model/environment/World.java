@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actor.Actor;
+import com.watchers.model.common.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -48,6 +49,12 @@ public class World {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents;
 
+    @JsonIgnore
+    private long lastContinentInFlux;
+
+    @JsonIgnore
+    private long heightDeficit;
+
     public World(long xSize, long ySize){
         this.xSize = xSize;
         this.ySize = ySize;
@@ -70,6 +77,11 @@ public class World {
     }
 
     @JsonIgnore
+    public Tile getTile(Coordinate coordinate){
+        return getTile(coordinate.getXCoord(), coordinate.getYCoord());
+    }
+
+    @JsonIgnore
     public List<Actor> getActorList(){
         if(actorList == null){
             setActorList();
@@ -85,9 +97,8 @@ public class World {
             final long xCoord = i;
             Map<Long, Tile> hashMap = new HashMap<>();
             tiles.stream()
-                    .filter(tile -> tile.getXCoord() == xCoord)
-                    .forEach(
-                    tile -> hashMap.put(tile.getYCoord(), tile)
+                    .filter(tile -> tile.getCoordinate().getXCoord() == xCoord)
+                    .forEach(tile -> hashMap.put(tile.getCoordinate().getYCoord(), tile)
             );
 
             tileMap.put(xCoord,hashMap);
@@ -107,9 +118,9 @@ public class World {
             final long xCoord = i;
             Map<Long, Tile> hashMap = new HashMap<>();
             tiles.stream()
-                    .filter(tile -> tile.getXCoord() == xCoord)
+                    .filter(tile -> tile.getCoordinate().getXCoord() == xCoord)
                     .forEach(
-                            tile -> hashMap.put(tile.getYCoord(), tile)
+                            tile -> hashMap.put(tile.getCoordinate().getYCoord(), tile)
                     );
 
             tileMap.put(xCoord, hashMap);

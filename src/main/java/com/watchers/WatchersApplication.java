@@ -17,5 +17,4 @@ public class WatchersApplication {
 	public static void main(String[] args){
 		new SpringApplicationBuilder(WatchersApplication.class).bannerMode(Banner.Mode.OFF).run(args);
 	}
-
 }

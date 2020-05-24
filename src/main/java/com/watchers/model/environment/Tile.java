@@ -4,10 +4,23 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.model.actor.Actor;
+import com.watchers.model.common.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.util.*;
 
 @Data
@@ -23,17 +36,13 @@ public class Tile {
     @Column(name = "tile_id", nullable = false)
     private Long id;
 
-    @JsonProperty("xCoord")
-    @Column(name = "xCoord")
-    private long xCoord;
+    @JsonProperty("coordinate")
+    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    private Coordinate coordinate;
 
-    @JsonProperty("yCoord")
-    @Column(name = "yCoord")
-    private long yCoord;
-
-    @JsonProperty("zCoord")
-    @Column(name = "zCoord")
-    private long zCoord;
+    @JsonProperty("height")
+    @Column(name = "height")
+    private long height;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
@@ -58,8 +67,16 @@ public class Tile {
     private SurfaceType surfaceType;
 
     public Tile(long xCoord, long yCoord, World world, Continent continent){
-        this.xCoord = xCoord;
-        this.yCoord = yCoord;
+        this.coordinate = new Coordinate(xCoord, yCoord, world);
+        this.continent = continent;
+        this.surfaceType = continent.getType();
+        this.actors = new HashSet<>();
+        this.biome = new Biome(1, 10, 0.5f, this);
+        this.world = world;
+    }
+
+    public Tile(Coordinate coordinate, World world, Continent continent){
+        this.coordinate = new Coordinate(coordinate.getXCoord(), coordinate.getYCoord(), world);
         this.continent = continent;
         this.surfaceType = continent.getType();
         this.actors = new HashSet<>();
@@ -77,84 +94,6 @@ public class Tile {
 
 
     @JsonIgnore
-    public List<Tile> getNeighbours() {
-        boolean down = yCoord > 1L;
-        boolean up = yCoord < this.world.getYSize();
-
-        List<Tile> returnTiles = new ArrayList<>();
-        returnTiles.add(world.getTile(getLeftCoordinate(), yCoord));
-        returnTiles.add(world.getTile(getRightCoordinate(), yCoord));
-
-
-        if(down) {
-            Tile downTile = world.getTile(xCoord, yCoord - 1);
-            returnTiles.add(downTile);
-        }
-        if(up) {
-            Tile upTile = world.getTile(xCoord, yCoord + 1);
-            returnTiles.add(upTile);
-        }
-
-        return returnTiles;
-    }
-
-    @JsonIgnore
-    public List<Tile> getNeighboursContinental(Continent continent) {
-        boolean up = yCoord > 1L;
-        boolean down = yCoord < this.world.getYSize();
-
-        List<Tile> returnTiles = new ArrayList<>();
-
-        Tile leftTile = new Tile(getLeftCoordinate(), yCoord, this.world, continent);
-        Tile rightTile = new Tile(getRightCoordinate(), yCoord, this.world, continent);
-
-        returnTiles.add(leftTile);
-        returnTiles.add(rightTile);
-
-        if(down) {
-            Tile downTile = new Tile(xCoord, yCoord - 1, this.world, continent);
-            returnTiles.add(downTile);
-        }
-        if(up) {
-            Tile upTile = new Tile(xCoord, yCoord + 1, this.world, continent);
-            returnTiles.add(upTile);
-        }
-
-        return returnTiles;
-    }
-
-    @JsonIgnore
-    private long getRightCoordinate() {
-        if(xCoord == this.world.getXSize()){
-            return 1;
-        } else {
-            return xCoord+1;
-        }
-    }
-
-    @JsonIgnore
-    private long getLeftCoordinate() {
-        if(xCoord == 1){
-            return this.world.getXSize();
-        } else {
-            return xCoord-1;
-        }
-    }
-
-    public boolean coordinateEquals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Tile)) return false;
-        Tile that = (Tile) o;
-        return xCoord == that.xCoord &&
-                yCoord == that.yCoord;
-    }
-
-    public int coordinateHashCode() {
-
-        return Objects.hash(xCoord, yCoord);
-    }
-
-    @JsonIgnore
     public List<Tile> getNeighboursWithinRange(List<Tile> tiles, int range) {
         if(range>=1) {
             List<Tile> returnList = new ArrayList<>();
@@ -166,6 +105,27 @@ public class Tile {
         } else {
             return tiles;
         }
+    }
+
+
+    @JsonIgnore
+    public List<Tile> getNeighbours() {
+        List<Tile> returnTiles = new ArrayList<>();
+        coordinate.getNeighbours().forEach(
+                coordinate -> returnTiles.add(world.getTile(coordinate.getXCoord(), coordinate.getYCoord()))
+        );
+
+        return returnTiles;
+    }
+
+    @JsonIgnore
+    public List<Tile> getNeighboursContinental(Continent continent) {
+        List<Tile> returnTiles = new ArrayList<>();
+        coordinate.getNeighbours().forEach(
+                coordinate -> returnTiles.add(new Tile(coordinate, world, continent))
+        );
+
+        return returnTiles;
     }
 
     @JsonIgnore
@@ -184,5 +144,28 @@ public class Tile {
         } else {
             return tiles;
         }
+    }
+
+    public boolean coordinateEquals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tile)) return false;
+        return coordinate.equals(((Tile) o).getCoordinate());
+    }
+
+    public int coordinateHashCode() {
+        return coordinate.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tile)) return false;
+        Tile tile = (Tile) o;
+        return Objects.equals(coordinate, tile.coordinate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(coordinate);
     }
 }

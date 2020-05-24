@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,18 +27,20 @@ public class ActorController{
         private WorldRepository worldRepository;
 
         @RequestMapping(value = "/actors/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
-        public ResponseEntity getWorldMap(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){
+        public ResponseEntity seedLife(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){
             log.info("Received request to seed life at coordintae: " + xCoord + "x, " + yCoord + "y");
-            if(worldId != null) {
-                Optional<World> world = worldRepository.findById(worldId);
-                if (world.isPresent() && xCoord != null && yCoord != null) {
-                    mapManager.seedLife(world.get(), xCoord, yCoord);
-                    worldRepository.save(world.get());
-                    log.info("Seeded life on world " + worldId + " at coordinates: " + xCoord + "x, " + yCoord + "y");
-                    return ResponseEntity.ok().build();
-                } else {
-                    log.info("World not found");
-                }
+            Assert.notNull(worldId, "No world id was found");
+            Assert.notNull(xCoord, "No xCoord was found");
+            Assert.notNull(yCoord, "No yCoord was found");
+
+            Optional<World> world = worldRepository.findById(worldId);
+            if (world.isPresent()) {
+                mapManager.seedLife(world.get(), xCoord, yCoord);
+                worldRepository.save(world.get());
+                log.info("Seeded life on world " + worldId + " at coordinates: " + xCoord + "x, " + yCoord + "y");
+                return ResponseEntity.ok().build();
+            } else {
+                log.info("World not found");
             }
 
             return ResponseEntity.badRequest().build();
