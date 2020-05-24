@@ -19,16 +19,13 @@ public class MapManager {
     private WorldRepository worldRepository;
     private WorldFactory worldFactory;
     private ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster;
-    private ContinentalDriftManager continentalDriftManager;
 
     public MapManager(WorldRepository worldRepository,
                       WorldFactory worldFactory,
-                      ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster,
-                      ContinentalDriftManager continentalDriftManager){
+                      ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster){
         this.worldRepository = worldRepository;
         this.worldFactory = worldFactory;
         this.continentalDriftDirectionAdjuster = continentalDriftDirectionAdjuster;
-        this.continentalDriftManager = continentalDriftManager;
     }
 
     public World getWorld(Long worldId) {

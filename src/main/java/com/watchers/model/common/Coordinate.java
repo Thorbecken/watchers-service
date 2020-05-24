@@ -110,9 +110,9 @@ public class Coordinate {
 
     @JsonIgnore
     private long getXCoordinateFromTile(long distance, long startingCoordinate){
-        if(distance < 0){
+        if(distance <= CoordinateHelper.LEFT){
             return getXCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedXCoordinate(CoordinateHelper.LEFT, startingCoordinate));
-        } else if(distance > 0){
+        } else if(distance >= CoordinateHelper.RIGHT){
             return getXCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedXCoordinate(CoordinateHelper.RIGHT, startingCoordinate));
         } else {
             return startingCoordinate;
@@ -121,15 +121,15 @@ public class Coordinate {
 
     @JsonIgnore
     public long getYCoordinateFromTile(long distance){
-        return getXCoordinateFromTile(distance, this.getXCoord());
+        return getYCoordinateFromTile(distance, this.getYCoord());
     }
 
     @JsonIgnore
     private long getYCoordinateFromTile(long distance, long startingCoordinate){
-        if(distance < 0){
-            return getYCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedYCoordinate(CoordinateHelper.LEFT, startingCoordinate));
-        } else if(distance > 0){
-            return getYCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedYCoordinate(CoordinateHelper.RIGHT, startingCoordinate));
+        if(distance <= CoordinateHelper.DOWN){
+            return getYCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedYCoordinate(CoordinateHelper.DOWN, startingCoordinate));
+        } else if(distance >= CoordinateHelper.UP){
+            return getYCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedYCoordinate(CoordinateHelper.UP, startingCoordinate));
         } else {
             return startingCoordinate;
         }
@@ -153,9 +153,9 @@ public class Coordinate {
 
     @JsonIgnore
     private long getAdjustedXCoordinate(int adjustment, long startincCoordinate){
-        if(adjustment == CoordinateHelper.RIGHT && startincCoordinate == this.world.getXSize()){
+        if(adjustment >= CoordinateHelper.RIGHT && startincCoordinate == this.world.getXSize()){
             return 1;
-        } else if(adjustment == CoordinateHelper.LEFT && startincCoordinate == 1){
+        } else if(adjustment <= CoordinateHelper.LEFT && startincCoordinate == 1){
             return this.world.getXSize();
         } else {
             return startincCoordinate+adjustment;
@@ -164,9 +164,9 @@ public class Coordinate {
 
     @JsonIgnore
     private long getAdjustedYCoordinate(int adjustment, long startincCoordinate){
-        if(adjustment == CoordinateHelper.UP && startincCoordinate == this.world.getYSize()){
+        if(adjustment >= CoordinateHelper.UP && startincCoordinate == this.world.getYSize()){
             return 1;
-        } else if(adjustment == CoordinateHelper.DOWN && startincCoordinate == 1){
+        } else if(adjustment <= CoordinateHelper.DOWN && startincCoordinate == 1){
             return this.world.getYSize();
         } else {
             return startincCoordinate+adjustment;

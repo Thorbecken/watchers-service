@@ -1,5 +1,6 @@
 package com.watchers.service;
 
+import com.watchers.manager.ContinentalDriftManager;
 import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
@@ -20,22 +21,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
 @Slf4j
 @Service
 public class WorldService {
 
-    @Autowired
     private WorldRepository worldRepository;
-
-    @Autowired
     private MapManager mapManager;
-
-    @Transient
+    private ContinentalDriftManager continentalDriftManager;
     private List<Long> activeWorlds;
 
-    public WorldService(){
+    public WorldService(MapManager mapManager,
+                        WorldRepository worldRepository,
+                        ContinentalDriftManager continentalDriftManager){
         this.activeWorlds = new ArrayList<>();
+        this.mapManager = mapManager;
+        this.worldRepository = worldRepository;
+        this.continentalDriftManager = continentalDriftManager;
     }
 
     @PostConstruct
@@ -133,6 +134,10 @@ public class WorldService {
         world.getNewActors().clear();
 
         log.info(world.getActorList().size() + " Actors remained this turn");
+
+        continentalDriftManager.process(world);
+
+        worldRepository.save(world);
     }
 
 
@@ -140,10 +145,9 @@ public class WorldService {
     public void executeTurn() {
         processTurns();
 
-/*        World world = mapManager.getWorld(1L);
-        processTurn(world);
-        worldRepository.save(world);*/
         log.info("Processed a turn");
+
+
     }
 
 }

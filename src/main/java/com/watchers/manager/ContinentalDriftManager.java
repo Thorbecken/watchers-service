@@ -6,9 +6,11 @@ import com.watchers.components.continentaldrift.ContinentalDriftTileAdjuster;
 import com.watchers.components.continentaldrift.ContinentalDriftAdjuster;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.World;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class ContinentalDriftManager {
 
@@ -19,10 +21,10 @@ public class ContinentalDriftManager {
     private ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster;
 
     public ContinentalDriftManager(ContinentalDriftAdjuster continentalDriftAdjuster,
-                                   ContinentalDriftTileAdjuster continentalDriftTileAdjuster,
-                                   @Value("${watch.heightdivider}") long heigtDivider,
                                    ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster,
-                                   ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster){
+                                   ContinentalDriftTileAdjuster continentalDriftTileAdjuster,
+                                   ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster,
+                                   @Value("${watch.heightdivider}") long heigtDivider){
         this.continentalDriftAdjuster = continentalDriftAdjuster;
         this.continentalDriftTileAdjuster = continentalDriftTileAdjuster;
         this.heigtDivider = heigtDivider;
@@ -37,6 +39,8 @@ public class ContinentalDriftManager {
         continentalDriftAdjuster.calculateContinentalDrift(taskDto);
         continentalDriftTileAdjuster.process(taskDto);
         continentalDriftWorldAdjuster.process(taskDto);
+
+        log.info("Proccesed a continentaldrift for world id: " + world.getId());
     }
 
     private ContinentalDriftTaskDto setup(World world) {
