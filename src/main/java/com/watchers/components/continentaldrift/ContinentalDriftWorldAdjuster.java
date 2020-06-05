@@ -5,13 +5,11 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class ContinentalDriftWorldAdjuster {
@@ -33,9 +31,9 @@ public class ContinentalDriftWorldAdjuster {
         coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
                     ContinentalChangesDto dto = changes.get(coordinate);
                     if(dto.isEmpty()) {
-                        createNewTile(coordinate, newHeight, world);
+                        createNewTile(dto, newHeight, world);
                     } else {
-                        ChangeCoordinate(coordinate, dto, world);
+                        ChangeCoordinate(dto, world);
                     }
                 }
         );
@@ -49,35 +47,25 @@ public class ContinentalDriftWorldAdjuster {
                 .map(changes::get)
                 .filter(ContinentalChangesDto::isEmpty)
                 .count();
-        long spendableHeight = totalHeight/divider;
+        long spendableHeight = divider==0?0:totalHeight/divider;
         world.setHeightDeficit(totalHeight-(spendableHeight*divider));
         return spendableHeight;
     }
 
-    private void createNewTile(Coordinate coordinate, long newHeight, World world) {
-        List<Coordinate> coordinates = coordinate
-                .getCoordinatesWithinRange(1);
-
-        List<Tile> tiles = coordinates
-                .stream()
-                .map(world::getTile)
-                .filter(Objects::nonNull)
-                .filter(tile -> tile.getCoordinate() != null)
-                .collect(Collectors.toList());
-        List<Continent> continents = tiles.stream().map(Tile::getContinent).collect(Collectors.toList());
-
-        Optional<Continent> assignedContinent = continents.stream()
-                .max(Comparator.comparing(Continent::getId));
-        Tile newTile = new Tile(coordinate, world, assignedContinent
-                .orElseGet(() -> new Continent(world, SurfaceType.OCEANIC)));
+    private void createNewTile(ContinentalChangesDto dto, long newHeight, World world) {
+        Continent assignedContinent = dto.getNewMockContinent().getContinent();
+        Tile newTile = new Tile(dto.getKey(), world, assignedContinent);
+        assignedContinent.getTiles().add(newTile);
 
         newTile.setHeight(newHeight);
         world.getTiles().add(newTile);
+
+        world.getContinents().add(assignedContinent);
     }
 
-    private void ChangeCoordinate(Coordinate coordinate, ContinentalChangesDto dto, World world) {
+    private void ChangeCoordinate(ContinentalChangesDto dto, World world) {
         Tile newTile = dto.getNewTile();
-        newTile.setCoordinate(coordinate);
+        newTile.setCoordinate(dto.getKey());
         world.getTiles().add(newTile);
     }
 }

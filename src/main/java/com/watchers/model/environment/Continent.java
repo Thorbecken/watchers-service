@@ -30,7 +30,7 @@ public class Continent {
     private World world;
 
     @JsonIgnore
-    @JsonProperty("tiles")
+    @JsonProperty("coordinates")
     @OneToMany(mappedBy = "continent", cascade=CascadeType.ALL)
     private Set<Tile> tiles;
 

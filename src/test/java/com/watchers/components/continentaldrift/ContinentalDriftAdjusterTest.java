@@ -41,58 +41,7 @@ class ContinentalDriftAdjusterTest {
 
         taskDto.setNewTileLayout(new HashMap<>());
 
-        continentalDriftAdjuster.calculateContinentalDrift(taskDto);
-
-        Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
-
-        Assert.assertTrue("New continentalLayout was still empty", !newTileLayout.isEmpty());
-        int count = taskDto.getNewTileLayout().values().stream()
-                .map(List::size)
-                .reduce((x, y) -> x+y)
-                .orElse(0);
-        assertEquals(9, count);
-
-        long endHeight = taskDto.getNewTileLayout().values().stream()
-                .reduce((List<Tile> x, List<Tile> y) ->
-                {
-                    List<Tile> list = new ArrayList();
-                    list.addAll(x);
-                    list.addAll(y);
-                    return list;
-                })
-                .get()
-                .stream()
-                .map(Tile::getHeight)
-                .reduce((x, y) -> x + y)
-                .orElse(0L);
-        assertEquals(startingHeight, endHeight);
-
-        long zeroCount = newTileLayout.values().stream().filter(x -> x.size() == 0).count();
-        assertEquals(4, zeroCount);
-        long oneCount = newTileLayout.values().stream().filter(x -> x.size() == 1).count();
-        assertEquals(2, oneCount);
-        long twoCount = newTileLayout.values().stream().filter(x -> x.size() == 2).count();
-        assertEquals(2, twoCount);
-        long threeCount = newTileLayout.values().stream().filter(x -> x.size() == 3).count();
-        assertEquals(1, threeCount);
-    }
-
-    @Test
-    void calculateContinentalDriftExtreme() {
-        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setXVelocity(2);
-        ((Continent) taskDto.getWorld().getContinents().toArray()[1]).getDirection().setYVelocity(-2);
-        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setXVelocity(-1);
-        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setYVelocity(1);
-
-        assertEquals(9, taskDto.getWorld().getTiles().size());
-        long startingHeight = taskDto.getWorld().getTiles().stream()
-                .map(Tile::getHeight)
-                .reduce((x,y)-> x+y)
-                .orElse(0L);
-
-        taskDto.setNewTileLayout(new HashMap<>());
-
-        continentalDriftAdjuster.calculateContinentalDrift(taskDto);
+        continentalDriftAdjuster.process(taskDto);
 
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
@@ -121,8 +70,59 @@ class ContinentalDriftAdjusterTest {
         long zeroCount = newTileLayout.values().stream().filter(x -> x.size() == 0).count();
         assertEquals(3, zeroCount);
         long oneCount = newTileLayout.values().stream().filter(x -> x.size() == 1).count();
-        assertEquals(5, oneCount);
-        long fourCount = newTileLayout.values().stream().filter(x -> x.size() == 4).count();
-        assertEquals(1, fourCount);
+        assertEquals(4, oneCount);
+        long twoCount = newTileLayout.values().stream().filter(x -> x.size() == 2).count();
+        assertEquals(1, twoCount);
+        long threeCount = newTileLayout.values().stream().filter(x -> x.size() == 3).count();
+        assertEquals(1, threeCount);
+    }
+
+    @Test
+    void calculateContinentalDriftExtreme() {
+        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setXVelocity(2);
+        ((Continent) taskDto.getWorld().getContinents().toArray()[1]).getDirection().setYVelocity(-2);
+        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setXVelocity(-1);
+        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setYVelocity(1);
+
+        assertEquals(9, taskDto.getWorld().getTiles().size());
+        long startingHeight = taskDto.getWorld().getTiles().stream()
+                .map(Tile::getHeight)
+                .reduce((x,y)-> x+y)
+                .orElse(0L);
+
+        taskDto.setNewTileLayout(new HashMap<>());
+
+        continentalDriftAdjuster.process(taskDto);
+
+        Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
+
+        Assert.assertTrue("New continentalLayout was still empty", !newTileLayout.isEmpty());
+        int count = taskDto.getNewTileLayout().values().stream()
+                .map(List::size)
+                .reduce((x, y) -> x+y)
+                .orElse(0);
+        assertEquals(9, count);
+
+        long endHeight = taskDto.getNewTileLayout().values().stream()
+                .reduce((List<Tile> x, List<Tile> y) ->
+                {
+                    List<Tile> list = new ArrayList();
+                    list.addAll(x);
+                    list.addAll(y);
+                    return list;
+                })
+                .get()
+                .stream()
+                .map(Tile::getHeight)
+                .reduce((x, y) -> x + y)
+                .orElse(0L);
+        assertEquals(startingHeight, endHeight);
+
+        long zeroCount = newTileLayout.values().stream().filter(x -> x.size() == 0).count();
+        assertEquals(3, zeroCount);
+        long oneCount = newTileLayout.values().stream().filter(x -> x.size() == 1).count();
+        assertEquals(3, oneCount);
+        long twoCount = newTileLayout.values().stream().filter(x -> x.size() == 2).count();
+        assertEquals(3, twoCount);
     }
 }

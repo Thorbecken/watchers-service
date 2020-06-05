@@ -15,6 +15,7 @@ public class ContinentalDriftTaskDto {
     private World world;
     private long heightLoss;
     private long heightDivider;
+    private int minContinents;
     private Map<Coordinate, List<Tile>> newTileLayout;
     private Map<Coordinate, ContinentalChangesDto> changes;
 

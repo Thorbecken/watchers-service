@@ -42,25 +42,27 @@ public class ContinentalDriftTileAdjuster {
     }
 
     private void processAbsentTile(Coordinate coordinate, Map<Coordinate, ContinentalChangesDto> changes) {
-        ContinentalChangesDto dto = new ContinentalChangesDto();
+        ContinentalChangesDto dto = new ContinentalChangesDto(coordinate);
         dto.setEmpty(true);
         changes.put(coordinate, dto);
     }
 
     private void processOneTile(Coordinate coordinate, Tile tile, Map<Coordinate, ContinentalChangesDto> changes) {
-        ContinentalChangesDto dto = new ContinentalChangesDto();
+        ContinentalChangesDto dto = new ContinentalChangesDto(coordinate);
         dto.setNewTile(tile);
+        dto.setOldCoordinate(tile.getCoordinate());
         changes.put(coordinate, dto);
     }
 
     private void processMultipleTiles(Coordinate coordinate, List<Tile> tiles, ContinentalDriftTaskDto taskDto) {
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
-        ContinentalChangesDto dto = new ContinentalChangesDto();
+        ContinentalChangesDto dto = new ContinentalChangesDto(coordinate);
         changes.put(coordinate, dto);
 
         tiles.sort(Comparator.comparing(Tile::getHeight));
         Tile survivingTile = RandomHelper.getRandomHighestTile(tiles);
         dto.setNewTile(survivingTile);
+        dto.setOldCoordinate(survivingTile.getCoordinate());
         tiles.remove(survivingTile);
 
 

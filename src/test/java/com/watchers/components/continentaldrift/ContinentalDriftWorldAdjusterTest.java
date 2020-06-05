@@ -25,13 +25,15 @@ class ContinentalDriftWorldAdjusterTest {
         this.world = TestableWorld.createWorld();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
         this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper);
-
-        taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
         ContinentalDriftAdjuster continentalDriftAdjuster = new ContinentalDriftAdjuster(coordinateHelper);
         ContinentalDriftTileAdjuster continentalDriftTileAdjuster = new ContinentalDriftTileAdjuster(coordinateHelper);
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner();
 
-        continentalDriftAdjuster.calculateContinentalDrift(taskDto);
+        taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
+
+        continentalDriftAdjuster.process(taskDto);
         continentalDriftTileAdjuster.process(taskDto);
+        continentalDriftNewTileAssigner.process(taskDto);
     }
 
     @ParameterizedTest

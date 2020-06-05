@@ -52,7 +52,7 @@ public class MapManager {
 
     private AnimalType selectAnimalSeed(SurfaceType type) {
         switch (type){
-            case CONTINENTAL: return AnimalType.RABBIT;
+            case PLAIN: return AnimalType.RABBIT;
             case COASTAL:
             case OCEANIC:
             case DEEP_OCEAN:

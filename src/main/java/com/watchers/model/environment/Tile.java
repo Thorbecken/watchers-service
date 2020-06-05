@@ -119,16 +119,6 @@ public class Tile {
     }
 
     @JsonIgnore
-    public List<Tile> getNeighboursContinental(Continent continent) {
-        List<Tile> returnTiles = new ArrayList<>();
-        coordinate.getNeighbours().forEach(
-                coordinate -> returnTiles.add(new Tile(coordinate, world, continent))
-        );
-
-        return returnTiles;
-    }
-
-    @JsonIgnore
     private List<Tile> getNeighboursWithinRange(List<Tile> tiles, List<Tile> oldTiles, int range) {
         if(range>=1) {
             List<Tile> returnList = new ArrayList<>();

@@ -26,4 +26,8 @@ public class RandomHelper {
                 .collect(Collectors.toList());
         return maxTiles.get(RandomHelper.getRandom(maxTiles.size()));
     }
+
+    public static <T> T getRandomObject(List<T> list){
+        return list.get(getRandom(list.size()-1));
+    }
 }

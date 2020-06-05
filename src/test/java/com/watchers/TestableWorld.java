@@ -14,7 +14,7 @@ public class TestableWorld {
         World world = new World(3, 3);
         world.setLastContinentInFlux(0L);
 
-        Continent continent1 = new Continent(world, SurfaceType.CONTINENTAL);
+        Continent continent1 = new Continent(world, SurfaceType.PLAIN);
         continent1.setId(0L);
         continent1.setDirection(new Direction(1, 0));
         continent1.getTiles().addAll(Arrays.asList(
@@ -49,10 +49,10 @@ public class TestableWorld {
 
         world.getTiles().forEach(tile -> {
                     tile.getCoordinate().setWorld(tile.getWorld());
-                    if (tile.getSurfaceType() == SurfaceType.CONTINENTAL) {
-                        tile.setHeight(5);
+                    if (tile.getSurfaceType() == SurfaceType.PLAIN) {
+                        tile.setHeight(40);
                     } else {
-                        tile.setHeight(2);
+                        tile.setHeight(20);
                     }
                 }
         );

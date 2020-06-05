@@ -11,8 +11,8 @@ import static com.watchers.model.environment.SurfaceType.*;
 
 public enum NaturalHabitat {
     AQUATIC(Arrays.asList(OCEANIC,DEEP_OCEAN,COASTAL)),
-    TERRESTRIAL(Collections.singletonList(CONTINENTAL)),
-    ALL(Arrays.asList(OCEANIC,CONTINENTAL));
+    TERRESTRIAL(Collections.singletonList(PLAIN)),
+    ALL(Arrays.asList(OCEANIC, PLAIN));
 
     public final List<SurfaceType> movavableSurfaces;
 

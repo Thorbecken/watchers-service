@@ -10,7 +10,6 @@ import com.watchers.model.environment.World;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +32,7 @@ class ContinentalDriftTileAdjusterTest {
         ContinentalDriftAdjuster continentalDriftAdjuster = new ContinentalDriftAdjuster(coordinateHelper);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        continentalDriftAdjuster.calculateContinentalDrift(taskDto);
+        continentalDriftAdjuster.process(taskDto);
     }
 
     @Test

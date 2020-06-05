@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CoordinateHelper {
@@ -25,5 +26,21 @@ public class CoordinateHelper {
             }
         }
         return coordinates;
+    }
+
+    public static List<Coordinate> getAllOutersideCoordinates(List<Coordinate> coordinates){
+        List<Coordinate> possibleCoordinates = coordinates.stream().map(Coordinate::getNeighbours)
+                .reduce((List<Coordinate> x, List<Coordinate> y) ->
+                {
+                    List<Coordinate> list = new ArrayList();
+                    list.addAll(x);
+                    list.addAll(y);
+                    return list;
+                })
+                .get().stream()
+                .distinct()
+                .collect(Collectors.toList());
+        possibleCoordinates.removeAll(coordinates);
+        return possibleCoordinates;
     }
 }

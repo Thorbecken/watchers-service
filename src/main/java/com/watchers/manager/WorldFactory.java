@@ -1,7 +1,9 @@
 package com.watchers.manager;
 
+import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.model.environment.*;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -17,12 +19,15 @@ class WorldFactory {
     @Value("${watch.oceanicZone}")
     private int OCEANIC_ZONE = 5;
 
+    @Autowired
+    private TileDefined tileDefined;
+
     World generateWorld(long xSize, long ySize, long continents){
         World world = new World(xSize, ySize);
         for (int i = 0; i < continents; i++) {
             Random random = new Random();
             boolean land = random.nextBoolean();
-            Continent generatedContinent = new Continent(world, land ? SurfaceType.CONTINENTAL : SurfaceType.OCEANIC);
+            Continent generatedContinent = new Continent(world, land ? SurfaceType.PLAIN : SurfaceType.OCEANIC);
 
             Tile startingTile = generateStartingTile(world, generatedContinent);
 
@@ -34,6 +39,7 @@ class WorldFactory {
         world.fillTransactionals();
 
         specifyWaterZones(world);
+        tileDefined.process(world);
 
         return world;
     }
@@ -44,9 +50,9 @@ class WorldFactory {
                 .filter(tile -> SurfaceType.OCEANIC.equals(tile.getSurfaceType()))
                 .forEach(
                 tile -> {
-                    if(tile.getNeighboursWithinRange(Collections.singletonList(tile),COASTAL_ZONE).stream().anyMatch(streamTile -> SurfaceType.CONTINENTAL.equals(streamTile.getSurfaceType()))){
+                    if(tile.getNeighboursWithinRange(Collections.singletonList(tile),COASTAL_ZONE).stream().anyMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
                         tile.setSurfaceType(SurfaceType.COASTAL);
-                    } else if(tile.getNeighboursWithinRange(Collections.singletonList(tile),OCEANIC_ZONE).stream().noneMatch(streamTile -> SurfaceType.CONTINENTAL.equals(streamTile.getSurfaceType()))){
+                    } else if(tile.getNeighboursWithinRange(Collections.singletonList(tile),OCEANIC_ZONE).stream().noneMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
                         tile.setSurfaceType(SurfaceType.DEEP_OCEAN);
                     }
                 }
@@ -61,12 +67,12 @@ class WorldFactory {
                 continent -> mockContinents.add(new MockContinent(continent))
                 );
 
-        while(dto.getOpenTiles().size() >= 1){
-            System.out.println("In loop: " + dto.getOpenTiles().size() + " tiles left");
+        while(dto.getOpenCoordinates().size() >= 1){
+            System.out.println("In loop: " + dto.getOpenCoordinates().size() + " coordinates left");
             mockContinents.stream()
-                    .filter(mockContinent -> !CollectionUtils.isEmpty(mockContinent.getPossibleTiles()))
+                    .filter(mockContinent -> !CollectionUtils.isEmpty(mockContinent.getPossibleCoordinates()))
                     .forEach(
-                        mockContinent -> mockContinent.addRandomTile(dto)
+                        mockContinent -> mockContinent.addRandomCoordinate(dto)
             );
         }
 
@@ -80,7 +86,7 @@ class WorldFactory {
             mockContinent -> {
                        Continent continent = mockContinent.generateContinent();
                        world.getTiles().addAll(continent.getTiles());
-                       //mockContinent.getContinent().getTiles().addAll(mockContinent.getTiles());
+                       //mockContinent.getContinent().getCoordinates().addAll(mockContinent.getCoordinates());
                    }
         );
     }

@@ -20,7 +20,7 @@ public class ContinentalDriftAdjuster {
         this.coordinateHelper = coordinateHelper;
     }
 
-    public void calculateContinentalDrift(ContinentalDriftTaskDto taskDto){
+    public void process(ContinentalDriftTaskDto taskDto){
         createButtomLayer(taskDto);
         taskDto.getWorld().getContinents().forEach(continent -> predictContinentalMovement(continent, taskDto.getNewTileLayout()));
     }

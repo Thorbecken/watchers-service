@@ -17,7 +17,7 @@ class AnimalTest {
     @SuppressWarnings("all")
     void setRabbit(){
         rabbitWorld = new World(3, 3);
-        rabbitContinent = new Continent(rabbitWorld, SurfaceType.CONTINENTAL);
+        rabbitContinent = new Continent(rabbitWorld, SurfaceType.PLAIN);
 
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {
