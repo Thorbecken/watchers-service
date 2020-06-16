@@ -4,7 +4,7 @@ import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inMemory.WorldRepositoryInMemory;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
 public class WorldService {
 
     @Autowired
-    private WorldRepositoryPersistent worldRepositoryPersistent;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
 
     @Autowired
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepositoryPersistent worldRepositoryPersistent;
 
     @Autowired
     private MapManager mapManager;

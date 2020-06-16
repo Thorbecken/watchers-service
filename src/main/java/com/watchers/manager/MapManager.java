@@ -7,14 +7,16 @@ import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inMemory.WorldRepositoryInMemory;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@EnableTransactionManagement
 public class MapManager {
 
     @Autowired
@@ -39,6 +41,7 @@ public class MapManager {
         return world;
     }
 
+    @Transactional("inmemoryDatabaseTransactionManager")
     private World createWorld(long worldId){
         World newWorld = new WorldFactory().generateWorld(58L, 28L, 13);
         populateWorld(newWorld);
