@@ -185,4 +185,15 @@ public class Tile {
             return tiles;
         }
     }
+
+    @Override
+    public String toString() {
+        return "Tile{" +
+                "xCoord=" + xCoord +
+                ", yCoord=" + yCoord +
+                ", zCoord=" + zCoord +
+                ", biome=" + biome +
+                ", actors=" + actors +
+                '}';
+    }
 }
