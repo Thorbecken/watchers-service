@@ -3,6 +3,8 @@ package com.watchers.service;
 import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
+import com.watchers.model.environment.Biome;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
@@ -49,16 +51,13 @@ public class WorldService {
     }
 
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    public World startWorld(Long id){
-        activeWorldIds.add(id);
-        return mapManager.getInitiatedWorld(id);
     public void startWorld(Long id){
-        Long activeWorldID = activeWorlds.stream()
+        Long activeWorldID = activeWorldIds.stream()
             .filter(world -> world.equals(id))
             .findFirst()
-            .orElse(mapManager.getWorld(id).getId());
-        if(!activeWorlds.contains(activeWorldID)){
-            activeWorlds.add(activeWorldID);
+            .orElse(mapManager.getWorld(id, false).getId());
+        if(!activeWorldIds.contains(activeWorldID)){
+            activeWorldIds.add(activeWorldID);
         }
     }
 
