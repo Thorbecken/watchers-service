@@ -3,14 +3,14 @@ package com.watchers.service;
 import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
-import com.watchers.model.environment.Biome;
-import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.WorldRepository;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.postgres.WorldRepositoryPersistent;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,26 +23,35 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 @Service
+@EnableTransactionManagement
 public class WorldService {
 
     @Autowired
-    private WorldRepository worldRepository;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
+
+    @Autowired
+    private WorldRepositoryPersistent worldRepositoryPersistent;
 
     @Autowired
     private MapManager mapManager;
 
     @Transient
-    private List<Long> activeWorlds;
+    private List<Long> activeWorldIds;
 
     public WorldService(){
-        this.activeWorlds = new ArrayList<>();
+        this.activeWorldIds = new ArrayList<>();
     }
 
     @PostConstruct
     private void init(){
-        activeWorlds.add(1L);
+        activeWorldIds.add(1L);
+        mapManager.getWorld(1L, false);
     }
 
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+    public World startWorld(Long id){
+        activeWorldIds.add(id);
+        return mapManager.getInitiatedWorld(id);
     public void startWorld(Long id){
         Long activeWorldID = activeWorlds.stream()
             .filter(world -> world.equals(id))
@@ -53,19 +62,10 @@ public class WorldService {
         }
     }
 
-/*
-    turened off till double datasources are available
-
+    @Transactional("persistentDatabaseTransactionManager")
     public void saveAndShutdownAll(){
-        activeWorlds.forEach(worldRepository::save);
-        activeWorlds.clear();
-    }
-
-    public void shutdownWorld(Long id){
-        activeWorlds.stream()
-                .filter(world -> world.equals(id))
-                .findFirst()
-                .ifPresent(activeWorlds::remove);
+        activeWorldIds.stream().map(mapManager::getUninitiatedWorld).forEach(worldRepositoryPersistent::save);
+        activeWorldIds.clear();
     }
 
     public void saveAndShutdown(Long id){
@@ -73,25 +73,30 @@ public class WorldService {
         shutdownWorld(id);
     }
 
+    public void shutdownWorld(Long id){
+        getActiveWorldIds().stream()
+                .filter(worldId -> worldId.equals(id))
+                .findFirst()
+                .ifPresent(activeWorldIds::remove);
+    }
+
+    @Transactional("persistentDatabaseTransactionManager")
     public void saveWorlds(){
-        turned off till doubles datasources are available
-        getActiveWorlds().stream().map(World::getId).forEach(
-        this::saveWorld
+        getActiveWorldIds().forEach(
+                this::saveWorld
         );
     }
 
+    @Transactional("persistentDatabaseTransactionManager")
     public void saveWorld(Long id){
-        activeWorlds.stream()
-                .filter(world -> world.equals(id))
-                .findFirst()
-                .ifPresent(worldRepository::save);
+        worldRepositoryPersistent.save(mapManager.getWorld(id, false));
     }
-*/
 
     public void processTurns(){
-        activeWorlds.forEach(worldId -> processTurn(mapManager.getWorld(worldId)));
+        activeWorldIds.stream().map(mapManager::getInitiatedWorld).forEach(this::processTurn);
     }
 
+    @Transactional("inmemoryDatabaseTransactionManager")
     private void processTurn(World world){
         log.info("There is currently " + world.getTiles().stream()
                         .map(Tile::getBiome)
@@ -133,16 +138,14 @@ public class WorldService {
         world.getNewActors().clear();
 
         log.info(world.getActorList().size() + " Actors remained this turn");
+
+        worldRepositoryInMemory.save(world);
     }
 
 
     @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void executeTurn() {
         processTurns();
-
-/*        World world = mapManager.getWorld(1L);
-        processTurn(world);
-        worldRepository.save(world);*/
         log.info("Processed a turn");
     }
 

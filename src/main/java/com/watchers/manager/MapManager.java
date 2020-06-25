@@ -6,32 +6,46 @@ import com.watchers.model.actor.animals.AnimalFactory;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.WorldRepository;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@EnableTransactionManagement
 public class MapManager {
 
     @Autowired
-    private WorldRepository worldRepository;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
 
-    public World getWorld(Long worldId) {
-       Optional<World> world = worldRepository.findById(worldId);
-       world.ifPresent(World::fillTransactionals);
-
-        return world.orElseGet(() -> createWorld(worldId));
+    public World getInitiatedWorld(Long worldId){
+        return getWorld(worldId, true);
     }
-    
+
+    public World getUninitiatedWorld(Long worldId){
+        return getWorld(worldId, false);
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
+    public World getWorld(Long worldId, boolean initiated) {
+       World world = worldRepositoryInMemory.findById(worldId).orElseGet(() -> createWorld(worldId));
+
+       if(initiated) {
+           world.fillTransactionals();
+       }
+
+        return world;
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
     private World createWorld(long worldId){
         World newWorld = new WorldFactory().generateWorld(58L, 28L, 13);
 
         log.info(String.format("World number %s created", worldId));
-        worldRepository.save(newWorld);
+        worldRepositoryInMemory.save(newWorld);
         return newWorld;
     }
 

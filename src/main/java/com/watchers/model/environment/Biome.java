@@ -44,4 +44,13 @@ public class Biome implements ParallelTask {
             currentFood = currentFood + fertility;
         }
     }
+
+    @Override
+    public String toString() {
+        return "Biome{" +
+                "currentFood=" + currentFood +
+                ", maxFood=" + maxFood +
+                ", fertility=" + fertility +
+                '}';
+    }
 }
