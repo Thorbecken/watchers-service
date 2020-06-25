@@ -55,6 +55,7 @@ public class PersistentDatabaseConfiguration {
         properties.put("hibernate.type", env.getProperty("spring.jpa.properties.hibernate.type"));
         properties.put("hibernate.temp.use_jdbc_metadata_defaults", env.getProperty("spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults"));
         properties.put("hibernate.naming.physical-strategy", env.getProperty("spring.jpa.hibernate.naming.physical-strategy"));
+        properties.put("hibernate.event.merge.entity_copy_observer", env.getProperty("spring.jpa.hibernate.event.merge.entity_copy_observer"));
         em.setJpaPropertyMap(properties);
 
         return em;
