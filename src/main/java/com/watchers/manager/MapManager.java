@@ -1,6 +1,5 @@
 package com.watchers.manager;
 
-import com.watchers.helper.RandomHelper;
 import com.watchers.model.actor.AnimalType;
 import com.watchers.model.actor.animals.AnimalFactory;
 import com.watchers.model.environment.SurfaceType;
@@ -53,6 +52,7 @@ public class MapManager {
         Tile seedingTile = world.getTile(xCoord, yCoord);
         AnimalType animalType = selectAnimalSeed(seedingTile.getContinent().getType());
         seedingTile.getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile));
+        worldRepositoryInMemory.save(world);
     }
 
     private AnimalType selectAnimalSeed(SurfaceType type) {

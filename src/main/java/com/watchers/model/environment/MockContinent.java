@@ -7,13 +7,11 @@ import java.util.stream.Collectors;
 
 @Data
 public class MockContinent {
-    private List<Tile> tiles;
-    private List<Tile> possibleTiles;
+    private List<Tile> tiles = new ArrayList<>();
+    private List<Tile> possibleTiles = new ArrayList<>();
     private Continent continent;
 
     public MockContinent(Continent continent){
-        this.tiles = new ArrayList<>();
-        this.possibleTiles = new ArrayList<>();
         this.continent = continent;
 
         this.tiles.addAll(continent.getTiles());

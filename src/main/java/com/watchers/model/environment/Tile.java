@@ -46,7 +46,7 @@ public class Tile {
 
     @JsonProperty("actors")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL)
-    private Set<Actor> actors;
+    private Set<Actor> actors = new HashSet<>();
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
@@ -62,7 +62,6 @@ public class Tile {
         this.yCoord = yCoord;
         this.continent = continent;
         this.surfaceType = continent.getType();
-        this.actors = new HashSet<>();
         this.biome = new Biome(2, 10, 0.25f, this);
         this.world = world;
     }

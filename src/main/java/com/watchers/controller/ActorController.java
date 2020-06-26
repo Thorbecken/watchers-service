@@ -32,7 +32,6 @@ public class ActorController{
                 Optional<World> world = worldRepository.findById(worldId);
                 if (world.isPresent() && xCoord != null && yCoord != null) {
                     mapManager.seedLife(world.get(), xCoord, yCoord);
-                    worldRepository.save(world.get());
                     log.info("Seeded life on world " + worldId + " at coordinates: " + xCoord + "x, " + yCoord + "y");
                     return ResponseEntity.ok().build();
                 } else {

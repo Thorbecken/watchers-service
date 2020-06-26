@@ -15,6 +15,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.Properties;
 
 @Slf4j
 @Configuration
@@ -55,6 +56,8 @@ public class InMemoryDatabaseConfiguration {
         properties.put("hibernate.use_sql_comments", env.getProperty("spring.jpa.properties.hibernate.use_sql_comments"));
         properties.put("hibernate.type", env.getProperty("spring.jpa.properties.hibernate.type"));
         properties.put("hibernate.naming.physical-strategy", env.getProperty("spring.jpa.hibernate.naming.physical-strategy"));
+        properties.put("spring.h2.console.path", env.getProperty("spring.h2.console.path"));
+        properties.put("spring.h2.console.enabled", env.getProperty("spring.h2.console.enabled"));
         em.setJpaPropertyMap(properties);
 
         return em;
@@ -68,6 +71,10 @@ public class InMemoryDatabaseConfiguration {
         dataSource.setUrl(env.getProperty("spring.datasource.url"));
         dataSource.setUsername(env.getProperty("spring.datasource.username"));
         dataSource.setPassword(env.getProperty("spring.datasource.password"));
+        Properties properties = new Properties();
+        properties.setProperty("spring.h2.console.path", env.getProperty("spring.h2.console.path"));
+        properties.setProperty("spring.h2.console.enabled", env.getProperty("spring.h2.console.enabled"));
+        dataSource.setConnectionProperties(properties);
 
         return dataSource;
     }
@@ -77,6 +84,10 @@ public class InMemoryDatabaseConfiguration {
     public PlatformTransactionManager inmemoryDatabaseTransactionManager() {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(inmemoryDatabaseEntityManager().getObject());
+        Properties properties = new Properties();
+        properties.setProperty("spring.h2.console.path", env.getProperty("spring.h2.console.path"));
+        properties.setProperty("spring.h2.console.enabled", env.getProperty("spring.h2.console.enabled"));
+        transactionManager.setJpaProperties(properties);
         return transactionManager;
     }
 }
