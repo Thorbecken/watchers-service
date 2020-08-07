@@ -11,13 +11,11 @@ import java.util.stream.Collectors;
 @Data
 public class MockContinent {
     private World world;
-    private List<Coordinate> coordinates;
-    private List<Coordinate> possibleCoordinates;
+    private List<Coordinate> coordinates = new ArrayList<>();;
+    private List<Coordinate> possibleCoordinates = new ArrayList<>();;
     private Continent continent;
 
     public MockContinent(Continent continent){
-        this.coordinates = new ArrayList<>();
-        this.possibleCoordinates = new ArrayList<>();
         this.continent = continent;
         this.world = continent.getWorld();
 

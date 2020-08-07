@@ -8,8 +8,24 @@ import com.watchers.model.common.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
-import java.util.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Data
 @Entity
@@ -31,23 +47,23 @@ public class World {
 
     @JsonProperty("tiles")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
-    private Set<Tile> tiles;
+    private Set<Tile> tiles = new HashSet<>();
 
     @Transient
     @JsonIgnore
-    private Map<Long, Map<Long, Tile>> tileMap;
+    private Map<Long, Map<Long, Tile>> tileMap = new HashMap<>();
 
     @Transient
     @JsonIgnore
-    private List<Actor> actorList;
+    private List<Actor> actorList = new ArrayList<>();
 
     @Transient
     @JsonIgnore
-    private List<Actor> newActors;
+    private List<Actor> newActors = new ArrayList<>();
 
     @JsonProperty("continents")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
-    private Set<Continent> continents;
+    private Set<Continent> continents = new HashSet<>();
 
     @JsonIgnore
     private long lastContinentInFlux;
@@ -58,11 +74,6 @@ public class World {
     public World(long xSize, long ySize){
         this.xSize = xSize;
         this.ySize = ySize;
-        this.tiles = new HashSet<>();
-        this.continents = new HashSet<>();
-
-        this.newActors = new ArrayList<>();
-        this.actorList = new ArrayList<>();
     }
 
     private World(){}

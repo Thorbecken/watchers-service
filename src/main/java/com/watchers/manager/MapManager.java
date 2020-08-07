@@ -6,41 +6,55 @@ import com.watchers.model.actor.animals.AnimalFactory;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.WorldRepository;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@EnableTransactionManagement
 public class MapManager {
 
-    private WorldRepository worldRepository;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
     private WorldFactory worldFactory;
     private ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster;
 
-    public MapManager(WorldRepository worldRepository,
+    public MapManager(WorldRepositoryInMemory worldRepositoryInMemory,
                       WorldFactory worldFactory,
                       ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster){
-        this.worldRepository = worldRepository;
+        this.worldRepositoryInMemory = worldRepositoryInMemory;
         this.worldFactory = worldFactory;
         this.continentalDriftDirectionAdjuster = continentalDriftDirectionAdjuster;
     }
 
-    public World getWorld(Long worldId) {
-       Optional<World> world = worldRepository.findById(worldId);
-       world.ifPresent(World::fillTransactionals);
-
-        return world.orElseGet(() -> createWorld(worldId));
+    public World getInitiatedWorld(Long worldId){
+        return getWorld(worldId, true);
     }
-    
+
+    public World getUninitiatedWorld(Long worldId){
+        return getWorld(worldId, false);
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
+    public World getWorld(Long worldId, boolean initiated) {
+       World world = worldRepositoryInMemory.findById(worldId).orElseGet(() -> createWorld(worldId));
+
+       if(initiated) {
+           world.fillTransactionals();
+       }
+
+        return world;
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
     private World createWorld(long worldId){
         World newWorld = worldFactory.generateWorld(58L, 28L, 13);
         log.info(String.format("World number %s created", worldId));
-        worldRepository.save(newWorld);
+        worldRepositoryInMemory.save(newWorld);
         continentalDriftDirectionAdjuster.assignFirstOrNewDriftDirections(newWorld);
-        worldRepository.save(newWorld);
+        worldRepositoryInMemory.save(newWorld);
         return newWorld;
     }
 
@@ -48,6 +62,7 @@ public class MapManager {
         Tile seedingTile = world.getTile(xCoord, yCoord);
         AnimalType animalType = selectAnimalSeed(seedingTile.getContinent().getType());
         seedingTile.getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile));
+        worldRepositoryInMemory.save(world);
     }
 
     private AnimalType selectAnimalSeed(SurfaceType type) {

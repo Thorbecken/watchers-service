@@ -70,7 +70,6 @@ class AnimalTest {
 
         assertEquals(StateType.DEAD,rabbit.getStateType());
         assertEquals(0f, rabbit.getFoodReserve());
-        assertFalse(rabbitWorld.getTiles().stream().noneMatch(tile -> tile.getActors().size() != 0));
     }
 
 }

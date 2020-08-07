@@ -14,9 +14,8 @@ public class SaveJobService {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public void executeSave() {
-        // turned of till there van be two datasources in the application
-        //worldService.saveWorlds();
-        //logger.info("Saved the worlds");
+        worldService.saveWorlds();
+        logger.info("Saved the worlds");
     }
 
 }

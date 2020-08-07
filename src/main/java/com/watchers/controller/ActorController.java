@@ -2,7 +2,7 @@ package com.watchers.controller;
 
 import com.watchers.manager.MapManager;
 import com.watchers.model.environment.World;
-import com.watchers.repository.WorldRepository;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class ActorController{
         private MapManager mapManager;
 
         @Autowired
-        private WorldRepository worldRepository;
+        private WorldRepositoryInMemory worldRepository;
 
         @RequestMapping(value = "/actors/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
         public ResponseEntity seedLife(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){

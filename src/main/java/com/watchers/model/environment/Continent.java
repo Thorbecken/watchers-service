@@ -32,7 +32,7 @@ public class Continent {
     @JsonIgnore
     @JsonProperty("coordinates")
     @OneToMany(mappedBy = "continent", cascade=CascadeType.ALL)
-    private Set<Tile> tiles;
+    private Set<Tile> tiles = new HashSet<>();
 
     @JsonProperty("type")
     private SurfaceType type;
@@ -42,7 +42,6 @@ public class Continent {
     private Direction direction;
 
     public Continent(World world, SurfaceType surfaceType){
-        this.tiles = new HashSet<>();
         this.world = world;
         this.type = surfaceType;
     }
