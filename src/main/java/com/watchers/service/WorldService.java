@@ -32,10 +32,10 @@ public class WorldService {
     private WorldRepositoryPersistent worldRepositoryPersistent;
     private MapManager mapManager;
     private ContinentalDriftManager continentalDriftManager;
-    private List<Long> activeWorlds = new ArrayList<>();
+    private List<Long> activeWorldIds = new ArrayList<>();
 
     public WorldService(MapManager mapManager,
-                        WorldRepositoryInMemory worldRepositoryInMemory
+                        WorldRepositoryInMemory worldRepositoryInMemory,
                         WorldRepositoryPersistent worldRepositoryPersistent,
                         ContinentalDriftManager continentalDriftManager){
         this.worldRepositoryInMemory = worldRepositoryInMemory;
@@ -73,7 +73,7 @@ public class WorldService {
     }
 
     public void shutdownWorld(Long id){
-        getActiveWorldIds().stream()
+        activeWorldIds.stream()
                 .filter(worldId -> worldId.equals(id))
                 .findFirst()
                 .ifPresent(activeWorldIds::remove);
@@ -81,7 +81,7 @@ public class WorldService {
 
     @Transactional("persistentDatabaseTransactionManager")
     public void saveWorlds(){
-        getActiveWorldIds().forEach(
+        activeWorldIds.forEach(
                 this::saveWorld
         );
     }
