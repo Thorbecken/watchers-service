@@ -8,9 +8,7 @@ import com.watchers.model.environment.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,6 +26,80 @@ public class ContinentalDriftNewTileAssigner {
 
         int minimumContinents = taskDto.getMinContinents();
 
+        List<List<Coordinate>> listOfConnectedCoordinates = generateEmptyTileClusters(taskDto);
+
+        int newContinentsCreated = createNewContinents(taskDto, currentContinents, nextContinentalId, minimumContinents, listOfConnectedCoordinates);
+        addEmptytilesToExistingContinents(newContinentsCreated, listOfConnectedCoordinates, taskDto);
+
+    }
+
+    private void addEmptytilesToExistingContinents(int listOfCoordinatesProcessed, List<List<Coordinate>> listOfConnectedCoordinates, ContinentalDriftTaskDto taskDto) {
+        if(listOfCoordinatesProcessed < listOfConnectedCoordinates.size()){
+            for (int i = listOfCoordinatesProcessed; i < listOfConnectedCoordinates.size(); i++) {
+                List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
+                List<Coordinate> adjecantCoordinates = CoordinateHelper.getAllOutersideCoordinates(connectedCoordinates);
+
+                List<Coordinate> existingTiles = taskDto.getChanges().values().stream()
+                        .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
+                        .map(ContinentalChangesDto::getKey)
+                        .filter(adjecantCoordinates::contains)
+                        .collect(Collectors.toList());
+
+                Continent chosenContinent = taskDto.getChanges().values().stream()
+                        .filter(continentalChangesDto -> existingTiles.contains(continentalChangesDto.getKey()))
+                        .map(ContinentalChangesDto::getNewTile)
+                        .filter(Objects::nonNull)
+                        .filter(tile -> tile.getContinent().getId()!=null)
+                        .map(Tile::getContinent)
+                        .max(Comparator.comparing(Continent::getId))
+                        .orElse(null);
+
+                List<Tile> neighbouringContinentalTilesList = existingTiles.stream()
+                        .map(coordinate -> taskDto.getWorld().getTile(coordinate))
+                        .collect(Collectors.toList());
+
+                List<Tile> filteredNeighbouringContinentalTilesList = neighbouringContinentalTilesList.stream()
+                        .filter(Objects::nonNull)
+                        .filter(tile -> tile.getContinent().getId()!=null)
+                        .collect(Collectors.toList());
+
+                Continent assignedContinent = filteredNeighbouringContinentalTilesList.stream()
+                        .map(Tile::getContinent)
+                        .max(Comparator.comparing(Continent::getId))
+                        .orElse(null);
+
+                Assert.notNull(chosenContinent, "no adjacent continent was found!");
+                MockContinent mockContinent = new MockContinent(connectedCoordinates,taskDto.getWorld());
+                mockContinent.setContinent(chosenContinent);
+                connectedCoordinates.forEach(coordinate ->
+                        taskDto.getChanges().get(coordinate).setNewMockContinent(mockContinent)
+                );
+
+                listOfCoordinatesProcessed++;
+            }
+        }
+    }
+
+    private int createNewContinents(ContinentalDriftTaskDto taskDto, int currentContinents, long nextContinentalId, int minimumContinents, List<List<Coordinate>> listOfConnectedCoordinates) {
+        int listOfCoordinatesProcessed = 0;
+        if(currentContinents < minimumContinents) {
+            for (int i = listOfCoordinatesProcessed; newContinentLoop(i, currentContinents, minimumContinents) && checkForList(i, listOfConnectedCoordinates); i++) {
+
+                List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
+
+                Continent continent = new Continent(taskDto.getWorld(), SurfaceType.PLAIN);
+                MockContinent mockContinent = new MockContinent(connectedCoordinates, taskDto.getWorld());
+                mockContinent.setContinent(continent);
+                mockContinent.getContinent().setId(nextContinentalId++);
+                connectedCoordinates.forEach(coordinate -> taskDto.getChanges().get(coordinate).setNewMockContinent(mockContinent));
+
+                listOfCoordinatesProcessed++;
+            }
+        }
+        return listOfCoordinatesProcessed;
+    }
+
+    private List<List<Coordinate>> generateEmptyTileClusters(ContinentalDriftTaskDto taskDto) {
         List<List<Coordinate>> listOfConnectedCoordinates = new ArrayList<>();
 
         List<Coordinate> emptyCoordinates = taskDto.getChanges().values().stream()
@@ -52,47 +124,7 @@ public class ContinentalDriftNewTileAssigner {
         }
 
         listOfConnectedCoordinates.sort(Comparator.comparing(List::size));
-
-        int listOfCoordinatesProcessed = 0;
-        if(currentContinents < minimumContinents) {
-            for (int i = listOfCoordinatesProcessed; newContinentLoop(i, currentContinents, minimumContinents) && checkForList(i, listOfConnectedCoordinates); i++) {
-
-                List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
-
-                Continent continent = new Continent(taskDto.getWorld(), SurfaceType.PLAIN);
-                MockContinent mockContinent = new MockContinent(connectedCoordinates, taskDto.getWorld());
-                mockContinent.setContinent(continent);
-                mockContinent.getContinent().setId(nextContinentalId++);
-                connectedCoordinates.forEach(coordinate -> taskDto.getChanges().get(coordinate).setNewMockContinent(mockContinent));
-
-                listOfCoordinatesProcessed++;
-            }
-        }
-        if(listOfCoordinatesProcessed < listOfConnectedCoordinates.size()){
-            for (int i = listOfCoordinatesProcessed; i < listOfConnectedCoordinates.size(); i++) {
-                List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
-                List<Coordinate> adjecantCoordinates = CoordinateHelper.getAllOutersideCoordinates(connectedCoordinates);
-
-                List<Tile> existingTiles = taskDto.getChanges().values().stream()
-                        .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
-                        .map(ContinentalChangesDto::getKey)
-                        .filter(adjecantCoordinates::contains)
-                        .map(coordinate -> taskDto.getWorld().getTile(coordinate))
-                        .collect(Collectors.toList());
-
-                Continent assignedContinent = existingTiles.stream()
-                        .map(Tile::getContinent)
-                        .max(Comparator.comparing(Continent::getId))
-                        .orElse(null);
-
-                Assert.notNull(assignedContinent, "no adjacent continent was found!");
-                MockContinent mockContinent = new MockContinent(connectedCoordinates,taskDto.getWorld());
-                mockContinent.setContinent(assignedContinent);
-                connectedCoordinates.forEach(coordinate -> taskDto.getChanges().get(coordinate).setNewMockContinent(mockContinent));
-
-                listOfCoordinatesProcessed++;
-            }
-        }
+        return listOfConnectedCoordinates;
     }
 
     private boolean checkForList(int i, List<List<Coordinate>> listOfConnectedCoordinates) {

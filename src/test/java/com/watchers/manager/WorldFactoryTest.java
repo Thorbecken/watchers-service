@@ -1,5 +1,6 @@
 package com.watchers.manager;
 
+import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.model.environment.World;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,7 +13,8 @@ class WorldFactoryTest {
     @ParameterizedTest
     @CsvSource({"12,13,2","52,28,3"})
     void generateWorldTest(long xSize, long ySize, long conitinents) {
-        World world = new WorldFactory().generateWorld(xSize, ySize, conitinents);
+        TileDefined tileDefined = new TileDefined(10,20,30,40,50);
+        World world = new WorldFactory(2,5, tileDefined).generateWorld(xSize, ySize, conitinents);
 
         assertNotNull(world);
         assertEquals(Long.valueOf(xSize), world.getXSize());

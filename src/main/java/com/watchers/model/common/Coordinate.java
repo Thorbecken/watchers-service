@@ -224,4 +224,12 @@ public class Coordinate {
         String string = xCoord + "," + yCoord;
         return string.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "Coordinate{" +
+                "xCoord=" + xCoord +
+                ", yCoord=" + yCoord +
+                '}';
+    }
 }

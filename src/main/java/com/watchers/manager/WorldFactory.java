@@ -3,7 +3,6 @@ package com.watchers.manager;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.model.environment.*;
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -13,14 +12,15 @@ import java.util.*;
 @Component
 class WorldFactory {
 
-    @Value("${watch.coastalZone}")
-    private int COASTAL_ZONE = 2;
-
-    @Value("${watch.oceanicZone}")
-    private int OCEANIC_ZONE = 5;
-
-    @Autowired
+    private int coastalZone;
+    private int oceanicZone;
     private TileDefined tileDefined;
+
+    public WorldFactory(@Value("${watch.coastalZone}") int coastalZone, @Value("${watch.oceanicZone}") int oceanicZone, TileDefined tileDefined){
+        this.coastalZone = coastalZone;
+        this.oceanicZone = oceanicZone;
+        this.tileDefined = tileDefined;
+    }
 
     World generateWorld(long xSize, long ySize, long continents){
         World world = new World(xSize, ySize);
@@ -50,9 +50,9 @@ class WorldFactory {
                 .filter(tile -> SurfaceType.OCEANIC.equals(tile.getSurfaceType()))
                 .forEach(
                 tile -> {
-                    if(tile.getNeighboursWithinRange(Collections.singletonList(tile),COASTAL_ZONE).stream().anyMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
+                    if(tile.getNeighboursWithinRange(Collections.singletonList(tile), coastalZone).stream().anyMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
                         tile.setSurfaceType(SurfaceType.COASTAL);
-                    } else if(tile.getNeighboursWithinRange(Collections.singletonList(tile),OCEANIC_ZONE).stream().noneMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
+                    } else if(tile.getNeighboursWithinRange(Collections.singletonList(tile), oceanicZone).stream().noneMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
                         tile.setSurfaceType(SurfaceType.DEEP_OCEAN);
                     }
                 }

@@ -137,4 +137,18 @@ public class World {
             tile -> actorList.addAll(tile.getActors())
         );
     }
+
+    @Override
+    public String toString() {
+        return "World{" +
+                "id=" + id +
+                ", xSize=" + xSize +
+                ", ySize=" + ySize +
+                ", tiles=" + tiles.size() +
+                ", actorList=" + actorList.size() +
+                ", continents=" + continents.size() +
+                ", lastContinentInFlux=" + lastContinentInFlux +
+                ", heightDeficit=" + heightDeficit +
+                '}';
+    }
 }

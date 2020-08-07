@@ -78,6 +78,7 @@ public class Tile {
     public Tile(Coordinate coordinate, World world, Continent continent){
         this.coordinate = new Coordinate(coordinate.getXCoord(), coordinate.getYCoord(), world);
         this.continent = continent;
+        continent.getTiles().add(this);
         this.surfaceType = continent.getType();
         this.actors = new HashSet<>();
         this.biome = new Biome(1, 10, 0.5f, this);
@@ -157,5 +158,15 @@ public class Tile {
     @Override
     public int hashCode() {
         return Objects.hash(coordinate);
+    }
+
+    @Override
+    public String toString() {
+        return "Tile{" +
+                "coordinate=" + coordinate.toString() +
+                ", height=" + height +
+                ", actors=" + actors.size() +
+                ", surfaceType=" + surfaceType +
+                '}';
     }
 }

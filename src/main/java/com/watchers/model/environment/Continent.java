@@ -64,4 +64,15 @@ public class Continent {
 
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Continent{" +
+                "id=" + id +
+                ", world=" + world.getId() +
+                ", tiles=" + tiles.size() +
+                ", type=" + type +
+                ", direction=" + direction.toString() +
+                '}';
+    }
 }

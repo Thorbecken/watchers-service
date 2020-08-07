@@ -39,6 +39,8 @@ public class ContinentalDriftTileAdjuster {
         );
 
         taskDto.setChanges(changes);
+
+        taskDto.getWorld().fillTransactionals();
     }
 
     private void processAbsentTile(Coordinate coordinate, Map<Coordinate, ContinentalChangesDto> changes) {
