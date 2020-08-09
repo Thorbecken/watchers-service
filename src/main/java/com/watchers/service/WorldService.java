@@ -97,13 +97,13 @@ public class WorldService {
 
     @Transactional("inmemoryDatabaseTransactionManager")
     private void processTurn(World world){
-        log.info("There is currently " + world.getTiles().stream()
+        log.trace("There is currently " + world.getTiles().stream()
                         .map(Tile::getBiome)
                         .map(Biome::getCurrentFood)
                         .reduce(0f, (tile1, tile2) -> tile1 + tile2)
         + "food in the world"
         );
-        log.info("The total fertility in the world amounts to " + world.getTiles().parallelStream()
+        log.trace("The total fertility in the world amounts to " + world.getTiles().parallelStream()
                 .map(Tile::getBiome)
                 .map(Biome::getFertility)
                 .reduce(0f, (tile1, tile2) -> tile1 + tile2, (tile1, tile2) -> tile1 + tile2)
@@ -112,8 +112,8 @@ public class WorldService {
                 worldTile -> worldTile.getBiome().processParallelTask()
         );
 
-        log.info(world.getActorList().size() + " Actors at the start of this turn");
-        log.info(world.getActorList().stream()
+        log.trace(world.getActorList().size() + " Actors at the start of this turn");
+        log.trace(world.getActorList().stream()
                 .filter(actor -> actor.getStateType() == StateType.DEAD)
                 .count() + " Actors where dead at the start of this turn");
 
@@ -122,21 +122,21 @@ public class WorldService {
         List<Actor> currentDeads = world.getActorList().stream()
                 .filter(actor -> actor.getStateType() == StateType.DEAD)
                 .collect(Collectors.toList());
-        log.info(currentDeads.size() + " Actors died this turn");
+        log.trace(currentDeads.size() + " Actors died this turn");
         currentDeads.forEach( deadActor -> {
             deadActor.getTile().getActors().remove(deadActor);
             deadActor.setTile(null);
         });
 
-        log.info(world.getActorList().size() + " Actors remained before cleansing the dead this turn");
+        log.trace(world.getActorList().size() + " Actors remained before cleansing the dead this turn");
 
         world.getActorList().removeAll(currentDeads);
 
-        log.info(world.getNewActors().size() + " Actors were born into this world");
+        log.trace(world.getNewActors().size() + " Actors were born into this world");
         world.getActorList().addAll(world.getNewActors());
         world.getNewActors().clear();
 
-        log.info(world.getActorList().size() + " Actors remained this turn");
+        log.trace(world.getActorList().size() + " Actors remained this turn");
 
         continentalDriftManager.process(world);
 
