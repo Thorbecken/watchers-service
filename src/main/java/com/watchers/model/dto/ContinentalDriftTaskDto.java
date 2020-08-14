@@ -5,6 +5,7 @@ import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ public class ContinentalDriftTaskDto {
     private long heightLoss;
     private long heightDivider;
     private int minContinents;
+    private List<Tile> toBeRemovedTiles = new ArrayList<>();
     private Map<Coordinate, List<Tile>> newTileLayout;
     private Map<Coordinate, ContinentalChangesDto> changes;
 
@@ -24,4 +26,7 @@ public class ContinentalDriftTaskDto {
         this.newTileLayout = new HashMap<>();
     }
 
+    public List<Tile> getToBeRemovedTiles() {
+        return toBeRemovedTiles;
+    }
 }

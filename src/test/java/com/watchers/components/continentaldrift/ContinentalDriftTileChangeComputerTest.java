@@ -17,10 +17,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ContinentalDriftTileAdjusterTest {
+class ContinentalDriftTileChangeComputerTest {
 
     private World world;
-    private ContinentalDriftTileAdjuster continentalDriftTileAdjuster;
+    private ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer;
     private ContinentalDriftTaskDto taskDto;
 
 
@@ -28,11 +28,11 @@ class ContinentalDriftTileAdjusterTest {
     void setUp() {
         this.world = TestableWorld.createWorld();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftTileAdjuster = new ContinentalDriftTileAdjuster(coordinateHelper);
-        ContinentalDriftAdjuster continentalDriftAdjuster = new ContinentalDriftAdjuster(coordinateHelper);
+        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        continentalDriftAdjuster.process(taskDto);
+        continentalDriftPredicter.process(taskDto);
     }
 
     @Test
@@ -57,7 +57,7 @@ class ContinentalDriftTileAdjusterTest {
                 .orElse(0L);
         // testing
 
-        continentalDriftTileAdjuster.process(taskDto);
+        continentalDriftTileChangeComputer.process(taskDto);
 
         // assertions
         assertEquals(9, taskDto.getChanges().size());

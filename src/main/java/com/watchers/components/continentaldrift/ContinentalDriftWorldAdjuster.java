@@ -23,9 +23,8 @@ public class ContinentalDriftWorldAdjuster {
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = taskDto.getWorld();
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
-        long heightLoss = taskDto.getHeightLoss();
 
-        long newHeight = calculateNewHeight(world, heightLoss, changes);
+        long newHeight = calculateNewHeight(world, changes);
         world.setTiles(new HashSet<>());
 
         coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
@@ -41,8 +40,8 @@ public class ContinentalDriftWorldAdjuster {
         world.fillTransactionals();
     }
 
-    private long calculateNewHeight(World world, long heightLoss, Map<Coordinate, ContinentalChangesDto> changes) {
-        long totalHeight = world.getHeightDeficit() + heightLoss;
+    private long calculateNewHeight(World world, Map<Coordinate, ContinentalChangesDto> changes) {
+        long totalHeight = world.getHeightDeficit();
         long divider = coordinateHelper.getAllPossibleCoordinates(world).stream()
                 .map(changes::get)
                 .filter(ContinentalChangesDto::isEmpty)

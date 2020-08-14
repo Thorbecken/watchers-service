@@ -25,7 +25,7 @@ public class Direction {
     @SequenceGenerator(name="Direction_Gen", sequenceName="Direction_Seq", allocationSize = 1)
     @GeneratedValue(generator="Direction_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "direction_id")
-    private int id;
+    private Long id;
 
     @JsonIgnore
     @Column(name = "x_velocity")

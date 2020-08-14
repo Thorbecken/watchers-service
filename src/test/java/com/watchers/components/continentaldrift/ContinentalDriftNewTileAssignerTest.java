@@ -8,7 +8,6 @@ import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,7 +16,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,14 +30,14 @@ class ContinentalDriftNewTileAssignerTest {
     void setUp() {
         this.coordinateHelper = new CoordinateHelper();
         this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner();
-        ContinentalDriftAdjuster continentalDriftAdjuster = new ContinentalDriftAdjuster(coordinateHelper);
-        ContinentalDriftTileAdjuster continentalDriftTileAdjuster = new ContinentalDriftTileAdjuster(coordinateHelper);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
 
         World world = TestableWorld.createWorld();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        continentalDriftAdjuster.process(taskDto);
-        continentalDriftTileAdjuster.process(taskDto);
+        continentalDriftPredicter.process(taskDto);
+        continentalDriftTileChangeComputer.process(taskDto);
     }
 
     @Test
@@ -134,13 +132,11 @@ class ContinentalDriftNewTileAssignerTest {
         taskDto.setWorld(world);
         taskDto.setMinContinents(minimumContinents);
 
-        ContinentalDriftAdjuster continentalDriftAdjuster = new ContinentalDriftAdjuster(new CoordinateHelper());
-        continentalDriftAdjuster.process(taskDto);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(new CoordinateHelper());
+        continentalDriftPredicter.process(taskDto);
 
-        ContinentalDriftTileAdjuster continentalDriftTileAdjuster = new ContinentalDriftTileAdjuster(new CoordinateHelper());
-        continentalDriftTileAdjuster.process(taskDto);
-
-        //continentalDriftNewTileAssigner.process(taskDto);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(new CoordinateHelper());
+        continentalDriftTileChangeComputer.process(taskDto);
 
         assertEquals(3, taskDto.getChanges().values().stream().filter(ContinentalChangesDto::isEmpty).count());
         assertEquals(0, taskDto.getChanges().values().stream().filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null).count());

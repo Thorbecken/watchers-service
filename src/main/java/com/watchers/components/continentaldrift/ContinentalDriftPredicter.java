@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class ContinentalDriftAdjuster {
+public class ContinentalDriftPredicter {
 
     private CoordinateHelper coordinateHelper;
 
-    public ContinentalDriftAdjuster(CoordinateHelper coordinateHelper){
+    public ContinentalDriftPredicter(CoordinateHelper coordinateHelper){
         this.coordinateHelper = coordinateHelper;
     }
 

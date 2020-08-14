@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.common.Coordinate;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,7 +30,6 @@ import java.util.Set;
 @Entity
 @JsonSerialize
 @Table(name = "world")
-@EqualsAndHashCode(exclude= {"tiles", "continents", "tileMap", "actorList", "newActors"})
 public class World {
 
     @Id
@@ -46,7 +44,7 @@ public class World {
     private Long ySize;
 
     @JsonProperty("tiles")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<Tile> tiles = new HashSet<>();
 
     @Transient
@@ -62,7 +60,7 @@ public class World {
     private List<Actor> newActors = new ArrayList<>();
 
     @JsonProperty("continents")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<Continent> continents = new HashSet<>();
 
     @JsonIgnore
@@ -76,6 +74,7 @@ public class World {
         this.ySize = ySize;
     }
 
+    @SuppressWarnings("unused")
     private World(){}
 
     @JsonIgnore
@@ -161,5 +160,25 @@ public class World {
                 ", lastContinentInFlux=" + lastContinentInFlux +
                 ", heightDeficit=" + heightDeficit +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof World)) return false;
+
+        World world = (World) o;
+
+        return id != null && world.getId() != null?
+                (id == null || world.getId() == null || id.equals(world.getId())):
+                ySize.equals(world.ySize) && xSize.equals(world.xSize);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + xSize.hashCode();
+        result = 31 * result + ySize.hashCode();
+        return result;
     }
 }

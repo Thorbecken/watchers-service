@@ -13,7 +13,7 @@ class WorldFactoryTest {
     @ParameterizedTest
     @CsvSource({"12,13,2","52,28,3"})
     void generateWorldTest(long xSize, long ySize, long conitinents) {
-        TileDefined tileDefined = new TileDefined(10,20,30,40,50);
+        TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60);
         World world = new WorldFactory(2,5, tileDefined).generateWorld(xSize, ySize, conitinents);
 
         assertNotNull(world);

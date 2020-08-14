@@ -2,6 +2,7 @@ package com.watchers.helper;
 
 import com.watchers.model.environment.Tile;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -20,7 +21,8 @@ public class RandomHelper {
     }
 
     public static Tile getRandomHighestTile(List<Tile> tiles) {
-        long maxHeight = tiles.get(0).getHeight();
+        tiles.sort(Comparator.comparing(Tile::getHeight));
+        long maxHeight = tiles.get(tiles.size()-1).getHeight();
         List<Tile> maxTiles =  tiles.stream()
                 .filter(tile -> tile.getHeight() == maxHeight)
                 .collect(Collectors.toList());

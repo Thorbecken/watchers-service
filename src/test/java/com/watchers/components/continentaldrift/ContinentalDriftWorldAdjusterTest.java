@@ -25,14 +25,14 @@ class ContinentalDriftWorldAdjusterTest {
         this.world = TestableWorld.createWorld();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
         this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper);
-        ContinentalDriftAdjuster continentalDriftAdjuster = new ContinentalDriftAdjuster(coordinateHelper);
-        ContinentalDriftTileAdjuster continentalDriftTileAdjuster = new ContinentalDriftTileAdjuster(coordinateHelper);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
         ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
 
-        continentalDriftAdjuster.process(taskDto);
-        continentalDriftTileAdjuster.process(taskDto);
+        continentalDriftPredicter.process(taskDto);
+        continentalDriftTileChangeComputer.process(taskDto);
         continentalDriftNewTileAssigner.process(taskDto);
     }
 

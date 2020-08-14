@@ -39,6 +39,8 @@ class WorldFactory {
         world.fillTransactionals();
 
         specifyWaterZones(world);
+
+        tileDefined.setStartingHeights(world);
         tileDefined.process(world);
 
         return world;
@@ -86,7 +88,6 @@ class WorldFactory {
             mockContinent -> {
                        Continent continent = mockContinent.generateContinent();
                        world.getTiles().addAll(continent.getTiles());
-                       //mockContinent.getContinent().getCoordinates().addAll(mockContinent.getCoordinates());
                    }
         );
     }

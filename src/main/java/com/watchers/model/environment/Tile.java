@@ -27,7 +27,6 @@ import java.util.*;
 @Entity
 @Table(name = "tile")
 @SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1)
-@EqualsAndHashCode(exclude= {"world", "continent", "actors", "biome"})
 public class Tile {
 
     @Id
@@ -37,7 +36,7 @@ public class Tile {
     private Long id;
 
     @JsonProperty("coordinate")
-    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
     private Coordinate coordinate;
 
     @JsonProperty("height")
@@ -45,12 +44,12 @@ public class Tile {
     private long height;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
     @JsonProperty("biome")
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL, orphanRemoval = true)
     private Biome biome;
 
     @JsonProperty("actors")
@@ -58,7 +57,7 @@ public class Tile {
     private Set<Actor> actors = new HashSet<>();
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "continent_id", nullable = false)
     private Continent continent;
 
@@ -141,8 +140,12 @@ public class Tile {
         return coordinate.equals(((Tile) o).getCoordinate());
     }
 
-    public int coordinateHashCode() {
-        return coordinate.hashCode();
+    public void gotEatenBy(Tile newTile){
+        this.continent.getTiles().remove(this);
+        this.world.getTiles().remove(this);
+
+        this.actors.forEach(actor -> actor.setTile(newTile));
+        newTile.getActors().addAll(this.actors);
     }
 
     @Override
@@ -150,7 +153,9 @@ public class Tile {
         if (this == o) return true;
         if (!(o instanceof Tile)) return false;
         Tile tile = (Tile) o;
-        return Objects.equals(coordinate, tile.coordinate);
+        return id != null && tile.getId() != null?
+                id.equals(tile.id):
+                Objects.equals(coordinate, tile.coordinate);
     }
 
     @Override

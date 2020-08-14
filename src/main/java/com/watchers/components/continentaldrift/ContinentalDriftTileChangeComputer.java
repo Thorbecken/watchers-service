@@ -6,18 +6,22 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
+import com.watchers.repository.inmemory.TileRepositoryInMemory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class ContinentalDriftTileAdjuster {
+public class ContinentalDriftTileChangeComputer {
 
     private CoordinateHelper coordinateHelper;
 
-    public ContinentalDriftTileAdjuster(CoordinateHelper coordinateHelper){
+    @Autowired
+    private TileRepositoryInMemory tileRepositoryInMemory;
+
+    public ContinentalDriftTileChangeComputer(CoordinateHelper coordinateHelper){
         this.coordinateHelper = coordinateHelper;
     }
 
@@ -28,7 +32,9 @@ public class ContinentalDriftTileAdjuster {
         coordinateHelper.getAllPossibleCoordinates(taskDto.getWorld())
                 .forEach( coordinate -> {
                     List<Tile> tiles = newTileLayout.get(coordinate);
-                    if (tiles == null || tiles.size() == 0) {
+                    if(tiles == null){
+                        throw new RuntimeException("A part of the changesmap was not set");
+                    } else if ( tiles.size() == 0) {
                         processAbsentTile(coordinate, changes);
                     } else if (tiles.size() == 1) {
                         processOneTile(coordinate, tiles.get(0), changes);
@@ -61,7 +67,6 @@ public class ContinentalDriftTileAdjuster {
         ContinentalChangesDto dto = new ContinentalChangesDto(coordinate);
         changes.put(coordinate, dto);
 
-        tiles.sort(Comparator.comparing(Tile::getHeight));
         Tile survivingTile = RandomHelper.getRandomHighestTile(tiles);
         dto.setNewTile(survivingTile);
         dto.setOldCoordinate(survivingTile.getCoordinate());
@@ -73,17 +78,13 @@ public class ContinentalDriftTileAdjuster {
             taskDto.setHeightLoss(taskDto.getHeightLoss() + tile.getHeight() - addedHeight);
             survivingTile.setHeight(survivingTile.getHeight() + addedHeight);
 
-            taskDto.getWorld().getTiles().remove(tile);
-            tile.getContinent().getTiles().remove(tile);
+            tile.gotEatenBy(survivingTile);
+            taskDto.getToBeRemovedTiles().add(tile);
         }
 
         taskDto.getWorld().setHeightDeficit(taskDto.getWorld().getHeightDeficit() + taskDto.getHeightLoss());
         taskDto.setHeightLoss(0);
-        transferActors(survivingTile, tiles);
-    }
 
-    private void transferActors(Tile newTile, List<Tile> tiles) {
-        tiles.forEach( tile -> newTile.getActors().addAll(tile.getActors()));
     }
 
 }

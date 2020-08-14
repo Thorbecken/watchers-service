@@ -15,20 +15,19 @@ import java.util.stream.Collectors;
 public class ContinentalDriftNewTileAssigner {
 
     public void process(ContinentalDriftTaskDto taskDto){
-        int currentContinents = taskDto.getWorld().getContinents().size();
-        Long lastContinentalId = taskDto.getWorld().getContinents().stream()
+        int currentNumberOfContinents = taskDto.getWorld().getContinents().size();
+        Long newestContinent = taskDto.getWorld().getContinents().stream()
                 .max(Comparator.comparing(Continent::getId))
                 .map(Continent::getId)
                 .orElse(null);
-        Assert.notNull(lastContinentalId, "There was no continent found on the world with an id number!");
-        long nextContinentalId = lastContinentalId+1;
-
+        Assert.notNull(newestContinent, "There was no continent found on the world with an id number!");
+        long nextContinentalId = newestContinent+1;
 
         int minimumContinents = taskDto.getMinContinents();
 
         List<List<Coordinate>> listOfConnectedCoordinates = generateEmptyTileClusters(taskDto);
 
-        int newContinentsCreated = createNewContinents(taskDto, currentContinents, nextContinentalId, minimumContinents, listOfConnectedCoordinates);
+        int newContinentsCreated = createNewContinents(taskDto, currentNumberOfContinents, nextContinentalId, minimumContinents, listOfConnectedCoordinates);
         addEmptytilesToExistingContinents(newContinentsCreated, listOfConnectedCoordinates, taskDto);
 
     }
@@ -50,20 +49,6 @@ public class ContinentalDriftNewTileAssigner {
                         .map(ContinentalChangesDto::getNewTile)
                         .filter(Objects::nonNull)
                         .filter(tile -> tile.getContinent().getId()!=null)
-                        .map(Tile::getContinent)
-                        .max(Comparator.comparing(Continent::getId))
-                        .orElse(null);
-
-                List<Tile> neighbouringContinentalTilesList = existingTiles.stream()
-                        .map(coordinate -> taskDto.getWorld().getTile(coordinate))
-                        .collect(Collectors.toList());
-
-                List<Tile> filteredNeighbouringContinentalTilesList = neighbouringContinentalTilesList.stream()
-                        .filter(Objects::nonNull)
-                        .filter(tile -> tile.getContinent().getId()!=null)
-                        .collect(Collectors.toList());
-
-                Continent assignedContinent = filteredNeighbouringContinentalTilesList.stream()
                         .map(Tile::getContinent)
                         .max(Comparator.comparing(Continent::getId))
                         .orElse(null);

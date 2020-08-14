@@ -11,11 +11,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Set;
 
-class ContinentalDriftDirectionAdjusterTest {
+class ContinentalDriftDirectionChangerTest {
 
     private World world;
-    private ContinentalDriftDirectionAdjuster.ContinentalDriftDirectionMethodObject methodObject;
-    private ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster;
+    private ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject methodObject;
+    private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     private long lastContinentalDrift;
     private Set<Continent> continents;
 
@@ -24,10 +24,10 @@ class ContinentalDriftDirectionAdjusterTest {
         world = TestableWorld.createWorld();
         continents = world.getContinents();
 
-        continentalDriftDirectionAdjuster = new ContinentalDriftDirectionAdjuster(2, 2);
+        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(2, 2);
 
         lastContinentalDrift = world.getContinents().size()-1;
-        methodObject = continentalDriftDirectionAdjuster.new ContinentalDriftDirectionMethodObject(false,lastContinentalDrift);
+        methodObject = continentalDriftDirectionChanger.new ContinentalDriftDirectionMethodObject(false,lastContinentalDrift);
     }
 
     @ParameterizedTest
@@ -47,7 +47,7 @@ class ContinentalDriftDirectionAdjusterTest {
     void assignFirstOrNewDriftDirections() {
         continents.forEach(continent -> continent.setDirection(null));
         continents.forEach(continent -> Assert.assertNull("Continental direction was already assigned!", continent.getDirection()));
-        continentalDriftDirectionAdjuster.assignFirstOrNewDriftDirections(world);
+        continentalDriftDirectionChanger.assignFirstOrNewDriftDirections(world);
         continents.forEach(continent -> Assert.assertNotNull("Continent wasn't assigned a direction!", continent.getDirection()));
     }
 

@@ -1,6 +1,5 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.World;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,20 +11,47 @@ public class TileDefined {
     private long deepOceanHight;
     private long oceeanHight;
     private long coastalHight;
+    private long plainsHight;
     private long hillHight;
     private long mountainHight;
 
     public TileDefined(@Value("${watch.deepOceanHight}") long deepOceanHight,
                        @Value("${watch.oceeanHight}") long oceeanHight,
                        @Value("${watch.coastalHight}") long coastalHight,
+                       @Value("${watch.plainsHight}") long plainsHight,
                        @Value("${watch.hillHight}") long hillHight,
                        @Value("${watch.mountainHight}") long mountainHight){
         this.deepOceanHight = deepOceanHight;
         this.oceeanHight = oceeanHight;
         this.coastalHight = coastalHight;
+        this.plainsHight = plainsHight;
         this.hillHight = hillHight;
         this.mountainHight = mountainHight;
     }
+
+    public World setStartingHeights(World world){
+        world.getTiles().parallelStream().forEach(
+                tile -> {
+                    switch (tile.getSurfaceType()){
+                        case MOUNTAIN: tile.setHeight(mountainHight);
+                            break;
+                        case HILL: tile.setHeight(hillHight);
+                            break;
+                        case PLAIN: tile.setHeight(plainsHight);
+                            break;
+                        case OCEANIC: tile.setHeight(oceeanHight);
+                            break;
+                        case COASTAL: tile.setHeight(coastalHight);
+                            break;
+                        case DEEP_OCEAN: tile.setHeight(deepOceanHight);
+                            break;
+                        default: throw new RuntimeException("Surface type has not been given");
+                    }
+                }
+        );
+        return world;
+    }
+
 
     public void process(World world) {
 

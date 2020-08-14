@@ -31,7 +31,7 @@ public class Continent {
 
     @JsonIgnore
     @JsonProperty("coordinates")
-    @OneToMany(mappedBy = "continent", cascade=CascadeType.ALL)
+    @OneToMany(mappedBy = "continent")
     private Set<Tile> tiles = new HashSet<>();
 
     @JsonProperty("type")

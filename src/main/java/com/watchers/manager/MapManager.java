@@ -1,6 +1,6 @@
 package com.watchers.manager;
 
-import com.watchers.components.continentaldrift.ContinentalDriftDirectionAdjuster;
+import com.watchers.components.continentaldrift.ContinentalDriftDirectionChanger;
 import com.watchers.model.actor.AnimalType;
 import com.watchers.model.actor.animals.AnimalFactory;
 import com.watchers.model.environment.SurfaceType;
@@ -19,14 +19,14 @@ public class MapManager {
 
     private WorldRepositoryInMemory worldRepositoryInMemory;
     private WorldFactory worldFactory;
-    private ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster;
+    private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
 
     public MapManager(WorldRepositoryInMemory worldRepositoryInMemory,
                       WorldFactory worldFactory,
-                      ContinentalDriftDirectionAdjuster continentalDriftDirectionAdjuster){
+                      ContinentalDriftDirectionChanger continentalDriftDirectionChanger){
         this.worldRepositoryInMemory = worldRepositoryInMemory;
         this.worldFactory = worldFactory;
-        this.continentalDriftDirectionAdjuster = continentalDriftDirectionAdjuster;
+        this.continentalDriftDirectionChanger = continentalDriftDirectionChanger;
     }
 
     public World getInitiatedWorld(Long worldId){
@@ -40,7 +40,8 @@ public class MapManager {
     @Transactional("inmemoryDatabaseTransactionManager")
     public World getWorld(Long worldId, boolean initiated) {
        World world = worldRepositoryInMemory.findById(worldId).orElseGet(() -> createWorld(worldId));
-
+        log.info("world loaden from memory with: "+ (world.getTiles().stream().map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()) + " height");
+        log.info("the loaded world contains: " + world.getTiles().size() + " number of tiles");
        if(initiated) {
            world.fillTransactionals();
        }
@@ -53,14 +54,14 @@ public class MapManager {
         World newWorld = worldFactory.generateWorld(58L, 28L, 13);
         log.info(String.format("World number %s created", worldId));
         worldRepositoryInMemory.save(newWorld);
-        continentalDriftDirectionAdjuster.assignFirstOrNewDriftDirections(newWorld);
+        continentalDriftDirectionChanger.assignFirstOrNewDriftDirections(newWorld);
         worldRepositoryInMemory.save(newWorld);
         return newWorld;
     }
 
     public void seedLife(World world, Long xCoord, Long yCoord) {
         Tile seedingTile = world.getTile(xCoord, yCoord);
-        AnimalType animalType = selectAnimalSeed(seedingTile.getContinent().getType());
+        AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
         seedingTile.getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile));
         worldRepositoryInMemory.save(world);
     }

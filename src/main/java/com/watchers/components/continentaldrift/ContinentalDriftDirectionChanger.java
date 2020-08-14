@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Component
-public class ContinentalDriftDirectionAdjuster {
+public class ContinentalDriftDirectionChanger {
 
     private int driftVelocity;
     private int drifFlux;
@@ -19,12 +19,12 @@ public class ContinentalDriftDirectionAdjuster {
         world.getContinents().forEach(continent -> continent.assignNewDriftDirection(driftVelocity));
     }
 
-    public ContinentalDriftDirectionAdjuster(@Value("${watch.driftVelocity}") int driftVelocity, @Value("${watch.driftFlux}") int drifFlux) {
+    public ContinentalDriftDirectionChanger(@Value("${watch.driftVelocity}") int driftVelocity, @Value("${watch.driftFlux}") int drifFlux) {
         this.driftVelocity = driftVelocity;
         this.drifFlux = drifFlux;
     }
 
-    public World processContinentalDrift(World world){
+    public World process(World world){
         new ContinentalDriftDirectionMethodObject(false,  world.getLastContinentInFlux())
                 .adjustContinentelDriftFlux(world, drifFlux, driftVelocity);
 

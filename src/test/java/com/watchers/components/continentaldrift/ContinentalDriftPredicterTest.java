@@ -10,16 +10,15 @@ import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ContinentalDriftAdjusterTest {
+class ContinentalDriftPredicterTest {
 
-    private ContinentalDriftAdjuster continentalDriftAdjuster;
+    private ContinentalDriftPredicter continentalDriftPredicter;
     private ContinentalDriftTaskDto taskDto;
 
 
@@ -27,7 +26,7 @@ class ContinentalDriftAdjusterTest {
     void setUp() {
         World world = TestableWorld.createWorld();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        continentalDriftAdjuster = new ContinentalDriftAdjuster(coordinateHelper);
+        continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
     }
@@ -42,7 +41,7 @@ class ContinentalDriftAdjusterTest {
 
         taskDto.setNewTileLayout(new HashMap<>());
 
-        continentalDriftAdjuster.process(taskDto);
+        continentalDriftPredicter.process(taskDto);
 
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
@@ -93,7 +92,7 @@ class ContinentalDriftAdjusterTest {
 
         taskDto.setNewTileLayout(new HashMap<>());
 
-        continentalDriftAdjuster.process(taskDto);
+        continentalDriftPredicter.process(taskDto);
 
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
