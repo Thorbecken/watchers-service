@@ -1,24 +1,29 @@
 package com.watchers.controller;
 
 import com.watchers.manager.MapManager;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashSet;
 
 @CrossOrigin
 @RestController
 public class MapController {
 
-    @Autowired
     private MapManager mapManager;
+
+    public MapController(MapManager mapManager) {
+        this.mapManager = mapManager;
+    }
 
     @RequestMapping(value = "/world/{worldId}", method = RequestMethod.GET)
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId){
         Assert.notNull(worldId, "No world id was found");
         World world = mapManager.getUninitiatedWorld(worldId);
-        System.out.println("Returned a world with " + world.getActorList().size() + " actors in it");
+        System.out.println("Returned a world with " + world.getTiles().stream().map(Tile::getActors).reduce(new HashSet<>(), (x, y) -> {x.addAll(y); return x;}).size() + " actors in it");
         return ResponseEntity.ok(world);
     }
 }

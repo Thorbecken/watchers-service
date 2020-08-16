@@ -40,10 +40,9 @@ class ContinentalDriftWorldAdjusterTest {
     @ParameterizedTest
     @CsvSource({"1","2","3","4","5","6","7"})
     void processChanges(int deficit) {
-        //Fixeme
         deficit += world.getHeightDeficit();
         world.setHeightDeficit(deficit);
-        long numberOfNewTilesNeeded = taskDto.getWorld().getTiles().size()-taskDto.getNewTileLayout().values().size();
+        long numberOfNewTilesNeeded = taskDto.getWorld().getTiles().size()-taskDto.getNewTileLayout().values().stream().filter(tiles ->  tiles.size() > 0).count();
 
         long startingHeight = taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())

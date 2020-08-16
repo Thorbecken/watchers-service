@@ -5,6 +5,7 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -13,9 +14,11 @@ import java.util.*;
 public class ErosionAdjuster {
 
     private CoordinateHelper coordinateHelper;
+    private int maxErosion;
 
-    public ErosionAdjuster(CoordinateHelper coordinateHelper){
+    public ErosionAdjuster(CoordinateHelper coordinateHelper, @Value("${watch.maxErosion}") int maxErosion){
         this.coordinateHelper = coordinateHelper;
+        this.maxErosion = maxErosion;
     }
 
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -34,21 +37,15 @@ public class ErosionAdjuster {
                     .min(Comparator.comparing(Tile::getHeight))
                     .get();
 
-            if(tile.getHeight()-lowestNeighbour.getHeight() >= 12){
+            long heightTransfer = (tile.getHeight()-lowestNeighbour.getHeight()) / 4;
+            if(heightTransfer > maxErosion){
+                heightTransfer = maxErosion;
+            }
+            if(heightTransfer > 0){
                 long aLong = erosionMap.get(lowestNeighbour.getCoordinate());
-                erosionMap.put(lowestNeighbour.getCoordinate(), aLong+3);
+                erosionMap.put(lowestNeighbour.getCoordinate(), aLong+heightTransfer);
                 long anotherLong = erosionMap.get(tile.getCoordinate());
-                erosionMap.put(tile.getCoordinate(), anotherLong-3);
-            } else if(tile.getHeight()-lowestNeighbour.getHeight() >= 8){
-                long aLong = erosionMap.get(lowestNeighbour.getCoordinate());
-                erosionMap.put(lowestNeighbour.getCoordinate(), aLong+2);
-                long anotherLong = erosionMap.get(tile.getCoordinate());
-                erosionMap.put(tile.getCoordinate(), anotherLong-2);
-            } else if(tile.getHeight()-lowestNeighbour.getHeight() >= 4){
-                long aLong = erosionMap.get(lowestNeighbour.getCoordinate());
-                erosionMap.put(lowestNeighbour.getCoordinate(), aLong+1);
-                long anotherLong = erosionMap.get(tile.getCoordinate());
-                erosionMap.put(tile.getCoordinate(), anotherLong-1);
+                erosionMap.put(tile.getCoordinate(), anotherLong-heightTransfer);
             }
         });
 

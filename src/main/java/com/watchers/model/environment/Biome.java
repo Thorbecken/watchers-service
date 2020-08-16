@@ -46,7 +46,7 @@ public class Biome implements ParallelTask {
         }
     }
 
-    public void setCurrentFood(float currentFood) {
+    public void addCurrentFood(float currentFood) {
         if(currentFood + this.currentFood > maxFood){
             this.currentFood = maxFood;
         } else {

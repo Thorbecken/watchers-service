@@ -29,8 +29,6 @@ public abstract class Animal extends Actor {
     private float metabolisme;
     private float reproductionRate;
     private int movement;
-    //@Transient
-    //private Queue<Tile> currentPath;
     private AnimalType animalType;
 
     public abstract void generateOffspring(Tile tile, float foodPassed);
@@ -51,22 +49,6 @@ public abstract class Animal extends Actor {
                             .contains(tile.getSurfaceType()))
                     .max((tile1, tile2) -> Math.round(tile1.getBiome().getCurrentFood() - tile2.getBiome().getCurrentFood()))
                     .ifPresent(this::moveToTile);
-
-            /*
-            // advanced logic
-            if(currentPath.isEmpty()) {
-                Queue<Tile> tileQueue = new LinkedList<>();
-                tileQueue.add(getTile());
-                Queue<Tile> pathToNearestFoodsource = nearestFoodTile(Collections.singletonList(tileQueue), new ArrayList<>(), 0L);
-                super.setTile(pathToNearestFoodsource.peek());
-                pathToNearestFoodsource.remove();
-                if (!pathToNearestFoodsource.isEmpty()){
-                    currentPath = pathToNearestFoodsource;
-                }
-            } else {
-                super.setTile(currentPath.peek());
-                currentPath.remove();
-            }*/
         }
     }
 
@@ -75,44 +57,6 @@ public abstract class Animal extends Actor {
         setTile(tile);
         getTile().getActors().add(this);
     }
-
-/*
-    private Queue<Tile> searchPathToNearestFood(List<LinkedList<Tile>> paths, List<Tile> exclude, Long itteration) {
-        if(itteration == FORAGING_RANGE){
-            Queue<Tile> noPathFound = new LinkedList<>();
-            noPathFound.add(getTile());
-            return noPathFound;
-        }
-
-        final List<Tile> nextTiles = new ArrayList<>();
-        paths.forEach(
-                path -> nextTiles.addAll(path.getLast().getNeighbours())
-        );
-
-        nextTiles.removeAll(exclude);
-        if(getNaturalHabitat() != SurfaceType.ALL) {
-            nextTiles.removeAll(nextTiles.stream().filter(
-                    tile -> tile.getSurfaceType() != getNaturalHabitat()
-                ).collect(Collectors.toList())
-            );
-        }
-
-        List<Tile> possibleLocations = getTile().getNeighbours().stream()
-            .filter(neigbouringTile -> neigbouringTile.getBiome().getCurrentFood() >= foraging)
-            .collect(Collectors.toList());
-
-        if(possibleLocations.isEmpty()){
-            return searchPathToNearestFood(paths, nextTiles, itteration+1);
-        } else if(possibleLocations.size() == 1){
-            path.add(possibleLocations.get(0));
-            return path;
-        } else {
-            Random random = new Random();
-            path.add(possibleLocations.get(random.nextInt(nextTiles.size())));
-            return path;
-        }
-    }
-*/
 
     private void eat(){
         float localFood = getTile().getBiome().getCurrentFood();

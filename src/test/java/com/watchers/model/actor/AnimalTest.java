@@ -10,14 +10,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnimalTest {
     private World rabbitWorld;
     private Tile startingTile;
-    private Continent rabbitContinent;
     private Rabbit rabbit;
 
     @BeforeEach
     @SuppressWarnings("all")
     void setRabbit(){
         rabbitWorld = new World(3, 3);
-        rabbitContinent = new Continent(rabbitWorld, SurfaceType.PLAIN);
+        Continent rabbitContinent = new Continent(rabbitWorld, SurfaceType.PLAIN);
 
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {

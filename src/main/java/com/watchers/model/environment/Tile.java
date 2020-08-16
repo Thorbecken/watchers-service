@@ -156,7 +156,7 @@ public class Tile {
     public void setData(MockTile mockTile) {
         this.continent = mockTile.getContinent();
         mockTile.getContinent().getTiles().add(this);
-        this.biome.setCurrentFood(mockTile.getFood());
+        this.biome.addCurrentFood(mockTile.getFood());
         this.height = mockTile.getHeight();
         this.actors = mockTile.getActorSet();
         this.surfaceType = mockTile.getSurfaceType();
