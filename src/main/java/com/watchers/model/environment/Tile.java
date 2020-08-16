@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.common.Coordinate;
+import com.watchers.model.dto.MockTile;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -140,12 +140,26 @@ public class Tile {
         return coordinate.equals(((Tile) o).getCoordinate());
     }
 
-    public void gotEatenBy(Tile newTile){
+    public void clear(){
         this.continent.getTiles().remove(this);
-        this.world.getTiles().remove(this);
+        this.continent = null;
+        this.actors = new HashSet<>();
+        this.height = 0;
+        this.biome.clear();
+    }
 
-        this.actors.forEach(actor -> actor.setTile(newTile));
-        newTile.getActors().addAll(this.actors);
+    public void transferData(MockTile mockTile){
+        this.biome.transferData(mockTile);
+        mockTile.getActorSet().addAll(this.actors);
+    }
+
+    public void setData(MockTile mockTile) {
+        this.continent = mockTile.getContinent();
+        mockTile.getContinent().getTiles().add(this);
+        this.biome.setCurrentFood(mockTile.getFood());
+        this.height = mockTile.getHeight();
+        this.actors = mockTile.getActorSet();
+        this.surfaceType = mockTile.getSurfaceType();
     }
 
     @Override

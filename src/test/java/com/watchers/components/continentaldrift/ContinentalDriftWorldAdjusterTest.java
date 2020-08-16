@@ -5,6 +5,7 @@ import com.watchers.TestableWorld;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
+import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +47,8 @@ class ContinentalDriftWorldAdjusterTest {
 
         long startingHeight = taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
-                .map(ContinentalChangesDto::getNewTile)
-                .map(Tile::getHeight)
+                .map(ContinentalChangesDto::getMockTile)
+                .map(MockTile::getHeight)
                 .reduce((x,y) -> x+y)
                 .get();
         startingHeight += world.getHeightDeficit();

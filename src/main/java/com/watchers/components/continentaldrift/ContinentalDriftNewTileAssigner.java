@@ -4,6 +4,7 @@ import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
+import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -46,10 +47,11 @@ public class ContinentalDriftNewTileAssigner {
 
                 Continent chosenContinent = taskDto.getChanges().values().stream()
                         .filter(continentalChangesDto -> existingTiles.contains(continentalChangesDto.getKey()))
-                        .map(ContinentalChangesDto::getNewTile)
+                        .map(ContinentalChangesDto::getMockTile)
                         .filter(Objects::nonNull)
-                        .filter(tile -> tile.getContinent().getId()!=null)
-                        .map(Tile::getContinent)
+                        .map(MockTile::getContinent)
+                        .filter(Objects::nonNull)
+                        .filter(continent -> continent.getId()!=null)
                         .max(Comparator.comparing(Continent::getId))
                         .orElse(null);
 

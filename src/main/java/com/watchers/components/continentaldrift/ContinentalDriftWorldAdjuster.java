@@ -25,14 +25,13 @@ public class ContinentalDriftWorldAdjuster {
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
 
         long newHeight = calculateNewHeight(world, changes);
-        world.setTiles(new HashSet<>());
 
         coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
                     ContinentalChangesDto dto = changes.get(coordinate);
                     if(dto.isEmpty()) {
-                        createNewTile(dto, newHeight, world);
+                        createFreshTile(dto, newHeight, world);
                     } else {
-                        ChangeCoordinate(dto, world);
+                        ChangeTileOfCoordinate(dto, world);
                     }
                 }
         );
@@ -51,20 +50,20 @@ public class ContinentalDriftWorldAdjuster {
         return spendableHeight;
     }
 
-    private void createNewTile(ContinentalChangesDto dto, long newHeight, World world) {
+    private void createFreshTile(ContinentalChangesDto dto, long newHeight, World world) {
         Continent assignedContinent = dto.getNewMockContinent().getContinent();
-        Tile newTile = new Tile(dto.getKey(), world, assignedContinent);
-        assignedContinent.getTiles().add(newTile);
-
-        newTile.setHeight(newHeight);
-        world.getTiles().add(newTile);
+        Tile tile = world.getTile(dto.getKey());
+        tile.clear();
+        tile.setContinent(assignedContinent);
+        assignedContinent.getTiles().add(tile);
+        tile.setHeight(newHeight);
 
         world.getContinents().add(assignedContinent);
     }
 
-    private void ChangeCoordinate(ContinentalChangesDto dto, World world) {
-        Tile newTile = dto.getNewTile();
-        newTile.setCoordinate(dto.getKey());
-        world.getTiles().add(newTile);
+    private void ChangeTileOfCoordinate(ContinentalChangesDto dto, World world) {
+        Tile tile = world.getTile(dto.getKey());
+        tile.clear();
+        tile.setData(dto.getMockTile());
     }
 }

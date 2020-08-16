@@ -2,15 +2,13 @@ package com.watchers.model.dto;
 
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.MockContinent;
-import com.watchers.model.environment.Tile;
 import lombok.Data;
 
 @Data
 public class ContinentalChangesDto {
     private boolean empty;
     private Coordinate key;
-    private Coordinate oldCoordinate;
-    private Tile newTile;
+    private MockTile mockTile;
     private MockContinent newMockContinent;
 
     public ContinentalChangesDto(Coordinate coordinate){

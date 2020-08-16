@@ -20,7 +20,7 @@ public class SaveJob implements Job {
 
         logger.info("Save job ** {} ** fired @ {}", context.getJobDetail().getKey().getName(), context.getFireTime());
 
-        saveJobService.executeSave();
+        //saveJobService.executeSave();
 
         logger.info("Next save job scheduled @ {}", context.getNextFireTime());
     }

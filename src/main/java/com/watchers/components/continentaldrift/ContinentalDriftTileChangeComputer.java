@@ -5,9 +5,8 @@ import com.watchers.helper.RandomHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
+import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
-import com.watchers.repository.inmemory.TileRepositoryInMemory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,9 +16,6 @@ import java.util.Map;
 public class ContinentalDriftTileChangeComputer {
 
     private CoordinateHelper coordinateHelper;
-
-    @Autowired
-    private TileRepositoryInMemory tileRepositoryInMemory;
 
     public ContinentalDriftTileChangeComputer(CoordinateHelper coordinateHelper){
         this.coordinateHelper = coordinateHelper;
@@ -57,8 +53,8 @@ public class ContinentalDriftTileChangeComputer {
 
     private void processOneTile(Coordinate coordinate, Tile tile, Map<Coordinate, ContinentalChangesDto> changes) {
         ContinentalChangesDto dto = new ContinentalChangesDto(coordinate);
-        dto.setNewTile(tile);
-        dto.setOldCoordinate(tile.getCoordinate());
+        MockTile mockTile = new MockTile(tile);
+        dto.setMockTile(mockTile);
         changes.put(coordinate, dto);
     }
 
@@ -68,18 +64,17 @@ public class ContinentalDriftTileChangeComputer {
         changes.put(coordinate, dto);
 
         Tile survivingTile = RandomHelper.getRandomHighestTile(tiles);
-        dto.setNewTile(survivingTile);
-        dto.setOldCoordinate(survivingTile.getCoordinate());
+        MockTile mockTile = new MockTile(survivingTile);
+        dto.setMockTile(mockTile);
         tiles.remove(survivingTile);
 
 
         for (Tile tile : tiles) {
             long addedHeight = tile.getHeight() / taskDto.getHeightDivider();
             taskDto.setHeightLoss(taskDto.getHeightLoss() + tile.getHeight() - addedHeight);
-            survivingTile.setHeight(survivingTile.getHeight() + addedHeight);
+            mockTile.setHeight(mockTile.getHeight() + addedHeight);
 
-            tile.gotEatenBy(survivingTile);
-            taskDto.getToBeRemovedTiles().add(tile);
+            tile.transferData(mockTile);
         }
 
         taskDto.getWorld().setHeightDeficit(taskDto.getWorld().getHeightDeficit() + taskDto.getHeightLoss());

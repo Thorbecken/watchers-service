@@ -2,6 +2,7 @@ package com.watchers.model.environment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.ParallelTask;
+import com.watchers.model.dto.MockTile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -45,6 +46,14 @@ public class Biome implements ParallelTask {
         }
     }
 
+    public void setCurrentFood(float currentFood) {
+        if(currentFood + this.currentFood > maxFood){
+            this.currentFood = maxFood;
+        } else {
+            this.currentFood = this.currentFood + currentFood;
+        }
+    }
+
     @Override
     public String toString() {
         return "Biome{" +
@@ -52,5 +61,13 @@ public class Biome implements ParallelTask {
                 ", maxFood=" + maxFood +
                 ", fertility=" + fertility +
                 '}';
+    }
+
+    public void clear() {
+        this.currentFood = 0;
+    }
+
+    public void transferData(MockTile mockTile) {
+        mockTile.setFood(mockTile.getFood() + currentFood);
     }
 }

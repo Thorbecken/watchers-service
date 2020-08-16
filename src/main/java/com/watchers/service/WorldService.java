@@ -4,7 +4,6 @@ import com.watchers.manager.ContinentalDriftManager;
 import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
-import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -137,16 +135,8 @@ public class WorldService {
 
         log.trace(world.getActorList().size() + " Actors remained this turn");
 
-        //ContinentalDriftTaskDto continentalDriftTaskDto = continentalDriftManager.process(world);
-
-        log.info("pre save: "+ (world.getTiles().stream().map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()));
-        log.info(tileRepositoryInMemory.count() + " number of tiles in memory");
-        log.info(world.getTiles().size() + " number of tiles in the world");
-        worldRepositoryInMemory.flush();
+        continentalDriftManager.process(world);
         worldRepositoryInMemory.save(world);
-        //tileRepositoryInMemory.saveAll(continentalDriftTaskDto.getToBeRemovedTiles());
-        log.info("post save: "+ (world.getTiles().stream().map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()));
-        log.info("highest tile Id: " + world.getTiles().stream().map(Tile::getId).filter(Objects::nonNull).max(Long::compareTo).orElse(0L));
     }
 
     public void executeTurn() {

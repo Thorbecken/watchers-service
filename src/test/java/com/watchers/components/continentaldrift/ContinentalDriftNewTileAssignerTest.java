@@ -6,6 +6,7 @@ import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Direction;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
+import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,16 +67,14 @@ class ContinentalDriftNewTileAssignerTest {
                     long sum = coordinate.getYCoord()+coordinate.getXCoord();
                     if(sum == 4 || sum == 3){
                         dto.setEmpty(true);
-                        dto.setNewTile(null);
-                        dto.setOldCoordinate(null);
+                        dto.setMockTile(null);
                         dto.setNewMockContinent(null);
                         return;
                     }
                     Continent continent = sum<4?continentX:continentY;
                     Tile tile = new Tile(coordinate, world,continent);
-                    dto.setNewTile(tile);
+                    dto.setMockTile(new MockTile(tile));
                     dto.setEmpty(false);
-                    dto.setOldCoordinate(coordinate);
                 }
         );
 
