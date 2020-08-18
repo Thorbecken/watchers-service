@@ -9,6 +9,7 @@ import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 @EnableTransactionManagement
 public class MapManager {
 
+    private long xSize;
+    private long ySize;
+    private int numberOfContinents;
     private WorldRepositoryInMemory worldRepositoryInMemory;
     private WorldFactory worldFactory;
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
 
-    public MapManager(WorldRepositoryInMemory worldRepositoryInMemory,
+    public MapManager(@Value("${watch.worldGeneration.xSize}") long xSize,@Value("${watch.worldGeneration.ySize}") long ySize,@Value("${watch.worldGeneration.numberOfContinents}") int numberOfContinents, WorldRepositoryInMemory worldRepositoryInMemory,
                       WorldFactory worldFactory,
                       ContinentalDriftDirectionChanger continentalDriftDirectionChanger){
+        this.xSize = xSize;
+        this.ySize = ySize;
+        this.numberOfContinents = numberOfContinents;
         this.worldRepositoryInMemory = worldRepositoryInMemory;
         this.worldFactory = worldFactory;
         this.continentalDriftDirectionChanger = continentalDriftDirectionChanger;
@@ -52,7 +59,7 @@ public class MapManager {
 
     @Transactional("inmemoryDatabaseTransactionManager")
     private World createWorld(long worldId){
-        World newWorld = worldFactory.generateWorld(58L, 28L, 13);
+        World newWorld = worldFactory.generateWorld(xSize, ySize, numberOfContinents);
         log.info(String.format("World number %s created", worldId));
         worldRepositoryInMemory.save(newWorld);
         continentalDriftDirectionChanger.assignFirstOrNewDriftDirections(newWorld);
