@@ -33,8 +33,9 @@ class ContinentalDriftPredicterTest {
 
     @Test
     void calculateContinentalDrift() {
-        assertEquals(9, taskDto.getWorld().getTiles().size());
-        long startingHeight = taskDto.getWorld().getTiles().stream()
+        assertEquals(9, taskDto.getWorld().getCoordinates().stream().filter(coordinate -> coordinate.getTile() != null).count());
+        long startingHeight = taskDto.getWorld().getCoordinates().stream()
+                .map(Coordinate::getTile)
                 .map(Tile::getHeight)
                 .reduce((x,y)-> x+y)
                 .orElse(0L);
@@ -80,12 +81,13 @@ class ContinentalDriftPredicterTest {
     @Test
     void calculateContinentalDriftExtreme() {
         ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setXVelocity(2);
-        ((Continent) taskDto.getWorld().getContinents().toArray()[1]).getDirection().setYVelocity(-2);
-        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setXVelocity(-1);
-        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setYVelocity(1);
+        ((Continent) taskDto.getWorld().getContinents().toArray()[0]).getDirection().setYVelocity(-2);
+        ((Continent) taskDto.getWorld().getContinents().toArray()[1]).getDirection().setXVelocity(-1);
+        ((Continent) taskDto.getWorld().getContinents().toArray()[1]).getDirection().setYVelocity(1);
 
-        assertEquals(9, taskDto.getWorld().getTiles().size());
-        long startingHeight = taskDto.getWorld().getTiles().stream()
+        assertEquals(9, taskDto.getWorld().getCoordinates().size());
+        long startingHeight = taskDto.getWorld().getCoordinates().stream()
+                .map(Coordinate::getTile)
                 .map(Tile::getHeight)
                 .reduce((x,y)-> x+y)
                 .orElse(0L);

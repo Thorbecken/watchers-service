@@ -11,15 +11,15 @@ import java.util.stream.Collectors;
 @Data
 public class MockContinent {
     private World world;
-    private List<Coordinate> coordinates = new ArrayList<>();;
-    private List<Coordinate> possibleCoordinates = new ArrayList<>();;
+    private List<Coordinate> coordinates = new ArrayList<>();
+    private List<Coordinate> possibleCoordinates = new ArrayList<>();
     private Continent continent;
 
-    public MockContinent(Continent continent){
+    public MockContinent(Continent continent, World world){
         this.continent = continent;
-        this.world = continent.getWorld();
+        this.world = world;
 
-        this.coordinates.addAll(continent.getTiles().stream().map(Tile::getCoordinate).collect(Collectors.toList()));
+        this.coordinates.addAll(continent.getCoordinates());
         this.coordinates.forEach(coordinate -> this.possibleCoordinates.addAll(coordinate.getNeighbours())
         );
     }
@@ -33,18 +33,6 @@ public class MockContinent {
 
         this.possibleCoordinates = CoordinateHelper.getAllOutersideCoordinates(this.coordinates);
        }
-
-    public MockContinent(Coordinate coordinate){
-        Assert.isTrue(coordinate.getWorld() != null, "no world found!");
-
-        this.coordinates = new ArrayList<>();
-        this.possibleCoordinates = new ArrayList<>();
-        this.world = coordinate.getWorld();
-
-        this.coordinates.addAll(Collections.singleton(coordinate));
-        this.coordinates.forEach(tile -> this.possibleCoordinates.addAll(tile.getNeighbours())
-        );
-    }
 
     public void addRandomCoordinate(WorldFactoryDTO dto) {
         if(possibleCoordinates.isEmpty()){
@@ -71,24 +59,27 @@ public class MockContinent {
         ).findFirst();
     }
 
-    private void takeOpenTile(List<Coordinate> openTiles, List<Coordinate> takenTiles, Coordinate newTile, Coordinate openTile) {
-        this.coordinates.add(newTile);
-        takenTiles.add(newTile);
-        openTiles.remove(openTile);
-        this.possibleCoordinates.addAll(newTile.getNeighbours());
+    private void takeOpenTile(List<Coordinate> openCoordinates, List<Coordinate> takenCoordinates, Coordinate newCoordinate, Coordinate openCoordinate) {
+        this.coordinates.add(newCoordinate);
+        takenCoordinates.add(newCoordinate);
+        openCoordinates.remove(openCoordinate);
+        this.possibleCoordinates.addAll(newCoordinate.getNeighbours());
         this.possibleCoordinates.removeAll(this.coordinates);
         this.possibleCoordinates = this.possibleCoordinates.stream()
-                .filter(tile -> takenTiles.stream().noneMatch(
-                        tile::equals
+                .filter(coordinate -> takenCoordinates.stream().noneMatch(
+                        coordinate::equals
                 )).collect(Collectors.toList());
     }
 
     public Continent generateContinent(){
         Assert.isTrue(this.continent != null, "continent was nulll");
-        Continent continent = this.continent;
-        continent.setTiles(new HashSet<>());
-        this.coordinates.forEach(
-                coordinate -> continent.getTiles().add(new Tile(coordinate, continent.getWorld() , continent))
+        continent.getCoordinates().addAll(coordinates);
+        world.getCoordinates().addAll(coordinates);
+        continent.getCoordinates().forEach(
+                coordinate -> {
+                    coordinate.setContinent(continent);
+                    coordinate.getTile().setSurfaceType(continent.getType());
+                }
         );
 
         return continent;

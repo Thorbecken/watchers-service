@@ -43,9 +43,13 @@ public class World {
 
     private Long ySize;
 
-    @JsonProperty("tiles")
+    @JsonProperty("coordinates")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
-    private Set<Tile> tiles = new HashSet<>();
+    private Set<Coordinate> coordinates = new HashSet<>();
+
+    @Transient
+    @JsonIgnore
+    private Map<Long, Map<Long, Coordinate>> coordinateMap = new HashMap<>();
 
     @Transient
     @JsonIgnore
@@ -77,10 +81,17 @@ public class World {
     @SuppressWarnings("unused")
     private World(){}
 
+public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
+        if(coordinateMap == null || coordinateMap.isEmpty()){
+                setCoordinateMap();
+        }
+        return coordinateMap.get(xCoordinate).get(yCoordinate);
+    }
+
     @JsonIgnore
     public Tile getTile(Long x, Long y){
         if(tileMap == null || tileMap.isEmpty()){
-            setTiles();
+            setTileMap();
         }
 
         return tileMap.get(x).get(y);
@@ -100,18 +111,34 @@ public class World {
         return actorList;
     }
 
-    private void setTiles(){
+    private void setTileMap(){
         tileMap = new HashMap<>();
 
         for (int i = 1; i <= xSize; i++) {
             final long xCoord = i;
-            Map<Long, Tile> hashMap = new HashMap<>();
-            tiles.stream()
+            Map<Long, Tile> xTileHashMap = new HashMap<>();
+            coordinates.stream()
+                    .map(Coordinate::getTile)
                     .filter(tile -> tile.getCoordinate().getXCoord() == xCoord)
-                    .forEach(tile -> hashMap.put(tile.getCoordinate().getYCoord(), tile)
-            );
+                    .forEach(tile -> xTileHashMap.put(tile.getCoordinate().getYCoord(), tile)
+                    );
 
-            tileMap.put(xCoord,hashMap);
+            tileMap.put(xCoord,xTileHashMap);
+        }
+    }
+
+    private void setCoordinateMap(){
+        coordinateMap = new HashMap<>();
+
+        for (int i = 1; i <= xSize; i++) {
+            final long xCoord = i;
+            Map<Long, Coordinate> xCoordinateHashMap = new HashMap<>();
+            coordinates.stream()
+                    .filter(coordinate -> coordinate.getXCoord() == xCoord)
+                    .forEach(coordinate -> xCoordinateHashMap.put(coordinate.getYCoord(), coordinate)
+                    );
+
+            coordinateMap.put(xCoord,xCoordinateHashMap);
         }
     }
 
@@ -120,17 +147,17 @@ public class World {
         actorList = new ArrayList<>();
         tileMap = new HashMap<>();
 
-        tiles.forEach(
-                tile -> actorList.addAll(tile.getActors())
+        coordinates.forEach(
+                coordinate -> actorList.addAll(coordinate.getActors())
         );
 
         for (int i = 1; i <= xSize; i++) {
             final long xCoord = i;
             Map<Long, Tile> hashMap = new HashMap<>();
-            tiles.stream()
-                    .filter(tile -> tile.getCoordinate().getXCoord() == xCoord)
+            coordinates.stream()
+                    .filter(coordinate -> coordinate.getXCoord() == xCoord)
                     .forEach(
-                            tile -> hashMap.put(tile.getCoordinate().getYCoord(), tile)
+                            coordinate -> hashMap.put(coordinate.getYCoord(), coordinate.getTile())
                     );
 
             tileMap.put(xCoord, hashMap);
@@ -139,11 +166,11 @@ public class World {
 
     private void setActorList(){
         if(tileMap == null || tileMap.isEmpty()){
-            setTiles();
+            setTileMap();
         }
         actorList = new ArrayList<>();
 
-        tiles.forEach(
+        coordinates.forEach(
             tile -> actorList.addAll(tile.getActors())
         );
     }
@@ -154,7 +181,7 @@ public class World {
                 "id=" + id +
                 ", xSize=" + xSize +
                 ", ySize=" + ySize +
-                ", tiles=" + tiles.size() +
+                ", coordinates=" + coordinates.size() +
                 ", actorList=" + actorList.size() +
                 ", continents=" + continents.size() +
                 ", lastContinentInFlux=" + lastContinentInFlux +

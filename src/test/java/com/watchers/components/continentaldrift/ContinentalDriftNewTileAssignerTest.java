@@ -3,6 +3,7 @@ package com.watchers.components.continentaldrift;
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Direction;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -72,13 +73,14 @@ class ContinentalDriftNewTileAssignerTest {
                         return;
                     }
                     Continent continent = sum<4?continentX:continentY;
-                    Tile tile = new Tile(coordinate, world,continent);
-                    dto.setMockTile(new MockTile(tile));
+                    coordinate.setContinent(continent);
+                    continent.getCoordinates().add(coordinate);
+                    dto.setMockTile(new MockTile(coordinate.getTile()));
                     dto.setEmpty(false);
                 }
         );
 
-        //Checks that the test is beginning with only five open tiles
+        //Checks that the test is beginning with only five open coordinates
         assertEquals(5, taskDto.getChanges().values().stream().filter(ContinentalChangesDto::isEmpty).count());
         // Checks there are nog mockcontinents assigned
         assertEquals(0, taskDto.getChanges().values().stream().filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null).count());
@@ -94,7 +96,7 @@ class ContinentalDriftNewTileAssignerTest {
                 .map(Continent::getId)
                 .get());
 
-        // asserts that there is only created one continent
+        // asserts that only one continent is created
         assertEquals(1,taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
                 .map(ContinentalChangesDto::getNewMockContinent)
@@ -102,7 +104,7 @@ class ContinentalDriftNewTileAssignerTest {
                 .filter(distinctByKey(Continent::getId))
                 .count());
 
-        //assert that all the new tiles have the same mock continent.
+        //assert that all the new coordinates have the same mock continent.
         assertEquals(5, taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
                 .map(ContinentalChangesDto::getNewMockContinent)
@@ -111,7 +113,7 @@ class ContinentalDriftNewTileAssignerTest {
                 .getCoordinates()
                 .size());
 
-        // Assert that only four tiles that are adjecent to the mockcontinent
+        // Assert that only four coordinates that are adjecent to the mockcontinent
         // checks the possible continent to be merged with
         assertEquals(4, taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
@@ -173,9 +175,19 @@ class ContinentalDriftNewTileAssignerTest {
 
         world.setContinents(new HashSet<>(Arrays.asList(continentX, continentY)));
 
+        generateCoordinates(world);
         assignTiles(world, continentX, continentY, continentZ);
+        world.getContinents().removeIf(continent -> continent.getType() == null);
 
         return world;
+    }
+
+    private void generateCoordinates(World world) {
+        for (int xCoordinate = 1; xCoordinate <= world.getXSize(); xCoordinate++) {
+            for (int yCoordinate = 1; yCoordinate <= world.getYSize(); yCoordinate++) {
+                world.getCoordinates().add(new Coordinate(xCoordinate, yCoordinate, world, new Continent(world, null)));
+            }
+        }
     }
 
     private void assignTiles(World world, Continent x, Continent y, Continent z) {
@@ -183,17 +195,17 @@ class ContinentalDriftNewTileAssignerTest {
         coordinateHelper.getAllPossibleCoordinates(world).forEach(
                 coordinate -> {
                     if(coordinate.getXCoord()+coordinate.getYCoord() <4){
-                        Tile tile = new Tile(coordinate, world, x);
-                        tile.setHeight(8);
-                        world.getTiles().add(tile);
+                        coordinate.getTile().setHeight(8);
+                        coordinate.setContinent(x);
+                        x.getCoordinates().add(coordinate);
                     } else if (coordinate.getYCoord()==3 && coordinate.getXCoord() == 3){
-                        Tile tile = new Tile(coordinate, world, z);
-                        tile.setHeight(2);
-                        world.getTiles().add(tile);
+                        coordinate.getTile().setHeight(2);
+                        coordinate.setContinent(z);
+                        z.getCoordinates().add(coordinate);
                     } else {
-                        Tile tile = new Tile(coordinate, world, y);
-                        tile.setHeight(4);
-                        world.getTiles().add(tile);
+                        coordinate.getTile().setHeight(4);
+                        coordinate.setContinent(y);
+                        y.getCoordinates().add(coordinate);
                     }
                 }
         );

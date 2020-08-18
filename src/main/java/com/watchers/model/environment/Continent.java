@@ -1,9 +1,11 @@
 package com.watchers.model.environment;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.helper.RandomHelper;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Direction;
 import lombok.Data;
 
@@ -31,8 +33,8 @@ public class Continent {
 
     @JsonIgnore
     @JsonProperty("coordinates")
-    @OneToMany(mappedBy = "continent")
-    private Set<Tile> tiles = new HashSet<>();
+    @OneToMany(mappedBy = "continent", orphanRemoval = true)
+    private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("type")
     private SurfaceType type;
@@ -43,9 +45,12 @@ public class Continent {
 
     public Continent(World world, SurfaceType surfaceType){
         this.world = world;
+        this.world.getContinents().add(this);
         this.type = surfaceType;
     }
 
+    @JsonCreator
+    @SuppressWarnings("unused")
     private Continent(){}
 
     /**
@@ -53,13 +58,13 @@ public class Continent {
      * @return the continent which direction has been changed on the x and y axis.
      * These can be possitive or negative (left, right, up down).
      */
-    public Continent assignNewDriftDirection(int driftVelocity){
+    public Continent assignNewDriftDirection(int driftVelocity, World world){
         int xVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
         int yVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
 
         Direction direction = new Direction(xVelocity, yVelocity);
         this.setDirection(direction);
-        this.getWorld().setLastContinentInFlux(this.getId());
+        world.setLastContinentInFlux(this.getId());
 
         return this;
     }
@@ -69,7 +74,7 @@ public class Continent {
         return "Continent{" +
                 "id=" + id +
                 ", world=" + world.getId() +
-                ", tiles=" + tiles.size() +
+                ", coordinates=" + coordinates.size() +
                 ", type=" + type +
                 ", direction=" + direction.toString() +
                 '}';

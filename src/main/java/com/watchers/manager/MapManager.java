@@ -3,6 +3,7 @@ package com.watchers.manager;
 import com.watchers.components.continentaldrift.ContinentalDriftDirectionChanger;
 import com.watchers.model.actor.AnimalType;
 import com.watchers.model.actor.animals.AnimalFactory;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
@@ -40,8 +41,8 @@ public class MapManager {
     @Transactional("inmemoryDatabaseTransactionManager")
     public World getWorld(Long worldId, boolean initiated) {
        World world = worldRepositoryInMemory.findById(worldId).orElseGet(() -> createWorld(worldId));
-        log.info("world loaden from memory with: "+ (world.getTiles().stream().map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()) + " height");
-        log.info("the loaded world contains: " + world.getTiles().size() + " number of tiles");
+        log.info("world loaden from memory with: "+ (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()) + " height");
+        log.info("the loaded world contains: " + world.getCoordinates().size() + " number of coordinates");
        if(initiated) {
            world.fillTransactionals();
        }
@@ -62,7 +63,7 @@ public class MapManager {
     public void seedLife(World world, Long xCoord, Long yCoord) {
         Tile seedingTile = world.getTile(xCoord, yCoord);
         AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
-        seedingTile.getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile));
+        seedingTile.getCoordinate().getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile.getCoordinate()));
         worldRepositoryInMemory.save(world);
     }
 

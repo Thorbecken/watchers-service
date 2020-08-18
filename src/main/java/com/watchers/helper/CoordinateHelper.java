@@ -17,15 +17,7 @@ public class CoordinateHelper {
     public static int RIGHT = 1;
 
     public List<Coordinate> getAllPossibleCoordinates(World world) {
-        List<Coordinate> coordinates = new ArrayList<>();
-        for (long x = 1; x <= world.getXSize(); x++) {
-            for (long y = 1; y <= world.getYSize(); y++) {
-                Coordinate coordinate =new Coordinate(x,y, world);
-                coordinate.setWorld(world);
-                coordinates.add(coordinate);
-            }
-        }
-        return coordinates;
+        return new ArrayList<>(world.getCoordinates());
     }
 
     public static List<Coordinate> getAllOutersideCoordinates(List<Coordinate> coordinates){

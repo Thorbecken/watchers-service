@@ -54,8 +54,8 @@ public class ContinentalDriftWorldAdjuster {
         Continent assignedContinent = dto.getNewMockContinent().getContinent();
         Tile tile = world.getTile(dto.getKey());
         tile.clear();
-        tile.setContinent(assignedContinent);
-        assignedContinent.getTiles().add(tile);
+        tile.getCoordinate().setContinent(assignedContinent);
+        assignedContinent.getCoordinates().add(dto.getKey());
         tile.setHeight(newHeight);
 
         world.getContinents().add(assignedContinent);

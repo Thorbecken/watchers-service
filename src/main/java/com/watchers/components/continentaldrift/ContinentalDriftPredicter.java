@@ -25,14 +25,14 @@ public class ContinentalDriftPredicter {
         taskDto.getWorld().getContinents().forEach(continent -> predictContinentalMovement(continent, taskDto.getNewTileLayout()));
     }
 
-    private void predictContinentalMovement(Continent continent, Map<Coordinate, List<Tile>> buttomLayer){
+    private void predictContinentalMovement(Continent continent, Map<Coordinate, List<Tile>> newTileLayout){
         final int xVelocity = continent.getDirection().getXVelocity();
         final int yVelocity = continent.getDirection().getYVelocity();
-        continent.getTiles()
-                .forEach(tile -> {
-                    Coordinate coordinate = tile.getCoordinate().calculateDistantCoordinate(xVelocity, yVelocity);
-                    List<Tile> tiles = buttomLayer.get(coordinate);
-                    tiles.add(tile);
+        continent.getCoordinates()
+                .forEach(coordinate -> {
+                    Coordinate predictedCoordinate = coordinate.calculateDistantCoordinate(xVelocity, yVelocity);
+                    List<Tile> tiles = newTileLayout.get(predictedCoordinate);
+                    tiles.add(coordinate.getTile());
                 });
     }
 

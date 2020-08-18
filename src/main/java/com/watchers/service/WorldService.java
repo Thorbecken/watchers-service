@@ -4,10 +4,10 @@ import com.watchers.manager.ContinentalDriftManager;
 import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.TileRepositoryInMemory;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,6 @@ public class WorldService {
 
     private WorldRepositoryInMemory worldRepositoryInMemory;
     private WorldRepositoryPersistent worldRepositoryPersistent;
-    private TileRepositoryInMemory tileRepositoryInMemory;
     private MapManager mapManager;
     private ContinentalDriftManager continentalDriftManager;
     private List<Long> activeWorldIds = new ArrayList<>();
@@ -35,13 +34,11 @@ public class WorldService {
     public WorldService(MapManager mapManager,
                         WorldRepositoryInMemory worldRepositoryInMemory,
                         WorldRepositoryPersistent worldRepositoryPersistent,
-                        ContinentalDriftManager continentalDriftManager,
-                        TileRepositoryInMemory tileRepositoryInMemory){
+                        ContinentalDriftManager continentalDriftManager){
         this.worldRepositoryInMemory = worldRepositoryInMemory;
         this.mapManager = mapManager;
         this.worldRepositoryPersistent = worldRepositoryPersistent;
         this.continentalDriftManager = continentalDriftManager;
-        this.tileRepositoryInMemory = tileRepositoryInMemory;
     }
 
     @PostConstruct
@@ -82,9 +79,8 @@ public class WorldService {
     @Transactional("persistentDatabaseTransactionManager")
     public void saveWorld(Long id){
         World world = mapManager.getWorld(id, false);
-        log.info("pre persistants save: "+ world.getTiles().stream().map(Tile::getHeight).reduce(0L, (x, y) -> x+y));
         worldRepositoryInMemory.save(world);
-        log.info("post persistanc esave: "+ world.getTiles().stream().map(Tile::getHeight).reduce(0L, (x, y) -> x+y));
+
         worldRepositoryPersistent.save(world);
     }
 
@@ -94,18 +90,18 @@ public class WorldService {
 
     @Transactional("inmemoryDatabaseTransactionManager")
     private void processTurn(World world){
-        log.trace("There is currently " + world.getTiles().stream()
+        log.trace("There is currently " + world.getCoordinates().stream().map(Coordinate::getTile)
                         .map(Tile::getBiome)
                         .map(Biome::getCurrentFood)
                         .reduce(0f, (tile1, tile2) -> tile1 + tile2)
         + "food in the world"
         );
-        log.trace("The total fertility in the world amounts to " + world.getTiles().parallelStream()
+        log.trace("The total fertility in the world amounts to " + world.getCoordinates().parallelStream().map(Coordinate::getTile)
                 .map(Tile::getBiome)
                 .map(Biome::getFertility)
                 .reduce(0f, (tile1, tile2) -> tile1 + tile2, (tile1, tile2) -> tile1 + tile2)
                 + "food");
-        world.getTiles().parallelStream().forEach(
+        world.getCoordinates().parallelStream().map(Coordinate::getTile).forEach(
                 worldTile -> worldTile.getBiome().processParallelTask()
         );
 
@@ -121,8 +117,8 @@ public class WorldService {
                 .collect(Collectors.toList());
         log.trace(currentDeads.size() + " Actors died this turn");
         currentDeads.forEach( deadActor -> {
-            deadActor.getTile().getActors().remove(deadActor);
-            deadActor.setTile(null);
+            deadActor.getCoordinate().getActors().remove(deadActor);
+            deadActor.setCoordinate(null);
         });
 
         log.trace(world.getActorList().size() + " Actors remained before cleansing the dead this turn");

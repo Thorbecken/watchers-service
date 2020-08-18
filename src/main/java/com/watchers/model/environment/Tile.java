@@ -3,7 +3,6 @@ package com.watchers.model.environment;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.watchers.model.actor.Actor;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.MockTile;
 import lombok.Data;
@@ -15,9 +14,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -35,63 +31,35 @@ public class Tile {
     @Column(name = "tile_id", nullable = false)
     private Long id;
 
-    @JsonProperty("coordinate")
-    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     private Coordinate coordinate;
 
     @JsonProperty("height")
     @Column(name = "height")
     private long height;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "world_id", nullable = false)
-    private World world;
-
     @JsonProperty("biome")
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL, orphanRemoval = true)
     private Biome biome;
 
-    @JsonProperty("actors")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL)
-    private Set<Actor> actors = new HashSet<>();
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "continent_id", nullable = false)
-    private Continent continent;
 
     @JsonProperty("surfaceType")
     @Column(name = "surfaceType")
     private SurfaceType surfaceType;
 
-    public Tile(long xCoord, long yCoord, World world, Continent continent){
-        this.coordinate = new Coordinate(xCoord, yCoord, world);
-        this.continent = continent;
-        this.surfaceType = continent.getType();
-        this.biome = new Biome(1, 10, 0.5f, this);
-        this.world = world;
-    }
-
-    public Tile(Coordinate coordinate, World world, Continent continent){
-        this.coordinate = new Coordinate(coordinate.getXCoord(), coordinate.getYCoord(), world);
-        this.continent = continent;
-        continent.getTiles().add(this);
+    public Tile(Coordinate coordinate, Continent continent){
+        this.coordinate = coordinate;
         this.surfaceType = continent.getType();
         this.biome = new Biome(2, 10, 0.25f, this);
-        this.world = world;
     }
 
     @JsonCreator
+    @SuppressWarnings("unused")
     private Tile(){}
 
     @JsonIgnore
-    public Set<Actor> getConcurrentActors() {
-        return new HashSet<>(actors);
-    }
-
-
-    @JsonIgnore
+    @SuppressWarnings("unused")
     public List<Tile> getNeighboursWithinRange(List<Tile> tiles, int range) {
         if(range>=1) {
             List<Tile> returnList = new ArrayList<>();
@@ -110,7 +78,7 @@ public class Tile {
     public List<Tile> getNeighbours() {
         List<Tile> returnTiles = new ArrayList<>();
         coordinate.getNeighbours().forEach(
-                coordinate -> returnTiles.add(world.getTile(coordinate.getXCoord(), coordinate.getYCoord()))
+                coordinate -> returnTiles.add(coordinate.getWorld().getTile(coordinate.getXCoord(), coordinate.getYCoord()))
         );
 
         return returnTiles;
@@ -141,24 +109,22 @@ public class Tile {
     }
 
     public void clear(){
-        this.continent.getTiles().remove(this);
-        this.continent = null;
-        this.actors = new HashSet<>();
+        this.coordinate.getContinent().getCoordinates().remove(this.coordinate);
         this.height = 0;
         this.biome.clear();
     }
 
     public void transferData(MockTile mockTile){
         this.biome.transferData(mockTile);
-        mockTile.getActorSet().addAll(this.actors);
+        mockTile.getActorSet().addAll(this.coordinate.getActors());
     }
 
     public void setData(MockTile mockTile) {
-        this.continent = mockTile.getContinent();
-        mockTile.getContinent().getTiles().add(this);
+        this.coordinate.setContinent(mockTile.getContinent());
+        this.coordinate.getContinent().getCoordinates().add(this.coordinate);
         this.biome.addCurrentFood(mockTile.getFood());
         this.height = mockTile.getHeight();
-        this.actors = mockTile.getActorSet();
+        this.coordinate.getActors().addAll(mockTile.getActorSet());
         this.surfaceType = mockTile.getSurfaceType();
     }
 
@@ -182,7 +148,6 @@ public class Tile {
         return "Tile{" +
                 "coordinate=" + coordinate.toString() +
                 ", height=" + height +
-                ", actors=" + actors.size() +
                 ", surfaceType=" + surfaceType +
                 '}';
     }

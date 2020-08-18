@@ -3,6 +3,9 @@ package com.watchers.model.common;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.actor.Actor;
+import com.watchers.model.environment.Continent;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,11 +19,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -48,16 +55,25 @@ public class Coordinate {
     @Column(name = "yCoord")
     private long yCoord;
 
-    public Coordinate(long xCoord, long yCoord, World world) {
-        this.xCoord = xCoord;
-        this.yCoord = yCoord;
-        this.world = world;
-    }
+    @JsonProperty("tile")
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
+    private Tile tile;
 
-    public Coordinate(long xCoord, long yCoord, Coordinate baseCoordinate) {
-        this.xCoord = xCoord;
+    @JsonProperty("actors")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL)
+    private Set<Actor> actors = new HashSet<>();
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Continent continent;
+
+    public Coordinate(long xCoord, long yCoord, World world, Continent continent) {
         this.yCoord = yCoord;
-        this.world = baseCoordinate.getWorld();
+        this.xCoord = xCoord;
+        this.world = world;
+        this.continent = continent;
+
+        this.tile = new Tile(this, continent);
     }
 
     @JsonIgnore
@@ -66,16 +82,16 @@ public class Coordinate {
         boolean up = yCoord < this.world.getYSize();
 
         List<Coordinate> returnCoordinates = new ArrayList<>();
-        returnCoordinates.add(new Coordinate(getLeftCoordinate(), yCoord, world));
-        returnCoordinates.add(new Coordinate(getRightCoordinate(), yCoord, world));
+        returnCoordinates.add(world.getCoordinate(getLeftCoordinate(), yCoord));
+        returnCoordinates.add(world.getCoordinate(getRightCoordinate(), yCoord));
 
 
         if(down) {
-            Coordinate downCoordinate = new Coordinate(xCoord, yCoord - 1, world);
+            Coordinate downCoordinate = world.getCoordinate(xCoord, yCoord - 1);
             returnCoordinates.add(downCoordinate);
         }
         if(up) {
-            Coordinate upCoordinate = new Coordinate(xCoord, yCoord + 1, world);
+            Coordinate upCoordinate = world.getCoordinate(xCoord, yCoord + 1);
             returnCoordinates.add(upCoordinate);
         }
 
@@ -137,7 +153,7 @@ public class Coordinate {
     public Coordinate calculateDistantCoordinate(int xVelocity, int yVelocity) {
         long newX = this.getXCoordinateFromTile(xVelocity);
         long newY = this.getYCoordinateFromTile(yVelocity);
-        return new Coordinate(newX, newY, this);
+        return world.getCoordinate(newX, newY);
     }
 
     private long decreaseDistanceToZero(long distance){
@@ -173,6 +189,7 @@ public class Coordinate {
     }
 
     @JsonIgnore
+    @SuppressWarnings("unused")
     public List<Coordinate> getCoordinatesWithinRange(int range) {
         return getCoordinatesWithinRange(Collections.singletonList(this), range);
     }

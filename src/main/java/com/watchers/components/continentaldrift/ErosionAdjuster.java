@@ -29,9 +29,9 @@ public class ErosionAdjuster {
             erosionMap.put(coordinate, 0L);
         });
 
-        Set<Tile> tiles = taskDto.getWorld().getTiles();
+        Set<Coordinate> coordinates = taskDto.getWorld().getCoordinates();
 
-        tiles.forEach(tile -> {
+        coordinates.stream().map(Coordinate::getTile).forEach(tile -> {
             List<Tile> neighbouringTiles = tile.getNeighbours();
             Tile lowestNeighbour = neighbouringTiles.stream()
                     .min(Comparator.comparing(Tile::getHeight))

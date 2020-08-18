@@ -1,6 +1,7 @@
 package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.TileDefined;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.*;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +30,9 @@ class WorldFactory {
             boolean land = random.nextBoolean();
             Continent generatedContinent = new Continent(world, land ? SurfaceType.PLAIN : SurfaceType.OCEANIC);
 
-            Tile startingTile = generateStartingTile(world, generatedContinent);
+            Coordinate startingCoordinate = generateStartingCoordinate(world, generatedContinent);
 
-            generatedContinent.getTiles().add(startingTile);
-            world.getContinents().add(generatedContinent);
+            generatedContinent.getCoordinates().add(startingCoordinate);
         }
 
         fillInWorld(world);
@@ -48,7 +48,8 @@ class WorldFactory {
 
     private void specifyWaterZones(World world) {
         System.out.println("sepperating the oceans");
-        world.getTiles().stream()
+        world.getCoordinates().stream()
+                .map(Coordinate::getTile)
                 .filter(tile -> SurfaceType.OCEANIC.equals(tile.getSurfaceType()))
                 .forEach(
                 tile -> {
@@ -66,7 +67,7 @@ class WorldFactory {
         WorldFactoryDTO dto = new WorldFactoryDTO(world);
         List<MockContinent> mockContinents = new ArrayList<>();
         world.getContinents().forEach(
-                continent -> mockContinents.add(new MockContinent(continent))
+                continent -> mockContinents.add(new MockContinent(continent, world))
                 );
 
         while(dto.getOpenCoordinates().size() >= 1){
@@ -80,30 +81,24 @@ class WorldFactory {
 
         System.out.println("Left the loop");
 
-        // opschonen lijsten
-        world.setTiles(new HashSet<>());
+        world.getCoordinates().clear();
+        world.getContinents().removeIf(continent -> continent.getType() == null);
 
-        // invullen lijsten
-        mockContinents.forEach(
-            mockContinent -> {
-                       Continent continent = mockContinent.generateContinent();
-                       world.getTiles().addAll(continent.getTiles());
-                   }
-        );
+        mockContinents.forEach(MockContinent::generateContinent);
     }
 
-    private Tile generateStartingTile(World world, Continent continent) {
+    private Coordinate generateStartingCoordinate(World world, Continent continent) {
         long xCoord =  new RandomDataGenerator().nextLong(1, world.getXSize());
         long yCoord =  new RandomDataGenerator().nextLong(1, world.getYSize());
-        Tile startingTile = new Tile(xCoord, yCoord, world, continent);
+        Coordinate startingCoordinate = new Coordinate(xCoord, yCoord, world, continent);
         if (world.getContinents().stream().anyMatch(
-                continent1 -> continent.getTiles().stream().anyMatch(
-                        startingTile::coordinateEquals
+                continent1 -> continent.getCoordinates().stream().anyMatch(
+                        startingCoordinate::equals
                 )
         )) {
-           return generateStartingTile(world, continent);
+           return generateStartingCoordinate(world, continent);
         } else {
-            return startingTile;
+            return startingCoordinate;
         }
     }
 }

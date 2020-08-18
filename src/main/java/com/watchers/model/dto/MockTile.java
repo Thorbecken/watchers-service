@@ -20,8 +20,8 @@ public class MockTile {
 
     public MockTile(Tile tile) {
         this.height = tile.getHeight();
-        this.continent = tile.getContinent();
-        this.actorSet.addAll(tile.getActors());
+        this.continent = tile.getCoordinate().getContinent();
+        this.actorSet.addAll(tile.getCoordinate().getActors());
         this.surfaceType = tile.getSurfaceType();
         this.food = tile.getBiome().getCurrentFood();
     }

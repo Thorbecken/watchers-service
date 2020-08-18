@@ -1,7 +1,7 @@
 package com.watchers.model.actor.animals;
 
 import com.watchers.model.actor.*;
-import com.watchers.model.environment.Tile;
+import com.watchers.model.common.Coordinate;
 
 import javax.persistence.Entity;
 import java.util.List;
@@ -10,13 +10,13 @@ import java.util.List;
 public class Whale extends Animal {
 
     @Override
-    public void generateOffspring(Tile tile, float foodPassed) {
-        tile.getActors().add(new Whale(tile, foodPassed));
+    public void generateOffspring(Coordinate coordinate, float foodPassed) {
+        coordinate.getActors().add(new Whale(coordinate, foodPassed));
     }
 
     private Whale(){}
 
-    public Whale(Tile tile, float StartingFood){
+    public Whale(Coordinate coordinate, float StartingFood){
         super.setFoodReserve(StartingFood);
         super.setMaxFoodReserve(20f);
         super.setForaging(2f);
@@ -27,9 +27,9 @@ public class Whale extends Animal {
         super.setAnimalType(AnimalType.WHALE);
         super.setNaturalHabitat(NaturalHabitat.AQUATIC);
         super.setStateType(StateType.ALIVE);
-        super.setTile(tile);
+        super.setCoordinate(coordinate);
 
-        List<Actor> newActors = getTile().getWorld().getNewActors();
+        List<Actor> newActors = getCoordinate().getWorld().getNewActors();
         if(newActors != null){
             newActors.add(this);
         }

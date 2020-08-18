@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.World;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +30,8 @@ public class TileDefined {
         this.mountainHight = mountainHight;
     }
 
-    public World setStartingHeights(World world){
-        world.getTiles().parallelStream().forEach(
+    public void setStartingHeights(World world){
+        world.getCoordinates().parallelStream().map(Coordinate::getTile).forEach(
                 tile -> {
                     switch (tile.getSurfaceType()){
                         case MOUNTAIN: tile.setHeight(mountainHight);
@@ -49,13 +50,12 @@ public class TileDefined {
                     }
                 }
         );
-        return world;
     }
 
 
     public void process(World world) {
 
-        world.getTiles().parallelStream().forEach(tile -> {
+        world.getCoordinates().parallelStream().map(Coordinate::getTile).forEach(tile -> {
             long height = tile.getHeight();
             if(height <= deepOceanHight){
                 tile.setSurfaceType(SurfaceType.DEEP_OCEAN);

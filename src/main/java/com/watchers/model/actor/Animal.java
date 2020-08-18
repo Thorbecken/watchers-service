@@ -1,7 +1,7 @@
 package com.watchers.model.actor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.watchers.model.environment.Tile;
+import com.watchers.model.common.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -31,7 +31,7 @@ public abstract class Animal extends Actor {
     private int movement;
     private AnimalType animalType;
 
-    public abstract void generateOffspring(Tile tile, float foodPassed);
+    public abstract void generateOffspring(Coordinate coordinate, float foodPassed);
 
     private void metabolize(){
         if(metabolisme > foodReserve){
@@ -42,33 +42,33 @@ public abstract class Animal extends Actor {
     }
 
     private void move(){
-        float localFood = getTile().getBiome().getCurrentFood();
+        float localFood = getCoordinate().getTile().getBiome().getCurrentFood();
         if (localFood < foraging) {
-            getTile().getNeighbours().stream()
-                    .filter(tile -> this.getNaturalHabitat().movavableSurfaces
-                            .contains(tile.getSurfaceType()))
-                    .max((tile1, tile2) -> Math.round(tile1.getBiome().getCurrentFood() - tile2.getBiome().getCurrentFood()))
+            getCoordinate().getNeighbours().stream()
+                    .filter(coordinate -> this.getNaturalHabitat().movavableSurfaces
+                            .contains(coordinate.getTile().getSurfaceType()))
+                    .max((coordinate1, coordinate2) -> Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood()))
                     .ifPresent(this::moveToTile);
         }
     }
 
-    private void moveToTile(Tile tile) {
-        getTile().getActors().remove(this);
-        setTile(tile);
-        getTile().getActors().add(this);
+    private void moveToTile(Coordinate coordinate) {
+        getCoordinate().getActors().remove(this);
+        setCoordinate(coordinate);
+        getCoordinate().getActors().add(this);
     }
 
     private void eat(){
-        float localFood = getTile().getBiome().getCurrentFood();
+        float localFood = getCoordinate().getTile().getBiome().getCurrentFood();
         if(localFood >= foraging){
             foodReserve = foodReserve + foraging;
-            getTile().getBiome().setCurrentFood(localFood - foraging);
+            getCoordinate().getTile().getBiome().setCurrentFood(localFood - foraging);
         }
     }
 
     private void reproduce(){
         if(reproductionRate <= (foodReserve / maxFoodReserve)){
-            generateOffspring(getTile(), foodReserve/2);
+            generateOffspring(getCoordinate(), foodReserve/2);
             foodReserve = foodReserve/2;
         }
     }

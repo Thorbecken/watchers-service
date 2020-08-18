@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class ContinentTest {
 
     World world;
@@ -28,7 +26,7 @@ class ContinentTest {
     @ParameterizedTest
     @CsvSource({"1", "2", "3"})
     void assignNewDriftDirection(int driftVelocity) {
-        continent.assignNewDriftDirection(driftVelocity);
+        continent.assignNewDriftDirection(driftVelocity, world);
 
         Assert.assertTrue("drift out of bound!", (driftVelocity*driftVelocity)>= continent.getDirection().getXVelocity()*continent.getDirection().getXVelocity());
         Assert.assertTrue("drift out of bound!", (driftVelocity*driftVelocity)>= continent.getDirection().getYVelocity()*continent.getDirection().getYVelocity());

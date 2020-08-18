@@ -2,7 +2,7 @@ package com.watchers.model.actor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.SerialTask;
-import com.watchers.model.environment.Tile;
+import com.watchers.model.common.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -26,7 +26,7 @@ public abstract class Actor implements SerialTask {
     @EqualsAndHashCode.Exclude
     @ManyToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "tile_id")
-    private Tile tile;
+    private Coordinate coordinate;
 
 
     private StateType stateType;

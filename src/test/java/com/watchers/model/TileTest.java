@@ -1,5 +1,6 @@
 package com.watchers.model;
 
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
@@ -18,12 +19,12 @@ class TileTest {
 
     @BeforeEach
     void setup(){
+        this.world = new World(3, 3);
         Continent continent = new Continent(world, SurfaceType.OCEANIC);
 
-        this.world = new World(3, 3);
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {
-                world.getTiles().add(new Tile(x,y,world, continent));
+                world.getCoordinates().add(new Coordinate(x,y,world, continent));
             }
         }
     }

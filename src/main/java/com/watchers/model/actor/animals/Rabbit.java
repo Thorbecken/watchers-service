@@ -1,7 +1,7 @@
 package com.watchers.model.actor.animals;
 
 import com.watchers.model.actor.*;
-import com.watchers.model.environment.Tile;
+import com.watchers.model.common.Coordinate;
 
 import javax.persistence.Entity;
 import java.util.List;
@@ -9,13 +9,13 @@ import java.util.List;
 @Entity
 public class Rabbit extends Animal {
     @Override
-    public void generateOffspring(Tile tile, float foodPassed) {
-        tile.getActors().add(new Rabbit(tile, foodPassed));
+    public void generateOffspring(Coordinate coordinate, float foodPassed) {
+        coordinate.getActors().add(new Rabbit(coordinate, foodPassed));
     }
 
     private Rabbit(){}
 
-    public Rabbit(Tile tile, float StartingFood){
+    public Rabbit(Coordinate coordinate, float StartingFood){
         super.setFoodReserve(StartingFood);
         super.setMaxFoodReserve(5f);
         super.setForaging(1f);
@@ -26,9 +26,9 @@ public class Rabbit extends Animal {
         super.setAnimalType(AnimalType.RABBIT);
         super.setNaturalHabitat(NaturalHabitat.TERRESTRIAL);
         super.setStateType(StateType.ALIVE);
-        super.setTile(tile);
+        super.setCoordinate(coordinate);
 
-        List<Actor> newActors = getTile().getWorld().getNewActors();
+        List<Actor> newActors = getCoordinate().getWorld().getNewActors();
         if(newActors != null){
             newActors.add(this);
         }

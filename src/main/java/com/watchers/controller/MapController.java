@@ -1,7 +1,7 @@
 package com.watchers.controller;
 
 import com.watchers.manager.MapManager;
-import com.watchers.model.environment.Tile;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.World;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -23,7 +23,7 @@ public class MapController {
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId){
         Assert.notNull(worldId, "No world id was found");
         World world = mapManager.getUninitiatedWorld(worldId);
-        System.out.println("Returned a world with " + world.getTiles().stream().map(Tile::getActors).reduce(new HashSet<>(), (x, y) -> {x.addAll(y); return x;}).size() + " actors in it");
+        System.out.println("Returned a world with " + world.getCoordinates().stream().map(Coordinate::getActors).reduce(new HashSet<>(), (x, y) -> {x.addAll(y); return x;}).size() + " actors in it");
         return ResponseEntity.ok(world);
     }
 }

@@ -22,19 +22,19 @@ public class WorldFactoryDTO {
 
     private List<Coordinate> generateOpenAndTakenCoordinates(World world) {
         List<Coordinate> openCoordinates = new ArrayList<>();
-        Continent mockContinent = new Continent(world, SurfaceType.OCEANIC);
-        mockContinent.setType(SurfaceType.OCEANIC);
 
         for (long xCoord = 1L; xCoord <= world.getXSize(); xCoord++){
             for (long yCoord = 1L; yCoord <= world.getYSize(); yCoord++){
-                Coordinate coordinate = new Coordinate(xCoord, yCoord, world);
+                Coordinate coordinate = new Coordinate(xCoord, yCoord, world, new Continent(world, null));
                 openCoordinates.add(coordinate);
             }
         }
 
+        world.getCoordinates().addAll(openCoordinates);
+
         List<Coordinate> startingCoordinates = openCoordinates.stream().filter(
                 openCoordinate -> world.getContinents().stream().anyMatch(
-                        continent -> continent.getTiles().stream().map(Tile::getCoordinate).anyMatch(
+                        continent -> continent.getCoordinates().stream().anyMatch(
                                 continentCoordinate -> continentCoordinate.equals(openCoordinate)
                         )
                 )
@@ -46,7 +46,7 @@ public class WorldFactoryDTO {
 
         return openCoordinates.stream().filter(
                 coordinate -> world.getContinents().stream().anyMatch(
-                        continent -> continent.getTiles().stream().map(Tile::getCoordinate).anyMatch(
+                        continent -> continent.getCoordinates().stream().anyMatch(
                                 continentCoordinate -> !continentCoordinate.equals(coordinate)
                         )
                 )

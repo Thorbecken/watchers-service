@@ -3,6 +3,7 @@ package com.watchers.components.continentaldrift;
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
@@ -42,7 +43,7 @@ class ContinentalDriftWorldAdjusterTest {
     void processChanges(int deficit) {
         deficit += world.getHeightDeficit();
         world.setHeightDeficit(deficit);
-        long numberOfNewTilesNeeded = taskDto.getWorld().getTiles().size()-taskDto.getNewTileLayout().values().stream().filter(tiles ->  tiles.size() > 0).count();
+        long numberOfNewTilesNeeded = taskDto.getWorld().getCoordinates().size()-taskDto.getNewTileLayout().values().stream().filter(tiles ->  tiles.size() > 0).count();
 
         long startingHeight = taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
@@ -57,10 +58,11 @@ class ContinentalDriftWorldAdjusterTest {
         continentalDriftWorldAdjuster.process(taskDto);
 
         // assertions
-        assertEquals(9, world.getTiles().size());
-        assertTrue(world.getTiles().stream().noneMatch(tile -> tile.getHeight() == 0L));
+        assertEquals(9, world.getCoordinates().stream().filter(coordinate -> coordinate.getTile() != null).count());
+        assertTrue(world.getCoordinates().stream().map(Coordinate::getTile).noneMatch(tile -> tile.getHeight() == 0L));
 
-        long endHeight = world.getTiles().stream()
+        long endHeight = world.getCoordinates().stream()
+                .map(Coordinate::getTile)
                 .map(Tile::getHeight)
                 .reduce((x,y)-> x+y)
                 .orElse(0L);

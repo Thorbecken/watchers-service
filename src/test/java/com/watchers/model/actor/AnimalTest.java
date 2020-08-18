@@ -1,6 +1,7 @@
 package com.watchers.model.actor;
 
 import com.watchers.model.actor.animals.Rabbit;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,16 +21,16 @@ class AnimalTest {
 
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {
-                Tile tile = new Tile(x, y, rabbitWorld, rabbitContinent);
-                tile.setBiome(new Biome(2f, 3f, 1f, tile));
-                rabbitWorld.getTiles().add(tile);
+                Coordinate coordinate = new Coordinate(x, y, rabbitWorld, rabbitContinent);
+                coordinate.getTile().setBiome(new Biome(2f, 3f, 1f, coordinate.getTile()));
+                rabbitWorld.getCoordinates().add(coordinate);
             }
         }
 
-        startingTile = rabbitWorld.getTiles().stream().findFirst().get();
+        startingTile = rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).findFirst().get();
 
-        rabbit = new Rabbit(startingTile, 1f);
-        startingTile.getActors().add(rabbit);
+        rabbit = new Rabbit(startingTile.getCoordinate(), 1f);
+        startingTile.getCoordinate().getActors().add(rabbit);
     }
 
 
@@ -37,28 +38,28 @@ class AnimalTest {
     void processTurn(){
         assertEquals(1f, rabbit.getFoodReserve());
         rabbit.processSerialTask();
-        rabbitWorld.getTiles().forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
         assertEquals(1.5f, rabbit.getFoodReserve());
-        rabbitWorld.getTiles().forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
         rabbit.processSerialTask();
         assertEquals(2.0f, rabbit.getFoodReserve());
-        rabbitWorld.getTiles().forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
         rabbit.processSerialTask();
         assertEquals(2.5f, rabbit.getFoodReserve());
-        rabbitWorld.getTiles().forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
         rabbit.processSerialTask();
         assertEquals(3.0f, rabbit.getFoodReserve());
-        rabbitWorld.getTiles().forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
         rabbit.processSerialTask();
         assertEquals(3.5f, rabbit.getFoodReserve());
-        rabbitWorld.getTiles().forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
         rabbit.processSerialTask();
         assertEquals(2.0f, rabbit.getFoodReserve());
-        rabbitWorld.getTiles().forEach(tile -> tile.getBiome().processParallelTask());
-        assertEquals(2, startingTile.getActors().size());
-        startingTile.getActors().forEach(Actor::processSerialTask);
-        startingTile.getActors().forEach(Actor::processSerialTask);
-        assertEquals(1, startingTile.getActors().size());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
+        assertEquals(2, startingTile.getCoordinate().getActors().size());
+        startingTile.getCoordinate().getActors().forEach(Actor::processSerialTask);
+        startingTile.getCoordinate().getActors().forEach(Actor::processSerialTask);
+        assertEquals(1, startingTile.getCoordinate().getActors().size());
     }
 
     @Test

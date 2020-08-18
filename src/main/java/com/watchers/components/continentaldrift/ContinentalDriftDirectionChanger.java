@@ -16,7 +16,7 @@ public class ContinentalDriftDirectionChanger {
     private int drifFlux;
 
     public void assignFirstOrNewDriftDirections(World world){
-        world.getContinents().forEach(continent -> continent.assignNewDriftDirection(driftVelocity));
+        world.getContinents().forEach(continent -> continent.assignNewDriftDirection(driftVelocity, world));
     }
 
     public ContinentalDriftDirectionChanger(@Value("${watch.driftVelocity}") int driftVelocity, @Value("${watch.driftFlux}") int drifFlux) {
@@ -49,9 +49,9 @@ public class ContinentalDriftDirectionChanger {
 
             if(drifFlux >= continents.size()){
                 //Just a speed hack, does the same as below but without a lot of looping around.
-                continents.forEach(continent -> continent.assignNewDriftDirection(driftVelocity));
+                continents.forEach(continent -> continent.assignNewDriftDirection(driftVelocity, world));
             } else {
-                changeContinentalDriftDirections(continents, drifFlux, driftVelocity);
+                changeContinentalDriftDirections(continents, drifFlux, driftVelocity, world);
             }
         }
 
@@ -60,17 +60,18 @@ public class ContinentalDriftDirectionChanger {
          * @param continents List of the continents of the world
          * @param drifFlux the amount of continents that will change their course
          * @param driftVelocity the max direction the continent can have on the X or Y axis.
+         * @param world the world in which the continent exists
          */
-        private void changeContinentalDriftDirections(List<Continent> continents, int drifFlux, int driftVelocity){
+        private void changeContinentalDriftDirections(List<Continent> continents, int drifFlux, int driftVelocity, World world){
             for (long i = 0; i < continents.size() ; i++) {
                 Continent currentContinent = continents.get((int)i);
 
-                searchAndChangeDirection(currentContinent, driftVelocity);
+                searchAndChangeDirection(currentContinent, driftVelocity, world);
 
                 if(currentDriftChanges == drifFlux){
                     break;
                 } else if (i == continents.size()-1 && currentDriftChanges < drifFlux){
-                    changeContinentalDriftDirections(continents, drifFlux, driftVelocity);
+                    changeContinentalDriftDirections(continents, drifFlux, driftVelocity, world);
                     break;
                 }
             }
@@ -82,11 +83,11 @@ public class ContinentalDriftDirectionChanger {
          * @param currentContinent the continent that has focus of the loop
          * @param driftVelocity the max speed on the X or Y axis direction
          */
-        private void searchAndChangeDirection(Continent currentContinent, int driftVelocity) {
+        private void searchAndChangeDirection(Continent currentContinent, int driftVelocity, World world) {
             if(!lastChangedContinentFound && currentContinent.getId() == lastChangedContinentelDrift){
                 lastChangedContinentFound = true;
             } else if(lastChangedContinentFound){
-                currentContinent.assignNewDriftDirection(driftVelocity);
+                currentContinent.assignNewDriftDirection(driftVelocity, world);
                 currentDriftChanges++;
             }
         }

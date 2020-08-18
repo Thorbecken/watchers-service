@@ -39,14 +39,14 @@ public class ContinentalDriftNewTileAssigner {
                 List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
                 List<Coordinate> adjecantCoordinates = CoordinateHelper.getAllOutersideCoordinates(connectedCoordinates);
 
-                List<Coordinate> existingTiles = taskDto.getChanges().values().stream()
+                List<Coordinate> existingCoordinates = taskDto.getChanges().values().stream()
                         .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
                         .map(ContinentalChangesDto::getKey)
                         .filter(adjecantCoordinates::contains)
                         .collect(Collectors.toList());
 
                 Continent chosenContinent = taskDto.getChanges().values().stream()
-                        .filter(continentalChangesDto -> existingTiles.contains(continentalChangesDto.getKey()))
+                        .filter(continentalChangesDto -> existingCoordinates.contains(continentalChangesDto.getKey()))
                         .map(ContinentalChangesDto::getMockTile)
                         .filter(Objects::nonNull)
                         .map(MockTile::getContinent)

@@ -14,8 +14,8 @@ public class SaveJobService {
     }
 
     public void executeSave() {
-        worldService.saveWorlds();
-        log.info("Saved the worlds");
+        //worldService.saveWorlds();
+        //log.info("Saved the worlds");
     }
 
 }
