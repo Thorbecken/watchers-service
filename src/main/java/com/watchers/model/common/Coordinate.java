@@ -60,7 +60,7 @@ public class Coordinate {
     private Tile tile;
 
     @JsonProperty("actors")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<Actor> actors = new HashSet<>();
 
     @JsonIgnore

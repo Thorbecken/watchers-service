@@ -1,6 +1,8 @@
 package com.watchers.manager;
 
+import com.watchers.components.WorldCleanser;
 import com.watchers.components.continentaldrift.*;
+import com.watchers.model.actor.Actor;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.World;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ public class ContinentalDriftManager {
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
     private TileDefined tileDefined;
     private ErosionAdjuster erosionAdjuster;
+    private WorldCleanser worldCleanser;
 
     private long heigtDivider;
     private int minimumContinents;
@@ -29,6 +32,7 @@ public class ContinentalDriftManager {
                                    ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner,
                                    TileDefined tileDefined,
                                    ErosionAdjuster erosionAdjuster,
+                                   WorldCleanser worldCleanser,
                                    @Value("${watch.heightdivider}") long heigtDivider,
                                    @Value("${watch.minContinents}") int minimumContinents){
         this.continentalDriftPredicter = continentalDriftPredicter;
@@ -38,6 +42,7 @@ public class ContinentalDriftManager {
         this.continentalDriftNewTileAssigner = continentalDriftNewTileAssigner;
         this.tileDefined = tileDefined;
         this.erosionAdjuster = erosionAdjuster;
+        this.worldCleanser = worldCleanser;
 
         this.heigtDivider = heigtDivider;
         this.minimumContinents = minimumContinents;
@@ -52,6 +57,13 @@ public class ContinentalDriftManager {
         continentalDriftWorldAdjuster.process(taskDto);
         erosionAdjuster.process(taskDto);
         tileDefined.process(taskDto.getWorld());
+
+        world.fillTransactionals();
+
+        world.getActorList().stream()
+                .filter(Actor::isNotOnCorrectLand)
+                .forEach(Actor::handleContinentalMovement);
+        worldCleanser.proces(world);
 
         log.info("Proccesed a continentaldrift for world id: " + world.getId());
 

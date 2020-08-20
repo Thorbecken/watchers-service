@@ -22,6 +22,10 @@ public abstract class Actor implements SerialTask {
     @Column(name = "actor_id")
     private Long id;
 
+    public void setCoordinate(Coordinate coordinate) {
+        this.coordinate = coordinate;
+    }
+
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(cascade=CascadeType.ALL)
@@ -33,4 +37,16 @@ public abstract class Actor implements SerialTask {
     private NaturalHabitat naturalHabitat;
 
     public abstract void processSerialTask();
+    public abstract void handleContinentalMovement();
+    public boolean isCorrectLandType(Coordinate coordinate){
+        return this.getNaturalHabitat().movableSurfaces
+                .contains(coordinate.getTile().getSurfaceType());
+    }
+    public boolean isOnCorrectLand(){
+        return isCorrectLandType(coordinate);
+    }
+    public boolean isNotOnCorrectLand(){
+        return !isOnCorrectLand();
+    }
+
 }

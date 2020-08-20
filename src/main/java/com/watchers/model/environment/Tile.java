@@ -122,10 +122,13 @@ public class Tile {
     public void setData(MockTile mockTile) {
         this.coordinate.setContinent(mockTile.getContinent());
         this.coordinate.getContinent().getCoordinates().add(this.coordinate);
+
         this.biome.addCurrentFood(mockTile.getFood());
         this.height = mockTile.getHeight();
-        this.coordinate.getActors().addAll(mockTile.getActorSet());
         this.surfaceType = mockTile.getSurfaceType();
+
+        this.coordinate.getActors().addAll(mockTile.getActorSet());
+        this.coordinate.getActors().forEach(actor -> actor.setCoordinate(coordinate));
     }
 
     @Override

@@ -171,7 +171,7 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
         actorList = new ArrayList<>();
 
         coordinates.forEach(
-            tile -> actorList.addAll(tile.getActors())
+            coordinate -> actorList.addAll(coordinate.getActors())
         );
     }
 

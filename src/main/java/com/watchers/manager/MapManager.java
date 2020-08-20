@@ -74,7 +74,12 @@ public class MapManager {
         worldRepositoryInMemory.save(world);
     }
 
-    private AnimalType selectAnimalSeed(SurfaceType type) {
+    public static void seedLife(Coordinate coordinate) {
+        AnimalType animalType = selectAnimalSeed(coordinate.getTile().getSurfaceType());
+        coordinate.getActors().add(AnimalFactory.generateNewAnimal(animalType, coordinate));
+    }
+
+    private static AnimalType selectAnimalSeed(SurfaceType type) {
         switch (type){
             case PLAIN: return AnimalType.RABBIT;
             case COASTAL:

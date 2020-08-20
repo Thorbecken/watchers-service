@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.util.Optional;
 
 @Data
 @Entity
@@ -45,7 +46,7 @@ public abstract class Animal extends Actor {
         float localFood = getCoordinate().getTile().getBiome().getCurrentFood();
         if (localFood < foraging) {
             getCoordinate().getNeighbours().stream()
-                    .filter(coordinate -> this.getNaturalHabitat().movavableSurfaces
+                    .filter(coordinate -> this.getNaturalHabitat().movableSurfaces
                             .contains(coordinate.getTile().getSurfaceType()))
                     .max((coordinate1, coordinate2) -> Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood()))
                     .ifPresent(this::moveToTile);
@@ -86,4 +87,14 @@ public abstract class Animal extends Actor {
         }
     }
 
+    public void handleContinentalMovement(){
+        Optional<Coordinate> optionalCoordinate = getCoordinate().getNeighbours().stream()
+                .filter(this::isCorrectLandType)
+                .max((coordinate1, coordinate2) -> Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood()));
+        if (optionalCoordinate.isPresent()){
+            moveToTile(optionalCoordinate.get());
+        } else {
+            setStateType(StateType.DEAD);
+        }
+    }
 }

@@ -13,10 +13,10 @@ public enum NaturalHabitat {
     TERRESTRIAL(Arrays.asList(PLAIN, HILL, MOUNTAIN)),
     ALL(Arrays.asList(PLAIN, HILL, MOUNTAIN, OCEANIC,DEEP_OCEAN,COASTAL));
 
-    public final List<SurfaceType> movavableSurfaces;
+    public final List<SurfaceType> movableSurfaces;
 
     NaturalHabitat(List<SurfaceType> surfaceTypes){
-        this.movavableSurfaces = surfaceTypes;
+        this.movableSurfaces = surfaceTypes;
     }
 
 }

@@ -13,11 +13,13 @@ import java.util.*;
 @Component
 class WorldFactory {
 
+    private boolean lifePreSeeded;
     private int coastalZone;
     private int oceanicZone;
     private TileDefined tileDefined;
 
-    public WorldFactory(@Value("${watch.coastalZone}") int coastalZone, @Value("${watch.oceanicZone}") int oceanicZone, TileDefined tileDefined){
+    public WorldFactory(@Value("${watch.lifePresSeeded}") boolean lifePreSeeded, @Value("${watch.coastalZone}") int coastalZone, @Value("${watch.oceanicZone}") int oceanicZone, TileDefined tileDefined){
+        this.lifePreSeeded = lifePreSeeded;
         this.coastalZone = coastalZone;
         this.oceanicZone = oceanicZone;
         this.tileDefined = tileDefined;
@@ -42,6 +44,14 @@ class WorldFactory {
 
         tileDefined.setStartingHeights(world);
         tileDefined.process(world);
+
+        if(lifePreSeeded) {
+            world.getContinents().forEach(continent -> world.getCoordinates().stream()
+                    .filter(coordinate -> coordinate.getContinent() == continent)
+                    .findFirst()
+                    .ifPresent(MapManager::seedLife));
+
+        }
 
         return world;
     }

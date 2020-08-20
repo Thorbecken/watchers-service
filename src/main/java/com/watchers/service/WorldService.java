@@ -1,5 +1,6 @@
 package com.watchers.service;
 
+import com.watchers.components.WorldCleanser;
 import com.watchers.manager.ContinentalDriftManager;
 import com.watchers.manager.MapManager;
 import com.watchers.model.actor.Actor;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,16 +29,19 @@ public class WorldService {
     private WorldRepositoryPersistent worldRepositoryPersistent;
     private MapManager mapManager;
     private ContinentalDriftManager continentalDriftManager;
+    private WorldCleanser worldCleanser;
     private List<Long> activeWorldIds = new ArrayList<>();
 
     public WorldService(MapManager mapManager,
                         WorldRepositoryInMemory worldRepositoryInMemory,
                         WorldRepositoryPersistent worldRepositoryPersistent,
-                        ContinentalDriftManager continentalDriftManager){
+                        ContinentalDriftManager continentalDriftManager,
+                        WorldCleanser worldCleanser){
         this.worldRepositoryInMemory = worldRepositoryInMemory;
         this.mapManager = mapManager;
         this.worldRepositoryPersistent = worldRepositoryPersistent;
         this.continentalDriftManager = continentalDriftManager;
+        this.worldCleanser = worldCleanser;
     }
 
     @PostConstruct
@@ -112,25 +115,7 @@ public class WorldService {
 
         world.getActorList().forEach(Actor::processSerialTask);
 
-        List<Actor> currentDeads = world.getActorList().stream()
-                .filter(actor -> actor.getStateType() == StateType.DEAD)
-                .collect(Collectors.toList());
-        log.trace(currentDeads.size() + " Actors died this turn");
-        currentDeads.forEach( deadActor -> {
-            deadActor.getCoordinate().getActors().remove(deadActor);
-            deadActor.setCoordinate(null);
-        });
-
-        log.trace(world.getActorList().size() + " Actors remained before cleansing the dead this turn");
-
-        world.getActorList().removeAll(currentDeads);
-
-        log.trace(world.getNewActors().size() + " Actors were born into this world");
-        world.getActorList().addAll(world.getNewActors());
-        world.getNewActors().clear();
-
-        log.trace(world.getActorList().size() + " Actors remained this turn");
-
+        worldCleanser.proces(world);
         continentalDriftManager.process(world);
         worldRepositoryInMemory.save(world);
     }
