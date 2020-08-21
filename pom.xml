@@ -101,7 +101,7 @@
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
-                <!-- mvn release:plugin prepare -->
+                <!-- mvn release:prepare / mvn release/perform -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
