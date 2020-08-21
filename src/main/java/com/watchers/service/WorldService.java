@@ -93,13 +93,13 @@ public class WorldService {
 
     @Transactional("inmemoryDatabaseTransactionManager")
     private void processTurn(World world){
-        log.trace("There is currently " + world.getCoordinates().stream().map(Coordinate::getTile)
+        log.debug("There is currently " + world.getCoordinates().stream().map(Coordinate::getTile)
                         .map(Tile::getBiome)
                         .map(Biome::getCurrentFood)
                         .reduce(0f, (tile1, tile2) -> tile1 + tile2)
         + "food in the world"
         );
-        log.trace("The total fertility in the world amounts to " + world.getCoordinates().parallelStream().map(Coordinate::getTile)
+        log.debug("The total fertility in the world amounts to " + world.getCoordinates().parallelStream().map(Coordinate::getTile)
                 .map(Tile::getBiome)
                 .map(Biome::getFertility)
                 .reduce(0f, (tile1, tile2) -> tile1 + tile2, (tile1, tile2) -> tile1 + tile2)
@@ -108,8 +108,8 @@ public class WorldService {
                 worldTile -> worldTile.getBiome().processParallelTask()
         );
 
-        log.trace(world.getActorList().size() + " Actors at the start of this turn");
-        log.trace(world.getActorList().stream()
+        log.debug(world.getActorList().size() + " Actors at the start of this turn");
+        log.debug(world.getActorList().stream()
                 .filter(actor -> actor.getStateType() == StateType.DEAD)
                 .count() + " Actors where dead at the start of this turn");
 

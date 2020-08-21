@@ -4,7 +4,6 @@ import com.watchers.manager.MapManager;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -18,15 +17,19 @@ import java.util.Optional;
 @Slf4j
 @Controller
 @CrossOrigin
+@SuppressWarnings("unused")
 public class ActorController{
 
-        @Autowired
         private MapManager mapManager;
-
-        @Autowired
         private WorldRepositoryInMemory worldRepository;
 
-        @RequestMapping(value = "/actors/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
+    public ActorController(MapManager mapManager, WorldRepositoryInMemory worldRepository) {
+        this.mapManager = mapManager;
+        this.worldRepository = worldRepository;
+    }
+
+    @SuppressWarnings("unused")
+    @RequestMapping(value = "/actors/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
         public ResponseEntity seedLife(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){
             log.info("Received request to seed life at coordintae: " + xCoord + "x, " + yCoord + "y");
             Assert.notNull(worldId, "No world id was found");

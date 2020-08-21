@@ -78,22 +78,11 @@ public class Coordinate {
 
     @JsonIgnore
     public List<Coordinate> getNeighbours() {
-        boolean down = yCoord > 1L;
-        boolean up = yCoord < this.world.getYSize();
-
         List<Coordinate> returnCoordinates = new ArrayList<>();
         returnCoordinates.add(world.getCoordinate(getLeftCoordinate(), yCoord));
         returnCoordinates.add(world.getCoordinate(getRightCoordinate(), yCoord));
-
-
-        if(down) {
-            Coordinate downCoordinate = world.getCoordinate(xCoord, yCoord - 1);
-            returnCoordinates.add(downCoordinate);
-        }
-        if(up) {
-            Coordinate upCoordinate = world.getCoordinate(xCoord, yCoord + 1);
-            returnCoordinates.add(upCoordinate);
-        }
+        returnCoordinates.add(world.getCoordinate(xCoord, getDownCoordinate()));
+        returnCoordinates.add(world.getCoordinate(xCoord, getUpCoordinate()));
 
         return returnCoordinates;
     }

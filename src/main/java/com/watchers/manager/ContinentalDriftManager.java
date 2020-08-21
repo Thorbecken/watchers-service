@@ -5,7 +5,9 @@ import com.watchers.components.continentaldrift.*;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,8 @@ public class ContinentalDriftManager {
     private TileDefined tileDefined;
     private ErosionAdjuster erosionAdjuster;
     private WorldCleanser worldCleanser;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
+
 
     private long heigtDivider;
     private int minimumContinents;
@@ -33,6 +37,7 @@ public class ContinentalDriftManager {
                                    TileDefined tileDefined,
                                    ErosionAdjuster erosionAdjuster,
                                    WorldCleanser worldCleanser,
+                                   WorldRepositoryInMemory worldRepositoryInMemory,
                                    @Value("${watch.heightdivider}") long heigtDivider,
                                    @Value("${watch.minContinents}") int minimumContinents){
         this.continentalDriftPredicter = continentalDriftPredicter;
@@ -43,6 +48,7 @@ public class ContinentalDriftManager {
         this.tileDefined = tileDefined;
         this.erosionAdjuster = erosionAdjuster;
         this.worldCleanser = worldCleanser;
+        this.worldRepositoryInMemory = worldRepositoryInMemory;
 
         this.heigtDivider = heigtDivider;
         this.minimumContinents = minimumContinents;
@@ -58,6 +64,7 @@ public class ContinentalDriftManager {
         erosionAdjuster.process(taskDto);
         tileDefined.process(taskDto.getWorld());
 
+        worldRepositoryInMemory.save(world);
         world.fillTransactionals();
 
         world.getActorList().stream()

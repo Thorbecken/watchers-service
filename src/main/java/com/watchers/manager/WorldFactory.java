@@ -3,6 +3,7 @@ package com.watchers.manager;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
+@Slf4j
 @Component
 class WorldFactory {
 
@@ -57,7 +59,7 @@ class WorldFactory {
     }
 
     private void specifyWaterZones(World world) {
-        System.out.println("sepperating the oceans");
+        log.info("sepperating the oceans");
         world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .filter(tile -> SurfaceType.OCEANIC.equals(tile.getSurfaceType()))
@@ -70,7 +72,7 @@ class WorldFactory {
                     }
                 }
         );
-        System.out.println("Oceans are sepperated");
+        log.info("Oceans are sepperated");
     }
 
     private void fillInWorld(World world) {
@@ -81,7 +83,7 @@ class WorldFactory {
                 );
 
         while(dto.getOpenCoordinates().size() >= 1){
-            System.out.println("In loop: " + dto.getOpenCoordinates().size() + " coordinates left");
+            log.debug("In loop: " + dto.getOpenCoordinates().size() + " coordinates left");
             mockContinents.stream()
                     .filter(mockContinent -> !CollectionUtils.isEmpty(mockContinent.getPossibleCoordinates()))
                     .forEach(
@@ -89,7 +91,7 @@ class WorldFactory {
             );
         }
 
-        System.out.println("Left the loop");
+        log.info("Coordinates assigned to continents.");
 
         world.getCoordinates().clear();
         world.getContinents().removeIf(continent -> continent.getType() == null);

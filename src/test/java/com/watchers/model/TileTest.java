@@ -36,10 +36,7 @@ class TileTest {
         Tile tile = world.getTile(x,y);
         List<Tile> neighbours = tile.getNeighbours();
 
-        if(y == 1 || y == 3){
-            assertEquals(3, neighbours.size());
-        } else {
-            assertEquals(4, neighbours.size());
-        }
+        assertEquals(4, neighbours.size());
+
     }
 }
