@@ -1,6 +1,7 @@
 package com.watchers.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.environment.Tile;
@@ -63,7 +64,7 @@ public class Coordinate {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<Actor> actors = new HashSet<>();
 
-    @JsonIgnore
+    @JsonIgnoreProperties({"world", "coordinates", "type" })
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
 

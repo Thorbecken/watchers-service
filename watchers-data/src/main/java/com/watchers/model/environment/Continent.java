@@ -20,7 +20,6 @@ import java.util.Set;
 public class Continent {
 
     @Id
-    @JsonIgnore
     @SequenceGenerator(name="Continent_Gen", sequenceName="Continent_Seq", allocationSize = 1)
     @GeneratedValue(generator="Continent_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "continent_id")

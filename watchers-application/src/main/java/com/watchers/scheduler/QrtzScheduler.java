@@ -36,7 +36,7 @@ public class QrtzScheduler {
 
     @PostConstruct
     public void init() {
-        logger.info("Hello world from Quartz...");
+        logger.info("Quartz scheduler initiated");
     }
 
     @Bean
