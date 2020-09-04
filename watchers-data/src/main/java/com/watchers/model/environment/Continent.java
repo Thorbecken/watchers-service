@@ -27,13 +27,13 @@ public class Continent {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne(cascade=CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
     @JsonIgnore
     @JsonProperty("coordinates")
-    @OneToMany(mappedBy = "continent", orphanRemoval = true)
+    @OneToMany(mappedBy = "continent")
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("type")
