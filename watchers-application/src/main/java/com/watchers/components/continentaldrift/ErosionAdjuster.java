@@ -9,15 +9,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ErosionAdjuster {
 
     private CoordinateHelper coordinateHelper;
+    private int minHeightDifference;
     private int maxErosion;
 
-    public ErosionAdjuster(CoordinateHelper coordinateHelper, @Value("${watch.maxErosion}") int maxErosion){
+    public ErosionAdjuster(CoordinateHelper coordinateHelper, @Value("${watch.erosion.minHeightDifference}") int minHeightDifference, @Value("${watch.erosion.max}") int maxErosion) {
         this.coordinateHelper = coordinateHelper;
+        this.minHeightDifference = minHeightDifference;
         this.maxErosion = maxErosion;
     }
 
@@ -33,19 +36,20 @@ public class ErosionAdjuster {
 
         coordinates.stream().map(Coordinate::getTile).forEach(tile -> {
             List<Tile> neighbouringTiles = tile.getNeighbours();
-            Tile lowestNeighbour = neighbouringTiles.stream()
-                    .min(Comparator.comparing(Tile::getHeight))
-                    .get();
+            List<Tile> receivingTiles = neighbouringTiles.stream()
+                    .filter(neighbouringTile -> (tile.getHeight() - neighbouringTile.getHeight()) > minHeightDifference)
+                    .collect(Collectors.toList());
 
-            long heightTransfer = (tile.getHeight()-lowestNeighbour.getHeight()) / 4;
-            if(heightTransfer > maxErosion){
-                heightTransfer = maxErosion;
-            }
-            if(heightTransfer > 0){
-                long aLong = erosionMap.get(lowestNeighbour.getCoordinate());
-                erosionMap.put(lowestNeighbour.getCoordinate(), aLong+heightTransfer);
+            for (Tile recievingTile : receivingTiles) {
+                long heightTransfer = (tile.getHeight() - recievingTile.getHeight()) / 4;
+                if (heightTransfer > maxErosion) {
+                    heightTransfer = maxErosion;
+                }
+
+                long aLong = erosionMap.get(recievingTile.getCoordinate());
+                erosionMap.put(recievingTile.getCoordinate(), aLong + heightTransfer);
                 long anotherLong = erosionMap.get(tile.getCoordinate());
-                erosionMap.put(tile.getCoordinate(), anotherLong-heightTransfer);
+                erosionMap.put(tile.getCoordinate(), anotherLong - heightTransfer);
             }
         });
 

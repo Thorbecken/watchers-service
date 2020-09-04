@@ -26,7 +26,7 @@ class ContinentalDriftManagerTest {
         ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper);
         ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner();
         TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60);
-        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(coordinateHelper, 8);
+        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(coordinateHelper, 10,8);
         WorldCleanser worldCleanser = new WorldCleanser(worldRepositoryInMemory);
 
         continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftDirectionChanger, continentalDriftTileChangeComputer, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, tileDefined, erosionAdjuster, worldCleanser, worldRepositoryInMemory,2, 8);
