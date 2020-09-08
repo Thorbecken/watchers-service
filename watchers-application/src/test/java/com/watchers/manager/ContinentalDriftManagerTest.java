@@ -24,12 +24,13 @@ class ContinentalDriftManagerTest {
         ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(2,2);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
         ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner();
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger);
         TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60);
         ErosionAdjuster erosionAdjuster = new ErosionAdjuster(coordinateHelper, 10,8);
         WorldCleanser worldCleanser = new WorldCleanser(worldRepositoryInMemory);
+        ContinentalCorrector continentalCorrector = new ContinentalCorrector();
 
-        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftDirectionChanger, continentalDriftTileChangeComputer, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, tileDefined, erosionAdjuster, worldCleanser, worldRepositoryInMemory,2, 8);
+        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftDirectionChanger, continentalDriftTileChangeComputer, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, tileDefined, erosionAdjuster, worldCleanser, worldRepositoryInMemory,2, 8);
     }
 
     @Test

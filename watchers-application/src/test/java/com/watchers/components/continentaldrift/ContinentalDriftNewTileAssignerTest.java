@@ -31,7 +31,7 @@ class ContinentalDriftNewTileAssignerTest {
     @BeforeEach
     void setUp() {
         this.coordinateHelper = new CoordinateHelper();
-        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner();
+        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(null);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
 

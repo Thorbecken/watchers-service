@@ -30,7 +30,7 @@ class ContinentalDriftWorldAdjusterTest {
         this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner();
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(null);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
 

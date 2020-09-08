@@ -58,6 +58,7 @@ public class InMemoryDatabaseConfiguration {
         properties.put("hibernate.naming.physical-strategy", env.getProperty("spring.jpa.hibernate.naming.physical-strategy"));
         properties.put("spring.h2.console.path", env.getProperty("spring.h2.console.path"));
         properties.put("spring.h2.console.enabled", env.getProperty("spring.h2.console.enabled"));
+        properties.put("hibernate.event.merge.entity_copy_observer", env.getProperty("spring.jpa.hibernate.event.merge.entity_copy_observer"));
         em.setJpaPropertyMap(properties);
 
         return em;

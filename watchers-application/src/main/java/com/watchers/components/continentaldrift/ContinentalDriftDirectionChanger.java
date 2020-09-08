@@ -2,13 +2,16 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.World;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @Component
 public class ContinentalDriftDirectionChanger {
 
@@ -17,6 +20,10 @@ public class ContinentalDriftDirectionChanger {
 
     public void assignFirstOrNewDriftDirections(World world){
         world.getContinents().forEach(continent -> continent.assignNewDriftDirection(driftVelocity, world));
+    }
+
+    public void assignFirstDriftDirrecion(Continent continent, World world){
+        continent.assignNewDriftDirection(driftVelocity, world);
     }
 
     public ContinentalDriftDirectionChanger(@Value("${watch.driftVelocity}") int driftVelocity, @Value("${watch.driftFlux}") int drifFlux) {
@@ -63,18 +70,21 @@ public class ContinentalDriftDirectionChanger {
          * @param world the world in which the continent exists
          */
         private void changeContinentalDriftDirections(List<Continent> continents, int drifFlux, int driftVelocity, World world){
-            for (long i = 0; i < continents.size() ; i++) {
-                Continent currentContinent = continents.get((int)i);
+           int loop = 1;
+            while(currentDriftChanges < drifFlux) {
+               log.info("in loop " + loop++);
 
-                searchAndChangeDirection(currentContinent, driftVelocity, world);
+               for (Continent currentContinent : continents) {
+                   if (currentDriftChanges < drifFlux) {
+                       searchAndChangeDirection(currentContinent, driftVelocity, world);
+                   }
+               }
 
-                if(currentDriftChanges == drifFlux){
-                    break;
-                } else if (i == continents.size()-1 && currentDriftChanges < drifFlux){
-                    changeContinentalDriftDirections(continents, drifFlux, driftVelocity, world);
-                    break;
-                }
-            }
+               if(!lastChangedContinentFound){
+                   log.warn("Continent with id " + lastChangedContinentelDrift + " not found among: " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
+                   lastChangedContinentFound = true;
+               }
+           }
         }
 
         /**

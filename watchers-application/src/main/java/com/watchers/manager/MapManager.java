@@ -48,8 +48,8 @@ public class MapManager {
     @Transactional("inmemoryDatabaseTransactionManager")
     public World getWorld(Long worldId, boolean initiated) {
        World world = worldRepositoryInMemory.findById(worldId).orElseGet(() -> createWorld(worldId));
-        log.info("world loaden from memory with: "+ (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()) + " height");
-        log.info("the loaded world contains: " + world.getCoordinates().size() + " number of coordinates");
+        log.trace("world loaden from memory with: "+ (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()) + " height");
+        log.trace("the loaded world contains: " + world.getCoordinates().size() + " number of coordinates");
        if(initiated) {
            world.fillTransactionals();
        }

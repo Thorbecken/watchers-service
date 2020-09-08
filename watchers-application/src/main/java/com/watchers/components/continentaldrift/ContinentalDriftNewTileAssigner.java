@@ -17,6 +17,13 @@ import java.util.stream.Collectors;
 @Component
 public class ContinentalDriftNewTileAssigner {
 
+    private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
+    long nextContinentalId;
+
+    public ContinentalDriftNewTileAssigner(ContinentalDriftDirectionChanger continentalDriftDirectionChanger) {
+        this.continentalDriftDirectionChanger = continentalDriftDirectionChanger;
+    }
+
     public void process(ContinentalDriftTaskDto taskDto){
         int currentNumberOfContinents = taskDto.getWorld().getContinents().size();
         Long newestContinent = taskDto.getWorld().getContinents().stream()
@@ -24,13 +31,13 @@ public class ContinentalDriftNewTileAssigner {
                 .map(Continent::getId)
                 .orElse(null);
         Assert.notNull(newestContinent, "There was no continent found on the world with an id number!");
-        long nextContinentalId = newestContinent+1;
+        nextContinentalId = newestContinent+1;
 
         int minimumContinents = taskDto.getMinContinents();
 
         List<List<Coordinate>> listOfConnectedCoordinates = generateEmptyTileClusters(taskDto);
 
-        int newContinentsCreated = createNewContinents(taskDto, currentNumberOfContinents, nextContinentalId, minimumContinents, listOfConnectedCoordinates);
+        int newContinentsCreated = createNewContinents(taskDto, currentNumberOfContinents, minimumContinents, listOfConnectedCoordinates);
         addEmptytilesToExistingContinents(newContinentsCreated, listOfConnectedCoordinates, taskDto);
 
     }
@@ -47,17 +54,26 @@ public class ContinentalDriftNewTileAssigner {
                         .filter(adjecantCoordinates::contains)
                         .collect(Collectors.toList());
 
+                int maximalCoordinates = calculateMaximumCoordinates(taskDto);
+
                 Continent chosenContinent = taskDto.getChanges().values().stream()
                         .filter(continentalChangesDto -> existingCoordinates.contains(continentalChangesDto.getKey()))
                         .map(ContinentalChangesDto::getMockTile)
                         .filter(Objects::nonNull)
                         .map(MockTile::getContinent)
                         .filter(Objects::nonNull)
-                        .filter(continent -> continent.getId()!=null)
+                        .filter(continent -> continent.getId()!= null)
+                        .filter(continent -> continent.getCoordinates().size() < maximalCoordinates)
                         .max(Comparator.comparing(Continent::getId))
                         .orElse(null);
 
-                Assert.notNull(chosenContinent, "no adjacent continent was found!");
+                if(chosenContinent == null){
+                    chosenContinent = new Continent(taskDto.getWorld(), SurfaceType.PLAIN);
+                    taskDto.getWorld().getContinents().add(chosenContinent);
+                    chosenContinent.setId(nextContinentalId++);
+                    continentalDriftDirectionChanger.assignFirstDriftDirrecion(chosenContinent, taskDto.getWorld());
+                }
+
                 MockContinent mockContinent = new MockContinent(connectedCoordinates,taskDto.getWorld());
                 mockContinent.setContinent(chosenContinent);
                 connectedCoordinates.forEach(coordinate ->
@@ -69,7 +85,12 @@ public class ContinentalDriftNewTileAssigner {
         }
     }
 
-    private int createNewContinents(ContinentalDriftTaskDto taskDto, int currentContinents, long nextContinentalId, int minimumContinents, List<List<Coordinate>> listOfConnectedCoordinates) {
+    private int calculateMaximumCoordinates(ContinentalDriftTaskDto taskDto) {
+        int totalCoordinates = taskDto.getWorld().getCoordinates().size();
+        return totalCoordinates/taskDto.getMinContinents();
+    }
+
+    private int createNewContinents(ContinentalDriftTaskDto taskDto, int currentContinents, int minimumContinents, List<List<Coordinate>> listOfConnectedCoordinates) {
         int listOfCoordinatesProcessed = 0;
         if(currentContinents < minimumContinents) {
             for (int i = listOfCoordinatesProcessed; newContinentLoop(i, currentContinents, minimumContinents) && checkForList(i, listOfConnectedCoordinates); i++) {
@@ -77,6 +98,7 @@ public class ContinentalDriftNewTileAssigner {
                 List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
 
                 Continent continent = new Continent(taskDto.getWorld(), SurfaceType.PLAIN);
+                taskDto.getWorld().getContinents().add(continent);
                 MockContinent mockContinent = new MockContinent(connectedCoordinates, taskDto.getWorld());
                 mockContinent.setContinent(continent);
                 mockContinent.getContinent().setId(nextContinentalId++);

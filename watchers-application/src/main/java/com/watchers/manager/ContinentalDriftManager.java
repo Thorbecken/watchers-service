@@ -7,7 +7,6 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +19,7 @@ public class ContinentalDriftManager {
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     private ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster;
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
+    private ContinentalCorrector continentalCorrector;
     private TileDefined tileDefined;
     private ErosionAdjuster erosionAdjuster;
     private WorldCleanser worldCleanser;
@@ -34,7 +34,7 @@ public class ContinentalDriftManager {
                                    ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer,
                                    ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster,
                                    ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner,
-                                   TileDefined tileDefined,
+                                   ContinentalCorrector continentalCorrector, TileDefined tileDefined,
                                    ErosionAdjuster erosionAdjuster,
                                    WorldCleanser worldCleanser,
                                    WorldRepositoryInMemory worldRepositoryInMemory,
@@ -45,6 +45,7 @@ public class ContinentalDriftManager {
         this.continentalDriftDirectionChanger = continentalDriftDirectionChanger;
         this.continentalDriftWorldAdjuster = continentalDriftWorldAdjuster;
         this.continentalDriftNewTileAssigner = continentalDriftNewTileAssigner;
+        this.continentalCorrector = continentalCorrector;
         this.tileDefined = tileDefined;
         this.erosionAdjuster = erosionAdjuster;
         this.worldCleanser = worldCleanser;
@@ -56,11 +57,12 @@ public class ContinentalDriftManager {
 
     public ContinentalDriftTaskDto process(World world){
         ContinentalDriftTaskDto taskDto = setup(world);
-       continentalDriftDirectionChanger.process(world);
+        continentalDriftDirectionChanger.process(world);
         continentalDriftPredicter.process(taskDto);
         continentalDriftTileChangeComputer.process(taskDto);
         continentalDriftNewTileAssigner.process(taskDto);
         continentalDriftWorldAdjuster.process(taskDto);
+        continentalCorrector.process(taskDto);
         erosionAdjuster.process(taskDto);
         tileDefined.process(taskDto.getWorld());
 
