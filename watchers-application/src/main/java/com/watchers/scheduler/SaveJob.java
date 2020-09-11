@@ -1,27 +1,25 @@
 package com.watchers.scheduler;
 
-import com.watchers.service.SaveJobService;
+import com.watchers.service.WorldService;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 @DisallowConcurrentExecution
 public class SaveJob implements Job {
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
-    private SaveJobService saveJobService;
+    private WorldService worldService;
 
     public void execute(JobExecutionContext context) {
 
-        logger.info("Save job ** {} ** fired @ {}", context.getJobDetail().getKey().getName(), context.getFireTime());
+        log.info("Save job ** {} ** fired @ {}", context.getJobDetail().getKey().getName(), context.getFireTime());
 
-        //saveJobService.executeSave();
+        worldService.saveWorlds();
 
-        logger.info("Next save job scheduled @ {}", context.getNextFireTime());
+        log.info("Next save job scheduled @ {}", context.getNextFireTime());
     }
 }

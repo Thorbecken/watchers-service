@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -44,13 +44,6 @@ public class WorldService {
         this.worldCleanser = worldCleanser;
     }
 
-    @PostConstruct
-    @SuppressWarnings("unused")
-    private void init(){
-        activeWorldIds.add(1L);
-        mapManager.getWorld(1L, false);
-    }
-
     @SuppressWarnings("unused")
     @Transactional("persistentDatabaseTransactionManager")
     public void saveAndShutdownAll(){
@@ -71,8 +64,6 @@ public class WorldService {
                 .ifPresent(activeWorldIds::remove);
     }
 
-    @SuppressWarnings("unused")
-    //@Transactional("persistentDatabaseTransactionManager")
     public void saveWorlds(){
         activeWorldIds.forEach(
                 this::saveWorld
@@ -81,10 +72,8 @@ public class WorldService {
 
     @Transactional("persistentDatabaseTransactionManager")
     public void saveWorld(Long id){
-        World world = mapManager.getWorld(id, false);
-        worldRepositoryInMemory.save(world);
-
-        worldRepositoryPersistent.save(world);
+        //World world = mapManager.getWorld(id, false);
+        //worldRepositoryPersistent.save(world);
     }
 
     public void processTurns(){
@@ -126,4 +115,46 @@ public class WorldService {
         log.info("Processed a turn");
     }
 
+    /**
+     * @param id the id of the world to be added
+     * @param startFromPersistents boolean value for the use of the persistent database
+     * @return Boolean: true means added, null means already added false means not present in memory
+     */
+    public Boolean addActiveWorld(Long id, boolean startFromPersistents) {
+        if (startFromPersistents){
+            return addActiveWorldFromPersistence(id);
+        } else {
+            return addActiveWorldFromMemory(id);
+        }
+    }
+
+    private Boolean addActiveWorldFromPersistence(Long id) {
+        if(worldRepositoryPersistent.existsById(id)) {
+            World world = worldRepositoryPersistent.getOne(id);
+            worldRepositoryInMemory.save(world);
+            if (!activeWorldIds.contains(id)) {
+                activeWorldIds.add(id);
+                return true;
+            } else {
+                return null;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private Boolean addActiveWorldFromMemory(Long id) {
+        if (worldRepositoryInMemory.existsById(id)) {
+            if (!activeWorldIds.contains(id)) {
+                activeWorldIds.add(id);
+                return true;
+            } else {
+                return null;
+            }
+        } else {
+            mapManager.getWorld(id, false);
+            activeWorldIds.add(id);
+            return true;
+        }
+    }
 }
