@@ -11,13 +11,17 @@ import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,7 +57,7 @@ public class WorldService {
 
     @SuppressWarnings("unused")
     public void saveAndShutdown(Long id){
-        saveWorld(id);
+        saveWorld(null);
         shutdownWorld(id);
     }
 
@@ -64,16 +68,37 @@ public class WorldService {
                 .ifPresent(activeWorldIds::remove);
     }
 
+    @Transactional("inmemoryDatabaseTransactionManager")
     public void saveWorlds(){
-        activeWorldIds.forEach(
-                this::saveWorld
+        activeWorldIds.stream()
+                .map(mapManager::getInitiatedWorld)
+                .filter(Objects::nonNull)
+                .filter(world -> world.getContinents().stream().noneMatch(continent -> continent.getId() ==null))
+                .filter(world -> world.getActorList().stream().noneMatch(actor -> actor.getId() == null))
+                .filter(world -> world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null))
+                .forEach(this::saveWorld
         );
     }
 
     @Transactional("persistentDatabaseTransactionManager")
-    public void saveWorld(Long id){
-        //World world = mapManager.getWorld(id, false);
-        //worldRepositoryPersistent.save(world);
+    public void saveWorld(@NonNull World memoryWorld){
+        boolean exists = worldRepositoryPersistent.existsById(memoryWorld.getId());
+        if (!exists){
+            log.warn("World " + memoryWorld.getId() + " was not found in the persistent database!");
+            World persistentWorld = new World(memoryWorld.getXSize(), memoryWorld.getYSize());
+            persistentWorld.setId(memoryWorld.getId());
+            worldRepositoryPersistent.save(persistentWorld);
+
+            persistentWorld.basicCopy(memoryWorld);
+            worldRepositoryPersistent.save(persistentWorld);
+
+            persistentWorld.coordinateCopy(memoryWorld);
+            worldRepositoryPersistent.save(persistentWorld);
+            log.warn("The missing world is now saved to persistence.");
+        } else {
+            log.info("World is beeing updated from memory.");
+            worldRepositoryPersistent.save(memoryWorld);
+        }
     }
 
     public void processTurns(){
@@ -128,30 +153,43 @@ public class WorldService {
         }
     }
 
+    @Transactional("persistentDatabaseTransactionManager")
     private Boolean addActiveWorldFromPersistence(Long id) {
-        if(worldRepositoryPersistent.existsById(id)) {
-            World world = worldRepositoryPersistent.getOne(id);
-            worldRepositoryInMemory.save(world);
+        Optional<World> optionalWorld = worldRepositoryPersistent.findById(id);
+        if(optionalWorld.isPresent()) {
+            World world = optionalWorld.get();
+            saveToMemory(world);
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
+                log.info("World " + id + " added as active world from the persistence database.");
                 return true;
             } else {
+                log.info("World " + id + " added as active world from the persistence database.");
                 return null;
             }
         } else {
+            log.info("World " + id + " was not present in the persistence database.");
             return false;
         }
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
+    private void saveToMemory(World world) {
+        worldRepositoryInMemory.save(world);
     }
 
     private Boolean addActiveWorldFromMemory(Long id) {
         if (worldRepositoryInMemory.existsById(id)) {
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
+                log.info("The requested world " + id + " is now active.");
                 return true;
             } else {
+                log.info("The requested world " + id + " was alreadu active.");
                 return null;
             }
         } else {
+            log.warn("The world " + id + " does not exist in the persistence context. A new world is created.");
             mapManager.getWorld(id, false);
             activeWorldIds.add(id);
             return true;

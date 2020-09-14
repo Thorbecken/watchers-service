@@ -39,4 +39,12 @@ public class Direction {
         this.xVelocity = xVelocity;
         this.yVelocity = yVelocity;
     }
+
+    public Direction createClone() {
+        Direction clone = new Direction();
+        clone.setId(this.id);
+        clone.setXVelocity(this.xVelocity);
+        clone.setYVelocity(this.yVelocity);
+        return  clone;
+    }
 }

@@ -58,11 +58,17 @@ public class Continent {
      * These can be possitive or negative (left, right, up down).
      */
     public Continent assignNewDriftDirection(int driftVelocity, World world){
-        int xVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
-        int yVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
+        if(this.direction == null) {
+            int xVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
+            int yVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
 
-        Direction direction = new Direction(xVelocity, yVelocity);
-        this.setDirection(direction);
+            Direction direction = new Direction(xVelocity, yVelocity);
+            this.setDirection(direction);
+        } else {
+            this.direction.setXVelocity(RandomHelper.getRandomWithNegativeNumbers(driftVelocity));
+            this.direction.setYVelocity(RandomHelper.getRandomWithNegativeNumbers(driftVelocity));
+        }
+
         world.setLastContinentInFlux(this.getId());
 
         return this;
@@ -77,5 +83,14 @@ public class Continent {
                 ", type=" + type +
                 ", direction=" + direction.toString() +
                 '}';
+    }
+
+    public Continent createClone(World newWorld) {
+        Continent clone = new Continent();
+        clone.setId(this.id);
+        clone.setType(this.type);
+        clone.setWorld(newWorld);
+        clone.setDirection(this.direction.createClone());
+        return clone;
     }
 }

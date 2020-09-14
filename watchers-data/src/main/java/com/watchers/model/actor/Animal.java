@@ -2,6 +2,7 @@ package com.watchers.model.actor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.common.Coordinate;
+import com.watchers.model.environment.World;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -96,5 +97,27 @@ public abstract class Animal extends Actor {
         } else {
             setStateType(StateType.DEAD);
         }
+    }
+
+    private void setSuperId(Long id){
+        super.setId(id);
+    }
+
+    public Animal cloneBasis(Animal clone, Coordinate newCoordinate){
+        clone.setId(this.getId());
+        clone.setSuperId(this.getId());
+        clone.setCoordinate(newCoordinate);
+        clone.setStateType(this.getStateType());
+        clone.setNaturalHabitat(this.getNaturalHabitat());
+
+        clone.setFoodReserve(this.getFoodReserve());
+        clone.setFoodReserve(this.getMaxFoodReserve());
+        clone.setForaging(this.getForaging());
+        clone.setMetabolisme(this.getMetabolisme());
+        clone.setReproductionRate(this.getReproductionRate());
+        clone.setMovement(this.getMovement());
+        clone.setAnimalType(this.getAnimalType());
+
+        return clone;
     }
 }

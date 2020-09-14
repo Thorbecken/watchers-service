@@ -2,6 +2,7 @@ package com.watchers.model.actor.animals;
 
 import com.watchers.model.actor.*;
 import com.watchers.model.common.Coordinate;
+import com.watchers.model.environment.World;
 
 import javax.persistence.Entity;
 import java.util.List;
@@ -32,5 +33,10 @@ public class Rabbit extends Animal {
         if(newActors != null){
             newActors.add(this);
         }
+    }
+
+    @Override
+    public Actor createClone(Coordinate newCoordinate) {
+        return cloneBasis(new Rabbit(), newCoordinate);
     }
 }

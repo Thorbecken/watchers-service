@@ -154,4 +154,14 @@ public class Tile {
                 ", surfaceType=" + surfaceType +
                 '}';
     }
+
+    public Tile createClone(Coordinate newCoordinate) {
+        Tile clone = new Tile();
+        clone.setSurfaceType(this.surfaceType);
+        clone.setCoordinate(newCoordinate);
+        clone.setHeight(this.height);
+        clone.setId(this.id);
+        clone.setBiome(this.biome.createClone(clone));
+        return clone;
+    }
 }

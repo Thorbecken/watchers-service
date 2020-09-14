@@ -3,6 +3,8 @@ package com.watchers.model.actor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.SerialTask;
 import com.watchers.model.common.Coordinate;
+import com.watchers.model.environment.Continent;
+import com.watchers.model.environment.World;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -49,4 +51,5 @@ public abstract class Actor implements SerialTask {
         return !isOnCorrectLand();
     }
 
+    public abstract Actor createClone(Coordinate newCoordinate);
 }

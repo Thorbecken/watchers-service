@@ -79,7 +79,7 @@ public class World {
     }
 
     @SuppressWarnings("unused")
-    private World(){}
+    public World(){}
 
 public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
         if(coordinateMap == null || coordinateMap.isEmpty()){
@@ -172,6 +172,26 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
 
         coordinates.forEach(
             coordinate -> actorList.addAll(coordinate.getActors())
+        );
+    }
+
+    public void basicCopy(World template){
+        this.id = template.getId();
+        this.xSize = template.getXSize();
+        this.ySize = template.getYSize();
+        this.heightDeficit = template.getHeightDeficit();
+        this.lastContinentInFlux = template.getLastContinentInFlux();
+
+        this.continents = new HashSet<>();
+        template.getContinents().forEach(
+                continent -> this.continents.add(continent.createClone(this))
+        );
+    }
+
+    public void coordinateCopy(World template){
+        this.coordinates = new HashSet<>();
+        template.getCoordinates().forEach(
+                coordinate -> this.coordinates.add(coordinate.createClone(continents, this))
         );
     }
 

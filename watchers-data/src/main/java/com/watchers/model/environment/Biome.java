@@ -70,4 +70,14 @@ public class Biome implements ParallelTask {
     public void transferData(MockTile mockTile) {
         mockTile.setFood(mockTile.getFood() + currentFood);
     }
+
+    public Biome createClone(Tile newTile) {
+        Biome clone = new Biome();
+        clone.setCurrentFood(this.currentFood);
+        clone.setTile(newTile);
+        clone.setId(this.id);
+        clone.setMaxFood(this.maxFood);
+        clone.setFertility(this.fertility);
+        return clone;
+    }
 }
