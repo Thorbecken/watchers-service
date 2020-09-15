@@ -5,7 +5,6 @@ import com.watchers.model.actor.StateType;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

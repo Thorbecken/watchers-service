@@ -32,7 +32,7 @@ public class Continent {
 
     @JsonIgnore
     @JsonProperty("coordinates")
-    @OneToMany(mappedBy = "continent")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "continent")
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("type")

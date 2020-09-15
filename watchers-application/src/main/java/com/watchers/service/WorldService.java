@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -132,6 +131,7 @@ public class WorldService {
         worldCleanser.proces(world);
         continentalDriftManager.process(world);
         worldRepositoryInMemory.save(world);
+        Assert.isTrue(world.getCoordinates().size() == 450, "coordinates were " +world.getCoordinates().size());
     }
 
     public void executeTurn() {
@@ -158,7 +158,13 @@ public class WorldService {
         Optional<World> optionalWorld = worldRepositoryPersistent.findById(id);
         if(optionalWorld.isPresent()) {
             World world = optionalWorld.get();
+            Assert.notNull(world);
+            world.fillTransactionals();
+            Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() ==null));
+            Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null));
+            Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null));
             saveToMemory(world);
+            saveAgain(world);
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
                 log.info("World " + id + " added as active world from the persistence database.");
@@ -174,8 +180,38 @@ public class WorldService {
     }
 
     @Transactional("inmemoryDatabaseTransactionManager")
-    private void saveToMemory(World world) {
-        worldRepositoryInMemory.save(world);
+    private void saveAgain(World persistentWorld) {
+        World memoryWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).get();
+        log.info("current coordinates in memory are: " + memoryWorld.getCoordinates().size());
+        persistentWorld.getContinents().forEach(continent -> {
+            if(memoryWorld.getContinents().stream().noneMatch(newContinent -> newContinent.getId().equals(continent.getId()))){
+                memoryWorld.getContinents().add(continent.createClone(memoryWorld));
+                log.info("Continent " + continent.getId() + " was missing.");
+            }
+        });
+        persistentWorld.getCoordinates().forEach(coordinate -> {
+            if(memoryWorld.getCoordinate(coordinate.getXCoord(), coordinate.getYCoord()) == null){
+                memoryWorld.getCoordinates().add(coordinate.createClone(memoryWorld.getContinents(), memoryWorld));
+                log.info("Coordinate " + coordinate.getXCoord() + " X, " + coordinate.getYCoord() + " Y was missing.");
+            }
+        });
+        log.info("current coordinates in memory are: " + memoryWorld.getCoordinates().size());
+        worldRepositoryInMemory.save(memoryWorld);
+        World newWorld = worldRepositoryInMemory.findById(memoryWorld.getId()).get();
+        log.info("current coordinates in memory are: " + newWorld.getCoordinates().size());
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
+    private void saveToMemory(World persistentWorld) {
+        World memoryWorld = new World(persistentWorld.getXSize(), persistentWorld.getYSize());
+        memoryWorld.setId(persistentWorld.getId());
+        worldRepositoryInMemory.save(memoryWorld);
+
+        memoryWorld.basicCopy(persistentWorld);
+        worldRepositoryInMemory.save(memoryWorld);
+
+        memoryWorld.coordinateCopy(persistentWorld);
+        worldRepositoryInMemory.save(memoryWorld);
     }
 
     private Boolean addActiveWorldFromMemory(Long id) {

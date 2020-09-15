@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Slf4j
 @Service
@@ -54,6 +55,7 @@ public class MapManager {
            world.fillTransactionals();
        }
 
+        Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
         return world;
     }
 
@@ -64,6 +66,7 @@ public class MapManager {
         worldRepositoryInMemory.save(newWorld);
         continentalDriftDirectionChanger.assignFirstOrNewDriftDirections(newWorld);
         worldRepositoryInMemory.save(newWorld);
+        Assert.isTrue(newWorld.getCoordinates().size() == newWorld.getXSize()*newWorld.getYSize(), "coordinates were " +newWorld.getCoordinates().size());
         return newWorld;
     }
 
@@ -72,6 +75,7 @@ public class MapManager {
         AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
         seedingTile.getCoordinate().getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile.getCoordinate()));
         worldRepositoryInMemory.save(world);
+        Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
     }
 
     public static void seedLife(Coordinate coordinate) {

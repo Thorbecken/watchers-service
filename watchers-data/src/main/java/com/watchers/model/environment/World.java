@@ -47,6 +47,16 @@ public class World {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<Coordinate> coordinates = new HashSet<>();
 
+    @JsonProperty("continents")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    private Set<Continent> continents = new HashSet<>();
+
+    @JsonIgnore
+    private long lastContinentInFlux;
+
+    @JsonIgnore
+    private long heightDeficit;
+
     @Transient
     @JsonIgnore
     private Map<Long, Map<Long, Coordinate>> coordinateMap = new HashMap<>();
@@ -62,16 +72,6 @@ public class World {
     @Transient
     @JsonIgnore
     private List<Actor> newActors = new ArrayList<>();
-
-    @JsonProperty("continents")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
-    private Set<Continent> continents = new HashSet<>();
-
-    @JsonIgnore
-    private long lastContinentInFlux;
-
-    @JsonIgnore
-    private long heightDeficit;
 
     public World(long xSize, long ySize){
         this.xSize = xSize;
