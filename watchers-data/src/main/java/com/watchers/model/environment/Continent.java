@@ -36,6 +36,7 @@ public class Continent {
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("type")
+    @Enumerated(value = EnumType.STRING)
     private SurfaceType type;
 
     @JsonProperty("direction")

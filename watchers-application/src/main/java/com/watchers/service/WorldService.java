@@ -9,7 +9,7 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.inmemory.*;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class WorldService {
     }
 
     @SuppressWarnings("unused")
-    @Transactional("persistentDatabaseTransactionManager")
+    //@Transactional("persistentDatabaseTransactionManager")
     public void saveAndShutdownAll(){
         activeWorldIds.stream().map(mapManager::getUninitiatedWorld).forEach(worldRepositoryPersistent::save);
         activeWorldIds.clear();
@@ -67,7 +67,7 @@ public class WorldService {
                 .ifPresent(activeWorldIds::remove);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    //@Transactional("inmemoryDatabaseTransactionManager")
     public void saveWorlds(){
         activeWorldIds.stream()
                 .map(mapManager::getInitiatedWorld)
@@ -79,20 +79,14 @@ public class WorldService {
         );
     }
 
-    @Transactional("persistentDatabaseTransactionManager")
+    //@Transactional("persistentDatabaseTransactionManager")
     public void saveWorld(@NonNull World memoryWorld){
         boolean exists = worldRepositoryPersistent.existsById(memoryWorld.getId());
+        exists = false;
         if (!exists){
-            log.warn("World " + memoryWorld.getId() + " was not found in the persistent database!");
-            World persistentWorld = new World(memoryWorld.getXSize(), memoryWorld.getYSize());
-            persistentWorld.setId(memoryWorld.getId());
-            worldRepositoryPersistent.save(persistentWorld);
-
-            persistentWorld.basicCopy(memoryWorld);
-            worldRepositoryPersistent.save(persistentWorld);
-
-            persistentWorld.coordinateCopy(memoryWorld);
-            worldRepositoryPersistent.save(persistentWorld);
+            controlWorld(memoryWorld);
+            worldRepositoryPersistent.save(memoryWorld)
+            //persistenceSaveService.complexSaveToPersistence(memoryWorld);
             log.warn("The missing world is now saved to persistence.");
         } else {
             log.info("World is beeing updated from memory.");
@@ -104,7 +98,7 @@ public class WorldService {
         activeWorldIds.stream().map(mapManager::getInitiatedWorld).forEach(this::processTurn);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    //@Transactional("inmemoryDatabaseTransactionManager")
     private void processTurn(World world){
         log.debug("There is currently " + world.getCoordinates().stream().map(Coordinate::getTile)
                         .map(Tile::getBiome)
@@ -131,7 +125,7 @@ public class WorldService {
         worldCleanser.proces(world);
         continentalDriftManager.process(world);
         worldRepositoryInMemory.save(world);
-        Assert.isTrue(world.getCoordinates().size() == 450, "coordinates were " +world.getCoordinates().size());
+        Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
     }
 
     public void executeTurn() {
@@ -153,18 +147,13 @@ public class WorldService {
         }
     }
 
-    @Transactional("persistentDatabaseTransactionManager")
+    //@Transactional("persistentDatabaseTransactionManager")
     private Boolean addActiveWorldFromPersistence(Long id) {
         Optional<World> optionalWorld = worldRepositoryPersistent.findById(id);
         if(optionalWorld.isPresent()) {
             World world = optionalWorld.get();
-            Assert.notNull(world);
-            world.fillTransactionals();
-            Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() ==null));
-            Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null));
-            Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null));
+            controlWorld(world);
             saveToMemory(world);
-            saveAgain(world);
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
                 log.info("World " + id + " added as active world from the persistence database.");
@@ -179,39 +168,23 @@ public class WorldService {
         }
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
-    private void saveAgain(World persistentWorld) {
-        World memoryWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).get();
-        log.info("current coordinates in memory are: " + memoryWorld.getCoordinates().size());
-        persistentWorld.getContinents().forEach(continent -> {
-            if(memoryWorld.getContinents().stream().noneMatch(newContinent -> newContinent.getId().equals(continent.getId()))){
-                memoryWorld.getContinents().add(continent.createClone(memoryWorld));
-                log.info("Continent " + continent.getId() + " was missing.");
-            }
-        });
-        persistentWorld.getCoordinates().forEach(coordinate -> {
-            if(memoryWorld.getCoordinate(coordinate.getXCoord(), coordinate.getYCoord()) == null){
-                memoryWorld.getCoordinates().add(coordinate.createClone(memoryWorld.getContinents(), memoryWorld));
-                log.info("Coordinate " + coordinate.getXCoord() + " X, " + coordinate.getYCoord() + " Y was missing.");
-            }
-        });
-        log.info("current coordinates in memory are: " + memoryWorld.getCoordinates().size());
-        worldRepositoryInMemory.save(memoryWorld);
-        World newWorld = worldRepositoryInMemory.findById(memoryWorld.getId()).get();
-        log.info("current coordinates in memory are: " + newWorld.getCoordinates().size());
+    private void controlWorld(World world) {
+        Assert.notNull(world);
+        world.fillTransactionals();
+        Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() ==null));
+        Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null));
+        Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null || coordinate.getTile().getBiome().getTile() == null));
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    //@Transactional("inmemoryDatabaseTransactionManager")
     private void saveToMemory(World persistentWorld) {
-        World memoryWorld = new World(persistentWorld.getXSize(), persistentWorld.getYSize());
-        memoryWorld.setId(persistentWorld.getId());
-        worldRepositoryInMemory.save(memoryWorld);
+        controlWorld(persistentWorld);
+        worldRepositoryInMemory.save(persistentWorld);
+        //memorySaveService.complexSaveToMemory(persistentWorld);
 
-        memoryWorld.basicCopy(persistentWorld);
-        worldRepositoryInMemory.save(memoryWorld);
-
-        memoryWorld.coordinateCopy(persistentWorld);
-        worldRepositoryInMemory.save(memoryWorld);
+        World newWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).get();
+        log.info("current coordinates from memory are: " + newWorld.getCoordinates().size());
+        log.info("current coordinates from memory are: " + persistentWorld.getCoordinates().size());
     }
 
     private Boolean addActiveWorldFromMemory(Long id) {

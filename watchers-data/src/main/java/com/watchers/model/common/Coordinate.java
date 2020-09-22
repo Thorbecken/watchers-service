@@ -44,7 +44,7 @@ public class Coordinate {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
@@ -239,17 +239,16 @@ public class Coordinate {
                 '}';
     }
 
-    public Coordinate createClone(Set<Continent> newContinents, World newWorld) {
+    public Coordinate createBasicClone(World newWorld) {
         Coordinate clone = new Coordinate();
         clone.setId(this.id);
         clone.setWorld(newWorld);
         clone.setXCoord(this.xCoord);
         clone.setYCoord(this.yCoord);
-        clone.setTile(this.tile.createClone(clone));
-        clone.setContinent(newContinents.stream().filter(oldContinent -> oldContinent.getId().equals(this.continent.getId())).findFirst().get());
-        this.getActors().forEach(
-                actor -> clone.getActors().add(actor.createClone(clone))
-        );
+        clone.setContinent(newWorld.getContinents().stream()
+                .filter(oldContinent -> oldContinent.getId().equals(this.continent.getId()))
+                .findFirst().get());
+
         return clone;
     }
 }

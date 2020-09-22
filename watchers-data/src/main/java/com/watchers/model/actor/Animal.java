@@ -2,7 +2,6 @@ package com.watchers.model.actor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.World;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -31,6 +30,7 @@ public abstract class Animal extends Actor {
     private float metabolisme;
     private float reproductionRate;
     private int movement;
+    @Enumerated(value = EnumType.STRING)
     private AnimalType animalType;
 
     public abstract void generateOffspring(Coordinate coordinate, float foodPassed);

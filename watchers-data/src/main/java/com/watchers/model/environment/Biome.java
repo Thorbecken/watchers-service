@@ -26,7 +26,7 @@ public class Biome implements ParallelTask {
     private float fertility;
 
     @JsonIgnore
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "tile_id", nullable = false)
     private Tile tile;
 

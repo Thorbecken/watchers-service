@@ -16,10 +16,10 @@ public class SaveJob implements Job {
 
     public void execute(JobExecutionContext context) {
 
-        log.info("Save job ** {} ** fired @ {}", context.getJobDetail().getKey().getName(), context.getFireTime());
+        //log.info("Save job ** {} ** fired @ {}", context.getJobDetail().getKey().getName(), context.getFireTime());
 
-        worldService.saveWorlds();
+        //worldService.saveWorlds();
 
-        log.info("Next save job scheduled @ {}", context.getNextFireTime());
+        //log.info("Next save job scheduled @ {}", context.getNextFireTime());
     }
 }

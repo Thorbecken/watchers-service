@@ -3,8 +3,6 @@ package com.watchers.model.actor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.SerialTask;
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.World;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -24,20 +22,20 @@ public abstract class Actor implements SerialTask {
     @Column(name = "actor_id")
     private Long id;
 
-    public void setCoordinate(Coordinate coordinate) {
-        this.coordinate = coordinate;
-    }
-
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @ManyToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name = "tile_id")
+    @ManyToOne
     private Coordinate coordinate;
 
 
+    @Enumerated(value = EnumType.STRING)
     private StateType stateType;
+    @Enumerated(value = EnumType.STRING)
     private NaturalHabitat naturalHabitat;
 
+    public void setCoordinate(Coordinate coordinate) {
+        this.coordinate = coordinate;
+    }
     public abstract void processSerialTask();
     public abstract void handleContinentalMovement();
     public boolean isCorrectLandType(Coordinate coordinate){

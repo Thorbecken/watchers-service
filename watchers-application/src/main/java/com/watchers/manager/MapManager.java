@@ -46,7 +46,7 @@ public class MapManager {
         return getWorld(worldId, false);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    //@Transactional("inmemoryDatabaseTransactionManager")
     public World getWorld(Long worldId, boolean initiated) {
        World world = worldRepositoryInMemory.findById(worldId).orElseGet(() -> createWorld(worldId));
         log.trace("world loaden from memory with: "+ (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, (x, y) -> x+y) + world.getHeightDeficit()) + " height");
@@ -59,7 +59,7 @@ public class MapManager {
         return world;
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    //@Transactional("inmemoryDatabaseTransactionManager")
     private World createWorld(long worldId){
         World newWorld = worldFactory.generateWorld(xSize, ySize, numberOfContinents);
         log.info(String.format("World number %s created", worldId));

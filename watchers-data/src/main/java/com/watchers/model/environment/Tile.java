@@ -7,16 +7,7 @@ import com.watchers.model.dto.MockTile;
 import com.watchers.model.common.Coordinate;
 import lombok.Data;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.*;
 
 @Data
@@ -32,7 +23,7 @@ public class Tile {
     private Long id;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     private Coordinate coordinate;
 
     @JsonProperty("height")
@@ -46,6 +37,7 @@ public class Tile {
 
     @JsonProperty("surfaceType")
     @Column(name = "surfaceType")
+    @Enumerated(value = EnumType.STRING)
     private SurfaceType surfaceType;
 
     public Tile(Coordinate coordinate, Continent continent){
@@ -156,6 +148,16 @@ public class Tile {
     }
 
     public Tile createClone(Coordinate newCoordinate) {
+        Tile clone = new Tile();
+        clone.setSurfaceType(this.surfaceType);
+        clone.setCoordinate(newCoordinate);
+        clone.setHeight(this.height);
+        clone.setId(this.id);
+        clone.setBiome(this.biome.createClone(clone));
+        return clone;
+    }
+
+    public Tile createBasicClone(Coordinate newCoordinate) {
         Tile clone = new Tile();
         clone.setSurfaceType(this.surfaceType);
         clone.setCoordinate(newCoordinate);
