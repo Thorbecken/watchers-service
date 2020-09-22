@@ -26,8 +26,8 @@ public class Continent {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "world_id", nullable = false)
+    @Column(name = "world_id")
+    @ManyToOne(optional = false)
     private World world;
 
     @JsonIgnore
@@ -93,5 +93,25 @@ public class Continent {
         clone.setWorld(newWorld);
         clone.setDirection(this.direction.createClone());
         return clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Continent)) return false;
+
+        Continent continent = (Continent) o;
+
+        if (id != null ? !id.equals(continent.id) : continent.id != null) return false;
+        if (world != null ? !world.equals(continent.world) : continent.world != null) return false;
+        return coordinates != null ? coordinates.equals(continent.coordinates) : continent.coordinates == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (world != null ? world.hashCode() : 0);
+        result = 31 * result + (coordinates != null ? coordinates.hashCode() : 0);
+        return result;
     }
 }
