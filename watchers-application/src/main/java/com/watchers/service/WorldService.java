@@ -29,6 +29,8 @@ import java.util.Optional;
 public class WorldService {
 
     private WorldRepositoryInMemory worldRepositoryInMemory;
+    private MemorySaveService memorySaveService;
+    private PersistenceSaveService persistenceSaveService;
     private WorldRepositoryPersistent worldRepositoryPersistent;
     private MapManager mapManager;
     private ContinentalDriftManager continentalDriftManager;
@@ -37,11 +39,13 @@ public class WorldService {
 
     public WorldService(MapManager mapManager,
                         WorldRepositoryInMemory worldRepositoryInMemory,
-                        WorldRepositoryPersistent worldRepositoryPersistent,
+                        MemorySaveService memorySaveService, PersistenceSaveService persistenceSaveService, WorldRepositoryPersistent worldRepositoryPersistent,
                         ContinentalDriftManager continentalDriftManager,
                         WorldCleanser worldCleanser){
         this.worldRepositoryInMemory = worldRepositoryInMemory;
         this.mapManager = mapManager;
+        this.memorySaveService = memorySaveService;
+        this.persistenceSaveService = persistenceSaveService;
         this.worldRepositoryPersistent = worldRepositoryPersistent;
         this.continentalDriftManager = continentalDriftManager;
         this.worldCleanser = worldCleanser;
@@ -85,8 +89,7 @@ public class WorldService {
         exists = false;
         if (!exists){
             controlWorld(memoryWorld);
-            worldRepositoryPersistent.save(memoryWorld)
-            //persistenceSaveService.complexSaveToPersistence(memoryWorld);
+            persistenceSaveService.complexSaveToPersistence(memoryWorld);
             log.warn("The missing world is now saved to persistence.");
         } else {
             log.info("World is beeing updated from memory.");
@@ -179,8 +182,7 @@ public class WorldService {
     //@Transactional("inmemoryDatabaseTransactionManager")
     private void saveToMemory(World persistentWorld) {
         controlWorld(persistentWorld);
-        worldRepositoryInMemory.save(persistentWorld);
-        //memorySaveService.complexSaveToMemory(persistentWorld);
+        memorySaveService.complexSaveToMemory(persistentWorld);
 
         World newWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).get();
         log.info("current coordinates from memory are: " + newWorld.getCoordinates().size());
