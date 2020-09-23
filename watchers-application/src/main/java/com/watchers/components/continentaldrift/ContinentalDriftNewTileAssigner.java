@@ -69,7 +69,6 @@ public class ContinentalDriftNewTileAssigner {
 
                 if(chosenContinent == null){
                     chosenContinent = new Continent(taskDto.getWorld(), SurfaceType.PLAIN);
-                    taskDto.getWorld().getContinents().add(chosenContinent);
                     chosenContinent.setId(nextContinentalId++);
                     continentalDriftDirectionChanger.assignFirstDriftDirrecion(chosenContinent, taskDto.getWorld());
                 }
@@ -98,7 +97,6 @@ public class ContinentalDriftNewTileAssigner {
                 List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
 
                 Continent continent = new Continent(taskDto.getWorld(), SurfaceType.PLAIN);
-                taskDto.getWorld().getContinents().add(continent);
                 MockContinent mockContinent = new MockContinent(connectedCoordinates, taskDto.getWorld());
                 mockContinent.setContinent(continent);
                 mockContinent.getContinent().setId(nextContinentalId++);

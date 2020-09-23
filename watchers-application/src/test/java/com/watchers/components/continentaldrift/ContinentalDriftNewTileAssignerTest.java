@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ContinentalDriftNewTileAssignerTest {
 
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
+    private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     private ContinentalDriftTaskDto taskDto;
     private CoordinateHelper coordinateHelper;
 
@@ -31,13 +32,15 @@ class ContinentalDriftNewTileAssignerTest {
     @BeforeEach
     void setUp() {
         this.coordinateHelper = new CoordinateHelper();
-        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(null);
+        this.continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(1, 1);
+        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
 
         World world = TestableWorld.createWorld();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
+        taskDto.setMinContinents(1);
         continentalDriftPredicter.process(taskDto);
         continentalDriftTileChangeComputer.process(taskDto);
     }

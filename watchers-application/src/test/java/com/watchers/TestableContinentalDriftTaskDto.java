@@ -10,6 +10,7 @@ public class TestableContinentalDriftTaskDto {
 
         taskDto.setWorld(world);
         taskDto.setHeightDivider(2);
+        taskDto.setMinContinents(5);
 
         return taskDto;
     }
