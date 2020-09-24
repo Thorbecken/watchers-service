@@ -1,4 +1,6 @@
 package com.watchers.components.continentaldrift;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
@@ -8,18 +10,22 @@ import com.watchers.model.common.Direction;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
-import com.watchers.model.environment.*;
+import com.watchers.model.environment.Continent;
+import com.watchers.model.environment.MockContinent;
+import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.environment.World;
+import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ContinentalDriftNewTileAssignerTest {
 
@@ -33,7 +39,7 @@ class ContinentalDriftNewTileAssignerTest {
     void setUp() {
         this.coordinateHelper = new CoordinateHelper();
         this.continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(1, 1);
-        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger);
+        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger, 40);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
 
@@ -97,7 +103,8 @@ class ContinentalDriftNewTileAssignerTest {
                 .map(MockContinent::getContinent)
                 .max(Comparator.comparing(Continent::getId))
                 .map(Continent::getId)
-                .get());
+                .get()
+                .longValue());
 
         // asserts that only one continent is created
         assertEquals(1,taskDto.getChanges().values().stream()

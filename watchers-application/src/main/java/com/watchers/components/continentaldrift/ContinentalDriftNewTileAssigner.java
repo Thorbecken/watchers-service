@@ -8,6 +8,7 @@ import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.MockContinent;
 import com.watchers.model.environment.SurfaceType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -18,10 +19,12 @@ import java.util.stream.Collectors;
 public class ContinentalDriftNewTileAssigner {
 
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
+    private int maxContinentSize;
     long nextContinentalId;
 
-    public ContinentalDriftNewTileAssigner(ContinentalDriftDirectionChanger continentalDriftDirectionChanger) {
+    public ContinentalDriftNewTileAssigner(ContinentalDriftDirectionChanger continentalDriftDirectionChanger, @Value("${watch.maxContinentsize:0}") int maxContinentSize) {
         this.continentalDriftDirectionChanger = continentalDriftDirectionChanger;
+        this.maxContinentSize = maxContinentSize;
     }
 
     public void process(ContinentalDriftTaskDto taskDto){
@@ -54,7 +57,7 @@ public class ContinentalDriftNewTileAssigner {
                         .filter(adjecantCoordinates::contains)
                         .collect(Collectors.toList());
 
-                int maximalCoordinates = calculateMaximumCoordinates(taskDto);
+                int maximalCoordinates = maxContinentSize == 0?calculateMaximumCoordinates(taskDto):maxContinentSize;
 
                 Continent chosenContinent = taskDto.getChanges().values().stream()
                         .filter(continentalChangesDto -> existingCoordinates.contains(continentalChangesDto.getKey()))

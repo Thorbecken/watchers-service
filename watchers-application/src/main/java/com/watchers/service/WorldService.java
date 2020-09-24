@@ -85,7 +85,7 @@ public class WorldService {
         exists = false;
         if (!exists){
             controlWorld(memoryWorld);
-            worldRepositoryPersistent.save(memoryWorld)
+            worldRepositoryPersistent.save(memoryWorld);
             //persistenceSaveService.complexSaveToPersistence(memoryWorld);
             log.warn("The missing world is now saved to persistence.");
         } else {
