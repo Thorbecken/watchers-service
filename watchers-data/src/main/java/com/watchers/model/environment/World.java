@@ -67,7 +67,8 @@ public class World {
 
     @Transient
     @JsonIgnore
-    private List<Actor> actorList = new ArrayList<>();
+    // Needs to be uninitiated for functionality, this way there can be lazy loading.
+    private List<Actor> actorList;
 
     @Transient
     @JsonIgnore

@@ -6,9 +6,9 @@ import com.watchers.model.environment.World;
 public class TestableContinentalDriftTaskDto {
 
     public static ContinentalDriftTaskDto createContinentalDriftTaskDto(World world){
-        ContinentalDriftTaskDto  taskDto = new ContinentalDriftTaskDto();
+        ContinentalDriftTaskDto  taskDto = new ContinentalDriftTaskDto(world.getId());
 
-        taskDto.setWorld(world);
+        taskDto.setWorldId(world.getId());
         taskDto.setHeightDivider(2);
         taskDto.setMinContinents(5);
 

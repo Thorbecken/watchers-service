@@ -8,13 +8,16 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,6 +25,7 @@ class ContinentalDriftTileChangeComputerTest {
 
     private World world;
     private ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer;
+    private WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
     private ContinentalDriftTaskDto taskDto;
 
 
@@ -29,10 +33,11 @@ class ContinentalDriftTileChangeComputerTest {
     void setUp() {
         this.world = TestableWorld.createWorld();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
+        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
+        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
     }
 
@@ -58,6 +63,7 @@ class ContinentalDriftTileChangeComputerTest {
                 .orElse(0L);
         // testing
 
+        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftTileChangeComputer.process(taskDto);
 
         // assertions

@@ -45,13 +45,13 @@ class WorldFactory {
         specifyWaterZones(world);
 
         tileDefined.setStartingHeights(world);
-        tileDefined.process(world);
+        tileDefined.assignStartingType(world);
 
         if(lifePreSeeded) {
             world.getContinents().forEach(continent -> world.getCoordinates().stream()
                     .filter(coordinate -> coordinate.getContinent() == continent)
                     .findFirst()
-                    .ifPresent(MapManager::seedLife));
+                    .ifPresent(LifeManager::seedLife));
 
         }
 

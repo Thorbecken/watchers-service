@@ -3,11 +3,13 @@ package com.watchers.components.continentaldrift;
 import com.watchers.TestableWorld;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mockito;
 
 import java.util.Set;
 
@@ -16,6 +18,7 @@ class ContinentalDriftDirectionChangerTest {
     private World world;
     private ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject methodObject;
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
+    private WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
     private long lastContinentalDrift;
     private Set<Continent> continents;
 
@@ -24,7 +27,7 @@ class ContinentalDriftDirectionChangerTest {
         world = TestableWorld.createWorld();
         continents = world.getContinents();
 
-        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(2, 2);
+        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(2, 2, worldRepositoryInMemory);
 
         lastContinentalDrift = world.getContinents().size()-1;
         methodObject = continentalDriftDirectionChanger.new ContinentalDriftDirectionMethodObject(false,lastContinentalDrift);

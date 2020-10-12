@@ -4,7 +4,9 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.*;
@@ -13,9 +15,16 @@ import java.util.stream.Collectors;
 @Component
 public class ContinentalCorrector {
 
+    private WorldRepositoryInMemory worldRepositoryInMemory;
+
+    public ContinentalCorrector(WorldRepositoryInMemory worldRepositoryInMemory) {
+        this.worldRepositoryInMemory = worldRepositoryInMemory;
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
     public void process(ContinentalDriftTaskDto driftTaskDto) {
-        Assert.notNull(driftTaskDto.getWorld(), "World is not found!");
-        World world = driftTaskDto.getWorld();
+        World world = worldRepositoryInMemory.findById(driftTaskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        Assert.notNull(world, "World is not found!");
 
         world.getCoordinates().forEach(
                 coordinate -> {
@@ -44,6 +53,7 @@ public class ContinentalCorrector {
                 }
         );
 
+        worldRepositoryInMemory.save(world);
     }
 
     public static <T> T mostCommon(List<T> list) {

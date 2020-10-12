@@ -77,6 +77,13 @@ public class Coordinate {
         this.tile = new Tile(this, continent);
     }
 
+    public void changeContinent(Continent newContinent){
+        if(continent != null) {
+            continent.removeCoordinate(this);
+        }
+        newContinent.addCoordinate(this);
+    }
+
     @JsonIgnore
     public List<Coordinate> getNeighbours() {
         List<Coordinate> returnCoordinates = new ArrayList<>();

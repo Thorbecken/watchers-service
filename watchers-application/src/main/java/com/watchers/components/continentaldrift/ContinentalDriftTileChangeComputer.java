@@ -7,7 +7,10 @@ import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -15,17 +18,21 @@ import java.util.Map;
 @Component
 public class ContinentalDriftTileChangeComputer {
 
+    private WorldRepositoryInMemory worldRepositoryInMemory;
     private CoordinateHelper coordinateHelper;
 
-    public ContinentalDriftTileChangeComputer(CoordinateHelper coordinateHelper){
+    public ContinentalDriftTileChangeComputer(CoordinateHelper coordinateHelper, WorldRepositoryInMemory worldRepositoryInMemory){
         this.coordinateHelper = coordinateHelper;
+        this.worldRepositoryInMemory = worldRepositoryInMemory;
     }
 
+    @Transactional("inmemoryDatabaseTransactionManager")
     public void process(ContinentalDriftTaskDto taskDto) {
+        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory."));
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
-        coordinateHelper.getAllPossibleCoordinates(taskDto.getWorld())
+        coordinateHelper.getAllPossibleCoordinates(world)
                 .forEach( coordinate -> {
                     List<Tile> tiles = newTileLayout.get(coordinate);
                     if(tiles == null){
@@ -35,14 +42,13 @@ public class ContinentalDriftTileChangeComputer {
                     } else if (tiles.size() == 1) {
                         processOneTile(coordinate, tiles.get(0), changes);
                     } else {
-                        processMultipleTiles(coordinate, tiles, taskDto);
+                        processMultipleTiles(coordinate, tiles, taskDto, world);
                     }
                 }
         );
 
         taskDto.setChanges(changes);
-
-        taskDto.getWorld().fillTransactionals();
+        worldRepositoryInMemory.save(world);
     }
 
     private void processAbsentTile(Coordinate coordinate, Map<Coordinate, ContinentalChangesDto> changes) {
@@ -58,7 +64,7 @@ public class ContinentalDriftTileChangeComputer {
         changes.put(coordinate, dto);
     }
 
-    private void processMultipleTiles(Coordinate coordinate, List<Tile> tiles, ContinentalDriftTaskDto taskDto) {
+    private void processMultipleTiles(Coordinate coordinate, List<Tile> tiles, ContinentalDriftTaskDto taskDto, World world) {
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
         ContinentalChangesDto dto = new ContinentalChangesDto(coordinate);
         changes.put(coordinate, dto);
@@ -77,7 +83,7 @@ public class ContinentalDriftTileChangeComputer {
             tile.transferData(mockTile);
         }
 
-        taskDto.getWorld().setHeightDeficit(taskDto.getWorld().getHeightDeficit() + taskDto.getHeightLoss());
+        world.setHeightDeficit(world.getHeightDeficit() + taskDto.getHeightLoss());
         taskDto.setHeightLoss(0);
 
     }

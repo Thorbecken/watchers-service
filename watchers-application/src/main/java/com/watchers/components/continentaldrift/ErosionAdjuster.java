@@ -5,8 +5,10 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,22 +19,25 @@ public class ErosionAdjuster {
     private CoordinateHelper coordinateHelper;
     private int minHeightDifference;
     private int maxErosion;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
 
-    public ErosionAdjuster(CoordinateHelper coordinateHelper, @Value("${watch.erosion.minHeightDifference}") int minHeightDifference, @Value("${watch.erosion.max}") int maxErosion) {
+    public ErosionAdjuster(CoordinateHelper coordinateHelper, @Value("${watch.erosion.minHeightDifference}") int minHeightDifference, @Value("${watch.erosion.max}") int maxErosion, WorldRepositoryInMemory worldRepositoryInMemory) {
         this.coordinateHelper = coordinateHelper;
         this.minHeightDifference = minHeightDifference;
         this.maxErosion = maxErosion;
+        this.worldRepositoryInMemory = worldRepositoryInMemory;
     }
 
+    @Transactional("inmemoryDatabaseTransactionManager")
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = taskDto.getWorld();
+        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, Long> erosionMap = new HashMap<>();
 
         coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
             erosionMap.put(coordinate, 0L);
         });
 
-        Set<Coordinate> coordinates = taskDto.getWorld().getCoordinates();
+        Set<Coordinate> coordinates = world.getCoordinates();
 
         coordinates.stream().map(Coordinate::getTile).forEach(tile -> {
             List<Tile> neighbouringTiles = tile.getNeighbours();
@@ -58,5 +63,7 @@ public class ErosionAdjuster {
                     world.getTile(coordiante).setHeight(currentHeight + aLong);
                 }
         );
+
+        worldRepositoryInMemory.save(world);
     }
 }

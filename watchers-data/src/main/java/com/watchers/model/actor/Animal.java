@@ -10,6 +10,9 @@ import java.util.Optional;
 
 @Data
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="animal_type",
+        discriminatorType = DiscriminatorType.STRING)
 @Table(name = "animal")
 @EqualsAndHashCode(callSuper=true)
 @SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
@@ -54,9 +57,9 @@ public abstract class Animal extends Actor {
         }
     }
 
-    private void moveToTile(Coordinate coordinate) {
+    private void moveToTile(Coordinate newCoordinate) {
         getCoordinate().getActors().remove(this);
-        setCoordinate(coordinate);
+        setCoordinate(newCoordinate);
         getCoordinate().getActors().add(this);
     }
 

@@ -2,31 +2,24 @@ package com.watchers.model.dto;
 
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
-public class ContinentalDriftTaskDto {
+@EqualsAndHashCode(callSuper = true)
+public class ContinentalDriftTaskDto extends WorldTaskDto {
 
-    private World world;
     private long heightLoss;
     private long heightDivider;
     private int minContinents;
     private List<Tile> toBeRemovedTiles = new ArrayList<>();
-    private Map<Coordinate, List<Tile>> newTileLayout;
-    private Map<Coordinate, ContinentalChangesDto> changes;
+    private Map<Coordinate, List<Tile>> newTileLayout = new HashMap<>();
+    private Map<Coordinate, ContinentalChangesDto> changes = new HashMap<>();
+    public List<Long> getRemovedContinents = new ArrayList<>();
 
-    public ContinentalDriftTaskDto(){
-        this.changes = new HashMap<>();
-        this.newTileLayout = new HashMap<>();
-    }
-
-    public List<Tile> getToBeRemovedTiles() {
-        return toBeRemovedTiles;
+    public ContinentalDriftTaskDto(Long worldId) {
+        super(worldId);
     }
 }

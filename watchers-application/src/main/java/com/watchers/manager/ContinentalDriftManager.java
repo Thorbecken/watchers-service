@@ -1,11 +1,7 @@
 package com.watchers.manager;
 
-import com.watchers.components.WorldCleanser;
 import com.watchers.components.continentaldrift.*;
-import com.watchers.model.actor.Actor;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,9 +18,6 @@ public class ContinentalDriftManager {
     private ContinentalCorrector continentalCorrector;
     private TileDefined tileDefined;
     private ErosionAdjuster erosionAdjuster;
-    private WorldCleanser worldCleanser;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
-
 
     private long heigtDivider;
     private int minimumContinents;
@@ -36,8 +29,6 @@ public class ContinentalDriftManager {
                                    ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner,
                                    ContinentalCorrector continentalCorrector, TileDefined tileDefined,
                                    ErosionAdjuster erosionAdjuster,
-                                   WorldCleanser worldCleanser,
-                                   WorldRepositoryInMemory worldRepositoryInMemory,
                                    @Value("${watch.heightdivider}") long heigtDivider,
                                    @Value("${watch.minContinents}") int minimumContinents){
         this.continentalDriftPredicter = continentalDriftPredicter;
@@ -48,40 +39,26 @@ public class ContinentalDriftManager {
         this.continentalCorrector = continentalCorrector;
         this.tileDefined = tileDefined;
         this.erosionAdjuster = erosionAdjuster;
-        this.worldCleanser = worldCleanser;
-        this.worldRepositoryInMemory = worldRepositoryInMemory;
 
         this.heigtDivider = heigtDivider;
         this.minimumContinents = minimumContinents;
     }
 
-    public ContinentalDriftTaskDto process(World world){
-        ContinentalDriftTaskDto taskDto = setup(world);
-        continentalDriftDirectionChanger.process(world);
+    public void process(ContinentalDriftTaskDto taskDto){
+        continentalDriftDirectionChanger.process(taskDto);
         continentalDriftPredicter.process(taskDto);
         continentalDriftTileChangeComputer.process(taskDto);
         continentalDriftNewTileAssigner.process(taskDto);
         continentalDriftWorldAdjuster.process(taskDto);
         continentalCorrector.process(taskDto);
         erosionAdjuster.process(taskDto);
-        tileDefined.process(taskDto.getWorld());
+        tileDefined.process(taskDto);
 
-        worldRepositoryInMemory.save(world);
-        world.fillTransactionals();
-
-        world.getActorList().stream()
-                .filter(Actor::isNotOnCorrectLand)
-                .forEach(Actor::handleContinentalMovement);
-        worldCleanser.proces(world);
-
-        log.info("Proccesed a continentaldrift for world id: " + world.getId());
-
-        return taskDto;
+        log.info("Proccesed a continentaldrift for world id: " + taskDto.getWorldId());
     }
 
-    private ContinentalDriftTaskDto setup(World world) {
-        ContinentalDriftTaskDto taskDto = new ContinentalDriftTaskDto();
-        taskDto.setWorld(world);
+    public ContinentalDriftTaskDto createTask(Long worldId) {
+        ContinentalDriftTaskDto taskDto = new ContinentalDriftTaskDto(worldId);
         taskDto.setHeightDivider(heigtDivider);
         taskDto.setMinContinents(minimumContinents);
 

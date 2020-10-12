@@ -1,16 +1,15 @@
 package com.watchers.service;
 
-import com.watchers.components.WorldCleanser;
+import com.watchers.manager.CleansingManager;
 import com.watchers.manager.ContinentalDriftManager;
+import com.watchers.manager.LifeManager;
 import com.watchers.manager.MapManager;
-import com.watchers.model.actor.Actor;
-import com.watchers.model.actor.StateType;
-import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.Biome;
-import com.watchers.model.environment.Tile;
+import com.watchers.model.dto.ContinentalDriftTaskDto;
+import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.*;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 @EnableTransactionManagement
 public class WorldService {
 
@@ -32,23 +32,12 @@ public class WorldService {
     private WorldRepositoryPersistent worldRepositoryPersistent;
     private MapManager mapManager;
     private ContinentalDriftManager continentalDriftManager;
-    private WorldCleanser worldCleanser;
+    private CleansingManager cleansingManager;
+    private LifeManager lifeManager;
     private List<Long> activeWorldIds = new ArrayList<>();
 
-    public WorldService(MapManager mapManager,
-                        WorldRepositoryInMemory worldRepositoryInMemory,
-                        WorldRepositoryPersistent worldRepositoryPersistent,
-                        ContinentalDriftManager continentalDriftManager,
-                        WorldCleanser worldCleanser){
-        this.worldRepositoryInMemory = worldRepositoryInMemory;
-        this.mapManager = mapManager;
-        this.worldRepositoryPersistent = worldRepositoryPersistent;
-        this.continentalDriftManager = continentalDriftManager;
-        this.worldCleanser = worldCleanser;
-    }
-
     @SuppressWarnings("unused")
-    //@Transactional("persistentDatabaseTransactionManager")
+    @Transactional("persistentDatabaseTransactionManager")
     public void saveAndShutdownAll(){
         activeWorldIds.stream().map(mapManager::getUninitiatedWorld).forEach(worldRepositoryPersistent::save);
         activeWorldIds.clear();
@@ -67,7 +56,7 @@ public class WorldService {
                 .ifPresent(activeWorldIds::remove);
     }
 
-    //@Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional("inmemoryDatabaseTransactionManager")
     public void saveWorlds(){
         activeWorldIds.stream()
                 .map(mapManager::getInitiatedWorld)
@@ -79,12 +68,12 @@ public class WorldService {
         );
     }
 
-    //@Transactional("persistentDatabaseTransactionManager")
+    @Transactional("persistentDatabaseTransactionManager")
     public void saveWorld(@NonNull World memoryWorld){
         boolean exists = worldRepositoryPersistent.existsById(memoryWorld.getId());
         exists = false;
         if (!exists){
-            controlWorld(memoryWorld);
+            worldCheckup(memoryWorld);
             worldRepositoryPersistent.save(memoryWorld);
             //persistenceSaveService.complexSaveToPersistence(memoryWorld);
             log.warn("The missing world is now saved to persistence.");
@@ -95,37 +84,17 @@ public class WorldService {
     }
 
     public void processTurns(){
-        activeWorldIds.stream().map(mapManager::getInitiatedWorld).forEach(this::processTurn);
+        activeWorldIds.forEach(this::processTurn);
     }
 
-    //@Transactional("inmemoryDatabaseTransactionManager")
-    private void processTurn(World world){
-        log.debug("There is currently " + world.getCoordinates().stream().map(Coordinate::getTile)
-                        .map(Tile::getBiome)
-                        .map(Biome::getCurrentFood)
-                        .reduce(0f, (tile1, tile2) -> tile1 + tile2)
-        + "food in the world"
-        );
-        log.debug("The total fertility in the world amounts to " + world.getCoordinates().parallelStream().map(Coordinate::getTile)
-                .map(Tile::getBiome)
-                .map(Biome::getFertility)
-                .reduce(0f, (tile1, tile2) -> tile1 + tile2, (tile1, tile2) -> tile1 + tile2)
-                + "food");
-        world.getCoordinates().parallelStream().map(Coordinate::getTile).forEach(
-                worldTile -> worldTile.getBiome().processParallelTask()
-        );
+    private void processTurn(Long worldId){
+        ContinentalDriftTaskDto continentalDriftTaskDto = continentalDriftManager.createTask(worldId);
+        continentalDriftManager.process(continentalDriftTaskDto);
+        cleansingManager.process(continentalDriftTaskDto);
+        lifeManager.process(continentalDriftTaskDto);
 
-        log.debug(world.getActorList().size() + " Actors at the start of this turn");
-        log.debug(world.getActorList().stream()
-                .filter(actor -> actor.getStateType() == StateType.DEAD)
-                .count() + " Actors where dead at the start of this turn");
-
-        world.getActorList().forEach(Actor::processSerialTask);
-
-        worldCleanser.proces(world);
-        continentalDriftManager.process(world);
-        worldRepositoryInMemory.save(world);
-        Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
+        WorldTaskDto worldTaskDto = new WorldTaskDto(worldId);
+        cleansingManager.process(worldTaskDto);
     }
 
     public void executeTurn() {
@@ -147,12 +116,12 @@ public class WorldService {
         }
     }
 
-    //@Transactional("persistentDatabaseTransactionManager")
+    @Transactional("persistentDatabaseTransactionManager")
     private Boolean addActiveWorldFromPersistence(Long id) {
         Optional<World> optionalWorld = worldRepositoryPersistent.findById(id);
         if(optionalWorld.isPresent()) {
             World world = optionalWorld.get();
-            controlWorld(world);
+            worldCheckup(world);
             saveToMemory(world);
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
@@ -168,21 +137,21 @@ public class WorldService {
         }
     }
 
-    private void controlWorld(World world) {
-        Assert.notNull(world);
+    private void worldCheckup(World world) {
+        Assert.notNull(world, "The world was null.");
         world.fillTransactionals();
-        Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() ==null));
-        Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null));
-        Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null || coordinate.getTile().getBiome().getTile() == null));
+        Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() == null), "Some continents had nog id set.");
+        Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null), "Some actors had no id set.");
+        Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null || coordinate.getTile().getBiome().getTile() == null), "Some biomes had nog id set.");
     }
 
-    //@Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional("inmemoryDatabaseTransactionManager")
     private void saveToMemory(World persistentWorld) {
-        controlWorld(persistentWorld);
+        worldCheckup(persistentWorld);
         worldRepositoryInMemory.save(persistentWorld);
         //memorySaveService.complexSaveToMemory(persistentWorld);
 
-        World newWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).get();
+        World newWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).orElseThrow(() -> new RuntimeException("The world was lost in perstistence."));
         log.info("current coordinates from memory are: " + newWorld.getCoordinates().size());
         log.info("current coordinates from memory are: " + persistentWorld.getCoordinates().size());
     }

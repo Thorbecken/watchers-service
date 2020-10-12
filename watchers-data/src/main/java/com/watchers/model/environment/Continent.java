@@ -40,13 +40,14 @@ public class Continent {
     private SurfaceType type;
 
     @JsonProperty("direction")
-    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL, optional = false)
     private Direction direction;
 
     public Continent(World world, SurfaceType surfaceType){
         this.world = world;
         this.world.getContinents().add(this);
         this.type = surfaceType;
+        this.assignNewDriftDirection(1,world);
     }
 
     @JsonCreator
@@ -68,11 +69,23 @@ public class Continent {
         } else {
             this.direction.setXVelocity(RandomHelper.getRandomWithNegativeNumbers(driftVelocity));
             this.direction.setYVelocity(RandomHelper.getRandomWithNegativeNumbers(driftVelocity));
+            world.setLastContinentInFlux(this.getId());
         }
 
-        world.setLastContinentInFlux(this.getId());
-
         return this;
+    }
+
+    public void addCoordinate(Coordinate coordinate){
+        this.getCoordinates().add(coordinate);
+        coordinate.setContinent(this);
+    }
+
+    public void removeCoordinate(Coordinate coordinate){
+        boolean removed = this.getCoordinates().remove(coordinate);
+        if(!removed){
+            throw new RuntimeException("Coordinate " + coordinate + " was to be removed from continent " + this + " but was not present!");
+        }
+        coordinate.setContinent(null);
     }
 
     @Override
