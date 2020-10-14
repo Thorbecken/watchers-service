@@ -12,6 +12,7 @@ public class TestableWorld {
 
     public static World createWorld() {
         World world = new World(3, 3);
+        world.setId(1L);
         world.setLastContinentInFlux(0L);
 
         Continent continent1 = new Continent(world, SurfaceType.PLAIN);

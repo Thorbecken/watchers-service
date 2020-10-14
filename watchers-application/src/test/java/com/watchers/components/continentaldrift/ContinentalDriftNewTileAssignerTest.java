@@ -175,6 +175,7 @@ class ContinentalDriftNewTileAssignerTest {
 
     private World createTestWorld() {
         World world = new World(3,3);
+        world.setId(1L);
 
         Continent continentX = new Continent(world, SurfaceType.PLAIN);
         continentX.setDirection(new Direction(0,0));

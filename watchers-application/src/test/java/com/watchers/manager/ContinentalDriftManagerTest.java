@@ -3,6 +3,7 @@ package com.watchers.manager;
 import com.watchers.TestableWorld;
 import com.watchers.components.continentaldrift.*;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,11 +33,11 @@ class ContinentalDriftManagerTest {
         ContinentalCorrector continentalCorrector = new ContinentalCorrector(worldRepositoryInMemory);
 
         Mockito.when(worldRepositoryInMemory.findById(world.getId())).thenReturn(Optional.of(world));
-        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftDirectionChanger, continentalDriftTileChangeComputer, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, tileDefined, erosionAdjuster,2, 8);
+        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, tileDefined, erosionAdjuster);
     }
 
     @Test
     void process() {
-        continentalDriftManager.process(continentalDriftManager.createTask(world.getId()));
+        continentalDriftManager.process(new ContinentalDriftTaskDto(world.getId(), false, true, 2, 8));
     }
 }

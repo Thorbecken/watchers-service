@@ -1,5 +1,6 @@
 package com.watchers.service;
 
+import com.watchers.config.SettingConfiguration;
 import com.watchers.manager.CleansingManager;
 import com.watchers.manager.ContinentalDriftManager;
 import com.watchers.manager.LifeManager;
@@ -34,6 +35,7 @@ public class WorldService {
     private ContinentalDriftManager continentalDriftManager;
     private CleansingManager cleansingManager;
     private LifeManager lifeManager;
+    private SettingConfiguration settingConfiguration;
     private List<Long> activeWorldIds = new ArrayList<>();
 
     @SuppressWarnings("unused")
@@ -88,12 +90,23 @@ public class WorldService {
     }
 
     private void processTurn(Long worldId){
-        ContinentalDriftTaskDto continentalDriftTaskDto = continentalDriftManager.createTask(worldId);
+        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(worldId, false, true, settingConfiguration.getHeigtDivider(), settingConfiguration.getMinimumContinents());
         continentalDriftManager.process(continentalDriftTaskDto);
         cleansingManager.process(continentalDriftTaskDto);
         lifeManager.process(continentalDriftTaskDto);
 
-        WorldTaskDto worldTaskDto = new WorldTaskDto(worldId);
+        WorldTaskDto worldTaskDto = new WorldTaskDto(worldId, false, true);
+        cleansingManager.process(worldTaskDto);
+    }
+
+    public void processTurn(WorldTaskDto worldTaskDto){
+        if(worldTaskDto.isContinentalshift()) {
+            Assert.isTrue(worldTaskDto instanceof ContinentalDriftTaskDto, "The WorldTaskDto was initiated wrongly");
+            continentalDriftManager.process((ContinentalDriftTaskDto) worldTaskDto);
+            cleansingManager.process(worldTaskDto);
+        }
+
+        lifeManager.process(worldTaskDto);
         cleansingManager.process(worldTaskDto);
     }
 
