@@ -4,7 +4,6 @@ import com.watchers.components.continentaldrift.*;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -20,6 +19,7 @@ public class ContinentalDriftManager {
     private ContinentalCorrector continentalCorrector;
     private TileDefined tileDefined;
     private ErosionAdjuster erosionAdjuster;
+    private WorldSettingManager worldSettingManager;
 
     public void process(ContinentalDriftTaskDto taskDto){
         continentalDriftDirectionChanger.process(taskDto);
@@ -31,7 +31,8 @@ public class ContinentalDriftManager {
         erosionAdjuster.process(taskDto);
         tileDefined.process(taskDto);
 
-        log.info("Proccesed a continentaldrift for world id: " + taskDto.getWorldId());
+        worldSettingManager.changeContinentalSetting(taskDto.getWorldId(), false);
+        log.trace("Proccesed a continentaldrift for world id: " + taskDto.getWorldId());
     }
 
 }

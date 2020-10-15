@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.common.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.util.Optional;
 
 @Data
 @Entity
+@Slf4j
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="animal_type",
         discriminatorType = DiscriminatorType.STRING)
@@ -81,7 +83,7 @@ public abstract class Animal extends Actor {
     @Override
     public void processSerialTask() {
         if(StateType.DEAD.equals(getStateType())){
-            System.out.println("Animal with ID " + id + " is dead but still walking the world");
+            log.trace("Animal with ID " + id + " is dead but still walking the world");
         }
         this.metabolize();
         if(getStateType() != StateType.DEAD) {

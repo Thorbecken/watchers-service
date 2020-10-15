@@ -78,7 +78,7 @@ public class ContinentalDriftDirectionChanger {
         private void changeContinentalDriftDirections(List<Continent> continents, int drifFlux, int driftVelocity, World world){
            int loop = 1;
             while(currentDriftChanges < drifFlux) {
-               log.info("in loop " + loop++);
+               log.trace("in loop " + loop++);
 
                for (Continent currentContinent : continents) {
                    if (currentDriftChanges < drifFlux) {
@@ -87,7 +87,7 @@ public class ContinentalDriftDirectionChanger {
                }
 
                if(!lastChangedContinentFound){
-                   log.warn("Continent with id " + lastChangedContinentelDrift + " not found among: " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
+                   log.info("Continent with id " + lastChangedContinentelDrift + " not found among: " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
                    lastChangedContinentFound = true;
                }
            }

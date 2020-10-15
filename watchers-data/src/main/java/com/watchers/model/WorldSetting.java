@@ -1,13 +1,16 @@
 package com.watchers.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @Entity
-public class WorldSettings {
+@NoArgsConstructor
+@AllArgsConstructor
+public class WorldSetting {
 
     @Id
     Long worldId;
@@ -19,5 +22,4 @@ public class WorldSettings {
 
     private long heigtDivider;
     private int minimumContinents;
-
 }

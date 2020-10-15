@@ -4,6 +4,11 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import com.watchers.config.AutoWiringSpringBeanJobFactory;
+import com.watchers.config.SettingConfiguration;
+import com.watchers.scheduler.job.ContinentalshiftTimerJob;
+import com.watchers.scheduler.job.ProcessingUnitJob;
+import com.watchers.scheduler.job.SaveTimerJob;
+import com.watchers.scheduler.job.TurnTimerJob;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +38,9 @@ public class SpringQrtzScheduler {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private SettingConfiguration settingConfiguration;
+
     @PostConstruct
     public void init() {
         logger.info("Spring Quartz Schedular initiated");
@@ -48,25 +56,26 @@ public class SpringQrtzScheduler {
     }
 
     @Bean(name="turnScheduler")
-    public SchedulerFactoryBean turnScheduler(@Qualifier("turnTrigger") Trigger trigger, @Qualifier("turnJob") JobDetail job, DataSource quartzDataSource) {
+    public SchedulerFactoryBean turnScheduler(@Qualifier("turnTimerTrigger") Trigger trigger, @Qualifier("turnTimerJob") JobDetail job, DataSource quartzDataSource) {
+        return getSchedulerFactoryBean(trigger, job, quartzDataSource);
+    }
 
-        SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
-        schedulerFactory.setConfigLocation(new ClassPathResource("quartz.properties"));
+    @Bean(name="continentalshiftScheduler")
+    public SchedulerFactoryBean continentalshiftScheduler(@Qualifier("continentalshiftTimerTrigger") Trigger trigger, @Qualifier("continentalshiftTimerJob") JobDetail job, DataSource quartzDataSource) {
+        return getSchedulerFactoryBean(trigger, job, quartzDataSource);
+    }
 
-        logger.debug("Setting the Scheduler up");
-        schedulerFactory.setJobFactory(springBeanJobFactory());
-        schedulerFactory.setJobDetails(job);
-        schedulerFactory.setTriggers(trigger);
-
-        // Comment the following line to use the default Quartz job store.
-        schedulerFactory.setDataSource(quartzDataSource);
-
-        return schedulerFactory;
+    @Bean(name="processScheduler")
+    public SchedulerFactoryBean processScheduler(@Qualifier("processTrigger") Trigger trigger, @Qualifier("processJob") JobDetail job, DataSource quartzDataSource) {
+        return getSchedulerFactoryBean(trigger, job, quartzDataSource);
     }
 
     @Bean(name="saveScheduler")
-    public SchedulerFactoryBean saveScheduler(@Qualifier("saveTrigger") Trigger trigger, @Qualifier("saveJob") JobDetail job, DataSource quartzDataSource) {
+    public SchedulerFactoryBean saveScheduler(@Qualifier("saveTimerTrigger") Trigger trigger, @Qualifier("saveTimerJob") JobDetail job, DataSource quartzDataSource) {
+        return getSchedulerFactoryBean(trigger, job, quartzDataSource);
+    }
 
+    private SchedulerFactoryBean getSchedulerFactoryBean(Trigger trigger, JobDetail job, DataSource quartzDataSource) {
         SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
         schedulerFactory.setConfigLocation(new ClassPathResource("quartz.properties"));
 
@@ -81,50 +90,71 @@ public class SpringQrtzScheduler {
         return schedulerFactory;
     }
 
-    @Bean(name="turnJob")
-    public JobDetailFactoryBean jobDetail() {
+    @Bean(name="turnTimerJob")
+    public JobDetailFactoryBean jobDetailTurn() {
+        Class<? extends Job> jobClass = TurnTimerJob.class;
+        String name = "Turn";
 
+        return getJobDetailFactoryBean(jobClass, name);
+    }
+
+    @Bean(name="continentalshiftTimerJob")
+    public JobDetailFactoryBean jobDetailContinentalshift() {
+        Class<? extends Job> jobClass = ContinentalshiftTimerJob.class;
+        String name = "Continentalshift";
+
+        return getJobDetailFactoryBean(jobClass, name);
+    }
+
+    @Bean(name="saveTimerJob")
+    public JobDetailFactoryBean jobDetailSave() {
+        Class<? extends Job> jobClass = SaveTimerJob.class;
+        String name = "Save";
+
+        return  getJobDetailFactoryBean(jobClass, name);
+    }
+
+    @Bean(name="processJob")
+    public JobDetailFactoryBean jobDetailProcess() {
+        Class<? extends Job> jobClass = ProcessingUnitJob.class;
+        String name = "Process";
+
+        return  getJobDetailFactoryBean(jobClass, name);
+    }
+
+    private JobDetailFactoryBean getJobDetailFactoryBean(Class<? extends Job> jobClass, String name) {
         JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-        jobDetailFactory.setJobClass(TurnJob.class);
-        jobDetailFactory.setName("Qrtz_Job_Turn invoker");
-        jobDetailFactory.setDescription("Invokes the turn job");
+        jobDetailFactory.setJobClass(jobClass);
+        jobDetailFactory.setName("Qrtz_Job " + name + " invoker");
+        jobDetailFactory.setDescription("Invokes the " + name + " job");
         jobDetailFactory.setDurability(true);
         return jobDetailFactory;
     }
 
-    @Bean(name="saveJob")
-    public JobDetailFactoryBean jobDetail2() {
-
-        JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-        jobDetailFactory.setJobClass(SaveJob.class);
-        jobDetailFactory.setName("Qrtz_Job_World Saver");
-        jobDetailFactory.setDescription("Invokes the save world job");
-        jobDetailFactory.setDurability(true);
-        return jobDetailFactory;
+    @Bean(name="turnTimerTrigger")
+    public SimpleTriggerFactoryBean turnTrigger(@Qualifier("turnTimerJob") JobDetail job) {
+        return getSimpleTriggerFactoryBean(job, settingConfiguration.getTurnTimer());
     }
 
-    @Bean(name="turnTrigger")
-    public SimpleTriggerFactoryBean turnTrigger(@Qualifier("turnJob") JobDetail job) {
+    @Bean(name="continentalshiftTimerTrigger")
+    public SimpleTriggerFactoryBean continentalshiftTrigger(@Qualifier("continentalshiftTimerJob") JobDetail job) {
+        return getSimpleTriggerFactoryBean(job, settingConfiguration.getContinentalshiftTimer());
+    }
 
+    @Bean(name="saveTimerTrigger")
+    public SimpleTriggerFactoryBean saveTrigger(@Qualifier("saveTimerJob") JobDetail job) {
+        return getSimpleTriggerFactoryBean(job, settingConfiguration.getSaveTimer());
+    }
+
+    @Bean(name="processTrigger")
+    public SimpleTriggerFactoryBean processTrigger(@Qualifier("processJob") JobDetail job) {
+        return getSimpleTriggerFactoryBean(job, settingConfiguration.getProcessingTimer());
+    }
+
+    private SimpleTriggerFactoryBean getSimpleTriggerFactoryBean(JobDetail job, int frequencyInSec) {
         SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
         trigger.setJobDetail(job);
 
-        int frequencyInSec = 10;
-        logger.info("Configuring trigger to fire every {} seconds", frequencyInSec);
-
-        trigger.setRepeatInterval(frequencyInSec * 1000);
-        trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        trigger.setName("Qrtz_Trigger");
-        return trigger;
-    }
-
-    @Bean(name="saveTrigger")
-    public SimpleTriggerFactoryBean saveTrigger(@Qualifier("saveJob") JobDetail job) {
-
-        SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-        trigger.setJobDetail(job);
-
-        int frequencyInSec = 60;
         logger.info("Configuring trigger to fire every {} seconds", frequencyInSec);
 
         trigger.setRepeatInterval(frequencyInSec * 1000);

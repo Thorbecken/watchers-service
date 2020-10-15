@@ -1,6 +1,6 @@
 package com.watchers.model.dto;
 
-import com.watchers.model.WorldSettings;
+import com.watchers.model.WorldSetting;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
@@ -22,8 +22,8 @@ public class ContinentalDriftTaskDto extends WorldTaskDto {
     private long heightDivider;
     private int minContinents;
 
-    public ContinentalDriftTaskDto(WorldSettings worldSettings){
-        this(worldSettings.getWorldId(), worldSettings.isNeedsSaving(), worldSettings.isNeedsContinentalShift(), worldSettings.getHeigtDivider(), worldSettings.getMinimumContinents());
+    public ContinentalDriftTaskDto(WorldSetting worldSetting){
+        this(worldSetting.getWorldId(), worldSetting.isNeedsSaving(), worldSetting.isNeedsContinentalShift(), worldSetting.getHeigtDivider(), worldSetting.getMinimumContinents());
     }
 
     public ContinentalDriftTaskDto(Long worldId, boolean needsSaving, boolean needsContinentaldrift, long heigtDivider, int minimumContinents) {

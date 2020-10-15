@@ -1,64 +1,70 @@
 package com.watchers.manager;
 
-import com.watchers.model.WorldSettings;
-import com.watchers.model.WorldStatusEnum;
+import com.watchers.model.WorldSetting;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.repository.inmemory.WorldSettingsRepositoryInMemory;
 import com.watchers.service.WorldService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class TurnManager {
 
-    private WorldSettingsRepositoryInMemory worldSettingsRepositoryInMemory;
+    private WorldSettingManager worldSettingManager;
     private WorldService worldService;
 
-    public void processTurn(Long worldId){
-        WorldSettings worldSettings = worldSettingsRepositoryInMemory.findById(worldId).orElseThrow(() -> new RuntimeException("World status " + worldId + " was lost in memory."));
-        if(!worldSettings.getWorldStatusEnum().equals(WorldStatusEnum.WAITING)) {
-            worldSettings.setWorldStatusEnum(WorldStatusEnum.IN_PROGRESS);
-            worldSettingsRepositoryInMemory.save(worldSettings);
-            worldSettingsRepositoryInMemory.flush();
+    public void processTurn(){
+        worldSettingManager.getAllWaitingWorldSettings().forEach(
+                worldId -> {
+                    StopWatch stopWatch = new StopWatch();
+                    stopWatch.start();
+                    WorldSetting worldSetting = worldSettingManager.getWorldSetting(worldId);
+                    worldSettingManager.setWorldInProgress(worldId);
 
-            WorldTaskDto worldTaskDto = getNewWorldTask(worldSettings);
-            worldService.processTurn(worldTaskDto);
+                    WorldTaskDto worldTaskDto = getNewWorldTask(worldSetting);
+                    worldService.processTurn(worldTaskDto);
 
-            WorldSettings newWorldSettings = worldSettingsRepositoryInMemory.findById(worldId).orElseThrow(() -> new RuntimeException("World status " + worldId + " was lost in memory."));
-            if(newWorldSettings.getWorldStatusEnum().equals(WorldStatusEnum.IN_PROGRESS)) {
-                newWorldSettings.setWorldStatusEnum(WorldStatusEnum.WAITING);
-                worldSettingsRepositoryInMemory.save(newWorldSettings);
-            }
+                    worldSettingManager.setWorldInWaiting(worldId);
+                    log.info(generateLogMessage(worldSetting, stopWatch));
+                }
+        );
+    }
+
+    private String generateLogMessage(WorldSetting worldSetting, StopWatch stopWatch) {
+        String  logMessage ="Processing a turn ";
+        if(worldSetting.isNeedsContinentalShift()){
+            logMessage = logMessage + "and continentalshifting ";
         }
+        if(worldSetting.isNeedsSaving()){
+            logMessage = logMessage + "and saving ";
+        }
+
+        stopWatch.stop();
+        logMessage = logMessage + "for world " + worldSetting.getWorldId() + ", and took " + stopWatch.getTotalTimeSeconds() + " seconds.";
+        return logMessage;
     }
 
-    public void queInTurn(Long worldId){
-        WorldSettings worldSettings = worldSettingsRepositoryInMemory.findById(worldId).orElseThrow(() -> new RuntimeException("World status " + worldId + " was lost in memory."));
-        worldSettings.setNeedsProcessing(true);
-        worldSettingsRepositoryInMemory.save(worldSettings);
+    public void queInTurn(){
+        worldSettingManager.queInTurn();
     }
 
-    public void queInSave(Long worldId){
-        WorldSettings worldSettings = worldSettingsRepositoryInMemory.findById(worldId).orElseThrow(() -> new RuntimeException("World status " + worldId + " was lost in memory."));
-        worldSettings.setNeedsSaving(true);
-        worldSettingsRepositoryInMemory.save(worldSettings);
+    public void queInSave(){
+        worldSettingManager.queInSave();
     }
 
-    public void queInContinentalshift(Long worldId){
-        WorldSettings worldSettings = worldSettingsRepositoryInMemory.findById(worldId).orElseThrow(() -> new RuntimeException("World status " + worldId + " was lost in memory."));
-        worldSettings.setNeedsContinentalShift(true);
-        worldSettingsRepositoryInMemory.save(worldSettings);
+    public void queInContinentalshift(){
+        worldSettingManager.queInContinentalshift();
     }
 
-    private WorldTaskDto getNewWorldTask(WorldSettings worldSettings) {
-        if(worldSettings.isNeedsContinentalShift()){
-            return new ContinentalDriftTaskDto(worldSettings);
+    private WorldTaskDto getNewWorldTask(WorldSetting worldSetting) {
+        if(worldSetting.isNeedsContinentalShift()){
+            return new ContinentalDriftTaskDto(worldSetting);
         } else {
-            return new WorldTaskDto(worldSettings);
+            return new WorldTaskDto(worldSetting);
         }
     }
 

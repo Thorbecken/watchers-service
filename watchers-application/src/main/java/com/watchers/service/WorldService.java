@@ -1,6 +1,5 @@
 package com.watchers.service;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.manager.CleansingManager;
 import com.watchers.manager.ContinentalDriftManager;
 import com.watchers.manager.LifeManager;
@@ -8,7 +7,7 @@ import com.watchers.manager.MapManager;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.*;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -35,8 +33,7 @@ public class WorldService {
     private ContinentalDriftManager continentalDriftManager;
     private CleansingManager cleansingManager;
     private LifeManager lifeManager;
-    private SettingConfiguration settingConfiguration;
-    private List<Long> activeWorldIds = new ArrayList<>();
+    private ArrayList<Long> activeWorldIds;
 
     @SuppressWarnings("unused")
     @Transactional("persistentDatabaseTransactionManager")
@@ -85,20 +82,6 @@ public class WorldService {
         }
     }
 
-    public void processTurns(){
-        activeWorldIds.forEach(this::processTurn);
-    }
-
-    private void processTurn(Long worldId){
-        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(worldId, false, true, settingConfiguration.getHeigtDivider(), settingConfiguration.getMinimumContinents());
-        continentalDriftManager.process(continentalDriftTaskDto);
-        cleansingManager.process(continentalDriftTaskDto);
-        lifeManager.process(continentalDriftTaskDto);
-
-        WorldTaskDto worldTaskDto = new WorldTaskDto(worldId, false, true);
-        cleansingManager.process(worldTaskDto);
-    }
-
     public void processTurn(WorldTaskDto worldTaskDto){
         if(worldTaskDto.isContinentalshift()) {
             Assert.isTrue(worldTaskDto instanceof ContinentalDriftTaskDto, "The WorldTaskDto was initiated wrongly");
@@ -108,12 +91,6 @@ public class WorldService {
 
         lifeManager.process(worldTaskDto);
         cleansingManager.process(worldTaskDto);
-    }
-
-    public void executeTurn() {
-        processTurns();
-
-        log.info("Processed a turn");
     }
 
     /**
@@ -180,8 +157,10 @@ public class WorldService {
                 return null;
             }
         } else {
-            log.warn("The world " + id + " does not exist in the persistence context. A new world is created.");
-            mapManager.getWorld(id, false);
+            log.warn("The world " + id + " does not exist in the persistence context. A new world is going to be created. Large worlds take a while being generated.");
+            World world = mapManager.createWorld();
+            worldRepositoryInMemory.save(world);
+            log.info("Created a new world! Number: " + world.getId());
             activeWorldIds.add(id);
             return true;
         }

@@ -53,7 +53,7 @@ public class WorldCleaner {
             List<Continent> zeroContinents = world.getContinents().stream().filter(continent -> continent.getCoordinates().size() == 0).collect(Collectors.toList());
             if (zeroContinents.size() > 0) {
                 int start = world.getContinents().size();
-                log.warn("deleting continents: " + Arrays.toString(zeroContinents.stream().map(Continent::getId).toArray()));
+                log.trace("deleting continents: " + Arrays.toString(zeroContinents.stream().map(Continent::getId).toArray()));
                 world.getContinents().removeAll(zeroContinents);
 
                 worldRepositoryInMemory.save(world);
@@ -61,7 +61,7 @@ public class WorldCleaner {
                 world = worldRepositoryInMemory.findById(world.getId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
                 continentRepositoryInMemory.deleteAll(zeroContinents);
                 zeroContinents.stream().map(Continent::getId).forEach(aLong -> ((ContinentalDriftTaskDto) dto).getRemovedContinents.add(aLong));
-                log.warn("Started with " + start + " continents and ended with " + world.getContinents().size());
+                log.trace("Started with " + start + " continents and ended with " + world.getContinents().size());
             }
         }
 

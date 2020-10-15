@@ -55,8 +55,6 @@ class WorldFactory {
 
         }
 
-        log.info("Created a new world! Number: " + world.getId());
-
         return world;
     }
 
