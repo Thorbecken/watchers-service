@@ -2,6 +2,7 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
+import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
@@ -25,18 +26,19 @@ class ContinentalDriftWorldAdjusterTest {
     private World world;
     private ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster;
     private ContinentalDriftTaskDto taskDto;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
 
 
     @BeforeEach
     void setUp() {
         this.world = TestableWorld.createWorld();
-        worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
+        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
+        settingConfiguration.setContinentalContinentWeight(1);
+        WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepositoryInMemory);
+        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepositoryInMemory, settingConfiguration);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(null, 300, worldRepositoryInMemory);
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepositoryInMemory, null, settingConfiguration);
 
         Mockito.when(worldRepositoryInMemory.findById(world.getId())).thenReturn(Optional.of(world));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);

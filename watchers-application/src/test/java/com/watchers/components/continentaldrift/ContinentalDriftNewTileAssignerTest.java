@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
+import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Direction;
@@ -29,7 +30,6 @@ import java.util.function.Predicate;
 class ContinentalDriftNewTileAssignerTest {
 
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
-    private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     private ContinentalDriftTaskDto taskDto;
     private CoordinateHelper coordinateHelper;
     private WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
@@ -38,8 +38,9 @@ class ContinentalDriftNewTileAssignerTest {
     @BeforeEach
     void setUp() {
         this.coordinateHelper = new CoordinateHelper();
-        this.continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(1, 1, worldRepositoryInMemory);
-        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger, 40, worldRepositoryInMemory);
+        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
+        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepositoryInMemory, settingConfiguration);
+        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepositoryInMemory, continentalDriftDirectionChanger, settingConfiguration);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
 

@@ -2,6 +2,7 @@ package com.watchers.manager;
 
 import com.watchers.TestableWorld;
 import com.watchers.components.continentaldrift.*;
+import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.World;
@@ -17,22 +18,21 @@ class ContinentalDriftManagerTest {
 
     private World world;
     private ContinentalDriftManager continentalDriftManager;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
-    private WorldSettingsRepositoryInMemory worldSettingsRepositoryInMemory;
 
     @BeforeEach
     void setUp() {
         world = TestableWorld.createWorld();
-        worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
-        worldSettingsRepositoryInMemory = Mockito.mock(WorldSettingsRepositoryInMemory.class);
+        WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
+        WorldSettingsRepositoryInMemory worldSettingsRepositoryInMemory = Mockito.mock(WorldSettingsRepositoryInMemory.class);
+        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(2,2, worldRepositoryInMemory);
+        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepositoryInMemory, settingConfiguration);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger, 300, worldRepositoryInMemory);
+        ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepositoryInMemory, settingConfiguration);
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepositoryInMemory, continentalDriftDirectionChanger, settingConfiguration);
         TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60, worldRepositoryInMemory);
-        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(coordinateHelper, 10,8, worldRepositoryInMemory);
+        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(coordinateHelper, worldRepositoryInMemory, settingConfiguration);
         ContinentalCorrector continentalCorrector = new ContinentalCorrector(worldRepositoryInMemory);
         WorldSettingManager worldSettingManager = new WorldSettingManager(worldSettingsRepositoryInMemory);
 

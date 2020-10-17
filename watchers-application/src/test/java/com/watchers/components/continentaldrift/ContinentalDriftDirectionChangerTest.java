@@ -1,6 +1,7 @@
 package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableWorld;
+import com.watchers.config.SettingConfiguration;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
@@ -26,8 +27,9 @@ class ContinentalDriftDirectionChangerTest {
     public void setup(){
         world = TestableWorld.createWorld();
         continents = world.getContinents();
+        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
 
-        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(2, 2, worldRepositoryInMemory);
+        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepositoryInMemory, settingConfiguration);
 
         lastContinentalDrift = world.getContinents().size()-1;
         methodObject = continentalDriftDirectionChanger.new ContinentalDriftDirectionMethodObject(false,lastContinentalDrift);

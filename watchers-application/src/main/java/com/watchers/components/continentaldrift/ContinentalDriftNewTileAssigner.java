@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
@@ -10,7 +11,8 @@ import com.watchers.model.environment.MockContinent;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -19,18 +21,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ContinentalDriftNewTileAssigner {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
-    private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
-    private int maxContinentSize;
-    long nextContinentalId;
+    private final WorldRepositoryInMemory worldRepositoryInMemory;
+    private final ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
+    private final SettingConfiguration settingConfiguration;
+    long nextContinentalId = 0;
 
-    public ContinentalDriftNewTileAssigner(ContinentalDriftDirectionChanger continentalDriftDirectionChanger, @Value("${watch.maxContinentsize:0}") int maxContinentSize, WorldRepositoryInMemory worldRepositoryInMemory) {
-        this.continentalDriftDirectionChanger = continentalDriftDirectionChanger;
-        this.maxContinentSize = maxContinentSize;
-        this.worldRepositoryInMemory = worldRepositoryInMemory;
-    }
 
     @Transactional("inmemoryDatabaseTransactionManager")
     public void process(ContinentalDriftTaskDto taskDto){
@@ -66,24 +64,9 @@ public class ContinentalDriftNewTileAssigner {
                         .filter(adjecantCoordinates::contains)
                         .collect(Collectors.toList());
 
-                int maximalCoordinates = maxContinentSize == 0?calculateMaximumCoordinates(taskDto, world):maxContinentSize;
+                int maximalCoordinates = settingConfiguration.getMaxContinentSize() == 0?calculateMaximumCoordinates(taskDto, world):settingConfiguration.getMaxContinentSize();
 
-                Continent chosenContinent = taskDto.getChanges().values().stream()
-                        .filter(continentalChangesDto -> existingCoordinates.contains(continentalChangesDto.getKey()))
-                        .map(ContinentalChangesDto::getMockTile)
-                        .filter(Objects::nonNull)
-                        .map(MockTile::getContinent)
-                        .filter(Objects::nonNull)
-                        .filter(continent -> continent.getId()!= null)
-                        .filter(continent -> continent.getCoordinates().size() < maximalCoordinates)
-                        .max(Comparator.comparing(Continent::getId))
-                        .orElse(null);
-
-                if(chosenContinent == null){
-                    chosenContinent = new Continent(world, SurfaceType.PLAIN);
-                    chosenContinent.setId(nextContinentalId++);
-                    continentalDriftDirectionChanger.assignFirstDriftDirrecion(chosenContinent, world);
-                }
+                Continent chosenContinent = getChosenContinent(taskDto, existingCoordinates, maximalCoordinates, world);
 
                 MockContinent mockContinent = new MockContinent(connectedCoordinates,world);
                 mockContinent.setContinent(chosenContinent);
@@ -94,6 +77,39 @@ public class ContinentalDriftNewTileAssigner {
                 listOfCoordinatesProcessed++;
             }
         }
+    }
+
+    private Continent getChosenContinent(ContinentalDriftTaskDto taskDto, List<Coordinate> existingCoordinates, int maximalCoordinates, World world) {
+        Continent chosenContinent = getValidAdjacentContinent(taskDto, existingCoordinates, maximalCoordinates);
+
+        if(chosenContinent == null){
+            chosenContinent = new Continent(world, getSurfaceType(world));
+            chosenContinent.setId(nextContinentalId++);
+            continentalDriftDirectionChanger.assignFirstDriftDirrecion(chosenContinent, world);
+        }
+
+        return chosenContinent;
+    }
+
+    private Continent getValidAdjacentContinent(ContinentalDriftTaskDto taskDto, List<Coordinate> existingCoordinates, int maximalCoordinates) {
+        return taskDto.getChanges().values().stream()
+                .filter(continentalChangesDto -> existingCoordinates.contains(continentalChangesDto.getKey()))
+                .map(ContinentalChangesDto::getMockTile)
+                .filter(Objects::nonNull)
+                .map(MockTile::getContinent)
+                .filter(Objects::nonNull)
+                .filter(continent -> continent.getId()!= null)
+                .filter(continent -> continent.getCoordinates().size() < maximalCoordinates)
+                .max(Comparator.comparing(Continent::getId))
+                .orElse(null);
+    }
+
+    private SurfaceType getSurfaceType(World world) {
+        long numberOfOceaanicContinents = world.getContinents().stream().filter(continent -> continent.getType().equals(SurfaceType.OCEANIC)).count();
+        long numberOfContinents = world.getContinents().size();
+        int oceanincContinentsPerContinentalContinent = settingConfiguration.getContinentalToOcceanicRatio() + 1;
+        boolean tooMuckOceeanicContinents = numberOfOceaanicContinents * oceanincContinentsPerContinentalContinent > numberOfContinents;
+        return  tooMuckOceeanicContinents ? SurfaceType.PLAIN:SurfaceType.OCEANIC;
     }
 
     private int calculateMaximumCoordinates(ContinentalDriftTaskDto taskDto, World world) {
@@ -108,7 +124,7 @@ public class ContinentalDriftNewTileAssigner {
 
                 List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
 
-                Continent continent = new Continent(world, SurfaceType.PLAIN);
+                Continent continent = new Continent(world, getSurfaceType(world));
                 MockContinent mockContinent = new MockContinent(connectedCoordinates, world);
                 mockContinent.setContinent(continent);
                 mockContinent.getContinent().setId(nextContinentalId++);

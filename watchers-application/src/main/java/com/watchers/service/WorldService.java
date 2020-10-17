@@ -4,13 +4,14 @@ import com.watchers.manager.CleansingManager;
 import com.watchers.manager.ContinentalDriftManager;
 import com.watchers.manager.LifeManager;
 import com.watchers.manager.MapManager;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -44,7 +45,7 @@ public class WorldService {
 
     @SuppressWarnings("unused")
     public void saveAndShutdown(Long id){
-        saveWorld(null);
+        saveWorld(worldRepositoryInMemory.getOne(id));
         shutdownWorld(id);
     }
 
@@ -68,7 +69,7 @@ public class WorldService {
     }
 
     @Transactional("persistentDatabaseTransactionManager")
-    public void saveWorld(@NonNull World memoryWorld){
+    public void saveWorld(World memoryWorld){
         boolean exists = worldRepositoryPersistent.existsById(memoryWorld.getId());
         exists = false;
         if (!exists){
@@ -83,6 +84,7 @@ public class WorldService {
     }
 
     public void processTurn(WorldTaskDto worldTaskDto){
+        log.trace(getTotalHeight(worldTaskDto.getWorldId()));
         if(worldTaskDto.isContinentalshift()) {
             Assert.isTrue(worldTaskDto instanceof ContinentalDriftTaskDto, "The WorldTaskDto was initiated wrongly");
             continentalDriftManager.process((ContinentalDriftTaskDto) worldTaskDto);
@@ -91,6 +93,17 @@ public class WorldService {
 
         lifeManager.process(worldTaskDto);
         cleansingManager.process(worldTaskDto);
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
+    private String getTotalHeight(Long worldId) {
+        World world = worldRepositoryInMemory.findById(worldId).get();
+        long currentHeight = world.getCoordinates().stream()
+                .map(Coordinate::getTile)
+                .mapToLong(Tile::getHeight)
+                .sum();
+        long totalHeight = currentHeight + world.getHeightDeficit();
+        return "Current height is: " +  totalHeight + ".";
     }
 
     /**

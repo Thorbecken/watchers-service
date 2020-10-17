@@ -77,7 +77,8 @@ public class ContinentalDriftTileChangeComputer {
 
         for (Tile tile : tiles) {
             long addedHeight = tile.getHeight() / taskDto.getHeightDivider();
-            taskDto.setHeightLoss(taskDto.getHeightLoss() + tile.getHeight() - addedHeight);
+            long lostHeight = tile.getHeight() - addedHeight;
+            taskDto.setHeightLoss(taskDto.getHeightLoss() + lostHeight);
             mockTile.setHeight(mockTile.getHeight() + addedHeight);
 
             tile.transferData(mockTile);

@@ -1,5 +1,6 @@
 package com.watchers;
 
+import com.watchers.config.SettingConfiguration;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Direction;
 import com.watchers.model.environment.Continent;
@@ -63,4 +64,30 @@ public class TestableWorld {
     }
 
 
+    public static SettingConfiguration createConfiguration() {
+        return new SettingConfiguration(
+                false,
+                1,
+                10,
+                30,
+                60,
+
+                12,
+                6,
+                3,
+                true,
+                2,
+                5,
+
+                1,
+                1,
+                2,
+                2,
+                9000,
+                2,
+                3,
+                5,
+                10
+        );
+    }
 }
