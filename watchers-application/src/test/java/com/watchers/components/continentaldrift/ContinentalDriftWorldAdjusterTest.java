@@ -2,6 +2,7 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
+import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
@@ -9,10 +10,14 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mockito;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,12 +31,16 @@ class ContinentalDriftWorldAdjusterTest {
     @BeforeEach
     void setUp() {
         this.world = TestableWorld.createWorld();
+        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
+        settingConfiguration.setContinentalContinentWeight(1);
+        WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(null);
+        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepositoryInMemory, settingConfiguration);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepositoryInMemory, null, settingConfiguration);
 
+        Mockito.when(worldRepositoryInMemory.findById(world.getId())).thenReturn(Optional.of(world));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
 
         continentalDriftPredicter.process(taskDto);
@@ -44,7 +53,7 @@ class ContinentalDriftWorldAdjusterTest {
     void processChanges(int deficit) {
         deficit += world.getHeightDeficit();
         world.setHeightDeficit(deficit);
-        long numberOfNewTilesNeeded = taskDto.getWorld().getCoordinates().size()-taskDto.getNewTileLayout().values().stream().filter(tiles ->  tiles.size() > 0).count();
+        long numberOfNewTilesNeeded = world.getCoordinates().size()-taskDto.getNewTileLayout().values().stream().filter(tiles ->  tiles.size() > 0).count();
 
         long startingHeight = taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())

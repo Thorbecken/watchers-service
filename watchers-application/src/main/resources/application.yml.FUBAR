@@ -1,0 +1,95 @@
+startup:
+  persistent: false
+
+server:
+  port: 8080
+
+#continental drift variables
+watch:
+  driftVelocity: 1
+  driftFlux: 1
+  heightdivider: 2
+  minContinents: 8
+# watch.maxContinentsize <- this one is currently generated from the number of continents divided by the minimum number of continents
+  erosion: # erosion settings
+    minHeightDifference: 10
+    max: 10
+# world generation settings
+  lifePresSeeded: true
+  coastalZone: 2
+  oceanicZone: 5
+  worldGeneration: # world generation settings
+    xSize: 30 #116
+    ySize: 15 #54
+    numberOfContinents: 8
+# World settings
+  deepOceanHight: 10
+  oceeanHight: 20
+  coastalHight: 30
+  plainsHight: 40
+  hillHight: 50
+  mountainHight: 60
+
+#Logging
+logging:
+  level:
+    root: INFO
+
+# Datasource / Spring JDBC
+using:
+  spring:
+    schedulerFactory: true
+
+#QUARTZ
+spring:
+  quartz:
+    job-store-type: jdbc
+    jdbc.initialize-schema: always
+  datasource: # common datasource paramater
+    jdbc-url : "jdbc:h2:mem:localmemmory;DB_CLOSE_DELAY=-1"
+  main: #Datasources
+    allow-bean-definition-overriding : true
+    username: inmemory
+    password: inmemory
+    driverClassName: org.h2.Driver
+    url: "jdbc:h2:mem:localmemmory;DB_CLOSE_DELAY=-1"
+  h2: #H2
+    console:
+      enabled: true
+      path: /h2
+  persistent: #Persistent datsource
+    datasource:
+      driverClassName: org.postgresql.Driver
+      username: watcher
+      password: watcher
+      url: "jdbc:postgresql://localhost:5432/watchers?useSSL=false&createDatabaseIfNotExist=true&useUnicode=yes&characterEncoding=UTF-8"
+
+#Caching
+#hibernate.cache.region.factory_class=org.hibernate.cache.ehcache.EhCacheRegionFactorym
+  jpa: # Hibernate properties
+    hibernate:
+      event:
+        merge:
+          entity_copy_observer: allow
+      ddl-auto: create
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        jdbc.batch_size: 500
+        order_inserts: true
+        order_updates: true
+        jdbc.batch_versioned_data: false
+        temp.use_jdbc_metadata_defaults: false
+        generate_statistics: false
+        id.new_generator_mappings: true
+        globally_quoted_identifiers: true
+        show_sql: false
+        use_sql_comments: true
+        format_sql: true
+        type: trace
+        cache:
+          use_second_level_cache: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    persistent:
+      database-platform: org.hibernate.dialect.PostgreSQLDialect

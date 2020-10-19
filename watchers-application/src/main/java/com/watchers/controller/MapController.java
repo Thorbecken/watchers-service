@@ -23,7 +23,14 @@ public class MapController {
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId){
         Assert.notNull(worldId, "No world id was found");
         World world = mapManager.getUninitiatedWorld(worldId);
-        System.out.println("Returned a world with " + world.getCoordinates().stream().map(Coordinate::getActors).reduce(new HashSet<>(), (x, y) -> {x.addAll(y); return x;}).size() + " actors in it");
-        return ResponseEntity.ok(world);
+        if (world != null) {
+            System.out.println("Returned a world with " + world.getCoordinates().stream().map(Coordinate::getActors).reduce(new HashSet<>(), (x, y) -> {
+                x.addAll(y);
+                return x;
+            }).size() + " actors in it");
+            return ResponseEntity.ok(world);
+        } else {
+            return null;
+        }
     }
 }

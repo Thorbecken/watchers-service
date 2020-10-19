@@ -1,10 +1,14 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.config.SettingConfiguration;
+import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,29 +17,26 @@ import java.util.List;
 
 @Slf4j
 @Component
+@AllArgsConstructor
 public class ContinentalDriftDirectionChanger {
 
-    private int driftVelocity;
-    private int drifFlux;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private SettingConfiguration settingConfiguration;
 
     public void assignFirstOrNewDriftDirections(World world){
-        world.getContinents().forEach(continent -> continent.assignNewDriftDirection(driftVelocity, world));
+        world.getContinents().forEach(continent -> continent.assignNewDriftDirection(settingConfiguration.getDriftVelocity(), world));
     }
 
     public void assignFirstDriftDirrecion(Continent continent, World world){
-        continent.assignNewDriftDirection(driftVelocity, world);
+        continent.assignNewDriftDirection(settingConfiguration.getDriftVelocity(), world);
     }
 
-    public ContinentalDriftDirectionChanger(@Value("${watch.driftVelocity}") int driftVelocity, @Value("${watch.driftFlux}") int drifFlux) {
-        this.driftVelocity = driftVelocity;
-        this.drifFlux = drifFlux;
-    }
-
-    public World process(World world){
+    @Transactional("inmemoryDatabaseTransactionManager")
+    public void process(ContinentalDriftTaskDto taskDto){
+        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         new ContinentalDriftDirectionMethodObject(false,  world.getLastContinentInFlux())
-                .adjustContinentelDriftFlux(world, drifFlux, driftVelocity);
-
-        return world;
+                .adjustContinentelDriftFlux(world, settingConfiguration.getDrifFlux(), settingConfiguration.getDriftVelocity());
+        worldRepositoryInMemory.save(world);
     }
 
     class ContinentalDriftDirectionMethodObject {
@@ -72,7 +73,7 @@ public class ContinentalDriftDirectionChanger {
         private void changeContinentalDriftDirections(List<Continent> continents, int drifFlux, int driftVelocity, World world){
            int loop = 1;
             while(currentDriftChanges < drifFlux) {
-               log.info("in loop " + loop++);
+               log.trace("in loop " + loop++);
 
                for (Continent currentContinent : continents) {
                    if (currentDriftChanges < drifFlux) {
@@ -81,7 +82,7 @@ public class ContinentalDriftDirectionChanger {
                }
 
                if(!lastChangedContinentFound){
-                   log.warn("Continent with id " + lastChangedContinentelDrift + " not found among: " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
+                   log.info("Continent with id " + lastChangedContinentelDrift + " not found among: " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
                    lastChangedContinentFound = true;
                }
            }

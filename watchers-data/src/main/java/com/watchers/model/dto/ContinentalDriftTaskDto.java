@@ -1,32 +1,34 @@
 package com.watchers.model.dto;
 
+import com.watchers.model.WorldSetting;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
-public class ContinentalDriftTaskDto {
+@EqualsAndHashCode(callSuper = true)
+public class ContinentalDriftTaskDto extends WorldTaskDto {
 
-    private World world;
     private long heightLoss;
+
+    private List<Tile> toBeRemovedTiles = new ArrayList<>();
+    private Map<Coordinate, List<Tile>> newTileLayout = new HashMap<>();
+    private Map<Coordinate, ContinentalChangesDto> changes = new HashMap<>();
+    public List<Long> getRemovedContinents = new ArrayList<>();
+
     private long heightDivider;
     private int minContinents;
-    private List<Tile> toBeRemovedTiles = new ArrayList<>();
-    private Map<Coordinate, List<Tile>> newTileLayout;
-    private Map<Coordinate, ContinentalChangesDto> changes;
 
-    public ContinentalDriftTaskDto(){
-        this.changes = new HashMap<>();
-        this.newTileLayout = new HashMap<>();
+    public ContinentalDriftTaskDto(WorldSetting worldSetting){
+        this(worldSetting.getWorldId(), worldSetting.isNeedsSaving(), worldSetting.isNeedsContinentalShift(), worldSetting.getHeigtDivider(), worldSetting.getMinimumContinents());
     }
 
-    public List<Tile> getToBeRemovedTiles() {
-        return toBeRemovedTiles;
+    public ContinentalDriftTaskDto(Long worldId, boolean needsSaving, boolean needsContinentaldrift, long heigtDivider, int minimumContinents) {
+        super(worldId, needsSaving, needsContinentaldrift);
+        this.heightDivider = heigtDivider;
+        this.minContinents = minimumContinents;
     }
 }

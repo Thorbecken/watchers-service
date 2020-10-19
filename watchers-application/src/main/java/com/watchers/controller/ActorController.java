@@ -1,7 +1,6 @@
 package com.watchers.controller;
 
-import com.watchers.manager.MapManager;
-import com.watchers.model.environment.World;
+import com.watchers.manager.LifeManager;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,20 +11,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.Optional;
-
 @Slf4j
 @Controller
 @CrossOrigin
 @SuppressWarnings("unused")
 public class ActorController{
 
-        private MapManager mapManager;
+        private LifeManager lifeManager;
         private WorldRepositoryInMemory worldRepository;
 
-    public ActorController(MapManager mapManager, WorldRepositoryInMemory worldRepository) {
-        this.mapManager = mapManager;
+    public ActorController(LifeManager lifeManager, WorldRepositoryInMemory worldRepository) {
         this.worldRepository = worldRepository;
+        this.lifeManager = lifeManager;
     }
 
     @SuppressWarnings("unused")
@@ -36,10 +33,8 @@ public class ActorController{
             Assert.notNull(xCoord, "No xCoord was found");
             Assert.notNull(yCoord, "No yCoord was found");
 
-            Optional<World> world = worldRepository.findById(worldId);
-            if (world.isPresent()) {
-                mapManager.seedLife(world.get(), xCoord, yCoord);
-                worldRepository.save(world.get());
+            if (worldRepository.existsById(worldId)) {
+                lifeManager.seedLife(worldId, xCoord, yCoord);
                 log.info("Seeded life on world " + worldId + " at coordinates: " + xCoord + "x, " + yCoord + "y");
                 return ResponseEntity.ok().build();
             } else {

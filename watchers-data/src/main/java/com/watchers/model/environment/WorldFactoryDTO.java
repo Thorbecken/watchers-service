@@ -22,10 +22,11 @@ public class WorldFactoryDTO {
 
     private List<Coordinate> generateOpenAndTakenCoordinates(World world) {
         List<Coordinate> openCoordinates = new ArrayList<>();
+        Continent fillerContinent = new Continent(world, null);
 
         for (long xCoord = 1L; xCoord <= world.getXSize(); xCoord++){
             for (long yCoord = 1L; yCoord <= world.getYSize(); yCoord++){
-                Coordinate coordinate = new Coordinate(xCoord, yCoord, world, new Continent(world, null));
+                Coordinate coordinate = new Coordinate(xCoord, yCoord, world, fillerContinent);
                 openCoordinates.add(coordinate);
             }
         }
@@ -43,6 +44,7 @@ public class WorldFactoryDTO {
         takenCoordinates.addAll(startingCoordinates);
         openCoordinates.removeAll(startingCoordinates);
 
+        world.getContinents().remove(fillerContinent);
 
         return openCoordinates.stream().filter(
                 coordinate -> world.getContinents().stream().anyMatch(

@@ -1,43 +1,54 @@
 package com.watchers.components.continentaldrift;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
+import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Direction;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
-import com.watchers.model.environment.*;
+import com.watchers.model.environment.Continent;
+import com.watchers.model.environment.MockContinent;
+import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mockito;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class ContinentalDriftNewTileAssignerTest {
 
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
     private ContinentalDriftTaskDto taskDto;
     private CoordinateHelper coordinateHelper;
+    private WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
 
 
     @BeforeEach
     void setUp() {
         this.coordinateHelper = new CoordinateHelper();
-        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(null);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper);
+        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
+        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepositoryInMemory, settingConfiguration);
+        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepositoryInMemory, continentalDriftDirectionChanger, settingConfiguration);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
 
         World world = TestableWorld.createWorld();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
+        taskDto.setMinContinents(1);
+        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
         continentalDriftTileChangeComputer.process(taskDto);
     }
@@ -54,7 +65,7 @@ class ContinentalDriftNewTileAssignerTest {
 
     @Test
     void processTestLargeNewMockContinent(){
-        World world = taskDto.getWorld();
+        World world = new World();
 
         Continent continentX = new Continent(world, SurfaceType.PLAIN);
         Continent continentY = new Continent(world, SurfaceType.PLAIN);
@@ -94,7 +105,8 @@ class ContinentalDriftNewTileAssignerTest {
                 .map(MockContinent::getContinent)
                 .max(Comparator.comparing(Continent::getId))
                 .map(Continent::getId)
-                .get());
+                .get()
+                .longValue());
 
         // asserts that only one continent is created
         assertEquals(1,taskDto.getChanges().values().stream()
@@ -130,13 +142,15 @@ class ContinentalDriftNewTileAssignerTest {
         World world = createTestWorld();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        taskDto.setWorld(world);
+        taskDto.setWorldId(1L);
         taskDto.setMinContinents(minimumContinents);
 
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(new CoordinateHelper());
+
+        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(new CoordinateHelper(), worldRepositoryInMemory);
         continentalDriftPredicter.process(taskDto);
 
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(new CoordinateHelper());
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(new CoordinateHelper(), worldRepositoryInMemory);
         continentalDriftTileChangeComputer.process(taskDto);
 
         assertEquals(3, taskDto.getChanges().values().stream().filter(ContinentalChangesDto::isEmpty).count());
@@ -150,7 +164,7 @@ class ContinentalDriftNewTileAssignerTest {
                 .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
                 .map(ContinentalChangesDto::getNewMockContinent)
                 .map(MockContinent::getContinent)
-                .filter(continent -> taskDto.getWorld().getContinents().stream()
+                .filter(continent -> world.getContinents().stream()
                         .map(Continent::getId)
                         .noneMatch(aLong -> aLong.longValue() == continent.getId().longValue()))
                 .filter(distinctByKey(Continent::getId))
@@ -162,6 +176,7 @@ class ContinentalDriftNewTileAssignerTest {
 
     private World createTestWorld() {
         World world = new World(3,3);
+        world.setId(1L);
 
         Continent continentX = new Continent(world, SurfaceType.PLAIN);
         continentX.setDirection(new Direction(0,0));

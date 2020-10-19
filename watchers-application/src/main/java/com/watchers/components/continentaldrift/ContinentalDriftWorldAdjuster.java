@@ -1,27 +1,32 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
+import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Component
+@AllArgsConstructor
 public class ContinentalDriftWorldAdjuster {
 
     private CoordinateHelper coordinateHelper;
+    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private SettingConfiguration settingConfiguration;
 
-    public ContinentalDriftWorldAdjuster(CoordinateHelper coordinateHelper){
-        this.coordinateHelper = coordinateHelper;
-    }
-
+    @Transactional("inmemoryDatabaseTransactionManager")
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = taskDto.getWorld();
+        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
 
         long newHeight = calculateNewHeight(world, changes);
@@ -35,17 +40,30 @@ public class ContinentalDriftWorldAdjuster {
                     }
                 }
         );
+
+        worldRepositoryInMemory.save(world);
     }
 
     private long calculateNewHeight(World world, Map<Coordinate, ContinentalChangesDto> changes) {
-        long totalHeight = world.getHeightDeficit();
-        long divider = coordinateHelper.getAllPossibleCoordinates(world).stream()
-                .map(changes::get)
+        long heightDeficit = world.getHeightDeficit();
+        long divider = getWeightedDivider(changes);
+        long spendableHeightPerWeight = divider == 0 ? 0:heightDeficit/divider;
+        long usedHeight = spendableHeightPerWeight*divider;
+        world.setHeightDeficit(heightDeficit-usedHeight);
+        return spendableHeightPerWeight;
+    }
+
+    private long getWeightedDivider(Map<Coordinate, ContinentalChangesDto> changes) {
+        long numberOfOceanicCoordinates = getContinentTypeCount(changes, SurfaceType.OCEANIC);
+        long numberOfContinentalCoordinates = getContinentTypeCount(changes, SurfaceType.PLAIN) * settingConfiguration.getContinentalContinentWeight();
+        return numberOfOceanicCoordinates + numberOfContinentalCoordinates;
+    }
+
+    private long getContinentTypeCount(Map<Coordinate, ContinentalChangesDto> changes, SurfaceType surfaceType) {
+        return changes.values().stream()
                 .filter(ContinentalChangesDto::isEmpty)
+                .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent().getContinent().getType().equals(surfaceType))
                 .count();
-        long spendableHeight = divider==0?0:totalHeight/divider;
-        world.setHeightDeficit(totalHeight-(spendableHeight*divider));
-        return spendableHeight;
     }
 
     private void createFreshTile(ContinentalChangesDto dto, long newHeight, World world) {
@@ -54,9 +72,13 @@ public class ContinentalDriftWorldAdjuster {
         tile.clear();
         tile.getCoordinate().setContinent(assignedContinent);
         assignedContinent.getCoordinates().add(dto.getKey());
-        tile.setHeight(newHeight);
+        tile.setHeight(weightedHeight(newHeight, assignedContinent));
 
         world.getContinents().add(assignedContinent);
+    }
+
+    private long weightedHeight(long newHeight, Continent assignedContinent) {
+        return assignedContinent.getType().equals(SurfaceType.PLAIN)? newHeight * settingConfiguration.getContinentalContinentWeight() : newHeight;
     }
 
     private void ChangeTileOfCoordinate(ContinentalChangesDto dto, World world) {

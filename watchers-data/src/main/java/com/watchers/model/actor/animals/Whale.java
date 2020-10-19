@@ -2,12 +2,13 @@ package com.watchers.model.actor.animals;
 
 import com.watchers.model.actor.*;
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.World;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.util.List;
 
 @Entity
+@DiscriminatorValue(value = "WHALE")
 public class Whale extends Animal {
 
     @Override
