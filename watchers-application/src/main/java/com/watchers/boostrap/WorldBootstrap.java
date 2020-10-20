@@ -5,6 +5,7 @@ import com.watchers.manager.MapManager;
 import com.watchers.manager.WorldSettingManager;
 import com.watchers.model.WorldStatusEnum;
 import com.watchers.model.environment.World;
+import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.postgres.WorldRepositoryPersistent;
 import com.watchers.service.WorldService;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 public class WorldBootstrap implements CommandLineRunner {
 
     private final WorldRepositoryPersistent worldRepositoryPersistent;
+    private final WorldRepositoryInMemory worldRepositoryInMemory;
     private final WorldService worldService;
     private final MapManager mapManager;
     private final SettingConfiguration settingConfiguration;
@@ -34,6 +36,7 @@ public class WorldBootstrap implements CommandLineRunner {
             } else {
                 log.warn("No world was found on startup! Generating a new world.");
                 World newWorld = mapManager.createWorld();
+                worldRepositoryInMemory.save(newWorld);
                 worldService.saveWorld(newWorld);
                 log.info("Created a new world! Number: " + newWorld.getId());
             }

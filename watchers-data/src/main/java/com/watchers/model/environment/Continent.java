@@ -107,4 +107,22 @@ public class Continent {
         clone.setDirection(this.direction.createClone());
         return clone;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Continent)) return false;
+
+        Continent continent = (Continent) o;
+
+        if (id != null ? !id.equals(continent.id) : continent.id != null) return false;
+        return type == continent.type;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
+    }
 }

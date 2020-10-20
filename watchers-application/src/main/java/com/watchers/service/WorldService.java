@@ -1,9 +1,6 @@
 package com.watchers.service;
 
-import com.watchers.manager.CleansingManager;
-import com.watchers.manager.ContinentalDriftManager;
-import com.watchers.manager.LifeManager;
-import com.watchers.manager.MapManager;
+import com.watchers.manager.*;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
@@ -29,6 +26,7 @@ import java.util.Optional;
 public class WorldService {
 
     private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldSettingManager worldSettingManager;
     private MemorySaveService memorySaveService;
     private PersistenceSaveService persistenceSaveService;
     private WorldRepositoryPersistent worldRepositoryPersistent;
@@ -72,16 +70,21 @@ public class WorldService {
 
     @Transactional("persistentDatabaseTransactionManager")
     public void saveWorld(World memoryWorld){
-        boolean exists = worldRepositoryPersistent.existsById(memoryWorld.getId());
-        exists = false;
-        if (!exists){
-            worldCheckup(memoryWorld);
+        boolean exists = memoryWorld.getId() != null && worldRepositoryPersistent.existsById(memoryWorld.getId());
+        if (!exists && memoryWorld.getId() != null){
             persistenceSaveService.complexSaveToPersistence(memoryWorld);
             log.warn("The missing world is now saved to persistence.");
         } else {
             log.info("World is beeing updated from memory.");
+            if(memoryWorld.getId() == null){
+                newWorldMemoryCheckup(memoryWorld);
+            } else {
+                worldMemoryCheckup(memoryWorld);
+            }
             worldRepositoryPersistent.save(memoryWorld);
+            //memorySaveService.complexSaveToMemory(memoryWorld);
         }
+        worldSettingManager.dequeeSaving(memoryWorld.getId());
     }
 
     public void processTurn(WorldTaskDto worldTaskDto){
@@ -94,6 +97,10 @@ public class WorldService {
 
         lifeManager.process(worldTaskDto);
         cleansingManager.process(worldTaskDto);
+
+        if(worldTaskDto.isSaving()){
+            saveWorld(worldFromMemory(worldTaskDto.getWorldId()));
+        }
     }
 
     @Transactional("inmemoryDatabaseTransactionManager")
@@ -141,17 +148,46 @@ public class WorldService {
         }
     }
 
-    private void worldCheckup(World world) {
+    @Transactional("inmemoryDatabaseTransactionManager")
+    private World worldFromMemory(Long worldId) {
+        World world = worldRepositoryInMemory.findById(worldId).get();
         Assert.notNull(world, "The world was null.");
         world.fillTransactionals();
         Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() == null), "Some continents had nog id set.");
         Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null), "Some actors had no id set.");
         Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null || coordinate.getTile().getBiome().getTile() == null), "Some biomes had nog id set.");
+        return world;
+    }
+
+    @Transactional("persistentDatabaseTransactionManager")
+    private void worldCheckup(World world) {
+        Assert.notNull(world, "The world was null.");
+        world.fillTransactionals();
+        Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() == null), "Some continents had no id set.");
+        Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null), "Some actors had no id set.");
+        Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null || coordinate.getTile().getBiome().getTile() == null), "Some biomes had no id set.");
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
+    private void worldMemoryCheckup(World world) {
+        Assert.notNull(world, "The world was null.");
+        world.fillTransactionals();
+        Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() == null), "Some continents had no id set.");
+        Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() == null), "Some actors had no id set.");
+        Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null || coordinate.getTile().getBiome().getTile() == null), "Some biomes had no id set.");
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
+    private void newWorldMemoryCheckup(World world) {
+        Assert.notNull(world, "The world was null.");
+        world.fillTransactionals();
+        Assert.isTrue(world.getContinents().stream().noneMatch(continent -> continent.getId() != null), "Some continents had id set.");
+        Assert.isTrue(world.getActorList().stream().noneMatch(actor -> actor.getId() != null), "Some actors had id set.");
+        Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() != null || coordinate.getTile().getBiome().getTile() == null), "Some biomes had id set.");
     }
 
     @Transactional("inmemoryDatabaseTransactionManager")
     private void saveToMemory(World persistentWorld) {
-        worldCheckup(persistentWorld);
         memorySaveService.complexSaveToMemory(persistentWorld);
 
         World newWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).orElseThrow(() -> new RuntimeException("The world was lost in perstistence."));

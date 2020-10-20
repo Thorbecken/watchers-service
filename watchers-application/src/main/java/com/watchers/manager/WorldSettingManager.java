@@ -81,6 +81,14 @@ public class WorldSettingManager {
     }
 
     @Transactional("inmemoryDatabaseTransactionManager")
+    public void dequeeSaving(Long worldId) {
+        WorldSetting worldSetting = worldSettingsRepositoryInMemory.getOne(worldId);
+        worldSetting.setNeedsSaving(false);
+        worldSettingsRepositoryInMemory.save(worldSetting);
+        worldSettingsRepositoryInMemory.flush();
+    }
+
+    @Transactional("inmemoryDatabaseTransactionManager")
     public void queInContinentalshift() {
         worldSettingsRepositoryInMemory.findAll()
                 .forEach(worldSetting -> {
@@ -105,5 +113,4 @@ public class WorldSettingManager {
         worldSettingsRepositoryInMemory.save(worldSetting);
         worldSettingsRepositoryInMemory.flush();
     }
-
 }
