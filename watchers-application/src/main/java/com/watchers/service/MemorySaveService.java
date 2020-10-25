@@ -26,6 +26,7 @@ public class MemorySaveService {
 
     private WorldRepositoryInMemory worldRepositoryInMemory;
     private ContinentRepositoryInMemory continentRepositoryInMemory;
+    private DirectionRepositoryInMemory directionRepositoryInMemory;
     private CoordinateRepositoryInMemory coordinateRepositoryInMemory;
     private TileRepositoryInMemory tileRepositoryInMemory;
     private BiomeRepositoryInMemory biomeRepositoryInMemory;
@@ -164,11 +165,8 @@ public class MemorySaveService {
                 .map(continent -> continent.createClone(newWorld))
                 .collect(Collectors.toList());
         newWorld.getContinents().addAll(continents);
-        log.info("Current continents in memory: " + continents.size() + " " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
-        worldRepositoryInMemory.save(newWorld);
+        log.info("Saving the current " + continents.size() + " from the persistence to memory: " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
         continentRepositoryInMemory.saveAll(continents);
-        worldRepositoryInMemory.flush();
-        continentRepositoryInMemory.flush();
     }
 
     @Transactional("inmemoryDatabaseTransactionManager")

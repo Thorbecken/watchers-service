@@ -1,6 +1,5 @@
 package com.watchers.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,6 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Properties;
 
-@Slf4j
 @Configuration
 @EnableJpaRepositories(
         basePackages = "com.watchers.repository.inmemory",
@@ -55,6 +53,7 @@ public class InMemoryDatabaseConfiguration {
         properties.put("hibernate.show_sql", env.getProperty("spring.jpa.properties.hibernate.show_sql"));
         properties.put("hibernate.use_sql_comments", env.getProperty("spring.jpa.properties.hibernate.use_sql_comments"));
         properties.put("hibernate.type", env.getProperty("spring.jpa.properties.hibernate.type"));
+        properties.put("hibernate.temp.use_jdbc_metadata_defaults", env.getProperty("spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults"));
         properties.put("hibernate.naming.physical-strategy", env.getProperty("spring.jpa.hibernate.naming.physical-strategy"));
         properties.put("spring.h2.console.path", env.getProperty("spring.h2.console.path"));
         properties.put("spring.h2.console.enabled", env.getProperty("spring.h2.console.enabled"));
