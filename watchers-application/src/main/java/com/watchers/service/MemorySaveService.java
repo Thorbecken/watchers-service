@@ -154,10 +154,12 @@ public class MemorySaveService {
         saveContinentsControl(persistentWorld);
     }
 
+    @Transactional("inmemoryDatabaseTransactionManager")
     private void saveContinentsControl(World persistentWorld) {
         Assert.isTrue(persistentWorld.getContinents().size() == continentRepositoryInMemory.count(), "Expected " + persistentWorld.getContinents().size() + " but was " + continentRepositoryInMemory.count());
     }
 
+    @Transactional("inmemoryDatabaseTransactionManager")
     private void saveContinentsAction(World persistentWorld) {
         World newWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).orElseThrow(() -> new AssertException("world not found"));
         controlWorld(persistentWorld);
