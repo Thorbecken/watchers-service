@@ -1,7 +1,7 @@
 package com.watchers.model.actor.animals;
 
 import com.watchers.model.actor.*;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

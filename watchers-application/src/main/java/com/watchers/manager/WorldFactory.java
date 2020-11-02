@@ -2,8 +2,13 @@ package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.coordinate.CoordinateFactory;
+import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.environment.*;
+import com.watchers.model.world.World;
+import com.watchers.model.world.WorldFactoryDTO;
+import com.watchers.model.worldsetting.WorldSetting;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -22,8 +27,9 @@ class WorldFactory {
     private TileDefined tileDefined;
     private SettingConfiguration settingConfiguration;
 
-    World generateWorld(long xSize, long ySize, long continents){
+    World generateWorld(long xSize, long ySize, long continents, WorldSetting worldSetting){
         World world = new World(xSize, ySize);
+        world.setWorldSetting(worldSetting);
         int continental = 0;
         int oceeanic = 0;
         for (int i = 0; i < continents; i++) {
@@ -105,7 +111,7 @@ class WorldFactory {
     private Coordinate generateStartingCoordinate(World world, Continent continent) {
         long xCoord =  new RandomDataGenerator().nextLong(1, world.getXSize());
         long yCoord =  new RandomDataGenerator().nextLong(1, world.getYSize());
-        Coordinate startingCoordinate = new Coordinate(xCoord, yCoord, world, continent);
+        Coordinate startingCoordinate = CoordinateFactory.createCoordinate(xCoord, yCoord, world, continent);
         if (world.getContinents().stream().anyMatch(
                 continent1 -> continent.getCoordinates().stream().anyMatch(
                         startingCoordinate::equals

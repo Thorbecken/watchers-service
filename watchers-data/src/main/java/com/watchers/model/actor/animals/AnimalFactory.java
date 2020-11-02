@@ -1,6 +1,6 @@
 package com.watchers.model.actor.animals;
 
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.actor.Animal;
 import com.watchers.model.actor.AnimalType;
 

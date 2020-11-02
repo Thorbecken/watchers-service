@@ -2,10 +2,10 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,9 @@
-package com.watchers.model.environment;
+package com.watchers.model.world;
 
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.coordinate.CoordinateFactory;
+import com.watchers.model.coordinate.NonEuclideanCoordinate;
+import com.watchers.model.environment.Continent;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -24,12 +27,7 @@ public class WorldFactoryDTO {
         List<Coordinate> openCoordinates = new ArrayList<>();
         Continent fillerContinent = new Continent(world, null);
 
-        for (long xCoord = 1L; xCoord <= world.getXSize(); xCoord++){
-            for (long yCoord = 1L; yCoord <= world.getYSize(); yCoord++){
-                Coordinate coordinate = new Coordinate(xCoord, yCoord, world, fillerContinent);
-                openCoordinates.add(coordinate);
-            }
-        }
+        CoordinateFactory.fillListWithCoordinates(openCoordinates, world, fillerContinent);
 
         world.getCoordinates().addAll(openCoordinates);
 

@@ -1,7 +1,7 @@
 package com.watchers.helper;
 
-import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.World;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.world.World;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

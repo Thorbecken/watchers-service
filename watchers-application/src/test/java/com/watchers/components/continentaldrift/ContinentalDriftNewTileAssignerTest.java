@@ -6,15 +6,16 @@ import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
+import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.MockContinent;
 import com.watchers.model.environment.SurfaceType;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -200,7 +201,7 @@ class ContinentalDriftNewTileAssignerTest {
     private void generateCoordinates(World world) {
         for (int xCoordinate = 1; xCoordinate <= world.getXSize(); xCoordinate++) {
             for (int yCoordinate = 1; yCoordinate <= world.getYSize(); yCoordinate++) {
-                world.getCoordinates().add(new Coordinate(xCoordinate, yCoordinate, world, new Continent(world, null)));
+                world.getCoordinates().add(CoordinateFactory.createCoordinate(xCoordinate, yCoordinate, world, new Continent(world, null)));
             }
         }
     }

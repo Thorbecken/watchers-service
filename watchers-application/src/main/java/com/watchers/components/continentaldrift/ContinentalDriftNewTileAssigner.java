@@ -2,16 +2,15 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.MockContinent;
 import com.watchers.model.environment.SurfaceType;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

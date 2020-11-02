@@ -1,8 +1,10 @@
 package com.watchers.model.actor;
 
 import com.watchers.model.actor.animals.Rabbit;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.environment.*;
+import com.watchers.model.world.World;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +23,7 @@ class AnimalTest {
 
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {
-                Coordinate coordinate = new Coordinate(x, y, rabbitWorld, rabbitContinent);
+                Coordinate coordinate = CoordinateFactory.createCoordinate(x, y, rabbitWorld, rabbitContinent);
                 coordinate.getTile().setBiome(new Biome(2f, 3f, 1f, coordinate.getTile()));
                 rabbitWorld.getCoordinates().add(coordinate);
             }

@@ -1,8 +1,8 @@
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -22,7 +22,7 @@ class TileTest {
 
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {
-                world.getCoordinates().add(new Coordinate(x,y,world, continent));
+                world.getCoordinates().add(CoordinateFactory.createCoordinate(x,y,world, continent));
             }
         }
     }

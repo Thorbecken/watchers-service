@@ -7,7 +7,7 @@ import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;

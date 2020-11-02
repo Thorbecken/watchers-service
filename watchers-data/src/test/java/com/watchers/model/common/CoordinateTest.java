@@ -1,8 +1,10 @@
 package com.watchers.model.common;
 
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.SurfaceType;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,8 +15,8 @@ class CoordinateTest {
     void testCalculation(){
         World world = new World(58, 28);
 
-        Coordinate coordinate = new Coordinate(30,10, world, new Continent(world, SurfaceType.OCEANIC));
-        Coordinate soughtCoordinate = new Coordinate(30,9, world, new Continent(world, SurfaceType.COASTAL));
+        Coordinate coordinate = CoordinateFactory.createCoordinate(30,10, world, new Continent(world, SurfaceType.OCEANIC));
+        Coordinate soughtCoordinate = CoordinateFactory.createCoordinate(30,9, world, new Continent(world, SurfaceType.COASTAL));
         world.getCoordinates().add(soughtCoordinate);
 
         Coordinate distantCoordinate = coordinate.calculateDistantCoordinate(0, -1);

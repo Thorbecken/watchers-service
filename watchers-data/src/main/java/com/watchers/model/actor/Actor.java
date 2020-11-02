@@ -2,7 +2,7 @@ package com.watchers.model.actor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.SerialTask;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

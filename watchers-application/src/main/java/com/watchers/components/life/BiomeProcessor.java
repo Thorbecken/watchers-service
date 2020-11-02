@@ -1,10 +1,10 @@
 package com.watchers.components.life;
 
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

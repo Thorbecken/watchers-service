@@ -5,7 +5,7 @@ import com.watchers.model.actor.StateType;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.ContinentRepositoryInMemory;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.AllArgsConstructor;

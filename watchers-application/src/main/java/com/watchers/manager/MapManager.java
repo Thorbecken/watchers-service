@@ -1,9 +1,11 @@
 package com.watchers.manager;
 
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
+import com.watchers.model.worldsetting.WorldSetting;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +50,8 @@ public class MapManager {
        }
     }
 
-    public World createWorld(){
-        World newWorld = worldFactory.generateWorld(settingConfiguration.getXSize(), settingConfiguration.getYSize(), settingConfiguration.getMinimumContinents());
+    public World createWorld(WorldSetting worldSetting){
+        World newWorld = worldFactory.generateWorld(settingConfiguration.getXSize(), settingConfiguration.getYSize(), settingConfiguration.getMinimumContinents(), worldSetting);
         Assert.isTrue(newWorld.getCoordinates().size() == newWorld.getXSize()*newWorld.getYSize(), "coordinates were " + newWorld.getCoordinates().size());
         return newWorld;
     }

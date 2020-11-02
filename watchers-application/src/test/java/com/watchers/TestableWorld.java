@@ -1,11 +1,14 @@
 package com.watchers;
 
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
+import com.watchers.model.coordinate.CoordinateFactory;
+import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.SurfaceType;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
+import com.watchers.model.worldsetting.WorldSetting;
 
 import java.util.*;
 
@@ -16,31 +19,34 @@ public class TestableWorld {
         world.setId(1L);
         world.setLastContinentInFlux(0L);
 
+        WorldSetting worldSetting = new WorldSetting();
+        worldSetting.setWorldTypeEnum(WorldTypeEnum.NON_EUCLIDEAN);
+
         Continent continent1 = new Continent(world, SurfaceType.PLAIN);
         continent1.setId(0L);
         continent1.setDirection(new Direction(1, 0));
         continent1.getCoordinates().addAll(Arrays.asList(
-                new Coordinate(1, 1, world, continent1),
-                new Coordinate(1, 2, world, continent1),
-                new Coordinate(2, 1, world, continent1)
+                CoordinateFactory.createCoordinate(1, 1, world, continent1),
+                CoordinateFactory.createCoordinate(1, 2, world, continent1),
+                CoordinateFactory.createCoordinate(2, 1, world, continent1)
         ));
 
         Continent continent2 = new Continent(world, SurfaceType.COASTAL);
         continent2.setId(1L);
         continent2.setDirection(new Direction(0, -1));
         continent2.getCoordinates().addAll(Arrays.asList(
-                new Coordinate(2, 2, world, continent2),
-                new Coordinate(3, 2, world, continent2),
-                new Coordinate(1, 3, world, continent2)
+                CoordinateFactory.createCoordinate(2, 2, world, continent2),
+                CoordinateFactory.createCoordinate(3, 2, world, continent2),
+                CoordinateFactory.createCoordinate(1, 3, world, continent2)
         ));
 
         Continent continent3 = new Continent(world, SurfaceType.OCEANIC);
         continent3.setId(2L);
         continent3.setDirection(new Direction(0, 0));
         continent3.getCoordinates().addAll(Arrays.asList(
-                new Coordinate(3, 3, world, continent3),
-                new Coordinate(3, 1, world, continent3),
-                new Coordinate(2, 3, world, continent3)
+                CoordinateFactory.createCoordinate(3, 3, world, continent3),
+                CoordinateFactory.createCoordinate(3, 1, world, continent3),
+                CoordinateFactory.createCoordinate(2, 3, world, continent3)
         ));
 
         world.setContinents(new HashSet<>(Arrays.asList(continent1, continent2, continent3)));

@@ -1,8 +1,8 @@
 package com.watchers.controller;
 
 import com.watchers.manager.MapManager;
-import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.World;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.world.World;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;

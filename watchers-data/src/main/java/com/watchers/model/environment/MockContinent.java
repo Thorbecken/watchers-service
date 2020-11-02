@@ -1,7 +1,9 @@
 package com.watchers.model.environment;
 
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.world.World;
+import com.watchers.model.world.WorldFactoryDTO;
 import lombok.Data;
 import org.springframework.util.Assert;
 

@@ -3,7 +3,9 @@ package com.watchers.manager;
 import com.watchers.TestableWorld;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.environment.World;
+import com.watchers.model.coordinate.WorldTypeEnum;
+import com.watchers.model.world.World;
+import com.watchers.model.worldsetting.WorldSetting;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,7 +24,11 @@ class WorldFactoryTest {
     void generateWorldTest(long xSize, long ySize, long continents) {
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
         TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60, worldRepositoryInMemory);
-        World world = new WorldFactory(tileDefined, settingConfiguration).generateWorld(xSize, ySize, continents);
+        WorldSetting worldSetting = new WorldSetting();
+        worldSetting.setWorldTypeEnum(WorldTypeEnum.NON_EUCLIDEAN);
+        World world = new WorldFactory(tileDefined, settingConfiguration).generateWorld(xSize, ySize, continents, worldSetting);
+        world.setWorldSetting(new WorldSetting());
+        world.getWorldSetting().setWorldTypeEnum(WorldTypeEnum.NON_EUCLIDEAN);
 
         Assertions.assertNotNull(world);
         assertEquals(Long.valueOf(xSize), world.getXSize());

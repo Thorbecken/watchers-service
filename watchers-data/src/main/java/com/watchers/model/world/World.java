@@ -1,23 +1,16 @@
-package com.watchers.model.environment;
+package com.watchers.model.world;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actor.Actor;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.environment.Continent;
+import com.watchers.model.environment.Tile;
+import com.watchers.model.worldsetting.WorldSetting;
 import lombok.Data;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,9 +32,14 @@ public class World {
     @Column(name = "world_id")
     private Long id;
 
+
     private Long xSize;
 
     private Long ySize;
+
+    @Transient
+    @JsonIgnore
+    private WorldSetting worldSetting;
 
     @JsonProperty("coordinates")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)

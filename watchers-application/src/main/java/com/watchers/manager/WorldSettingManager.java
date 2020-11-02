@@ -1,7 +1,8 @@
 package com.watchers.manager;
 
-import com.watchers.model.WorldSetting;
-import com.watchers.model.WorldStatusEnum;
+import com.watchers.model.coordinate.WorldTypeEnum;
+import com.watchers.model.worldsetting.WorldSetting;
+import com.watchers.model.worldsetting.WorldStatusEnum;
 import com.watchers.repository.inmemory.WorldSettingsRepositoryInMemory;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -96,14 +97,17 @@ public class WorldSettingManager {
         WorldSetting worldSetting = worldSettingsRepositoryInMemory.getOne(worldId);
         Assert.notNull(worldSetting.getWorldId(), "The worldId was null.");
         Assert.notNull(worldSetting.getWorldStatusEnum(), "The worldStatusEnum was null");
+        Assert.notNull(worldSetting.getWorldTypeEnum(), "The WorldTypeEnum was null");
         return worldSetting;
     }
 
     @Transactional("inmemoryDatabaseTransactionManager")
-    public void createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift, long heigtDivider, int minimumContinents) {
-        WorldSetting worldSetting = new WorldSetting(worldId, worldStatusEnum, needsProcessing, needsSaving, needsContinentalshift, heigtDivider, minimumContinents);
+    public WorldSetting createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, WorldTypeEnum worldTypeEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift, long heigtDivider, int minimumContinents) {
+        WorldSetting worldSetting = new WorldSetting(worldId, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift, heigtDivider, minimumContinents);
         worldSettingsRepositoryInMemory.save(worldSetting);
         worldSettingsRepositoryInMemory.flush();
+
+        return worldSetting;
     }
 
 }

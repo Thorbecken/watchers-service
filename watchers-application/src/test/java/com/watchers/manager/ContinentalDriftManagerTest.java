@@ -5,7 +5,7 @@ import com.watchers.components.continentaldrift.*;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import com.watchers.repository.inmemory.WorldSettingsRepositoryInMemory;
 import org.junit.jupiter.api.BeforeEach;

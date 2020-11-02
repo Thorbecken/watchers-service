@@ -1,41 +1,30 @@
-package com.watchers.model.common;
+package com.watchers.model.coordinate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.actor.AnimalType;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.environment.Continent;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import javax.persistence.*;
+import java.util.*;
 
 @Data
 @Entity
-@Table(name = "coordinate")
 @NoArgsConstructor
+@Table(name = "coordinate")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="coordinate_type", discriminatorType = DiscriminatorType.STRING)
 @SequenceGenerator(name="Coordinate_Gen", sequenceName="Coordinate_Seq", allocationSize = 1)
-public class Coordinate {
+public abstract class Coordinate {
 
     @Id
     @JsonIgnore
@@ -47,6 +36,9 @@ public class Coordinate {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
+
+    @Enumerated(value = EnumType.STRING)
+    private CoordinateType coordinateType;
 
     @JsonProperty("xCoord")
     @Column(name = "xCoord")
@@ -68,11 +60,12 @@ public class Coordinate {
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
 
-    public Coordinate(long xCoord, long yCoord, World world, Continent continent) {
+    protected Coordinate(long xCoord, long yCoord, CoordinateType coordinateType, World world, Continent continent) {
         this.yCoord = yCoord;
         this.xCoord = xCoord;
         this.world = world;
         this.continent = continent;
+        this.coordinateType = coordinateType;
 
         this.tile = new Tile(this, continent);
     }
@@ -96,22 +89,22 @@ public class Coordinate {
     }
 
     @JsonIgnore
-    private long getRightCoordinate() {
+    protected long getRightCoordinate() {
         return getAdjustedXCoordinate(CoordinateHelper.RIGHT, this.xCoord);
     }
 
     @JsonIgnore
-    private long getLeftCoordinate() {
+    protected long getLeftCoordinate() {
         return getAdjustedXCoordinate(CoordinateHelper.LEFT, this.xCoord);
     }
 
     @JsonIgnore
-    private long getUpCoordinate() {
+    protected long getUpCoordinate() {
         return getAdjustedYCoordinate(CoordinateHelper.UP, this.yCoord);
     }
 
     @JsonIgnore
-    private long getDownCoordinate() {
+    protected long getDownCoordinate() {
         return getAdjustedYCoordinate(CoordinateHelper.DOWN, this.yCoord);
     }
 
@@ -121,7 +114,7 @@ public class Coordinate {
     }
 
     @JsonIgnore
-    private long getXCoordinateFromTile(long distance, long startingCoordinate){
+    protected long getXCoordinateFromTile(long distance, long startingCoordinate){
         if(distance <= CoordinateHelper.LEFT){
             return getXCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedXCoordinate(CoordinateHelper.LEFT, startingCoordinate));
         } else if(distance >= CoordinateHelper.RIGHT){
@@ -137,7 +130,7 @@ public class Coordinate {
     }
 
     @JsonIgnore
-    private long getYCoordinateFromTile(long distance, long startingCoordinate){
+    protected long getYCoordinateFromTile(long distance, long startingCoordinate){
         if(distance <= CoordinateHelper.DOWN){
             return getYCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedYCoordinate(CoordinateHelper.DOWN, startingCoordinate));
         } else if(distance >= CoordinateHelper.UP){
@@ -153,7 +146,7 @@ public class Coordinate {
         return world.getCoordinate(newX, newY);
     }
 
-    private long decreaseDistanceToZero(long distance){
+    protected long decreaseDistanceToZero(long distance){
         if(distance < 0){
             return distance+CoordinateHelper.RIGHT;
         } else if(distance > 0){
@@ -164,7 +157,7 @@ public class Coordinate {
     }
 
     @JsonIgnore
-    private long getAdjustedXCoordinate(int adjustment, long startincCoordinate){
+    protected long getAdjustedXCoordinate(int adjustment, long startincCoordinate){
         if(adjustment >= CoordinateHelper.RIGHT && startincCoordinate == this.world.getXSize()){
             return 1;
         } else if(adjustment <= CoordinateHelper.LEFT && startincCoordinate == 1){
@@ -175,7 +168,7 @@ public class Coordinate {
     }
 
     @JsonIgnore
-    private long getAdjustedYCoordinate(int adjustment, long startincCoordinate){
+    protected long getAdjustedYCoordinate(int adjustment, long startincCoordinate){
         if(adjustment >= CoordinateHelper.UP && startincCoordinate == this.world.getYSize()){
             return 1;
         } else if(adjustment <= CoordinateHelper.DOWN && startincCoordinate == 1){
@@ -192,7 +185,7 @@ public class Coordinate {
     }
 
     @JsonIgnore
-    private List<Coordinate> getCoordinatesWithinRange(List<Coordinate> coordinates, int range) {
+    protected List<Coordinate> getCoordinatesWithinRange(List<Coordinate> coordinates, int range) {
         if(range>=1) {
             List<Coordinate> returnList = new ArrayList<>();
             coordinates.forEach(
@@ -206,7 +199,7 @@ public class Coordinate {
     }
 
     @JsonIgnore
-    private List<Coordinate> getCoordinatesWithinRange(List<Coordinate> coordinates, List<Coordinate> oldCoordinates, int range) {
+    protected List<Coordinate> getCoordinatesWithinRange(List<Coordinate> coordinates, List<Coordinate> oldCoordinates, int range) {
         if(range>=1) {
             List<Coordinate> returnList = new ArrayList<>();
             coordinates.forEach(
@@ -222,6 +215,8 @@ public class Coordinate {
             return coordinates;
         }
     }
+
+    public abstract Coordinate createBasicClone(World newWorld);
 
     @Override
     public boolean equals(Object o) {
@@ -244,18 +239,5 @@ public class Coordinate {
                 "xCoord=" + xCoord +
                 ", yCoord=" + yCoord +
                 '}';
-    }
-
-    public Coordinate createBasicClone(World newWorld) {
-        Coordinate clone = new Coordinate();
-        clone.setId(this.id);
-        clone.setWorld(newWorld);
-        clone.setXCoord(this.xCoord);
-        clone.setYCoord(this.yCoord);
-        clone.setContinent(newWorld.getContinents().stream()
-                .filter(oldContinent -> oldContinent.getId().equals(this.continent.getId()))
-                .findFirst().get());
-
-        return clone;
     }
 }

@@ -1,9 +1,9 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.SurfaceType;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
