@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.worldsetting.WorldSetting;
@@ -27,11 +28,10 @@ public class World {
 
     @Id
     @JsonIgnore
-    @SequenceGenerator(name="World_Gen", sequenceName="World_Seq", allocationSize = 1)
-    @GeneratedValue(generator="World_Gen", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "World_Gen", sequenceName = "World_Seq", allocationSize = 1)
+    @GeneratedValue(generator = "World_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "world_id")
     private Long id;
-
 
     private Long xSize;
 
@@ -42,11 +42,11 @@ public class World {
     private WorldSetting worldSetting;
 
     @JsonProperty("coordinates")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("continents")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Continent> continents = new HashSet<>();
 
     @JsonIgnore
@@ -72,24 +72,26 @@ public class World {
     @JsonIgnore
     private List<Actor> newActors = new ArrayList<>();
 
-    public World(long xSize, long ySize){
+    public World(long xSize, long ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
     }
 
     @SuppressWarnings("unused")
-    public World(){}
+    public World() {
+    }
 
-public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
-        if(coordinateMap == null || coordinateMap.isEmpty()){
-                setCoordinateMap();
+    public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
+        if (coordinateMap == null || coordinateMap.isEmpty()) {
+            setCoordinateMap();
         }
         return coordinateMap.get(xCoordinate).get(yCoordinate);
     }
 
     @JsonIgnore
-    public Tile getTile(Long x, Long y){
-        if(tileMap == null || tileMap.isEmpty()){
+
+    public Tile getTile(Long x, Long y) {
+        if (tileMap == null || tileMap.isEmpty()) {
             setTileMap();
         }
 
@@ -97,20 +99,20 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
     }
 
     @JsonIgnore
-    public Tile getTile(Coordinate coordinate){
+    public Tile getTile(Coordinate coordinate) {
         return getTile(coordinate.getXCoord(), coordinate.getYCoord());
     }
 
     @JsonIgnore
-    public List<Actor> getActorList(){
-        if(actorList == null){
+    public List<Actor> getActorList() {
+        if (actorList == null) {
             setActorList();
         }
 
         return actorList;
     }
 
-    private void setTileMap(){
+    private void setTileMap() {
         tileMap = new HashMap<>();
 
         for (int i = 1; i <= xSize; i++) {
@@ -122,11 +124,11 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
                     .forEach(tile -> xTileHashMap.put(tile.getCoordinate().getYCoord(), tile)
                     );
 
-            tileMap.put(xCoord,xTileHashMap);
+            tileMap.put(xCoord, xTileHashMap);
         }
     }
 
-    private void setCoordinateMap(){
+    private void setCoordinateMap() {
         coordinateMap = new HashMap<>();
 
         for (int i = 1; i <= xSize; i++) {
@@ -137,7 +139,7 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
                     .forEach(coordinate -> xCoordinateHashMap.put(coordinate.getYCoord(), coordinate)
                     );
 
-            coordinateMap.put(xCoord,xCoordinateHashMap);
+            coordinateMap.put(xCoord, xCoordinateHashMap);
         }
     }
 
@@ -163,18 +165,18 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
         }
     }
 
-    private void setActorList(){
-        if(tileMap == null || tileMap.isEmpty()){
+    private void setActorList() {
+        if (tileMap == null || tileMap.isEmpty()) {
             setTileMap();
         }
         actorList = new ArrayList<>();
 
         coordinates.forEach(
-            coordinate -> actorList.addAll(coordinate.getActors())
+                coordinate -> actorList.addAll(coordinate.getActors())
         );
     }
 
-    public void createBasicClone(World template){
+    public void createBasicClone(World template) {
         this.id = template.getId();
         this.xSize = template.getXSize();
         this.ySize = template.getYSize();
@@ -203,8 +205,8 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
 
         World world = (World) o;
 
-        return id != null && world.getId() != null?
-                (id == null || world.getId() == null || id.equals(world.getId())):
+        return id != null && world.getId() != null ?
+                (id == null || world.getId() == null || id.equals(world.getId())) :
                 ySize.equals(world.ySize) && xSize.equals(world.xSize);
     }
 

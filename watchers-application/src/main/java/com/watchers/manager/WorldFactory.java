@@ -4,7 +4,6 @@ import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
-import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.environment.*;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldFactoryDTO;
@@ -15,9 +14,8 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -26,6 +24,9 @@ class WorldFactory {
 
     private TileDefined tileDefined;
     private SettingConfiguration settingConfiguration;
+
+    private static final long LONGITUDE_DIGREES = 360;
+    private static final long LATHITUDE_DIGREES = 360;
 
     World generateWorld(long xSize, long ySize, long continents, WorldSetting worldSetting){
         World world = new World(xSize, ySize);
@@ -64,7 +65,178 @@ class WorldFactory {
 
         }
 
+        createBasicClimateForWorld(world);
+
         return world;
+    }
+
+    private void createBasicClimateForWorld(World world) {
+        List<Climate> climateList = createClimateLongitudeList(world);
+        addLatitudeToClimates(climateList,world);
+        calculateDistanceToEquator(climateList);
+    }
+
+    private void calculateDistanceToEquator(List<Climate> climateList) {
+        long equator = LONGITUDE_DIGREES/2;
+        climateList.forEach(
+                climate -> climate.setDistanceToEquator(
+                        climate.getLongitude()>equator?
+                                climate.getLongitude()-equator
+                                :equator-climate.getLongitude())
+        );
+    }
+
+    private void addLatitudeToClimates(List<Climate> climateList, World world) {
+        long centerY = (world.getYSize()-1)/2+1;
+        long splitterX = world.getXSize()/2;
+
+        Map<Long, List<Climate>>  sortedNorthernClimates = climateList.stream()
+                .filter(climate -> climate.getCoordinate().getXCoord() <= splitterX)
+                .collect(Collectors.groupingBy(Climate::getLongitude));
+
+        Map<Long, List<Climate>>  sortedSouthernClimates = climateList.stream()
+                .filter(climate -> climate.getCoordinate().getXCoord() > splitterX)
+                .collect(Collectors.groupingBy(Climate::getLongitude));
+
+        sortedNorthernClimates.keySet()
+                .forEach(key -> assingNothernLatitude(sortedNorthernClimates.get(key), key, centerY));
+
+        sortedNorthernClimates.keySet()
+                .forEach(key -> assignSouthernLatitude(sortedSouthernClimates.get(key), key, centerY));
+
+    }
+
+    void assingNothernLatitude(List<Climate> climates, Long longitude, long centerY){
+        World world = climates.get(0).getCoordinate().getWorld();
+        boolean down = false;
+        boolean left = true;
+        boolean right = false;
+
+        Coordinate startingCoordinate = climates.stream()
+                .map(Climate::getCoordinate)
+                .filter(coordinate -> coordinate.getYCoord() == centerY-longitude)
+                .max(Comparator.comparing(Coordinate::getXCoord))
+                .get();
+
+        long longitudeRingSize = climates.size();
+
+        for (long i = 0; i < longitudeRingSize; i++) {
+            startingCoordinate.getClimate().setLatitude(i/longitudeRingSize*LATHITUDE_DIGREES);
+            if(left){
+                if(startingCoordinate.getXCoord()+1<=longitude+centerY) {
+                    startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord() + 1, startingCoordinate.getYCoord());
+                } else {
+                    startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord()-1);
+                    right = false;
+                    down = true;
+                }
+            } else if(down){
+                if(startingCoordinate.getYCoord()-1 >= longitude-centerY ) {
+                    startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord() - 1);
+                } else {
+                    startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord()-1, startingCoordinate.getYCoord());
+                    down = false;
+                    left = true;
+                }
+            } else if(right){
+                if(startingCoordinate.getXCoord()-1 >= longitude-centerY) {
+                    startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord() - 1, startingCoordinate.getYCoord());
+                } else {
+                    startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord()+1);
+                    left = false;
+                }
+            } else {
+                startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord()+1);
+            }
+        }
+
+    }
+
+    void assignSouthernLatitude(List<Climate> climates, Long longitude, long centerY){
+        World world = climates.get(0).getCoordinate().getWorld();
+        boolean down = false;
+        boolean left = false;
+        boolean right = true;
+
+        Coordinate startingCoordinate = climates.stream()
+                .map(Climate::getCoordinate)
+                .filter(coordinate -> coordinate.getYCoord() == centerY-longitude)
+                .min(Comparator.comparing(Coordinate::getXCoord))
+                .get();
+
+        long longitudeRingSize = climates.size();
+
+        for (long i = 0; i < longitudeRingSize; i++) {
+          startingCoordinate.getClimate().setLatitude(i/longitudeRingSize*LATHITUDE_DIGREES);
+          if(right){
+              if(startingCoordinate.getXCoord()+1<=longitude+centerY) {
+                  startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord() + 1, startingCoordinate.getYCoord());
+              } else {
+                  startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord()-1);
+                  right = false;
+                  down = true;
+              }
+          } else if(down){
+              if(startingCoordinate.getYCoord()-1 >= longitude-centerY ) {
+                  startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord() - 1);
+              } else {
+                  startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord()-1, startingCoordinate.getYCoord());
+                  down = false;
+                  left = true;
+              }
+          } else if(left){
+              if(startingCoordinate.getXCoord()-1 >= longitude-centerY) {
+                  startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord() - 1, startingCoordinate.getYCoord());
+              } else {
+                  startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord()+1);
+                  left = false;
+              }
+          } else {
+              startingCoordinate = world.getCoordinate(startingCoordinate.getXCoord(), startingCoordinate.getYCoord()+1);
+          }
+        }
+    }
+
+    private List<Climate> createClimateLongitudeList(World world) {
+        List<Climate> climateList = new ArrayList<>();
+        long splitterX = world.getXSize()/2;
+        long centerX = (splitterX-1)/2+1;
+        long centerY = (world.getYSize()-1)/2+1;
+        long northernCenterX = centerX;
+        long southernCenterX = centerX+splitterX;
+
+        world.getCoordinates().parallelStream()
+                .filter(coordinate -> coordinate.getXCoord() <= splitterX)
+                .forEach(
+                        coordinate -> {
+                            Climate climate = new Climate();
+                            climate.setLongitude(getLongitude(coordinate, northernCenterX, centerY));
+                            climate.setCoordinate(coordinate);
+                            climateList.add(climate);
+                        }
+                );
+
+        world.getCoordinates().parallelStream()
+                .filter(coordinate -> coordinate.getXCoord() > splitterX)
+                .forEach(
+                        coordinate -> {
+                            Climate climate = new Climate();
+                            climate.setLongitude(getLongitude(coordinate, southernCenterX, centerY));
+                            climate.setCoordinate(coordinate);
+                            climateList.add(climate);
+                        }
+                );
+
+        return climateList;
+    }
+
+    private long getLongitude(Coordinate coordinate, long centerX, long centerY) {
+        long xCoord = coordinate.getXCoord();
+        long yCoord = coordinate.getYCoord();
+        long xDifference = xCoord>centerX?xCoord-centerX:centerX-xCoord;
+        long yDifference = yCoord>centerY?yCoord-centerY:centerY-yCoord;
+        long rawLongitude = xDifference>yDifference?xDifference:yDifference;
+        return rawLongitude/coordinate.getWorld().getXSize()*LONGITUDE_DIGREES;
     }
 
     private void specifyWaterZones(World world) {

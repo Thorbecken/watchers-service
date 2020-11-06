@@ -4,15 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.actor.AnimalType;
+import com.watchers.model.environment.Climate;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.environment.Continent;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.util.*;
@@ -60,6 +58,8 @@ public abstract class Coordinate {
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
 
+    private Climate climate;
+
     protected Coordinate(long xCoord, long yCoord, CoordinateType coordinateType, World world, Continent continent) {
         this.yCoord = yCoord;
         this.xCoord = xCoord;
@@ -70,23 +70,20 @@ public abstract class Coordinate {
         this.tile = new Tile(this, continent);
     }
 
+    private void setContinent(Continent continent){
+        this.continent = continent;
+    }
+
     public void changeContinent(Continent newContinent){
         if(continent != null) {
             continent.removeCoordinate(this);
         }
+        this.continent = newContinent;
         newContinent.addCoordinate(this);
     }
 
     @JsonIgnore
-    public List<Coordinate> getNeighbours() {
-        List<Coordinate> returnCoordinates = new ArrayList<>();
-        returnCoordinates.add(world.getCoordinate(getLeftCoordinate(), yCoord));
-        returnCoordinates.add(world.getCoordinate(getRightCoordinate(), yCoord));
-        returnCoordinates.add(world.getCoordinate(xCoord, getDownCoordinate()));
-        returnCoordinates.add(world.getCoordinate(xCoord, getUpCoordinate()));
-
-        return returnCoordinates;
-    }
+    public abstract List<Coordinate> getNeighbours();
 
     @JsonIgnore
     protected long getRightCoordinate() {

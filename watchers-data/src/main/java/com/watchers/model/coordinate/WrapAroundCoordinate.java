@@ -7,6 +7,8 @@ import com.watchers.model.world.World;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @DiscriminatorValue(value = "WRAP_AROUND")
@@ -32,6 +34,18 @@ public class WrapAroundCoordinate extends Coordinate {
 
     @Override
     @JsonIgnore
+    public List<Coordinate> getNeighbours() {
+        List<Coordinate> returnCoordinates = new ArrayList<>();
+        returnCoordinates.add(super.getWorld().getCoordinate(getLeftCoordinate(), super.getYCoord()));
+        returnCoordinates.add(super.getWorld().getCoordinate(getRightCoordinate(), super.getYCoord()));
+        returnCoordinates.add(super.getWorld().getCoordinate(super.getXCoord(), getDownCoordinate()));
+        returnCoordinates.add(super.getWorld().getCoordinate(super.getXCoord(), getUpCoordinate()));
+
+        return returnCoordinates;
+    }
+
+    @Override
+    @JsonIgnore
     protected long getAdjustedYCoordinate(int adjustment, long startincCoordinate){
         if(adjustment >= CoordinateHelper.UP && startincCoordinate == getWorld().getYSize()){
             return getWorld().getYSize();
@@ -48,7 +62,7 @@ public class WrapAroundCoordinate extends Coordinate {
         clone.setWorld(newWorld);
         clone.setXCoord(getXCoord());
         clone.setYCoord(getYCoord());
-        clone.setContinent(newWorld.getContinents().stream()
+        clone.changeContinent(newWorld.getContinents().stream()
                 .filter(oldContinent -> oldContinent.getId().equals(getContinent().getId()))
                 .findFirst().get());
 

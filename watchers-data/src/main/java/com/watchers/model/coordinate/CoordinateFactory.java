@@ -9,10 +9,9 @@ public class CoordinateFactory {
 
     public static void fillListWithCoordinates(List<Coordinate> openCoordinates, World world, Continent fillerContinent) {
         if (WorldTypeEnum.GLOBE.equals(world.getWorldSetting().getWorldTypeEnum())) {
-            for (long xCoord = 1L; xCoord <= world.getXSize(); xCoord++) {
+            for (long xCoord = 1L; xCoord <= world.getXSize()*2; xCoord++) {
                 for (long yCoord = 1L; yCoord <= world.getYSize(); yCoord++) {
-                    openCoordinates.add(new GlobeCoordinate(xCoord, yCoord, false, world, fillerContinent));
-                    openCoordinates.add(new GlobeCoordinate(xCoord, yCoord, true, world, fillerContinent));
+                    openCoordinates.add(new GlobeCoordinate(xCoord, yCoord, world, fillerContinent));
                 }
             }
         } else {
