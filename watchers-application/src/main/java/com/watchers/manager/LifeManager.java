@@ -9,7 +9,7 @@ import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 @AllArgsConstructor
 public class LifeManager {
 
-    WorldRepositoryInMemory worldRepositoryInMemory;
+    WorldRepository worldRepository;
     BiomeProcessor biomeProcessor;
     ActorProcessor actorProcessor;
 
@@ -30,13 +30,13 @@ public class LifeManager {
         actorProcessor.process(taskDto);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void seedLife(Long worldId, Long xCoord, Long yCoord) {
-        World world = worldRepositoryInMemory.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Tile seedingTile = world.getTile(xCoord, yCoord);
         AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
         seedingTile.getCoordinate().getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile.getCoordinate()));
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
         Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
     }
 

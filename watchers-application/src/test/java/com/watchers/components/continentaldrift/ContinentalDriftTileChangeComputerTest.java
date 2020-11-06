@@ -8,7 +8,7 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class ContinentalDriftTileChangeComputerTest {
 
     private World world;
     private ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer;
-    private WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
+    private WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
     private ContinentalDriftTaskDto taskDto;
 
 
@@ -33,11 +33,11 @@ class ContinentalDriftTileChangeComputerTest {
     void setUp() {
         this.world = TestableWorld.createWorld();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
+        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepository);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepository);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
     }
 
@@ -63,7 +63,7 @@ class ContinentalDriftTileChangeComputerTest {
                 .orElse(0L);
         // testing
 
-        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftTileChangeComputer.process(taskDto);
 
         // assertions

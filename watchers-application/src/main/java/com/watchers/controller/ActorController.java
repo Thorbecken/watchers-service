@@ -1,7 +1,7 @@
 package com.watchers.controller;
 
 import com.watchers.manager.LifeManager;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ActorController{
 
         private LifeManager lifeManager;
-        private WorldRepositoryInMemory worldRepository;
+        private WorldRepository worldRepository;
 
-    public ActorController(LifeManager lifeManager, WorldRepositoryInMemory worldRepository) {
+    public ActorController(LifeManager lifeManager, WorldRepository worldRepository) {
         this.worldRepository = worldRepository;
         this.lifeManager = lifeManager;
     }

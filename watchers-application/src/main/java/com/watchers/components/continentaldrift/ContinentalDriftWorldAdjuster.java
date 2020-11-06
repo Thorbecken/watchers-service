@@ -9,7 +9,7 @@ import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +21,12 @@ import java.util.*;
 public class ContinentalDriftWorldAdjuster {
 
     private CoordinateHelper coordinateHelper;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
     private SettingConfiguration settingConfiguration;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
 
         long newHeight = calculateNewHeight(world, changes);
@@ -41,7 +41,7 @@ public class ContinentalDriftWorldAdjuster {
                 }
         );
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
     private long calculateNewHeight(World world, Map<Coordinate, ContinentalChangesDto> changes) {

@@ -6,7 +6,7 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +20,12 @@ public class ErosionAdjuster {
 
     private final int NUMBER_OF_NEIGHBOURS = 4;
     private CoordinateHelper coordinateHelper;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
     private SettingConfiguration settingConfiguration;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, Long> erosionMap = new HashMap<>();
 
         coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
@@ -59,6 +59,6 @@ public class ErosionAdjuster {
                 }
         );
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 }

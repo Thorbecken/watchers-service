@@ -9,8 +9,7 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
-import com.watchers.repository.postgres.WorldRepositoryPersistent;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,8 @@ import java.util.Optional;
 @EnableTransactionManagement
 public class WorldService {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
-    private WorldRepositoryPersistent worldRepositoryPersistent;
+    private WorldRepository worldRepository;
+    private SaveService saveService;
     private MapManager mapManager;
     private ContinentalDriftManager continentalDriftManager;
     private CleansingManager cleansingManager;
@@ -39,13 +38,13 @@ public class WorldService {
     @SuppressWarnings("unused")
     @Transactional("persistentDatabaseTransactionManager")
     public void saveAndShutdownAll(){
-        activeWorldIds.stream().map(mapManager::getUninitiatedWorld).forEach(worldRepositoryPersistent::save);
+        activeWorldIds.stream().map(mapManager::getUninitiatedWorld).forEach(saveService::saveWorld);
         activeWorldIds.clear();
     }
 
     @SuppressWarnings("unused")
     public void saveAndShutdown(Long id){
-        saveWorld(worldRepositoryInMemory.getOne(id));
+        saveWorld(worldRepository.getOne(id));
         shutdownWorld(id);
     }
 
@@ -56,7 +55,7 @@ public class WorldService {
                 .ifPresent(activeWorldIds::remove);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void saveWorlds(){
         activeWorldIds.stream()
                 .map(mapManager::getInitiatedWorld)
@@ -70,16 +69,16 @@ public class WorldService {
 
     @Transactional("persistentDatabaseTransactionManager")
     public void saveWorld(World memoryWorld){
-        boolean exists = worldRepositoryPersistent.existsById(memoryWorld.getId());
+        boolean exists = saveService.exist(memoryWorld.getId());
         exists = false;
         if (!exists){
             worldCheckup(memoryWorld);
-            worldRepositoryPersistent.save(memoryWorld);
+            saveService.saveWorld(memoryWorld);
             //persistenceSaveService.complexSaveToPersistence(memoryWorld);
             log.warn("The missing world is now saved to persistence.");
         } else {
             log.info("World is beeing updated from memory.");
-            worldRepositoryPersistent.save(memoryWorld);
+            saveService.saveWorld(memoryWorld);
         }
     }
 
@@ -95,9 +94,9 @@ public class WorldService {
         cleansingManager.process(worldTaskDto);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     private String getTotalHeight(Long worldId) {
-        World world = worldRepositoryInMemory.findById(worldId).get();
+        World world = worldRepository.findById(worldId).get();
         long currentHeight = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .mapToLong(Tile::getHeight)
@@ -121,7 +120,7 @@ public class WorldService {
 
     @Transactional("persistentDatabaseTransactionManager")
     private Boolean addActiveWorldFromPersistence(Long id) {
-        Optional<World> optionalWorld = worldRepositoryPersistent.findById(id);
+        Optional<World> optionalWorld = saveService.findById(id);
         if(optionalWorld.isPresent()) {
             World world = optionalWorld.get();
             worldCheckup(world);
@@ -148,19 +147,19 @@ public class WorldService {
         Assert.isTrue(world.getCoordinates().stream().noneMatch(coordinate -> coordinate.getTile().getBiome().getId() == null || coordinate.getTile().getBiome().getTile() == null), "Some biomes had nog id set.");
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     private void saveToMemory(World persistentWorld) {
         worldCheckup(persistentWorld);
-        worldRepositoryInMemory.save(persistentWorld);
+        worldRepository.save(persistentWorld);
         //memorySaveService.complexSaveToMemory(persistentWorld);
 
-        World newWorld = worldRepositoryInMemory.findById(persistentWorld.getId()).orElseThrow(() -> new RuntimeException("The world was lost in perstistence."));
+        World newWorld = worldRepository.findById(persistentWorld.getId()).orElseThrow(() -> new RuntimeException("The world was lost in perstistence."));
         log.info("current coordinates from memory are: " + newWorld.getCoordinates().size());
         log.info("current coordinates from memory are: " + persistentWorld.getCoordinates().size());
     }
 
     private Boolean addActiveWorldFromMemory(Long id) {
-        if (worldRepositoryInMemory.existsById(id)) {
+        if (worldRepository.existsById(id)) {
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
                 log.info("The requested world " + id + " is now active.");
@@ -172,7 +171,7 @@ public class WorldService {
         } else {
             log.warn("The world " + id + " does not exist in the persistence context. A new world is going to be created. Large worlds take a while being generated.");
             World world = mapManager.createWorld();
-            worldRepositoryInMemory.save(world);
+            worldRepository.save(world);
             log.info("Created a new world! Number: " + world.getId());
             activeWorldIds.add(id);
             return true;

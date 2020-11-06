@@ -2,7 +2,7 @@ package com.watchers.manager;
 
 import com.watchers.model.WorldSetting;
 import com.watchers.model.WorldStatusEnum;
-import com.watchers.repository.inmemory.WorldSettingsRepositoryInMemory;
+import com.watchers.repository.WorldSettingsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,94 +16,94 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class WorldSettingManager {
 
-    private WorldSettingsRepositoryInMemory worldSettingsRepositoryInMemory;
+    private WorldSettingsRepository worldSettingsRepository;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void changeContinentalSetting(Long worldId, boolean newValue){
-        Optional<WorldSetting> optionalWorldSetting =  worldSettingsRepositoryInMemory.findById(worldId);
+        Optional<WorldSetting> optionalWorldSetting =  worldSettingsRepository.findById(worldId);
         if(optionalWorldSetting.isPresent()){
             WorldSetting worldSetting = optionalWorldSetting.get();
             worldSetting.setNeedsContinentalShift(newValue);
-            worldSettingsRepositoryInMemory.saveAndFlush(worldSetting);
+            worldSettingsRepository.saveAndFlush(worldSetting);
         }
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public List<Long> getAllWaitingWorldSettings() {
-        return worldSettingsRepositoryInMemory.findAll().stream()
+        return worldSettingsRepository.findAll().stream()
                 .filter(worldSetting -> worldSetting.getWorldStatusEnum().equals(WorldStatusEnum.WAITING))
                 .map(WorldSetting::getWorldId)
                 .collect(Collectors.toList());
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void setWorldInProgress(Long worldId) {
-        Optional<WorldSetting> optionalWorldSetting = worldSettingsRepositoryInMemory.findById(worldId);
+        Optional<WorldSetting> optionalWorldSetting = worldSettingsRepository.findById(worldId);
         if(optionalWorldSetting.isPresent()) {
             WorldSetting worldSetting = optionalWorldSetting.get();
             worldSetting.setWorldStatusEnum(WorldStatusEnum.IN_PROGRESS);
-            worldSettingsRepositoryInMemory.save(worldSetting);
-            worldSettingsRepositoryInMemory.flush();
+            worldSettingsRepository.save(worldSetting);
+            worldSettingsRepository.flush();
         }
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void setWorldInWaiting(Long worldId) {
-        Optional<WorldSetting> optionalWorldSetting = worldSettingsRepositoryInMemory.findById(worldId);
+        Optional<WorldSetting> optionalWorldSetting = worldSettingsRepository.findById(worldId);
         if(optionalWorldSetting.isPresent()) {
             WorldSetting worldSetting = optionalWorldSetting.get();
             worldSetting.setWorldStatusEnum(WorldStatusEnum.WAITING);
-            worldSettingsRepositoryInMemory.save(worldSetting);
-            worldSettingsRepositoryInMemory.flush();
+            worldSettingsRepository.save(worldSetting);
+            worldSettingsRepository.flush();
         }
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void queInTurn() {
-        worldSettingsRepositoryInMemory.findAll()
+        worldSettingsRepository.findAll()
                 .forEach(worldSetting -> {
                             worldSetting.setNeedsProcessing(true);
-                            worldSettingsRepositoryInMemory.save(worldSetting);
+                            worldSettingsRepository.save(worldSetting);
                         }
                 );
-        worldSettingsRepositoryInMemory.flush();
+        worldSettingsRepository.flush();
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void queInSave() {
-        worldSettingsRepositoryInMemory.findAll()
+        worldSettingsRepository.findAll()
                 .forEach(worldSetting -> {
                             worldSetting.setNeedsSaving(true);
-                            worldSettingsRepositoryInMemory.save(worldSetting);
+                            worldSettingsRepository.save(worldSetting);
                         }
                 );
-        worldSettingsRepositoryInMemory.flush();
+        worldSettingsRepository.flush();
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void queInContinentalshift() {
-        worldSettingsRepositoryInMemory.findAll()
+        worldSettingsRepository.findAll()
                 .forEach(worldSetting -> {
                             worldSetting.setNeedsContinentalShift(true);
-                            worldSettingsRepositoryInMemory.save(worldSetting);
+                            worldSettingsRepository.save(worldSetting);
                         }
                 );
-        worldSettingsRepositoryInMemory.flush();
+        worldSettingsRepository.flush();
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public WorldSetting getWorldSetting(Long worldId) {
-        WorldSetting worldSetting = worldSettingsRepositoryInMemory.getOne(worldId);
+        WorldSetting worldSetting = worldSettingsRepository.getOne(worldId);
         Assert.notNull(worldSetting.getWorldId(), "The worldId was null.");
         Assert.notNull(worldSetting.getWorldStatusEnum(), "The worldStatusEnum was null");
         return worldSetting;
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift, long heigtDivider, int minimumContinents) {
         WorldSetting worldSetting = new WorldSetting(worldId, worldStatusEnum, needsProcessing, needsSaving, needsContinentalshift, heigtDivider, minimumContinents);
-        worldSettingsRepositoryInMemory.save(worldSetting);
-        worldSettingsRepositoryInMemory.flush();
+        worldSettingsRepository.save(worldSetting);
+        worldSettingsRepository.flush();
     }
 
 }

@@ -8,7 +8,7 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,17 +24,17 @@ class ContinentalDriftPredicterTest {
     private World world;
     private ContinentalDriftPredicter continentalDriftPredicter;
     private ContinentalDriftTaskDto taskDto;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
 
     @BeforeEach
     void setUp() {
         world = TestableWorld.createWorld();
-        worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
+        worldRepository = Mockito.mock(WorldRepository.class);
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
+        continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepository);
 
-        Mockito.when(worldRepositoryInMemory.findById(world.getId())).thenReturn(Optional.of(world));
+        Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
     }
 
@@ -49,7 +49,7 @@ class ContinentalDriftPredicterTest {
 
         taskDto.setNewTileLayout(new HashMap<>());
 
-        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
 
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
@@ -102,7 +102,7 @@ class ContinentalDriftPredicterTest {
 
         taskDto.setNewTileLayout(new HashMap<>());
 
-        Mockito.when(worldRepositoryInMemory.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
 
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();

@@ -10,7 +10,7 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,14 +33,14 @@ class ContinentalDriftWorldAdjusterTest {
         this.world = TestableWorld.createWorld();
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
         settingConfiguration.setContinentalContinentWeight(1);
-        WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
+        WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
         CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepositoryInMemory, settingConfiguration);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepositoryInMemory, null, settingConfiguration);
+        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepository, settingConfiguration);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepository);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepository);
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, null, settingConfiguration);
 
-        Mockito.when(worldRepositoryInMemory.findById(world.getId())).thenReturn(Optional.of(world));
+        Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
 
         continentalDriftPredicter.process(taskDto);

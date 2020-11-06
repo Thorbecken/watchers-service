@@ -3,7 +3,7 @@ package com.watchers.components.cleaners;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class ContinentAfterCleaner {
 
-    private final WorldRepositoryInMemory worldRepositoryInMemory;
+    private final WorldRepository worldRepository;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto dto) {
         if (dto.getGetRemovedContinents().size() > 0) {
-            World world = worldRepositoryInMemory.findById(dto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
+            World world = worldRepository.findById(dto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
 
             Long lastId = world.getLastContinentInFlux();
 
@@ -29,7 +29,7 @@ public class ContinentAfterCleaner {
                 world.setLastContinentInFlux(newLastContinentInFlux);
             }
 
-            worldRepositoryInMemory.save(world);
+            worldRepository.save(world);
         }
     }
 }

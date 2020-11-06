@@ -4,7 +4,7 @@ import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 @Component
 public class ContinentalCorrector {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
-    public ContinentalCorrector(WorldRepositoryInMemory worldRepositoryInMemory) {
-        this.worldRepositoryInMemory = worldRepositoryInMemory;
+    public ContinentalCorrector(WorldRepository worldRepository) {
+        this.worldRepository = worldRepository;
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto driftTaskDto) {
-        World world = worldRepositoryInMemory.findById(driftTaskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(driftTaskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Assert.notNull(world, "World is not found!");
 
         world.getCoordinates().forEach(
@@ -53,7 +53,7 @@ public class ContinentalCorrector {
                 }
         );
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
     public static <T> T mostCommon(List<T> list) {

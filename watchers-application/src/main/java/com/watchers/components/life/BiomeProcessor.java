@@ -5,7 +5,7 @@ import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class BiomeProcessor {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(WorldTaskDto taskDto){
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
         log.debug("There is currently " + world.getCoordinates().stream().map(Coordinate::getTile)
                 .map(Tile::getBiome)
                 .map(Biome::getCurrentFood)
@@ -36,6 +36,6 @@ public class BiomeProcessor {
                 worldTile -> worldTile.getBiome().processParallelTask()
         );
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 }

@@ -4,7 +4,7 @@ import com.watchers.model.actor.Actor;
 import com.watchers.model.actor.StateType;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,11 +18,11 @@ import java.util.List;
 @AllArgsConstructor
 public class ActorProcessor {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(WorldTaskDto taskDto){
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(()-> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(()-> new RuntimeException("The world was lost in memory."));
 
         log.debug(world.getActorList().size() + " Actors at the start of this turn");
         log.debug(world.getActorList().stream()
@@ -37,6 +37,6 @@ public class ActorProcessor {
             currentActors.forEach(Actor::processSerialTask);
         }
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 }

@@ -6,7 +6,7 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Continent;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,20 +17,20 @@ import java.util.Map;
 @Component
 public class ContinentalDriftPredicter {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
     private CoordinateHelper coordinateHelper;
 
-    public ContinentalDriftPredicter(CoordinateHelper coordinateHelper, WorldRepositoryInMemory worldRepositoryInMemory){
+    public ContinentalDriftPredicter(CoordinateHelper coordinateHelper, WorldRepository worldRepository){
         this.coordinateHelper = coordinateHelper;
-        this.worldRepositoryInMemory = worldRepositoryInMemory;
+        this.worldRepository = worldRepository;
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto taskDto){
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         createButtomLayer(taskDto, world);
         world.getContinents().forEach(continent -> predictContinentalMovement(continent, taskDto.getNewTileLayout()));
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
     private void predictContinentalMovement(Continent continent, Map<Coordinate, List<Tile>> newTileLayout){
