@@ -54,8 +54,8 @@ public class ErosionAdjuster {
         });
 
         erosionMap.forEach((Coordinate coordiante, Long aLong) -> {
-                    long currentHeight = world.getTile(coordiante).getHeight();
-                    world.getTile(coordiante).setHeight(currentHeight + aLong);
+                    long currentHeight = world.getCoordinate(coordiante.getXCoord(), coordiante.getYCoord()).getTile().getHeight();
+                    world.getCoordinate(coordiante.getXCoord(), coordiante.getYCoord()).getTile().setHeight(currentHeight + aLong);
                 }
         );
 

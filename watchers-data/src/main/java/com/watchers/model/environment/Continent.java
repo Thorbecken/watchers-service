@@ -59,6 +59,7 @@ public class Continent {
      * @return the continent which direction has been changed on the x and y axis.
      * These can be possitive or negative (left, right, up down).
      */
+    @JsonIgnore
     public Continent assignNewDriftDirection(int driftVelocity, World world){
         if(this.direction == null) {
             int xVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
@@ -89,6 +90,7 @@ public class Continent {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return "Continent{" +
                 "id=" + id +
@@ -99,6 +101,7 @@ public class Continent {
                 '}';
     }
 
+    @JsonIgnore
     public Continent createClone(World newWorld) {
         Continent clone = new Continent();
         clone.setId(this.id);

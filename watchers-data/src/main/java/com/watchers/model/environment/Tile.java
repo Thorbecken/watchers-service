@@ -70,7 +70,7 @@ public class Tile {
     public List<Tile> getNeighbours() {
         List<Tile> returnTiles = new ArrayList<>();
         coordinate.getNeighbours().forEach(
-                coordinate -> returnTiles.add(coordinate.getWorld().getTile(coordinate.getXCoord(), coordinate.getYCoord()))
+                coordinate -> returnTiles.add(coordinate.getWorld().getCoordinate(coordinate.getXCoord(), coordinate.getYCoord()).getTile())
         );
 
         return returnTiles;
@@ -139,6 +139,7 @@ public class Tile {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return "Tile{" +
                 "coordinate=" + coordinate.toString() +

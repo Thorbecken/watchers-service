@@ -40,6 +40,7 @@ public class Direction {
         this.yVelocity = yVelocity;
     }
 
+    @JsonIgnore
     public Direction createClone() {
         Direction clone = new Direction();
         clone.setId(this.id);

@@ -24,11 +24,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Entity
@@ -38,7 +34,6 @@ import java.util.Set;
 public class Coordinate {
 
     @Id
-    @JsonIgnore
     @GeneratedValue(generator="Coordinate_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "coordinate_id", nullable = false)
     private Long id;
@@ -147,6 +142,7 @@ public class Coordinate {
         }
     }
 
+    @JsonIgnore
     public Coordinate calculateDistantCoordinate(int xVelocity, int yVelocity) {
         long newX = this.getXCoordinateFromTile(xVelocity);
         long newY = this.getYCoordinateFromTile(yVelocity);
@@ -224,6 +220,7 @@ public class Coordinate {
     }
 
     @Override
+    @JsonIgnore
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Coordinate)) return false;
@@ -233,12 +230,14 @@ public class Coordinate {
     }
 
     @Override
+    @JsonIgnore
     public int hashCode() {
         String string = xCoord + "," + yCoord;
         return string.hashCode();
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return "Coordinate{" +
                 "xCoord=" + xCoord +
@@ -246,7 +245,7 @@ public class Coordinate {
                 '}';
     }
 
-    public Coordinate createBasicClone(World newWorld) {
+    public Coordinate createClone(World newWorld) {
         Coordinate clone = new Coordinate();
         clone.setId(this.id);
         clone.setWorld(newWorld);
@@ -255,6 +254,7 @@ public class Coordinate {
         clone.setContinent(newWorld.getContinents().stream()
                 .filter(oldContinent -> oldContinent.getId().equals(this.continent.getId()))
                 .findFirst().get());
+        clone.setTile(tile.createClone(clone));
 
         return clone;
     }

@@ -106,4 +106,13 @@ public class WorldSettingManager {
         worldSettingsRepository.flush();
     }
 
+    @Transactional
+    public void changeSaveSetting(Long worldId, boolean newValue){
+        Optional<WorldSetting> optionalWorldSetting =  worldSettingsRepository.findById(worldId);
+        if(optionalWorldSetting.isPresent()){
+            WorldSetting worldSetting = optionalWorldSetting.get();
+            worldSetting.setNeedsSaving(newValue);
+            worldSettingsRepository.saveAndFlush(worldSetting);
+        }
+    }
 }

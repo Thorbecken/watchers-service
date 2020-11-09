@@ -1,6 +1,10 @@
 package com.watchers.model.actor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.watchers.model.actor.animals.Rabbit;
+import com.watchers.model.actor.animals.Whale;
 import com.watchers.model.common.Coordinate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,6 +22,14 @@ import java.util.Optional;
 @Table(name = "animal")
 @EqualsAndHashCode(callSuper=true)
 @SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Rabbit.class, name = "rabbit"),
+        @JsonSubTypes.Type(value = Whale.class, name = "whale")
+})
 public abstract class Animal extends Actor {
 
     @Id
@@ -108,6 +120,7 @@ public abstract class Animal extends Actor {
         super.setId(id);
     }
 
+    @JsonIgnore
     public Animal cloneBasis(Animal clone, Coordinate newCoordinate){
         clone.setId(this.getId());
         clone.setSuperId(this.getId());

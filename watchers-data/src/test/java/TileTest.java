@@ -31,7 +31,7 @@ class TileTest {
     @SuppressWarnings("all")
     @CsvSource({"1,1", "1,2", "1,3", "2,1", "2,2", "2,3", "3,1", "3,3", "3,3"})
     void getNeighbours(long x, long y) {
-        Tile tile = world.getTile(x,y);
+        Tile tile = world.getCoordinate(x,y).getTile();
         List<Tile> neighbours = tile.getNeighbours();
 
         assertEquals(4, neighbours.size());

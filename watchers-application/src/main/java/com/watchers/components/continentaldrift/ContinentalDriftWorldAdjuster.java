@@ -68,7 +68,7 @@ public class ContinentalDriftWorldAdjuster {
 
     private void createFreshTile(ContinentalChangesDto dto, long newHeight, World world) {
         Continent assignedContinent = dto.getNewMockContinent().getContinent();
-        Tile tile = world.getTile(dto.getKey());
+        Tile tile = world.getCoordinate(dto.getKey().getXCoord(), dto.getKey().getYCoord()).getTile();
         tile.clear();
         tile.getCoordinate().setContinent(assignedContinent);
         assignedContinent.getCoordinates().add(dto.getKey());
@@ -82,7 +82,7 @@ public class ContinentalDriftWorldAdjuster {
     }
 
     private void ChangeTileOfCoordinate(ContinentalChangesDto dto, World world) {
-        Tile tile = world.getTile(dto.getKey());
+        Tile tile = world.getCoordinate(dto.getKey().getXCoord(), dto.getKey().getYCoord()).getTile();
         tile.clear();
         tile.setData(dto.getMockTile());
     }

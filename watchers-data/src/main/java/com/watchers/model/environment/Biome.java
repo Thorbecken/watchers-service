@@ -55,6 +55,7 @@ public class Biome implements ParallelTask {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return "Biome{" +
                 "currentFood=" + currentFood +

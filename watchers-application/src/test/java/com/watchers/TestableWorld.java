@@ -66,6 +66,8 @@ public class TestableWorld {
 
     public static SettingConfiguration createConfiguration() {
         return new SettingConfiguration(
+                null,
+
                 false,
                 1,
                 10,

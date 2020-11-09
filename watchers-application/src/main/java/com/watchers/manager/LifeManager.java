@@ -33,7 +33,7 @@ public class LifeManager {
     @Transactional
     public void seedLife(Long worldId, Long xCoord, Long yCoord) {
         World world = worldRepository.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
-        Tile seedingTile = world.getTile(xCoord, yCoord);
+        Tile seedingTile = world.getCoordinate(xCoord, yCoord).getTile();
         AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
         seedingTile.getCoordinate().getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile.getCoordinate()));
         worldRepository.save(world);

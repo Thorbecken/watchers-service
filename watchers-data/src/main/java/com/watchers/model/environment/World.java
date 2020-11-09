@@ -33,7 +33,6 @@ import java.util.Set;
 public class World {
 
     @Id
-    @JsonIgnore
     @SequenceGenerator(name="World_Gen", sequenceName="World_Seq", allocationSize = 1)
     @GeneratedValue(generator="World_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "world_id")
@@ -44,11 +43,11 @@ public class World {
     private Long ySize;
 
     @JsonProperty("coordinates")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("continents")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents = new HashSet<>();
 
     @JsonIgnore
@@ -60,10 +59,6 @@ public class World {
     @Transient
     @JsonIgnore
     private Map<Long, Map<Long, Coordinate>> coordinateMap = new HashMap<>();
-
-    @Transient
-    @JsonIgnore
-    private Map<Long, Map<Long, Tile>> tileMap = new HashMap<>();
 
     @Transient
     @JsonIgnore
@@ -90,42 +85,12 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
     }
 
     @JsonIgnore
-    public Tile getTile(Long x, Long y){
-        if(tileMap == null || tileMap.isEmpty()){
-            setTileMap();
-        }
-
-        return tileMap.get(x).get(y);
-    }
-
-    @JsonIgnore
-    public Tile getTile(Coordinate coordinate){
-        return getTile(coordinate.getXCoord(), coordinate.getYCoord());
-    }
-
-    @JsonIgnore
     public List<Actor> getActorList(){
         if(actorList == null){
             setActorList();
         }
 
         return actorList;
-    }
-
-    private void setTileMap(){
-        tileMap = new HashMap<>();
-
-        for (int i = 1; i <= xSize; i++) {
-            final long xCoord = i;
-            Map<Long, Tile> xTileHashMap = new HashMap<>();
-            coordinates.stream()
-                    .map(Coordinate::getTile)
-                    .filter(tile -> tile.getCoordinate().getXCoord() == xCoord)
-                    .forEach(tile -> xTileHashMap.put(tile.getCoordinate().getYCoord(), tile)
-                    );
-
-            tileMap.put(xCoord,xTileHashMap);
-        }
     }
 
     private void setCoordinateMap(){
@@ -146,7 +111,6 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
     public void fillTransactionals() {
         newActors = new ArrayList<>();
         actorList = new ArrayList<>();
-        tileMap = new HashMap<>();
 
         coordinates.forEach(
                 coordinate -> actorList.addAll(coordinate.getActors())
@@ -160,15 +124,10 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
                     .forEach(
                             coordinate -> hashMap.put(coordinate.getYCoord(), coordinate.getTile())
                     );
-
-            tileMap.put(xCoord, hashMap);
         }
     }
 
     private void setActorList(){
-        if(tileMap == null || tileMap.isEmpty()){
-            setTileMap();
-        }
         actorList = new ArrayList<>();
 
         coordinates.forEach(
@@ -176,15 +135,16 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
         );
     }
 
-    public void createBasicClone(World template){
-        this.id = template.getId();
-        this.xSize = template.getXSize();
-        this.ySize = template.getYSize();
-        this.heightDeficit = template.getHeightDeficit();
-        this.lastContinentInFlux = template.getLastContinentInFlux();
+    public World createBasicClone(){
+        World newWorld = new World(this.xSize, this.ySize);
+        newWorld.setId(this.id);
+        newWorld.setHeightDeficit(this.heightDeficit);
+        newWorld.setLastContinentInFlux(this.lastContinentInFlux);
+        return newWorld;
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return "World{" +
                 "id=" + id +
