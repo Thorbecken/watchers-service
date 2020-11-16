@@ -1,7 +1,7 @@
 package com.watchers;
 
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import org.springframework.util.Assert;
 
 public class TestableContinentalDriftTaskDto {

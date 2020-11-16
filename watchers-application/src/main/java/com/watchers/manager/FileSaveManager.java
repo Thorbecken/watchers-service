@@ -2,8 +2,9 @@ package com.watchers.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchers.config.SettingConfiguration;
+import com.watchers.model.common.Views;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -54,7 +55,7 @@ public class FileSaveManager {
 
         try {
             // Writing to a file
-            mapper.writeValue(getWorldFile(id), world);
+            mapper.writerWithView(Views.Internal.class).writeValue(getWorldFile(id), world);
             log.warn("saved world " + world.getId() + " to file on director: " + getWorldFile(id) + ".");
 
         } catch (IOException e) {
@@ -69,6 +70,6 @@ public class FileSaveManager {
     private World load(@NonNull Long aLong) throws IOException {
         File file = getWorldFile(aLong.toString());
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(file, World.class);
+        return objectMapper.readerWithView(Views.Internal.class).readValue(file, World.class);
     }
 }

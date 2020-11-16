@@ -1,7 +1,7 @@
 package com.watchers.manager;
 
-import com.watchers.model.WorldSetting;
-import com.watchers.model.WorldStatusEnum;
+import com.watchers.model.world.WorldSetting;
+import com.watchers.model.enums.WorldStatusEnum;
 import com.watchers.repository.WorldSettingsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

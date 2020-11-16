@@ -1,8 +1,8 @@
 package com.watchers.components.cleaners;
 
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.Continent;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +26,7 @@ public class ContinentAfterCleaner {
             if (dto.getRemovedContinents.stream().anyMatch(id -> id.equals(lastId))) {
                 Long newLastContinentInFlux = world.getContinents().stream().map(Continent::getId).max(Long::compareTo).orElse(1L);
                 log.info("Continent " + lastId + " was deleted. The new lastContinentInFlux is: " + newLastContinentInFlux);
+                log.warn("setting last continent in flux to " + newLastContinentInFlux + " from continent cleaner");
                 world.setLastContinentInFlux(newLastContinentInFlux);
             }
 

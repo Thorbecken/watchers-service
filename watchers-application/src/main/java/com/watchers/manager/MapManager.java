@@ -3,7 +3,7 @@ package com.watchers.manager;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

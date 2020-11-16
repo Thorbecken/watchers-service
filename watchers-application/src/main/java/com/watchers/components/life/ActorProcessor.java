@@ -1,9 +1,9 @@
 package com.watchers.components.life;
 
-import com.watchers.model.actor.Actor;
-import com.watchers.model.actor.StateType;
+import com.watchers.model.actors.Actor;
+import com.watchers.model.enums.StateType;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

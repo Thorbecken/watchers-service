@@ -1,6 +1,6 @@
 package com.watchers.manager;
 
-import com.watchers.model.WorldSetting;
+import com.watchers.model.world.WorldSetting;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.service.WorldService;

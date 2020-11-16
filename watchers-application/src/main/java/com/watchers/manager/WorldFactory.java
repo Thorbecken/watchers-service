@@ -2,8 +2,12 @@ package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.config.SettingConfiguration;
+import com.watchers.model.dto.MockContinent;
+import com.watchers.model.dto.WorldFactoryDTO;
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.*;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.Continent;
+import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.random.RandomDataGenerator;

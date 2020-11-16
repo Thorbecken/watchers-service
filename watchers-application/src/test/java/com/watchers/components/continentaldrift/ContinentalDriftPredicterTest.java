@@ -5,9 +5,9 @@ import com.watchers.TestableWorld;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.Continent;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -31,8 +31,7 @@ class ContinentalDriftPredicterTest {
     void setUp() {
         world = TestableWorld.createWorld();
         worldRepository = Mockito.mock(WorldRepository.class);
-        CoordinateHelper coordinateHelper = new CoordinateHelper();
-        continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepository);
+        continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);

@@ -1,7 +1,6 @@
 package com.watchers.model.dto;
 
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.MockContinent;
 import lombok.Data;
 
 @Data

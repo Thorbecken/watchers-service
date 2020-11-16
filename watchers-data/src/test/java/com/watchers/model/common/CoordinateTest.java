@@ -1,8 +1,8 @@
 package com.watchers.model.common;
 
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.Continent;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.World;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

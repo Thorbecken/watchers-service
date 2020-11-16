@@ -1,8 +1,8 @@
-package com.watchers.model.actor.animals;
+package com.watchers.model.actors.animals;
 
+import com.watchers.model.actors.Animal;
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.actor.Animal;
-import com.watchers.model.actor.AnimalType;
+import com.watchers.model.enums.AnimalType;
 
 public class AnimalFactory {
 

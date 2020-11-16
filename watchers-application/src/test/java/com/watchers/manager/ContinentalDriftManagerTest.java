@@ -5,7 +5,7 @@ import com.watchers.components.continentaldrift.*;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import com.watchers.repository.WorldSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,14 +25,13 @@ class ContinentalDriftManagerTest {
         WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
         WorldSettingsRepository worldSettingsRepository = Mockito.mock(WorldSettingsRepository.class);
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
-        CoordinateHelper coordinateHelper = new CoordinateHelper();
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepository);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
         ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository, settingConfiguration);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepository);
-        ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepository, settingConfiguration);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
+        ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(worldRepository, settingConfiguration);
         ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, continentalDriftDirectionChanger, settingConfiguration);
         TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60, worldRepository);
-        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(coordinateHelper, worldRepository, settingConfiguration);
+        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(worldRepository, settingConfiguration);
         ContinentalCorrector continentalCorrector = new ContinentalCorrector(worldRepository);
         WorldSettingManager worldSettingManager = new WorldSettingManager(worldSettingsRepository);
 

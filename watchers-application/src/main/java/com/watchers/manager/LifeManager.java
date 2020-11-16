@@ -2,13 +2,13 @@ package com.watchers.manager;
 
 import com.watchers.components.life.ActorProcessor;
 import com.watchers.components.life.BiomeProcessor;
-import com.watchers.model.actor.AnimalType;
-import com.watchers.model.actor.animals.AnimalFactory;
+import com.watchers.model.enums.AnimalType;
+import com.watchers.model.actors.animals.AnimalFactory;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

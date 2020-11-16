@@ -1,6 +1,7 @@
 package com.watchers.model.common;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,17 +22,18 @@ import javax.persistence.Table;
 public class Direction {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
+    @JsonProperty("directionId")
     @SequenceGenerator(name="Direction_Gen", sequenceName="Direction_Seq", allocationSize = 1)
     @GeneratedValue(generator="Direction_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "direction_id")
     private Long id;
 
-    @JsonIgnore
+    @JsonView(Views.Public.class)
     @Column(name = "x_velocity")
     private int xVelocity;
 
-    @JsonIgnore
+    @JsonView(Views.Public.class)
     @Column(name = "y_velocity")
     private int yVelocity;
 
@@ -40,7 +42,6 @@ public class Direction {
         this.yVelocity = yVelocity;
     }
 
-    @JsonIgnore
     public Direction createClone() {
         Direction clone = new Direction();
         clone.setId(this.id);

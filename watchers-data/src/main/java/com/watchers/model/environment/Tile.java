@@ -1,10 +1,11 @@
 package com.watchers.model.environment;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
+import com.watchers.model.common.Views;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.common.Coordinate;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.Continent;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -17,7 +18,8 @@ import java.util.*;
 public class Tile {
 
     @Id
-    @JsonIgnore
+    @JsonProperty("tileId")
+    @JsonView(Views.Internal.class)
     @GeneratedValue(generator="Tile_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "tile_id", nullable = false)
     private Long id;
@@ -28,15 +30,18 @@ public class Tile {
 
     @JsonProperty("height")
     @Column(name = "height")
+    @JsonView(Views.Public.class)
     private long height;
 
     @JsonProperty("biome")
+    @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL, orphanRemoval = true)
     private Biome biome;
 
 
     @JsonProperty("surfaceType")
     @Column(name = "surfaceType")
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private SurfaceType surfaceType;
 
@@ -139,7 +144,6 @@ public class Tile {
     }
 
     @Override
-    @JsonIgnore
     public String toString() {
         return "Tile{" +
                 "coordinate=" + coordinate.toString() +
@@ -149,16 +153,6 @@ public class Tile {
     }
 
     public Tile createClone(Coordinate newCoordinate) {
-        Tile clone = new Tile();
-        clone.setSurfaceType(this.surfaceType);
-        clone.setCoordinate(newCoordinate);
-        clone.setHeight(this.height);
-        clone.setId(this.id);
-        clone.setBiome(this.biome.createClone(clone));
-        return clone;
-    }
-
-    public Tile createBasicClone(Coordinate newCoordinate) {
         Tile clone = new Tile();
         clone.setSurfaceType(this.surfaceType);
         clone.setCoordinate(newCoordinate);

@@ -1,8 +1,7 @@
 package com.watchers.repository;
 
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.Continent;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository

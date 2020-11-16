@@ -9,7 +9,7 @@ import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,10 +34,9 @@ class ContinentalDriftWorldAdjusterTest {
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
         settingConfiguration.setContinentalContinentWeight(1);
         WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
-        CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepository, settingConfiguration);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepository);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepository);
+        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(worldRepository, settingConfiguration);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
         ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, null, settingConfiguration);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));

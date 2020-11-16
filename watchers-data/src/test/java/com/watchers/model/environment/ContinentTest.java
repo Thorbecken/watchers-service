@@ -1,9 +1,11 @@
 package com.watchers.model.environment;
 
 import com.watchers.model.common.Direction;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.Continent;
+import com.watchers.model.world.World;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

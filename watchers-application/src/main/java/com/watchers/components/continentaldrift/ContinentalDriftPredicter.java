@@ -3,10 +3,11 @@ package com.watchers.components.continentaldrift;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.Continent;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,15 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@AllArgsConstructor
 public class ContinentalDriftPredicter {
 
     private WorldRepository worldRepository;
-    private CoordinateHelper coordinateHelper;
-
-    public ContinentalDriftPredicter(CoordinateHelper coordinateHelper, WorldRepository worldRepository){
-        this.coordinateHelper = coordinateHelper;
-        this.worldRepository = worldRepository;
-    }
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto){
@@ -46,7 +42,7 @@ public class ContinentalDriftPredicter {
 
     private void createButtomLayer(ContinentalDriftTaskDto taskDto, World world) {
         Map<Coordinate,List<Tile>> map = taskDto.getNewTileLayout();
-        coordinateHelper.getAllPossibleCoordinates(world)
+        CoordinateHelper.getAllPossibleCoordinates(world)
                 .forEach(coordinate -> map.put(coordinate, new ArrayList<>()));
     }
 }

@@ -1,8 +1,8 @@
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.world.Continent;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

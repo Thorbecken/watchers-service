@@ -3,9 +3,9 @@ package com.watchers;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Direction;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.Continent;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.World;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 
@@ -108,6 +108,7 @@ public class TestableWorld {
             }
 
             @Override
+            @SuppressWarnings("all")
             public boolean acceptsProfiles(String... profiles) {
                 return false;
             }

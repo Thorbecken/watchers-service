@@ -7,7 +7,7 @@ import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +32,8 @@ class ContinentalDriftTileChangeComputerTest {
     @BeforeEach
     void setUp() {
         this.world = TestableWorld.createWorld();
-        CoordinateHelper coordinateHelper = new CoordinateHelper();
-        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepository);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepository);
+        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));

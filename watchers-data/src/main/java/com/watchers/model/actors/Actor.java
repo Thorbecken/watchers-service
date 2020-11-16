@@ -1,10 +1,11 @@
-package com.watchers.model.actor;
+package com.watchers.model.actors;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.watchers.model.SerialTask;
+import com.fasterxml.jackson.annotation.*;
+import com.watchers.model.interfaces.SerialTask;
 import com.watchers.model.common.Coordinate;
+import com.watchers.model.common.Views;
+import com.watchers.model.enums.NaturalHabitat;
+import com.watchers.model.enums.StateType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,21 +26,29 @@ import javax.persistence.*;
 public abstract class Actor implements SerialTask {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
+    @JsonProperty("actorId")
     @SequenceGenerator(name="Actor_Gen", sequenceName="Actor_Seq", allocationSize = 1)
     @GeneratedValue(generator="Actor_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "actor_id")
     private Long id;
 
+    @ManyToOne
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @ManyToOne
     private Coordinate coordinate;
 
 
+    @JsonProperty("statusType")
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "status_type")
     private StateType stateType;
+
+    @JsonProperty("naturalHabitat")
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "natural_habitat")
     private NaturalHabitat naturalHabitat;
 
     public void setCoordinate(Coordinate coordinate) {

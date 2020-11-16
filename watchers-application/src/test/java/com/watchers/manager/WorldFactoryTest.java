@@ -3,7 +3,7 @@ package com.watchers.manager;
 import com.watchers.TestableWorld;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;

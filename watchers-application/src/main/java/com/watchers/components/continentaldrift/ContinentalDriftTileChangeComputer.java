@@ -7,8 +7,9 @@ import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,15 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@AllArgsConstructor
 public class ContinentalDriftTileChangeComputer {
 
     private WorldRepository worldRepository;
-    private CoordinateHelper coordinateHelper;
-
-    public ContinentalDriftTileChangeComputer(CoordinateHelper coordinateHelper, WorldRepository worldRepository){
-        this.coordinateHelper = coordinateHelper;
-        this.worldRepository = worldRepository;
-    }
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -32,7 +28,7 @@ public class ContinentalDriftTileChangeComputer {
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
-        coordinateHelper.getAllPossibleCoordinates(world)
+        CoordinateHelper.getAllPossibleCoordinates(world)
                 .forEach( coordinate -> {
                     List<Tile> tiles = newTileLayout.get(coordinate);
                     if(tiles == null){

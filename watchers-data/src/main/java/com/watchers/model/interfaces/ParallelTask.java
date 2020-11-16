@@ -1,4 +1,4 @@
-package com.watchers.model;
+package com.watchers.model.interfaces;
 
 public interface ParallelTask {
 

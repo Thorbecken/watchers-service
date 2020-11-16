@@ -5,10 +5,10 @@ import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.world.Continent;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,6 @@ import java.util.*;
 @AllArgsConstructor
 public class ContinentalDriftWorldAdjuster {
 
-    private CoordinateHelper coordinateHelper;
     private WorldRepository worldRepository;
     private SettingConfiguration settingConfiguration;
 
@@ -31,7 +30,7 @@ public class ContinentalDriftWorldAdjuster {
 
         long newHeight = calculateNewHeight(world, changes);
 
-        coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
+        CoordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
                     ContinentalChangesDto dto = changes.get(coordinate);
                     if(dto.isEmpty()) {
                         createFreshTile(dto, newHeight, world);

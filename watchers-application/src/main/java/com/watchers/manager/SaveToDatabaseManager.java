@@ -1,10 +1,10 @@
 package com.watchers.manager;
 
 import com.mchange.util.AssertException;
-import com.watchers.model.actor.Actor;
+import com.watchers.model.actors.Actor;
 import com.watchers.model.common.Coordinate;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.Continent;
+import com.watchers.model.world.World;
 import com.watchers.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +27,25 @@ public class SaveToDatabaseManager {
 
     public void complexSaveToMemory(World persistentWorld) {
         adjustAndMergeContinents(persistentWorld);
+        adjustAndMergeActors(persistentWorld);
 
         Long newWorldId = saveBasicWorld(persistentWorld);
         saveContinents(newWorldId, persistentWorld);
         saveCoordinates(newWorldId, persistentWorld);
         saveActors(newWorldId, persistentWorld);
+    }
+
+    /**
+     * This method changes the ids of the actors since these need to be ordered from 1 upwards for being able to be
+     * processed by Hibernate
+     * @param persistentWorld the world that is provided from a persistent source
+     */
+    private void adjustAndMergeActors(World persistentWorld) {
+        List<Actor> actors = persistentWorld.getActorList();
+        actors.sort(Comparator.comparing(Actor::getId));
+        for (int i = 1; i <= actors.size(); i++) {
+            actors.get(i-1).setId((long) i);
+        }
     }
 
     /**
@@ -57,6 +71,10 @@ public class SaveToDatabaseManager {
                 forEach(
                         coordinate -> coordinate.setContinent(continentMapping.get(coordinate.getContinent().getId()))
                 );
+
+        if (continentMapping.keySet().contains(persistentWorld.getLastContinentInFlux())){
+            persistentWorld.setLastContinentInFlux(continentMapping.get(persistentWorld.getLastContinentInFlux()).getId());
+        }
     }
 
     @Transactional
@@ -69,6 +87,7 @@ public class SaveToDatabaseManager {
                 .map(Coordinate::getActors)
                 .flatMap(Collection::stream)
                 .map(actor -> actor.createClone(newWorld.getCoordinate(actor.getCoordinate().getXCoord(), actor.getCoordinate().getYCoord())))
+                .sorted(Comparator.comparing(Actor::getId))
                 .collect(Collectors.toList());
         actors.forEach(actor -> actor.getCoordinate().getActors().add(actor));
         log.info(actors.size() + " " + Arrays.toString(actors.stream().map(Actor::getId).toArray()));
@@ -82,6 +101,7 @@ public class SaveToDatabaseManager {
         World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
         List<Coordinate> coordinates = persistentWorld.getCoordinates().stream()
                 .map(coordinate -> coordinate.createClone(newWorld))
+                .sorted(Comparator.comparing(Coordinate::getId))
                 .collect(Collectors.toList());
         newWorld.getCoordinates().addAll(coordinates);
         log.info("Current coordinates in memory: " + coordinates.size() + " " + Arrays.toString(coordinates.stream().map(Coordinate::getId).toArray()));
@@ -94,6 +114,7 @@ public class SaveToDatabaseManager {
         World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
         List<Continent> continents = persistentWorld.getContinents().stream()
                 .map(continent -> continent.createClone(newWorld))
+                .sorted(Comparator.comparing(Continent::getId))
                 .collect(Collectors.toList());
         newWorld.getContinents().addAll(continents);
         log.info("Current continents in memory: " + continents.size() + " " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));

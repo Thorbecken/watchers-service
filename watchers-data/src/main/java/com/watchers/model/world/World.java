@@ -1,10 +1,13 @@
-package com.watchers.model.environment;
+package com.watchers.model.world;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.watchers.model.actor.Actor;
+import com.watchers.model.actors.Actor;
 import com.watchers.model.common.Coordinate;
+import com.watchers.model.common.Views;
+import com.watchers.model.environment.Tile;
 import lombok.Data;
 
 import javax.persistence.CascadeType;
@@ -33,27 +36,41 @@ import java.util.Set;
 public class World {
 
     @Id
+    @JsonProperty("worldId")
+    @JsonView(Views.Internal.class)
     @SequenceGenerator(name="World_Gen", sequenceName="World_Seq", allocationSize = 1)
     @GeneratedValue(generator="World_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "world_id")
     private Long id;
 
+    @JsonProperty("xSize")
+    @Column(name = "x_size")
+    @JsonView(Views.Public.class)
     private Long xSize;
 
+    @JsonProperty("ySize")
+    @Column(name = "y_size")
+    @JsonView(Views.Public.class)
     private Long ySize;
 
     @JsonProperty("coordinates")
+    @JsonView(Views.Public.class)
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("continents")
+    @JsonView(Views.Public.class)
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents = new HashSet<>();
 
-    @JsonIgnore
+    @JsonProperty("lastContinentInFlux")
+    @JsonView(Views.Internal.class)
+    @Column(name = "last_continent_in_flux")
     private long lastContinentInFlux;
 
-    @JsonIgnore
+    @JsonProperty("heightDeficit")
+    @JsonView(Views.Internal.class)
+    @Column(name = "current_height_deficit")
     private long heightDeficit;
 
     @Transient
@@ -77,7 +94,8 @@ public class World {
     @SuppressWarnings("unused")
     public World(){}
 
-public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
+    @JsonIgnore
+    public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
         if(coordinateMap == null || coordinateMap.isEmpty()){
                 setCoordinateMap();
         }
@@ -144,7 +162,6 @@ public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
     }
 
     @Override
-    @JsonIgnore
     public String toString() {
         return "World{" +
                 "id=" + id +

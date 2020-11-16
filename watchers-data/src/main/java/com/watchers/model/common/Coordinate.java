@@ -1,13 +1,11 @@
 package com.watchers.model.common;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.World;
-import com.watchers.model.actor.Actor;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.World;
+import com.watchers.model.actors.Actor;
+import com.watchers.model.world.Continent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -34,6 +32,8 @@ import java.util.*;
 public class Coordinate {
 
     @Id
+    @JsonView(Views.Internal.class)
+    @JsonProperty("coordinateId")
     @GeneratedValue(generator="Coordinate_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "coordinate_id", nullable = false)
     private Long id;
@@ -45,20 +45,25 @@ public class Coordinate {
 
     @JsonProperty("xCoord")
     @Column(name = "xCoord")
+    @JsonView(Views.Public.class)
     private long xCoord;
 
     @JsonProperty("yCoord")
     @Column(name = "yCoord")
+    @JsonView(Views.Public.class)
     private long yCoord;
 
     @JsonProperty("tile")
+    @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Tile tile;
 
     @JsonProperty("actors")
+    @JsonView(Views.Public.class)
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<Actor> actors = new HashSet<>();
 
+    @JsonView(Views.Public.class)
     @JsonIgnoreProperties({"world", "coordinates", "type" })
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
@@ -220,7 +225,6 @@ public class Coordinate {
     }
 
     @Override
-    @JsonIgnore
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Coordinate)) return false;
@@ -230,14 +234,12 @@ public class Coordinate {
     }
 
     @Override
-    @JsonIgnore
     public int hashCode() {
         String string = xCoord + "," + yCoord;
         return string.hashCode();
     }
 
     @Override
-    @JsonIgnore
     public String toString() {
         return "Coordinate{" +
                 "xCoord=" + xCoord +

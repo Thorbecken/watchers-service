@@ -2,9 +2,10 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.Continent;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -13,13 +14,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@AllArgsConstructor
 public class ContinentalCorrector {
 
     private WorldRepository worldRepository;
-
-    public ContinentalCorrector(WorldRepository worldRepository) {
-        this.worldRepository = worldRepository;
-    }
 
     @Transactional
     public void process(ContinentalDriftTaskDto driftTaskDto) {

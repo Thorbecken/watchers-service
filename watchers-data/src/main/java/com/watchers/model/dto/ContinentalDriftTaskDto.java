@@ -1,6 +1,6 @@
 package com.watchers.model.dto;
 
-import com.watchers.model.WorldSetting;
+import com.watchers.model.world.WorldSetting;
 import com.watchers.model.common.Coordinate;
 import com.watchers.model.environment.Tile;
 import lombok.Data;

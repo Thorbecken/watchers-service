@@ -2,8 +2,8 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableWorld;
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.World;
+import com.watchers.model.world.Continent;
+import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
