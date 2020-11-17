@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+    watchers-service:
+        image: bitnami/java:13.0.2
+        container_name: watchers-service-0.0.2-rc5
+        restart: unless-stopped
+        working_dir: /app
+        command: "java -jar watchers-application-0.0.2-SNAPSHOT.jar"
+        volumes:
+          - ./app:/app
+        ports:
+          - 8080:8080
+        environment:
+          - WATCHERS_SAVE_PATH:/tmp
+
+# c:\watchers\docker-compose.yml
+# c:\watchers\app\thewatchers.jar
+# ga naar c:\watchers\
+# docker-compose up -d
+# of
+# docker-compose up
+# ^--  dan kun je live meekijken wat er gebeurt, maar als je afsluit stop het proces
