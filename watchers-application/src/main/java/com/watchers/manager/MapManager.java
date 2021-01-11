@@ -43,7 +43,7 @@ public class MapManager {
                world.fillTransactionals();
            }
 
-           Assert.isTrue(world.getCoordinates().size() == world.getXSize() * world.getYSize(), "coordinates were " + world.getCoordinates().size());
+           Assert.isTrue(world.getCoordinates().size() == world.getXSize() * world.getYSize(), "Coordinate size was expected to be " + world.getXSize() * world.getYSize() + ", but were " + world.getCoordinates().size());
            return world;
        } else {
            return null;

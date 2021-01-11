@@ -15,7 +15,7 @@ class CoordinateTest {
     void testCalculation(){
         World world = new World(58, 28);
 
-        Coordinate coordinate = CoordinateFactory.createCoordinate(30,10, world, new Continent(world, SurfaceType.OCEANIC));
+        Coordinate coordinate = CoordinateFactory.createCoordinate(30,10, world, new Continent(world, SurfaceType.OCEAN));
         Coordinate soughtCoordinate = CoordinateFactory.createCoordinate(30,9, world, new Continent(world, SurfaceType.COASTAL));
         world.getCoordinates().add(soughtCoordinate);
 

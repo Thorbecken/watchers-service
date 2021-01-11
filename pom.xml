@@ -3,16 +3,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
+
     <modules>
         <module>watchers-data</module>
         <module>watchers-application</module>
     </modules>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.3.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
     <groupId>com</groupId>
     <artifactId>watchers-service</artifactId>
     <version>0.0.2-SNAPSHOT</version>
@@ -20,7 +23,7 @@
     <description>Interactive generated world viewer</description>
 
     <properties>
-        <java.version>8</java.version>
+        <java.version>13</java.version>
     </properties>
 
     <scm>

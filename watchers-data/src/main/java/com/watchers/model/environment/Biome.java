@@ -21,6 +21,9 @@ public class Biome implements ParallelTask {
     @Column(name = "biome_id", nullable = false)
     private Long id;
 
+    @Enumerated(value = EnumType.STRING)
+    private BiomeTypeEnum biomeTypeEnum;
+
     private float currentFood;
     private float maxFood;
     private float fertility;

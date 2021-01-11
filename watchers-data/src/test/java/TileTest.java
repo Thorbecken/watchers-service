@@ -18,7 +18,7 @@ class TileTest {
     @BeforeEach
     void setup(){
         this.world = new World(3, 3);
-        Continent continent = new Continent(world, SurfaceType.OCEANIC);
+        Continent continent = new Continent(world, SurfaceType.OCEAN);
 
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {

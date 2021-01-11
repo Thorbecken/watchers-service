@@ -2,6 +2,7 @@ package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.config.SettingConfiguration;
+import com.watchers.model.climate.Climate;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.environment.*;
@@ -39,7 +40,7 @@ class WorldFactory {
                 surfaceType = SurfaceType.PLAIN;
                 continental++;
             } else {
-                surfaceType = SurfaceType.OCEANIC;
+                surfaceType = SurfaceType.OCEAN;
                 oceeanic++;
             }
             Continent generatedContinent = new Continent(world, surfaceType);
@@ -65,36 +66,61 @@ class WorldFactory {
 
         }
 
-        createBasicClimateForWorld(world);
+        //createBasicBasicClimateForWorld(world);
 
         return world;
     }
 
-    private void createBasicClimateForWorld(World world) {
-        List<Climate> climateList = createClimateLongitudeList(world);
-        addLatitudeToClimates(climateList,world);
-        calculateDistanceToEquator(climateList);
-    }
+    /*private void createBasicBasicClimateForWorld(World world) {
+        for (int i = 1; i <= world.getYSize(); i++) {
+
+            long currentY = i;
+            List<Climate> airCruunt = world.getCoordinates().stream()
+                    .filter(coordinate -> coordinate.getYCoord() == currentY)
+                    .sorted(Comparator.comparing(Coordinate::getXCoord))
+                    .map(Coordinate::getClimate)
+                    .collect(Collectors.toList());
+
+            airCruunt.get(0)
+                    .setDownstreamClimate(airCruunt.get(airCruunt.size()-1));
+            for (int j = 1; j < airCruunt.size(); j++) {
+                airCruunt.get(j)
+                        .setDownstreamClimate(airCruunt.get(j-1));
+            }
+
+        }
+
+        world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .forEach(climate -> climate.getUpstreamClimate().set(0,climate.getDownstreamClimate()));
+
+    }*/
+
+/*    private void createBasicClimateForWorld(World world) {
+        List<Climate> airCurrentClimates = createClimateLongitudeList(world);
+        addLatitudeToClimates(airCurrentClimates,world);
+        calculateDistanceToEquator(airCurrentClimates);
+    }*/
 
     private void calculateDistanceToEquator(List<Climate> climateList) {
         long equator = LONGITUDE_DIGREES/2;
-        climateList.forEach(
-                climate -> climate.setDistanceToEquator(
-                        climate.getLongitude()>equator?
-                                climate.getLongitude()-equator
-                                :equator-climate.getLongitude())
-        );
+//        airCurrentClimates.forEach(
+//                climate -> climate.setDistanceToEquator(
+//                        climate.getLongitude()>equator?
+//                                climate.getLongitude()-equator
+//                                :equator-climate.getLongitude())
+//        );
     }
 
-    private void addLatitudeToClimates(List<Climate> climateList, World world) {
+/*    private void addLatitudeToClimates(List<Climate> airCurrentClimates, World world) {
         long centerY = (world.getYSize()-1)/2+1;
         long splitterX = world.getXSize()/2;
 
-        Map<Long, List<Climate>>  sortedNorthernClimates = climateList.stream()
+        Map<Long, List<Climate>>  sortedNorthernClimates = airCurrentClimates.stream()
                 .filter(climate -> climate.getCoordinate().getXCoord() <= splitterX)
                 .collect(Collectors.groupingBy(Climate::getLongitude));
 
-        Map<Long, List<Climate>>  sortedSouthernClimates = climateList.stream()
+        Map<Long, List<Climate>>  sortedSouthernClimates = airCurrentClimates.stream()
                 .filter(climate -> climate.getCoordinate().getXCoord() > splitterX)
                 .collect(Collectors.groupingBy(Climate::getLongitude));
 
@@ -104,7 +130,7 @@ class WorldFactory {
         sortedNorthernClimates.keySet()
                 .forEach(key -> assignSouthernLatitude(sortedSouthernClimates.get(key), key, centerY));
 
-    }
+    }*/
 
     void assingNothernLatitude(List<Climate> climates, Long longitude, long centerY){
         World world = climates.get(0).getCoordinate().getWorld();
@@ -209,7 +235,7 @@ class WorldFactory {
                 .filter(coordinate -> coordinate.getXCoord() <= splitterX)
                 .forEach(
                         coordinate -> {
-                            Climate climate = new Climate();
+                            Climate climate = new Climate(coordinate);
                             climate.setLongitude(getLongitude(coordinate, northernCenterX, centerY));
                             climate.setCoordinate(coordinate);
                             climateList.add(climate);
@@ -220,7 +246,7 @@ class WorldFactory {
                 .filter(coordinate -> coordinate.getXCoord() > splitterX)
                 .forEach(
                         coordinate -> {
-                            Climate climate = new Climate();
+                            Climate climate = new Climate(coordinate);
                             climate.setLongitude(getLongitude(coordinate, southernCenterX, centerY));
                             climate.setCoordinate(coordinate);
                             climateList.add(climate);
@@ -243,13 +269,13 @@ class WorldFactory {
         log.info("sepperating the oceans");
         world.getCoordinates().stream()
                 .map(Coordinate::getTile)
-                .filter(tile -> SurfaceType.OCEANIC.equals(tile.getSurfaceType()))
+                .filter(tile -> SurfaceType.SEA.equals(tile.getSurfaceType()))
                 .forEach(
                 tile -> {
                     if(tile.getNeighboursWithinRange(Collections.singletonList(tile), settingConfiguration.getCoastalZone()).stream().anyMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
                         tile.setSurfaceType(SurfaceType.COASTAL);
                     } else if(tile.getNeighboursWithinRange(Collections.singletonList(tile), settingConfiguration.getOceanicZone()).stream().noneMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
-                        tile.setSurfaceType(SurfaceType.DEEP_OCEAN);
+                        tile.setSurfaceType(SurfaceType.OCEAN);
                     }
                 }
         );

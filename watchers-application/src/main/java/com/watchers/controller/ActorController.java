@@ -2,6 +2,8 @@ package com.watchers.controller;
 
 import com.watchers.manager.LifeManager;
 import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Slf4j
 @Controller
 @CrossOrigin
+@Api(description = "This controller exposes functionalitie about all the actors in the worlds.")
 @SuppressWarnings("unused")
 public class ActorController{
 
@@ -26,7 +29,9 @@ public class ActorController{
     }
 
     @SuppressWarnings("unused")
+    @ApiOperation(value = "Generates a new actor on the chosen coordinate.")
     @RequestMapping(value = "/actors/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
+    //TODO maak hier nog een post method van. of put.
         public ResponseEntity seedLife(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){
             log.info("Received request to seed life at coordintae: " + xCoord + "x, " + yCoord + "y");
             Assert.notNull(worldId, "No world id was found");

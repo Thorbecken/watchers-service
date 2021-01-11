@@ -20,7 +20,6 @@ public class TurnManager {
     public void processTurn(){
         worldSettingManager.getAllWaitingWorldSettings().forEach(
                 worldId -> {
-                    //Instance start = Instant.now()
                     StopWatch stopWatch = new StopWatch();
                     stopWatch.start();
                     WorldSetting worldSetting = worldSettingManager.getWorldSetting(worldId);
@@ -31,7 +30,6 @@ public class TurnManager {
 
                     worldSettingManager.setWorldInWaiting(worldId);
                     log.info(generateLogMessage(worldSetting, stopWatch));
-                    //log.info(generateLogMessage(worldSetting, start));
                 }
         );
     }
@@ -47,7 +45,6 @@ public class TurnManager {
 
         stopWatch.stop();
         logMessage = logMessage + "for world " + worldSetting.getWorldId() + ", and took " + stopWatch.getTotalTimeSeconds() + " seconds.";
-        //logMessage = logMessage + "for world " + worldSetting.getWorldId() + ", and took " + Durartion.between(start, Instance.now()).toSeconds() + " seconds.";
         return logMessage;
     }
 

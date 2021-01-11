@@ -23,7 +23,7 @@ class WorldFactoryTest {
     @CsvSource({"12,13,2","52,28,3"})
     void generateWorldTest(long xSize, long ySize, long continents) {
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
-        TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60, worldRepositoryInMemory);
+        TileDefined tileDefined = new TileDefined(10,20,30,40,50, 60);
         WorldSetting worldSetting = new WorldSetting();
         worldSetting.setWorldTypeEnum(WorldTypeEnum.NON_EUCLIDEAN);
         World world = new WorldFactory(tileDefined, settingConfiguration).generateWorld(xSize, ySize, continents, worldSetting);

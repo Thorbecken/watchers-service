@@ -7,9 +7,9 @@ import java.util.List;
 
 
 public enum NaturalHabitat {
-    AQUATIC(Arrays.asList(SurfaceType.OCEANIC, SurfaceType.DEEP_OCEAN, SurfaceType.COASTAL)),
+    AQUATIC(Arrays.asList(SurfaceType.OCEAN, SurfaceType.SEA, SurfaceType.COASTAL)),
     TERRESTRIAL(Arrays.asList(SurfaceType.PLAIN, SurfaceType.HILL, SurfaceType.MOUNTAIN)),
-    ALL(Arrays.asList(SurfaceType.PLAIN, SurfaceType.HILL, SurfaceType.MOUNTAIN, SurfaceType.OCEANIC, SurfaceType.DEEP_OCEAN, SurfaceType.COASTAL));
+    ALL(Arrays.asList( SurfaceType.OCEAN, SurfaceType.SEA, SurfaceType.COASTAL, SurfaceType.PLAIN, SurfaceType.HILL, SurfaceType.MOUNTAIN));
 
     public final List<SurfaceType> movableSurfaces;
 

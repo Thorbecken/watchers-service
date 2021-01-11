@@ -77,16 +77,20 @@ public class Continent {
     }
 
     public void addCoordinate(Coordinate coordinate){
-        this.getCoordinates().add(coordinate);
-        coordinate.setContinent(this);
+        coordinates.add(coordinate);
+        if(!coordinate.getContinent().equals(this)){
+            coordinate.changeContinent(this);
+        }
     }
 
     public void removeCoordinate(Coordinate coordinate){
         boolean removed = this.getCoordinates().remove(coordinate);
         if(!removed){
-            throw new RuntimeException("Coordinate " + coordinate + " was to be removed from continent " + this + " but was not present!");
+            // do nothing
+            //throw new RuntimeException("Coordinate " + coordinate + " was to be removed from continent " + this + " but was not present!");
+        } else {
+            coordinate.changeContinent(null);
         }
-        coordinate.setContinent(null);
     }
 
     @Override

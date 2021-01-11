@@ -74,12 +74,13 @@ public class MockContinent {
     }
 
     public Continent generateContinent(){
-        Assert.isTrue(this.continent != null, "continent was nulll");
+        Assert.isTrue(this.continent != null, "continent was null");
         continent.getCoordinates().addAll(coordinates);
         world.getCoordinates().addAll(coordinates);
-        continent.getCoordinates().forEach(
+        Set<Coordinate> coordinates = new HashSet<>(continent.getCoordinates());
+        coordinates.forEach(
                 coordinate -> {
-                    coordinate.setContinent(continent);
+                    coordinate.changeContinent(continent);
                     coordinate.getTile().setSurfaceType(continent.getType());
                 }
         );
