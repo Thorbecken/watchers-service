@@ -33,8 +33,10 @@ public class World {
     @Column(name = "world_id")
     private Long id;
 
+    @JsonProperty("xSize")
     private Long xSize;
 
+    @JsonProperty("ySize")
     private Long ySize;
 
     @Transient

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.environment.Climate;
+import com.watchers.model.climate.Climate;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.model.actor.Actor;
@@ -58,6 +58,8 @@ public abstract class Coordinate {
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
 
+    @JsonProperty("climate")
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Climate climate;
 
     protected Coordinate(long xCoord, long yCoord, CoordinateType coordinateType, World world, Continent continent) {
@@ -68,6 +70,7 @@ public abstract class Coordinate {
         this.coordinateType = coordinateType;
 
         this.tile = new Tile(this, continent);
+        this.climate = new Climate(this);
     }
 
     private void setContinent(Continent continent){
@@ -79,29 +82,31 @@ public abstract class Coordinate {
             continent.removeCoordinate(this);
         }
         this.continent = newContinent;
-        newContinent.addCoordinate(this);
+        if(newContinent != null){
+            newContinent.addCoordinate(this);
+        }
     }
 
     @JsonIgnore
     public abstract List<Coordinate> getNeighbours();
 
     @JsonIgnore
-    protected long getRightCoordinate() {
+    public long getRightCoordinate() {
         return getAdjustedXCoordinate(CoordinateHelper.RIGHT, this.xCoord);
     }
 
     @JsonIgnore
-    protected long getLeftCoordinate() {
+    public long getLeftCoordinate() {
         return getAdjustedXCoordinate(CoordinateHelper.LEFT, this.xCoord);
     }
 
     @JsonIgnore
-    protected long getUpCoordinate() {
+    public long getUpCoordinate() {
         return getAdjustedYCoordinate(CoordinateHelper.UP, this.yCoord);
     }
 
     @JsonIgnore
-    protected long getDownCoordinate() {
+    public long getDownCoordinate() {
         return getAdjustedYCoordinate(CoordinateHelper.DOWN, this.yCoord);
     }
 

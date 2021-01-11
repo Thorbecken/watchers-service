@@ -104,11 +104,11 @@ public class ContinentalDriftNewTileAssigner {
     }
 
     private SurfaceType getSurfaceType(World world) {
-        long numberOfOceaanicContinents = world.getContinents().stream().filter(continent -> continent.getType().equals(SurfaceType.OCEANIC)).count();
+        long numberOfOceaanicContinents = world.getContinents().stream().filter(continent -> continent.getType().equals(SurfaceType.OCEAN)).count();
         long numberOfContinents = world.getContinents().size();
         int oceanincContinentsPerContinentalContinent = settingConfiguration.getContinentalToOcceanicRatio() + 1;
         boolean tooMuckOceeanicContinents = numberOfOceaanicContinents * oceanincContinentsPerContinentalContinent > numberOfContinents;
-        return  tooMuckOceeanicContinents ? SurfaceType.PLAIN:SurfaceType.OCEANIC;
+        return  tooMuckOceeanicContinents ? SurfaceType.PLAIN:SurfaceType.OCEAN;
     }
 
     private int calculateMaximumCoordinates(ContinentalDriftTaskDto taskDto, World world) {

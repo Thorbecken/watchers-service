@@ -17,7 +17,7 @@ public class ContinentalDriftManager {
     private ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster;
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
     private ContinentalCorrector continentalCorrector;
-    private TileDefined tileDefined;
+    private SurfaceTypeComputator surfaceTypeComputator;
     private ErosionAdjuster erosionAdjuster;
     private WorldSettingManager worldSettingManager;
 
@@ -29,7 +29,7 @@ public class ContinentalDriftManager {
         continentalDriftWorldAdjuster.process(taskDto);
         continentalCorrector.process(taskDto);
         erosionAdjuster.process(taskDto);
-        tileDefined.process(taskDto);
+        surfaceTypeComputator.process(taskDto);
 
         worldSettingManager.changeContinentalSetting(taskDto.getWorldId(), false);
         log.trace("Proccesed a continentaldrift for world id: " + taskDto.getWorldId());

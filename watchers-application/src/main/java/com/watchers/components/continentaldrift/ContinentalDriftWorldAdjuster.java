@@ -54,7 +54,7 @@ public class ContinentalDriftWorldAdjuster {
     }
 
     private long getWeightedDivider(Map<Coordinate, ContinentalChangesDto> changes) {
-        long numberOfOceanicCoordinates = getContinentTypeCount(changes, SurfaceType.OCEANIC);
+        long numberOfOceanicCoordinates = getContinentTypeCount(changes, SurfaceType.OCEAN);
         long numberOfContinentalCoordinates = getContinentTypeCount(changes, SurfaceType.PLAIN) * settingConfiguration.getContinentalContinentWeight();
         return numberOfOceanicCoordinates + numberOfContinentalCoordinates;
     }
@@ -70,7 +70,7 @@ public class ContinentalDriftWorldAdjuster {
         Continent assignedContinent = dto.getNewMockContinent().getContinent();
         Tile tile = world.getTile(dto.getKey());
         tile.clear();
-        tile.getCoordinate().setContinent(assignedContinent);
+        tile.getCoordinate().changeContinent(assignedContinent);
         assignedContinent.getCoordinates().add(dto.getKey());
         tile.setHeight(weightedHeight(newHeight, assignedContinent));
 

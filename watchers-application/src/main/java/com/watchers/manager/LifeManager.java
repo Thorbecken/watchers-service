@@ -47,12 +47,16 @@ public class LifeManager {
 
     private static AnimalType selectAnimalSeed(SurfaceType type) {
         switch (type){
-            case PLAIN: return AnimalType.RABBIT;
+            case MOUNTAIN:
+            case HILL:
+            case PLAIN:
+                return AnimalType.RABBIT;
             case COASTAL:
-            case OCEANIC:
-            case DEEP_OCEAN:
+            case SEA:
+            case OCEAN:
                 return AnimalType.WHALE;
-            default: return AnimalType.RABBIT;
+            default:
+                return AnimalType.RABBIT;
         }
     }
 }

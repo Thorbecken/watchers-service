@@ -112,7 +112,7 @@ public class Tile {
     }
 
     public void setData(MockTile mockTile) {
-        this.coordinate.setContinent(mockTile.getContinent());
+        this.coordinate.changeContinent(mockTile.getContinent());
         this.coordinate.getContinent().getCoordinates().add(this.coordinate);
 
         this.biome.addCurrentFood(mockTile.getFood());

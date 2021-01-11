@@ -1,9 +1,6 @@
 package com.watchers.service;
 
-import com.watchers.manager.CleansingManager;
-import com.watchers.manager.ContinentalDriftManager;
-import com.watchers.manager.LifeManager;
-import com.watchers.manager.MapManager;
+import com.watchers.manager.*;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -34,6 +31,7 @@ public class WorldService {
     private WorldRepositoryPersistent worldRepositoryPersistent;
     private MapManager mapManager;
     private ContinentalDriftManager continentalDriftManager;
+    private ClimateManager climateManager;
     private CleansingManager cleansingManager;
     private LifeManager lifeManager;
     private ArrayList<Long> activeWorldIds;
@@ -90,9 +88,11 @@ public class WorldService {
         if(worldTaskDto.isContinentalshift()) {
             Assert.isTrue(worldTaskDto instanceof ContinentalDriftTaskDto, "The WorldTaskDto was initiated wrongly");
             continentalDriftManager.process((ContinentalDriftTaskDto) worldTaskDto);
+            climateManager.proces(worldTaskDto);
             cleansingManager.process(worldTaskDto);
         }
 
+        climateManager.proces(worldTaskDto);
         lifeManager.process(worldTaskDto);
         cleansingManager.process(worldTaskDto);
     }

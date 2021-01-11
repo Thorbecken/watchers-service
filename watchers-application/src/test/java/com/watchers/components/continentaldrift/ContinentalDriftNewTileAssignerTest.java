@@ -85,7 +85,7 @@ class ContinentalDriftNewTileAssignerTest {
                         return;
                     }
                     Continent continent = sum<4?continentX:continentY;
-                    coordinate.setContinent(continent);
+                    coordinate.changeContinent(continent);
                     continent.getCoordinates().add(coordinate);
                     dto.setMockTile(new MockTile(coordinate.getTile()));
                     dto.setEmpty(false);
@@ -181,9 +181,9 @@ class ContinentalDriftNewTileAssignerTest {
 
         Continent continentX = new Continent(world, SurfaceType.PLAIN);
         continentX.setDirection(new Direction(0,0));
-        Continent continentY = new Continent(world, SurfaceType.OCEANIC);
+        Continent continentY = new Continent(world, SurfaceType.OCEAN);
         continentY.setDirection(new Direction(1,0));
-        Continent continentZ = new Continent(world, SurfaceType.OCEANIC);
+        Continent continentZ = new Continent(world, SurfaceType.OCEAN);
         continentZ.setDirection(new Direction(0, 1));
         continentX.setId(3L);
         continentY.setId(2L);
@@ -212,15 +212,15 @@ class ContinentalDriftNewTileAssignerTest {
                 coordinate -> {
                     if(coordinate.getXCoord()+coordinate.getYCoord() <4){
                         coordinate.getTile().setHeight(8);
-                        coordinate.setContinent(x);
+                        coordinate.changeContinent(x);
                         x.getCoordinates().add(coordinate);
                     } else if (coordinate.getYCoord()==3 && coordinate.getXCoord() == 3){
                         coordinate.getTile().setHeight(2);
-                        coordinate.setContinent(z);
+                        coordinate.changeContinent(z);
                         z.getCoordinates().add(coordinate);
                     } else {
                         coordinate.getTile().setHeight(4);
-                        coordinate.setContinent(y);
+                        coordinate.changeContinent(y);
                         y.getCoordinates().add(coordinate);
                     }
                 }

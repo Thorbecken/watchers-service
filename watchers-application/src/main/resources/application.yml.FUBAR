@@ -23,8 +23,8 @@ watch:
     ySize: 15 #54
     numberOfContinents: 8
 # World settings
-  deepOceanHight: 10
-  oceeanHight: 20
+  oceanHight: 10
+  seaHight: 20
   coastalHight: 30
   plainsHight: 40
   hillHight: 50

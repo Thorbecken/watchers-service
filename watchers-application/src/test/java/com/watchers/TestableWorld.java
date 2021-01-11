@@ -40,7 +40,7 @@ public class TestableWorld {
                 CoordinateFactory.createCoordinate(1, 3, world, continent2)
         ));
 
-        Continent continent3 = new Continent(world, SurfaceType.OCEANIC);
+        Continent continent3 = new Continent(world, SurfaceType.OCEAN);
         continent3.setId(2L);
         continent3.setDirection(new Direction(0, 0));
         continent3.getCoordinates().addAll(Arrays.asList(

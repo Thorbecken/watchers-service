@@ -46,7 +46,7 @@ public class ContinentalCorrector {
                                 .findFirst();
 
                         chosenContinent.ifPresent( continent -> {
-                            coordinate.setContinent(continent);
+                            coordinate.changeContinent(continent);
                             coordinate.getContinent().getCoordinates().add(coordinate);
                         });
                     }
