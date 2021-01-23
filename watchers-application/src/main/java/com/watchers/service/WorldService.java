@@ -173,7 +173,7 @@ public class WorldService {
                 return null;
             }
         } else {
-            log.warn("The world " + worldSetting.getWorldId() + " does not exist in the persistence context. A new world is going to be created. Large worlds take a while being generated.");
+            log.warn("The world " + worldSetting.getWorldId() + " does not exist in the persistence context. A new world is going to be created. Large worlds take a while being generated. (Large worlds can take up to 34 minutes)");
             World world = mapManager.createWorld(worldSetting);
             worldRepositoryInMemory.save(world);
             log.info("Created a new world! Number: " + world.getId());

@@ -18,12 +18,36 @@ public class Cloud {
     @JsonIgnore
     @GeneratedValue(generator="Cloud_Gen", strategy = GenerationType.SEQUENCE)
     private Long id;
-    private int airMoisture;
+
+    long airMoisture;
+
+    @Transient
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    private long airMoistureLossage;
 
     @Transient
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     private Climate incomingClimate;
+
+    public void setPreviousHeight() {
+        this.previousHeight = this.currentClimate.getCoordinate().getTile().getHeight();
+    }
+
+    @Transient
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    private long previousHeight;
+
+    public void setCurrentHeight() {
+        this.currentHeight = this.currentClimate.getCoordinate().getTile().getHeight();
+    }
+
+    @Transient
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    private long currentHeight;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
@@ -34,22 +58,22 @@ public class Cloud {
         this.setCurrentClimate(climate);
     }
 
-    public void addAirMoisture(int extraAirmoisture){
-        if(extraAirmoisture > 0) {
-            if(extraAirmoisture+this.airMoisture < 100) {
+    public void addAirMoisture(long extraAirmoisture){
+        if(extraAirmoisture > 0L) {
+            if(extraAirmoisture+this.airMoisture < 100L) {
                 this.airMoisture = this.airMoisture + extraAirmoisture;
             } else{
-                this.airMoisture = 100;
+                this.airMoisture = 100L;
             }
         }
     }
 
-    public void reduceAirMoisture(int airmoistureReduction){
-        if(airmoistureReduction > 0) {
-            if(this.airMoisture-airmoistureReduction > 0) {
+    public void reduceAirMoisture(long airmoistureReduction){
+        if(airmoistureReduction > 0L) {
+            if(this.airMoisture-airmoistureReduction > 0L) {
                 this.airMoisture = this.airMoisture - airmoistureReduction;
             } else {
-                this.airMoisture = 0;
+                this.airMoisture = 0L;
             }
         }
     }
@@ -60,5 +84,16 @@ public class Cloud {
                 "id=" + id +
                 ", airMoisture=" + airMoisture +
                 '}';
+    }
+
+    public void calculateHeightDifferenceEffect() {
+        long difference = currentHeight - previousHeight;
+        if(airMoisture > 0L && difference > 0L) {
+            airMoistureLossage = airMoistureLossage + difference;
+        }
+    }
+
+    public void calculateNewMoistureLevel() {
+        reduceAirMoisture(airMoistureLossage);
     }
 }

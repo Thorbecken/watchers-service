@@ -21,13 +21,25 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class PrecipiationComputator {
 
-    private final static int HUMID_ZONE = 12;
-    private final static int SEMI_ARID_ZONE = 4;
-    private final static int ARID_ZONE = 0;
+    private final static long WET_ZONE = 60;
+    private final static long HUMID_ZONE = 30;
+    private final static long SEMI_ARID_ZONE = 15;
+    private final static long ARID_ZONE = 0;
 
-    private final static int HUMID_PRECIPITION = 4;
-    private final static int SEMI_ARID__PRECIPITION = 2;
-    private final static int ARID__PRECIPITION = 1;
+    private final static long WET_PRECIPITION = 10;
+    private final static long HUMID_PRECIPITION = 5;
+    private final static long SEMI_ARID__PRECIPITION = 3;
+    private final static long ARID_PRECIPITION = 1;
+    private final static long NO_PRECIPITION = 0;
+
+    static Map<PrecipitationEnum, Long> precipationMap = new HashMap<>();
+
+    static {
+        precipationMap.put(PrecipitationEnum.WET, WET_PRECIPITION);
+        precipationMap.put(PrecipitationEnum.HUMID, HUMID_PRECIPITION);
+        precipationMap.put(PrecipitationEnum.SEMI_ARID, SEMI_ARID__PRECIPITION);
+        precipationMap.put(PrecipitationEnum.ARID, ARID_ZONE);
+    }
 
     private WorldRepositoryInMemory worldRepositoryInMemory;
 
@@ -46,14 +58,15 @@ public class PrecipiationComputator {
     private void computeEvaporation(List<Climate> climates) {
         climates.parallelStream()
                 .filter(Climate::isWater)
-                .forEach(climate -> {
-                    climate.getCurrentCloud().addAirMoisture(3);
-                    climate.setPrecipitationEnum(PrecipitationEnum.ARID);
-                });
+                .forEach(this::procesWaterClimate);
+    }
+
+    private void procesWaterClimate(Climate climate) {
+        climate.getCurrentCloud().addAirMoisture(10);
+        climate.setPrecipitationEnum(PrecipitationEnum.WET);
     }
 
     protected void moveCloudsAccordingToAirflow(Set<Coordinate> coordinates) {
-        //coordinates.forEach(coordinate -> log(coordinate.getClimate(), "beforeAirflow"));
         Map<Long, List<Coordinate>> airCurrentsMap = coordinates.stream()
                 .collect(Collectors.groupingBy(Coordinate::getYCoord));
         Map<Long, AirCurrent> airCurrents = airCurrentsMap.entrySet().stream()
@@ -64,31 +77,45 @@ public class PrecipiationComputator {
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet());
         currents.forEach(AirCurrent::moveClouds);
-        //coordinates.forEach(coordinate -> log(coordinate.getClimate(), "afterAirflow"));
     }
 
     protected void setLandPrecipationEnums(List<Climate> climates) {
         climates.parallelStream()
                 .filter(Climate::isLand)
-                .forEach(climate -> {
-                            Cloud currentCloud = climate.getCurrentCloud();
-                            if (currentCloud.getAirMoisture() >= HUMID_ZONE) {
-                                climate.setPrecipitationEnum(PrecipitationEnum.WET);
-                                currentCloud.reduceAirMoisture(HUMID_PRECIPITION);
-                            } else if (currentCloud.getAirMoisture() > HUMID_ZONE) {
-                                climate.setPrecipitationEnum(PrecipitationEnum.HUMID);
-                                currentCloud.reduceAirMoisture(HUMID_PRECIPITION);
-                            } else if (currentCloud.getAirMoisture() > SEMI_ARID_ZONE) {
-                                climate.setPrecipitationEnum(PrecipitationEnum.SEMI_ARID);
-                                currentCloud.reduceAirMoisture(SEMI_ARID__PRECIPITION);
-                            } else if (currentCloud.getAirMoisture() > ARID_ZONE) {
-                                climate.setPrecipitationEnum(PrecipitationEnum.ARID);
-                                currentCloud.reduceAirMoisture(ARID__PRECIPITION);
-                            } else {
-                                climate.setPrecipitationEnum(PrecipitationEnum.ARID);
-                                currentCloud.reduceAirMoisture(ARID__PRECIPITION);
-                            }
-                        }
-                );
+                .forEach(this::procesLandClimate);
+    }
+
+    private void procesLandClimate(Climate climate){
+            Cloud currentCloud = climate.getCurrentCloud();
+            if (currentCloud.getAirMoisture() >= WET_ZONE) {
+                currentCloud.setAirMoistureLossage(WET_PRECIPITION);
+            } else if (currentCloud.getAirMoisture() >= HUMID_ZONE) {
+                currentCloud.setAirMoistureLossage(HUMID_PRECIPITION);
+            } else if (currentCloud.getAirMoisture() >= SEMI_ARID_ZONE) {
+                currentCloud.setAirMoistureLossage(SEMI_ARID__PRECIPITION);
+            } else if (currentCloud.getAirMoisture() >= ARID_ZONE) {
+                currentCloud.setAirMoistureLossage(ARID_PRECIPITION);
+            } else {
+                currentCloud.setAirMoistureLossage(NO_PRECIPITION);
+            }
+
+            currentCloud.calculateHeightDifferenceEffect();
+            currentCloud.calculateNewMoistureLevel();
+            climate.setPrecipitationEnum(precipationCaluculator(currentCloud.getAirMoistureLossage()));
+            //climate.getCurrentCloud().reduceAirMoisture(precipationMap.get(climate.getPrecipitationEnum()));
+    }
+
+    private PrecipitationEnum precipationCaluculator(long airMoistureLossage) {
+        if (airMoistureLossage >= WET_PRECIPITION) {
+            return PrecipitationEnum.WET;
+        } else if (airMoistureLossage >= HUMID_PRECIPITION) {
+            return PrecipitationEnum.HUMID;
+        } else if (airMoistureLossage >= SEMI_ARID__PRECIPITION) {
+            return PrecipitationEnum.SEMI_ARID;
+        } else if (airMoistureLossage >= ARID_PRECIPITION) {
+            return PrecipitationEnum.ARID;
+        } else {
+            return PrecipitationEnum.ARID;
+        }
     }
 }

@@ -32,6 +32,10 @@ public class AirCurrent {
     }
 
     public void moveClouds(){
+        airCurrentClimates.parallelStream()
+                .map(Climate::getCurrentCloud)
+                .forEach(Cloud::setPreviousHeight);
+
         // sets the first incoming cloud from the last in the array.
         airCurrentClimates.get(0)
                 .setIncomingCloud(airCurrentClimates.get(airCurrentSize -1).getCurrentCloud());
@@ -44,6 +48,9 @@ public class AirCurrent {
         }
 
         airCurrentClimates.forEach(climate -> climate.setCurrentCloud(climate.getIncomingCloud()));
-        //airCurrentClimates.forEach(climate -> climate.getCurrentCloud().setCurrentClimate(climate));
+
+        airCurrentClimates.parallelStream()
+                .map(Climate::getCurrentCloud)
+                .forEach(Cloud::setCurrentHeight);
     }
 }
