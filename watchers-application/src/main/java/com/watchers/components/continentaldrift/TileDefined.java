@@ -2,9 +2,9 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +19,8 @@ public class TileDefined {
     private long hillHight;
     private long mountainHight;
 
+    private WorldRepository worldRepository;
+
     public TileDefined(@Value("${watch.oceanHight}") long oceanHight,
                        @Value("${watch.seaHight}") long seaHight,
                        @Value("${watch.coastalHight}") long coastalHight,
@@ -31,6 +33,7 @@ public class TileDefined {
         this.plainsHight = plainsHight;
         this.hillHight = hillHight;
         this.mountainHight = mountainHight;
+        this.worldRepository = worldRepository;
     }
 
     public void setStartingHeights(World world){
@@ -72,5 +75,7 @@ public class TileDefined {
                 tile.setSurfaceType(SurfaceType.MOUNTAIN);
             }
         });
+
+        worldRepository.save(world);
     }
 }

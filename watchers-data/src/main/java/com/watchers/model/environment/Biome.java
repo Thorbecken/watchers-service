@@ -1,8 +1,11 @@
 package com.watchers.model.environment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.watchers.model.common.Views;
 import com.watchers.model.dto.MockTile;
-import com.watchers.model.ParallelTask;
+import com.watchers.model.interfaces.ParallelTask;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +19,8 @@ import javax.persistence.*;
 public class Biome implements ParallelTask {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
+    @JsonProperty("biomeId")
     @GeneratedValue(generator="Biome_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "biome_id", nullable = false)
     private Long id;
@@ -24,8 +28,19 @@ public class Biome implements ParallelTask {
     @Enumerated(value = EnumType.STRING)
     private BiomeTypeEnum biomeTypeEnum;
 
-    private float currentFood;
+    @JsonView(Views.Public.class)
+    @Column(name = "currentFood")
+    @JsonProperty("current_food")
+private float currentFood;
+
+    @JsonView(Views.Public.class)
+    @Column(name = "maxFood")
+    @JsonProperty("maxFood")
     private float maxFood;
+
+    @JsonView(Views.Public.class)
+    @Column(name = "fertility")
+    @JsonProperty("fertility")
     private float fertility;
 
     @JsonIgnore

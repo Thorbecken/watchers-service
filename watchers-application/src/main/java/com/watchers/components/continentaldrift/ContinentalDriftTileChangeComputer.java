@@ -8,7 +8,8 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,23 +17,18 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@AllArgsConstructor
 public class ContinentalDriftTileChangeComputer {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
-    private CoordinateHelper coordinateHelper;
+    private WorldRepository worldRepository;
 
-    public ContinentalDriftTileChangeComputer(CoordinateHelper coordinateHelper, WorldRepositoryInMemory worldRepositoryInMemory){
-        this.coordinateHelper = coordinateHelper;
-        this.worldRepositoryInMemory = worldRepositoryInMemory;
-    }
-
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory."));
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
-        coordinateHelper.getAllPossibleCoordinates(world)
+        CoordinateHelper.getAllPossibleCoordinates(world)
                 .forEach( coordinate -> {
                     List<Tile> tiles = newTileLayout.get(coordinate);
                     if(tiles == null){
@@ -48,7 +44,7 @@ public class ContinentalDriftTileChangeComputer {
         );
 
         taskDto.setChanges(changes);
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
     private void processAbsentTile(Coordinate coordinate, Map<Coordinate, ContinentalChangesDto> changes) {

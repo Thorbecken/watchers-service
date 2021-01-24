@@ -1,8 +1,11 @@
 package com.watchers.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.manager.MapManager;
-import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.common.Coordinate;
+import com.watchers.model.common.Views;
 import com.watchers.model.world.World;
+import lombok.AllArgsConstructor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -15,17 +18,15 @@ import java.util.HashSet;
 @Slf4j
 @CrossOrigin
 @RestController
+@AllArgsConstructor
 @Api(description = "This controller exposes functionalitie about retrieving all the worlds.")
 public class MapController {
 
     private MapManager mapManager;
 
-    public MapController(MapManager mapManager) {
-        this.mapManager = mapManager;
-    }
-
-    @ApiOperation(value = "Returns the json of the chosen world.")
+    @JsonView(Views.Public.class)
     @RequestMapping(value = "/world/{worldId}", method = RequestMethod.GET)
+    @ApiOperation(value = "Returns the json of the chosen world.")
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId){
         Assert.notNull(worldId, "No world id was found");
         World world = mapManager.getUninitiatedWorld(worldId);

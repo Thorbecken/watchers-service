@@ -2,13 +2,12 @@ package com.watchers.model.world;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.watchers.model.actor.Actor;
-import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.coordinate.WorldTypeEnum;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.actors.Actor;
+import com.watchers.model.common.Coordinate;
+import com.watchers.model.common.Views;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.worldsetting.WorldSetting;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -27,16 +26,23 @@ import java.util.Set;
 public class World {
 
     @Id
-    @JsonIgnore
+    @JsonProperty("worldId")
+    @JsonView(Views.Internal.class)
     @SequenceGenerator(name = "World_Gen", sequenceName = "World_Seq", allocationSize = 1)
     @GeneratedValue(generator = "World_Gen", strategy = GenerationType.SEQUENCE)
-    @Column(name = "world_id")
+    @JsonProperty("worldId")
     private Long id;
 
     @JsonProperty("xSize")
+    @JsonProperty("xSize")
+    @Column(name = "x_size")
+    @JsonView(Views.Public.class)
     private Long xSize;
 
     @JsonProperty("ySize")
+    @JsonProperty("ySize")
+    @Column(name = "y_size")
+    @JsonView(Views.Public.class)
     private Long ySize;
 
     @Transient
@@ -44,26 +50,28 @@ public class World {
     private WorldSetting worldSetting;
 
     @JsonProperty("coordinates")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView(Views.Public.class)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("continents")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView(Views.Public.class)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents = new HashSet<>();
 
-    @JsonIgnore
+    @JsonProperty("lastContinentInFlux")
+    @JsonView(Views.Internal.class)
+    @Column(name = "last_continent_in_flux")
     private long lastContinentInFlux;
 
-    @JsonIgnore
+    @JsonProperty("heightDeficit")
+    @JsonView(Views.Internal.class)
+    @Column(name = "current_height_deficit")
     private long heightDeficit;
 
     @Transient
     @JsonIgnore
     private Map<Long, Map<Long, Coordinate>> coordinateMap = new HashMap<>();
-
-    @Transient
-    @JsonIgnore
-    private Map<Long, Map<Long, Tile>> tileMap = new HashMap<>();
 
     @Transient
     @JsonIgnore
@@ -80,29 +88,14 @@ public class World {
     }
 
     @SuppressWarnings("unused")
-    public World() {
-    }
+    public World(){}
 
+    @JsonIgnore
     public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
-        if (coordinateMap == null || coordinateMap.isEmpty()) {
-            setCoordinateMap();
+        if(coordinateMap == null || coordinateMap.isEmpty()){
+                setCoordinateMap();
         }
         return coordinateMap.get(xCoordinate).get(yCoordinate);
-    }
-
-    @JsonIgnore
-
-    public Tile getTile(Long x, Long y) {
-        if (tileMap == null || tileMap.isEmpty()) {
-            setTileMap();
-        }
-
-        return tileMap.get(x).get(y);
-    }
-
-    @JsonIgnore
-    public Tile getTile(Coordinate coordinate) {
-        return getTile(coordinate.getXCoord(), coordinate.getYCoord());
     }
 
     @JsonIgnore
@@ -114,23 +107,7 @@ public class World {
         return actorList;
     }
 
-    private void setTileMap() {
-        tileMap = new HashMap<>();
-
-        for (int i = 1; i <= xSize; i++) {
-            final long xCoord = i;
-            Map<Long, Tile> xTileHashMap = new HashMap<>();
-            coordinates.stream()
-                    .map(Coordinate::getTile)
-                    .filter(tile -> tile.getCoordinate().getXCoord() == xCoord)
-                    .forEach(tile -> xTileHashMap.put(tile.getCoordinate().getYCoord(), tile)
-                    );
-
-            tileMap.put(xCoord, xTileHashMap);
-        }
-    }
-
-    private void setCoordinateMap() {
+    private void setCoordinateMap(){
         coordinateMap = new HashMap<>();
 
         for (int i = 1; i <= xSize; i++) {
@@ -148,7 +125,6 @@ public class World {
     public void fillTransactionals() {
         newActors = new ArrayList<>();
         actorList = new ArrayList<>();
-        tileMap = new HashMap<>();
 
         coordinates.forEach(
                 coordinate -> actorList.addAll(coordinate.getActors())
@@ -162,15 +138,11 @@ public class World {
                     .forEach(
                             coordinate -> hashMap.put(coordinate.getYCoord(), coordinate.getTile())
                     );
-
-            tileMap.put(xCoord, hashMap);
         }
     }
 
+    private void setActorList(){
     private void setActorList() {
-        if (tileMap == null || tileMap.isEmpty()) {
-            setTileMap();
-        }
         actorList = new ArrayList<>();
 
         coordinates.forEach(
@@ -178,12 +150,12 @@ public class World {
         );
     }
 
-    public void createBasicClone(World template) {
-        this.id = template.getId();
-        this.xSize = template.getXSize();
-        this.ySize = template.getYSize();
-        this.heightDeficit = template.getHeightDeficit();
-        this.lastContinentInFlux = template.getLastContinentInFlux();
+    public World createBasicClone(){
+        World newWorld = new World(this.xSize, this.ySize);
+        newWorld.setId(this.id);
+        newWorld.setHeightDeficit(this.heightDeficit);
+        newWorld.setLastContinentInFlux(this.lastContinentInFlux);
+        return newWorld;
     }
 
     @Override

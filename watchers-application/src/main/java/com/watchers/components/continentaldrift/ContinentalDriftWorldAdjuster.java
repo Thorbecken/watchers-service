@@ -5,11 +5,11 @@ import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.world.Continent;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,18 +20,17 @@ import java.util.*;
 @AllArgsConstructor
 public class ContinentalDriftWorldAdjuster {
 
-    private CoordinateHelper coordinateHelper;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
     private SettingConfiguration settingConfiguration;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
 
         long newHeight = calculateNewHeight(world, changes);
 
-        coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
+        CoordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
                     ContinentalChangesDto dto = changes.get(coordinate);
                     if(dto.isEmpty()) {
                         createFreshTile(dto, newHeight, world);
@@ -41,7 +40,7 @@ public class ContinentalDriftWorldAdjuster {
                 }
         );
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
     private long calculateNewHeight(World world, Map<Coordinate, ContinentalChangesDto> changes) {
@@ -68,7 +67,7 @@ public class ContinentalDriftWorldAdjuster {
 
     private void createFreshTile(ContinentalChangesDto dto, long newHeight, World world) {
         Continent assignedContinent = dto.getNewMockContinent().getContinent();
-        Tile tile = world.getTile(dto.getKey());
+        Tile tile = world.getCoordinate(dto.getKey().getXCoord(), dto.getKey().getYCoord()).getTile();
         tile.clear();
         tile.getCoordinate().changeContinent(assignedContinent);
         assignedContinent.getCoordinates().add(dto.getKey());
@@ -82,7 +81,7 @@ public class ContinentalDriftWorldAdjuster {
     }
 
     private void ChangeTileOfCoordinate(ContinentalChangesDto dto, World world) {
-        Tile tile = world.getTile(dto.getKey());
+        Tile tile = world.getCoordinate(dto.getKey().getXCoord(), dto.getKey().getYCoord()).getTile();
         tile.clear();
         tile.setData(dto.getMockTile());
     }

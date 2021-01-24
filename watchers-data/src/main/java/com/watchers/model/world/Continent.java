@@ -1,46 +1,54 @@
-package com.watchers.model.environment;
+package com.watchers.model.world;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.helper.RandomHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
 import com.watchers.model.world.World;
+import com.watchers.model.common.Views;
+import com.watchers.model.enums.SurfaceType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@Slf4j
 @Entity
 @JsonSerialize
 @Table(name = "continent")
 public class Continent {
 
     @Id
-    @SequenceGenerator(name="Continent_Gen", sequenceName="Continent_Seq", allocationSize = 1)
-    @GeneratedValue(generator="Continent_Gen", strategy = GenerationType.SEQUENCE)
+    @JsonProperty("continentId")
     @Column(name = "continent_id")
+    @JsonView(Views.Internal.class)
+    @GeneratedValue(generator="Continent_Gen", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="Continent_Gen", sequenceName="Continent_Seq", allocationSize = 1)
     private Long id;
 
-    @JsonIgnore
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
     @JsonIgnore
-    @JsonProperty("coordinates")
+    @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "continent")
     private Set<Coordinate> coordinates = new HashSet<>();
 
-    @JsonProperty("type")
+    @JsonProperty("surfaceType")
+    @Column(name = "surface_type")
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private SurfaceType type;
 
     @JsonProperty("direction")
+    @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL, optional = false)
     private Direction direction;
 
@@ -70,6 +78,7 @@ public class Continent {
         } else {
             this.direction.setXVelocity(RandomHelper.getRandomWithNegativeNumbers(driftVelocity));
             this.direction.setYVelocity(RandomHelper.getRandomWithNegativeNumbers(driftVelocity));
+            log.warn("setting last continent in flux to " + this.getId() + " from continent");
             world.setLastContinentInFlux(this.getId());
         }
 

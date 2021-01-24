@@ -1,10 +1,11 @@
 package com.watchers.model.environment;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
+import com.watchers.model.common.Views;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.Continent;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -17,7 +18,8 @@ import java.util.*;
 public class Tile {
 
     @Id
-    @JsonIgnore
+    @JsonProperty("tileId")
+    @JsonView(Views.Internal.class)
     @GeneratedValue(generator="Tile_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "tile_id", nullable = false)
     private Long id;
@@ -28,15 +30,18 @@ public class Tile {
 
     @JsonProperty("height")
     @Column(name = "height")
+    @JsonView(Views.Public.class)
     private long height;
 
     @JsonProperty("biome")
+    @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL, orphanRemoval = true)
     private Biome biome;
 
 
     @JsonProperty("surfaceType")
     @Column(name = "surfaceType")
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private SurfaceType surfaceType;
 
@@ -70,7 +75,7 @@ public class Tile {
     public List<Tile> getNeighbours() {
         List<Tile> returnTiles = new ArrayList<>();
         coordinate.getNeighbours().forEach(
-                coordinate -> returnTiles.add(coordinate.getWorld().getTile(coordinate.getXCoord(), coordinate.getYCoord()))
+                coordinate -> returnTiles.add(coordinate.getWorld().getCoordinate(coordinate.getXCoord(), coordinate.getYCoord()).getTile())
         );
 
         return returnTiles;

@@ -1,7 +1,14 @@
-package com.watchers.model.actor;
+package com.watchers.model.actors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.coordinate.Coordinate;
+import com.fasterxml.jackson.annotation.*;
+import com.watchers.model.actors.animals.Rabbit;
+import com.watchers.model.actors.animals.Whale;
+import com.watchers.model.common.Coordinate;
+import com.watchers.model.common.Views;
+import com.watchers.model.enums.AnimalType;
+import com.watchers.model.enums.StateType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -10,32 +17,63 @@ import javax.persistence.*;
 import java.util.Optional;
 
 @Data
-@Entity
 @Slf4j
+@Entity
+@Table(name = "animal")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="animal_type",
         discriminatorType = DiscriminatorType.STRING)
-@Table(name = "animal")
 @EqualsAndHashCode(callSuper=true)
 @SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Rabbit.class, name = "rabbit"),
+        @JsonSubTypes.Type(value = Whale.class, name = "whale")
+})
 public abstract class Animal extends Actor {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
+    @JsonProperty("animalId")
     @SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
     @GeneratedValue(generator="Animal_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "animal_id")
     private Long id;
 
+    @Transient
+    @JsonIgnore
     static int FORAGING_RANGE = 3;
 
+    @JsonView(Views.Public.class)
+    @Column(name = "food_reserve")
     private float foodReserve;
+
+    @JsonView(Views.Public.class)
+    @Column(name = "max_food")
     private float maxFoodReserve;
+
+    @JsonView(Views.Public.class)
+    @Column(name = "foraging")
     private float foraging;
+
+    @JsonView(Views.Public.class)
+    @Column(name = "metabolism")
     private float metabolisme;
+
+    @JsonView(Views.Public.class)
+    @Column(name = "reproduction_rate")
     private float reproductionRate;
+
+    @JsonView(Views.Public.class)
+    @Column(name = "movement")
     private int movement;
+
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "animal_type")
     private AnimalType animalType;
 
     public abstract void generateOffspring(Coordinate coordinate, float foodPassed);

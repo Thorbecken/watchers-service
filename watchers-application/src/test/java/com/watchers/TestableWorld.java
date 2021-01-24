@@ -3,11 +3,11 @@ package com.watchers;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
-import com.watchers.model.coordinate.CoordinateFactory;
-import com.watchers.model.coordinate.WorldTypeEnum;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.world.Continent;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import com.watchers.model.worldsetting.WorldSetting;
 
 import java.util.*;
@@ -72,6 +72,8 @@ public class TestableWorld {
 
     public static SettingConfiguration createConfiguration() {
         return new SettingConfiguration(
+                getEnviormentMock(),
+
                 false,
                 1,
                 10,
@@ -95,5 +97,75 @@ public class TestableWorld {
                 5,
                 10
         );
+    }
+
+    private static Environment getEnviormentMock() {
+        return new Environment() {
+            @Override
+            public String[] getActiveProfiles() {
+                return new String[0];
+            }
+
+            @Override
+            public String[] getDefaultProfiles() {
+                return new String[0];
+            }
+
+            @Override
+            @SuppressWarnings("all")
+            public boolean acceptsProfiles(String... profiles) {
+                return false;
+            }
+
+            @Override
+            public boolean acceptsProfiles(Profiles profiles) {
+                return false;
+            }
+
+            @Override
+            public boolean containsProperty(String key) {
+                return false;
+            }
+
+            @Override
+            public String getProperty(String key) {
+                return null;
+            }
+
+            @Override
+            public String getProperty(String key, String defaultValue) {
+                return null;
+            }
+
+            @Override
+            public <T> T getProperty(String key, Class<T> targetType) {
+                return null;
+            }
+
+            @Override
+            public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+                return null;
+            }
+
+            @Override
+            public String getRequiredProperty(String key) throws IllegalStateException {
+                return null;
+            }
+
+            @Override
+            public <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException {
+                return null;
+            }
+
+            @Override
+            public String resolvePlaceholders(String text) {
+                return null;
+            }
+
+            @Override
+            public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+                return null;
+            }
+        };
     }
 }

@@ -6,11 +6,11 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.MockContinent;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.world.Continent;
+import com.watchers.model.dto.MockContinent;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +23,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ContinentalDriftNewTileAssigner {
 
-    private final WorldRepositoryInMemory worldRepositoryInMemory;
+    private final WorldRepository worldRepository;
     private final ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     private final SettingConfiguration settingConfiguration;
     long nextContinentalId = 0;
 
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto taskDto){
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         int currentNumberOfContinents = world.getContinents().size();
         Long newestContinent = world.getContinents().stream()
                 .max(Comparator.comparing(Continent::getId))
@@ -47,7 +47,7 @@ public class ContinentalDriftNewTileAssigner {
         int newContinentsCreated = createNewContinents(taskDto, currentNumberOfContinents, minimumContinents, listOfConnectedCoordinates, world);
         addEmptytilesToExistingContinents(newContinentsCreated, listOfConnectedCoordinates, taskDto, world);
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
 
     }
 

@@ -2,6 +2,7 @@ package com.watchers.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Data
@@ -14,6 +15,7 @@ public class SettingConfiguration {
     private int turnTimer;
     private int continentalshiftTimer;
     private int saveTimer;
+    private String directory;
 
     // World configuration
     private long xSize;
@@ -37,6 +39,8 @@ public class SettingConfiguration {
     private int maxErosion;
 
     public SettingConfiguration(
+            Environment environment,
+
             @Value("${watch.startup.persistent}") boolean persistent,
             @Value("${watch.startup.processingTimer}") int processingTimer,
             @Value("${watch.startup.turnTimer}") int turnTimer,
@@ -64,6 +68,7 @@ public class SettingConfiguration {
         this.turnTimer = turnTimer;
         this.continentalshiftTimer = continentalshiftTimer;
         this.saveTimer = saveTimer;
+        this.directory = environment.getProperty("WATCHERS_SAVE_PATH");
 
         this.minimumContinents = minimumContinents;
         this.xSize = xSize;

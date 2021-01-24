@@ -1,4 +1,4 @@
-package com.watchers.model.actor;
+package com.watchers.model.enums;
 
 public enum StateType {
     ALIVE, DEAD

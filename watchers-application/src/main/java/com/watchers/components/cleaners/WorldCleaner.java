@@ -1,13 +1,13 @@
 package com.watchers.components.cleaners;
 
-import com.watchers.model.actor.Actor;
-import com.watchers.model.actor.StateType;
+import com.watchers.model.actors.Actor;
+import com.watchers.model.enums.StateType;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.ContinentRepositoryInMemory;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.ContinentRepository;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,12 +22,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class WorldCleaner {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
-    private ContinentRepositoryInMemory continentRepositoryInMemory;
+    private WorldRepository worldRepository;
+    private ContinentRepository continentRepository;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void proces(WorldTaskDto dto){
-        World world = worldRepositoryInMemory.findById(dto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(dto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         List<Actor> currentDeads = world.getActorList().stream()
                 .filter(actor -> actor.getStateType() == StateType.DEAD)
                 .collect(Collectors.toList());
@@ -56,15 +56,15 @@ public class WorldCleaner {
                 log.trace("deleting continents: " + Arrays.toString(zeroContinents.stream().map(Continent::getId).toArray()));
                 world.getContinents().removeAll(zeroContinents);
 
-                worldRepositoryInMemory.save(world);
+                worldRepository.save(world);
 
-                world = worldRepositoryInMemory.findById(world.getId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
-                continentRepositoryInMemory.deleteAll(zeroContinents);
+                world = worldRepository.findById(world.getId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
+                continentRepository.deleteAll(zeroContinents);
                 zeroContinents.stream().map(Continent::getId).forEach(aLong -> ((ContinentalDriftTaskDto) dto).getRemovedContinents.add(aLong));
                 log.trace("Started with " + start + " continents and ended with " + world.getContinents().size());
             }
         }
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 }

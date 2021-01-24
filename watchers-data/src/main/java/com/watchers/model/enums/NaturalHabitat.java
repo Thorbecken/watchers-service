@@ -1,6 +1,6 @@
-package com.watchers.model.actor;
+package com.watchers.model.enums;
 
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.enums.SurfaceType;
 
 import java.util.Arrays;
 import java.util.List;

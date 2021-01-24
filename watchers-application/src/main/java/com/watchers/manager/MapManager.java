@@ -5,8 +5,8 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
+import com.watchers.repository.WorldRepository;
 import com.watchers.model.worldsetting.WorldSetting;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @EnableTransactionManagement
 public class MapManager {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
     private WorldFactory worldFactory;
     private SettingConfiguration settingConfiguration;
 
@@ -34,7 +34,7 @@ public class MapManager {
     }
 
     public World getWorld(Long worldId, boolean initiated) {
-       Optional<World> optionalWorld = worldRepositoryInMemory.findById(worldId);
+       Optional<World> optionalWorld = worldRepository.findById(worldId);
        if(optionalWorld.isPresent()) {
            World world = optionalWorld.get();
            log.trace("world loaden from memory with: " + (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, (x, y) -> x + y) + world.getHeightDeficit()) + " height");

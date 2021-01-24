@@ -6,7 +6,7 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +19,15 @@ import java.util.stream.Collectors;
 public class ErosionAdjuster {
 
     private final int NUMBER_OF_NEIGHBOURS = 4;
-    private CoordinateHelper coordinateHelper;
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
     private SettingConfiguration settingConfiguration;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepositoryInMemory.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, Long> erosionMap = new HashMap<>();
 
-        coordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
+        CoordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
             erosionMap.put(coordinate, 0L);
         });
 
@@ -54,11 +53,11 @@ public class ErosionAdjuster {
         });
 
         erosionMap.forEach((Coordinate coordiante, Long aLong) -> {
-                    long currentHeight = world.getTile(coordiante).getHeight();
-                    world.getTile(coordiante).setHeight(currentHeight + aLong);
+                    long currentHeight = world.getCoordinate(coordiante.getXCoord(), coordiante.getYCoord()).getTile().getHeight();
+                    world.getCoordinate(coordiante.getXCoord(), coordiante.getYCoord()).getTile().setHeight(currentHeight + aLong);
                 }
         );
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 }

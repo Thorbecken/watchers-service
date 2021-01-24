@@ -6,8 +6,8 @@ import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
-import com.watchers.repository.inmemory.WorldSettingsRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
+import com.watchers.repository.WorldSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,8 +22,8 @@ class ContinentalDriftManagerTest {
     @BeforeEach
     void setUp() {
         world = TestableWorld.createWorld();
-        WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
-        WorldSettingsRepositoryInMemory worldSettingsRepositoryInMemory = Mockito.mock(WorldSettingsRepositoryInMemory.class);
+        WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
+        WorldSettingsRepository worldSettingsRepository = Mockito.mock(WorldSettingsRepository.class);
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
         CoordinateHelper coordinateHelper = new CoordinateHelper();
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
@@ -36,8 +36,8 @@ class ContinentalDriftManagerTest {
         ContinentalCorrector continentalCorrector = new ContinentalCorrector(worldRepositoryInMemory);
         WorldSettingManager worldSettingManager = new WorldSettingManager(worldSettingsRepositoryInMemory);
 
-        Mockito.when(worldRepositoryInMemory.findById(world.getId())).thenReturn(Optional.of(world));
-        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputator, erosionAdjuster, worldSettingManager);
+        Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
+        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, tileDefined, erosionAdjuster, worldSettingManager);
     }
 
     @Test

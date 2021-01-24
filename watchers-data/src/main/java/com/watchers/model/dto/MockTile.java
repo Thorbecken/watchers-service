@@ -1,9 +1,9 @@
 package com.watchers.model.dto;
 
 
-import com.watchers.model.actor.Actor;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.actors.Actor;
+import com.watchers.model.world.Continent;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
 

@@ -1,14 +1,15 @@
 package com.watchers.model.coordinate;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.model.actor.Actor;
 import com.watchers.model.environment.Continent;
+import com.watchers.model.world.World;
+import com.watchers.model.actors.Actor;
+import com.watchers.model.world.Continent;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +26,8 @@ import java.util.*;
 public abstract class Coordinate {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
+    @JsonProperty("coordinateId")
     @GeneratedValue(generator="Coordinate_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "coordinate_id", nullable = false)
     private Long id;
@@ -40,20 +42,25 @@ public abstract class Coordinate {
 
     @JsonProperty("xCoord")
     @Column(name = "xCoord")
+    @JsonView(Views.Public.class)
     private long xCoord;
 
     @JsonProperty("yCoord")
     @Column(name = "yCoord")
+    @JsonView(Views.Public.class)
     private long yCoord;
 
     @JsonProperty("tile")
+    @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Tile tile;
 
     @JsonProperty("actors")
+    @JsonView(Views.Public.class)
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<Actor> actors = new HashSet<>();
 
+    @JsonView(Views.Public.class)
     @JsonIgnoreProperties({"world", "coordinates", "type" })
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
@@ -142,6 +149,7 @@ public abstract class Coordinate {
         }
     }
 
+    @JsonIgnore
     public Coordinate calculateDistantCoordinate(int xVelocity, int yVelocity) {
         long newX = this.getXCoordinateFromTile(xVelocity);
         long newY = this.getYCoordinateFromTile(yVelocity);
@@ -241,5 +249,19 @@ public abstract class Coordinate {
                 "xCoord=" + xCoord +
                 ", yCoord=" + yCoord +
                 '}';
+    }
+
+    public Coordinate createClone(World newWorld) {
+        Coordinate clone = new Coordinate();
+        clone.setId(this.id);
+        clone.setWorld(newWorld);
+        clone.setXCoord(this.xCoord);
+        clone.setYCoord(this.yCoord);
+        clone.setContinent(newWorld.getContinents().stream()
+                .filter(oldContinent -> oldContinent.getId().equals(this.continent.getId()))
+                .findFirst().get());
+        clone.setTile(tile.createClone(clone));
+
+        return clone;
     }
 }

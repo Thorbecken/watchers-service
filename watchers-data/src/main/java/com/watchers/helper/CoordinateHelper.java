@@ -1,14 +1,12 @@
 package com.watchers.helper;
 
-import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.common.Coordinate;
 import com.watchers.model.world.World;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
 public class CoordinateHelper {
 
     public static int UP = 1;
@@ -16,7 +14,7 @@ public class CoordinateHelper {
     public static int LEFT = -1;
     public static int RIGHT = 1;
 
-    public List<Coordinate> getAllPossibleCoordinates(World world) {
+    public static List<Coordinate> getAllPossibleCoordinates(World world) {
         return new ArrayList<>(world.getCoordinates());
     }
 

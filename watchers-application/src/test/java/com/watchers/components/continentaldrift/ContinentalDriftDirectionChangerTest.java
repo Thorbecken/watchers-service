@@ -2,9 +2,9 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableWorld;
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ class ContinentalDriftDirectionChangerTest {
     private World world;
     private ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject methodObject;
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
-    private WorldRepositoryInMemory worldRepositoryInMemory = Mockito.mock(WorldRepositoryInMemory.class);
+    private WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
     private long lastContinentalDrift;
     private Set<Continent> continents;
 
@@ -29,7 +29,7 @@ class ContinentalDriftDirectionChangerTest {
         continents = world.getContinents();
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
 
-        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepositoryInMemory, settingConfiguration);
+        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository, settingConfiguration);
 
         lastContinentalDrift = world.getContinents().size()-1;
         methodObject = continentalDriftDirectionChanger.new ContinentalDriftDirectionMethodObject(false,lastContinentalDrift);
