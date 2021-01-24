@@ -25,19 +25,18 @@ class ContinentalDriftManagerTest {
         WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
         WorldSettingsRepository worldSettingsRepository = Mockito.mock(WorldSettingsRepository.class);
         SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
-        CoordinateHelper coordinateHelper = new CoordinateHelper();
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepositoryInMemory, settingConfiguration);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(coordinateHelper, worldRepositoryInMemory);
-        ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(coordinateHelper, worldRepositoryInMemory, settingConfiguration);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepositoryInMemory, continentalDriftDirectionChanger, settingConfiguration);
-        SurfaceTypeComputator surfaceTypeComputator = new SurfaceTypeComputator(20,30,40,50, 60, worldRepositoryInMemory);
-        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(coordinateHelper, worldRepositoryInMemory, settingConfiguration);
-        ContinentalCorrector continentalCorrector = new ContinentalCorrector(worldRepositoryInMemory);
-        WorldSettingManager worldSettingManager = new WorldSettingManager(worldSettingsRepositoryInMemory);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
+        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository, settingConfiguration);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
+        ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(worldRepository, settingConfiguration);
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, continentalDriftDirectionChanger, settingConfiguration);
+        SurfaceTypeComputator surfaceTypeComputator = new SurfaceTypeComputator(20,30,40,50, 60, worldRepository);
+        ErosionAdjuster erosionAdjuster = new ErosionAdjuster(worldRepository, settingConfiguration);
+        ContinentalCorrector continentalCorrector = new ContinentalCorrector(worldRepository);
+        WorldSettingManager worldSettingManager = new WorldSettingManager(worldSettingsRepository);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
-        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, tileDefined, erosionAdjuster, worldSettingManager);
+        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputator, erosionAdjuster, worldSettingManager);
     }
 
     @Test

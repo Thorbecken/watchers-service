@@ -26,6 +26,10 @@ public class WorldSetting {
     @Column(name = "world_status")
     private WorldStatusEnum worldStatusEnum;
 
+    @JsonProperty("worldTypeEnum")
+    @JsonView(Views.Public.class)
+    public WorldTypeEnum worldTypeEnum;
+
     @JsonProperty("needsProcessing")
     @Column(name = "needs_processing")
     private boolean needsProcessing;

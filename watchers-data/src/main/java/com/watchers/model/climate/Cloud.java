@@ -1,6 +1,8 @@
 package com.watchers.model.climate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.watchers.model.common.Views;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,10 +17,11 @@ import javax.persistence.*;
 public class Cloud {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
     @GeneratedValue(generator="Cloud_Gen", strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @JsonView(Views.Public.class)
     long airMoisture;
 
     @Transient
@@ -95,5 +98,13 @@ public class Cloud {
 
     public void calculateNewMoistureLevel() {
         reduceAirMoisture(airMoistureLossage);
+    }
+
+    public Cloud createClone(Climate climateClone) {
+        Cloud clone = new Cloud();
+        clone.setCurrentClimate(currentClimate);
+        clone.setAirMoisture(airMoisture);
+        clone.setCurrentClimate(climateClone);
+        return clone;
     }
 }

@@ -6,7 +6,7 @@ import com.watchers.model.climate.ClimateEnum;
 import com.watchers.model.climate.PrecipitationEnum;
 import com.watchers.model.climate.TemperatureEnum;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class ClimateComputator {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
     private static final Map<TemperatureEnum, Map<PrecipitationEnum ,ClimateEnum>> climatemap;
     static {
@@ -46,14 +46,14 @@ public class ClimateComputator {
         climatemap.put(TemperatureEnum.TROPICAL, tropicalMap);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(WorldTaskDto taskDto){
-        World world = worldRepositoryInMemory.getOne(taskDto.getWorldId());
+        World world = worldRepository.getOne(taskDto.getWorldId());
         world.getCoordinates()
                 .parallelStream()
                 .map(Coordinate::getClimate)
                 .forEach(climate -> climate.setClimateEnum(climatemap.get(climate.getTemperatureEnum()).get(climate.getPrecipitationEnum())));
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 }

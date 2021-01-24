@@ -2,9 +2,10 @@ package com.watchers.components.climate;
 
 import com.watchers.model.climate.ClimateEnum;
 import com.watchers.model.dto.WorldTaskDto;
+import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.*;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class BiomeComputator {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
     private static final Map<SurfaceType, Map<ClimateEnum, BiomeTypeEnum>> biomeTypes;
     static {
@@ -117,9 +118,9 @@ public class BiomeComputator {
         biomeTypes.put(SurfaceType.MOUNTAIN, mountainMap);
     }
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(WorldTaskDto taskDto){
-        World world = worldRepositoryInMemory.getOne(taskDto.getWorldId());
+        World world = worldRepository.getOne(taskDto.getWorldId());
         world.getCoordinates()
                 .parallelStream()
                 .forEach(
@@ -131,7 +132,7 @@ public class BiomeComputator {
                                     .setBiomeTypeEnum(biomeTypes.get(surfaceType).get(climateEnum));
                         });
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
 }

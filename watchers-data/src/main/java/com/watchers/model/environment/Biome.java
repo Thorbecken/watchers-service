@@ -25,13 +25,14 @@ public class Biome implements ParallelTask {
     @Column(name = "biome_id", nullable = false)
     private Long id;
 
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private BiomeTypeEnum biomeTypeEnum;
 
     @JsonView(Views.Public.class)
     @Column(name = "currentFood")
     @JsonProperty("current_food")
-private float currentFood;
+    private float currentFood;
 
     @JsonView(Views.Public.class)
     @Column(name = "maxFood")

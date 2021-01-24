@@ -2,8 +2,8 @@ package com.watchers.model.dto;
 
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.model.world.WorldFactoryDTO;
 import lombok.Data;
 import org.springframework.util.Assert;
 

@@ -3,10 +3,8 @@ package com.watchers.model.coordinate;
 import com.fasterxml.jackson.annotation.*;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.climate.Climate;
+import com.watchers.model.common.Views;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.world.World;
-import com.watchers.model.actor.Actor;
-import com.watchers.model.environment.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.actors.Actor;
 import com.watchers.model.world.Continent;
@@ -23,6 +21,15 @@ import java.util.*;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="coordinate_type", discriminatorType = DiscriminatorType.STRING)
 @SequenceGenerator(name="Coordinate_Gen", sequenceName="Coordinate_Seq", allocationSize = 1)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = GlobeCoordinate.class, name = "GlobeCoordinate"),
+        @JsonSubTypes.Type(value = NonEuclideanCoordinate.class, name = "NonEuclideanCoordinate"),
+        @JsonSubTypes.Type(value = WrapAroundCoordinate.class, name = "WrapAroundCoordinate")
+})
 public abstract class Coordinate {
 
     @Id
@@ -37,6 +44,7 @@ public abstract class Coordinate {
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private CoordinateType coordinateType;
 
@@ -65,6 +73,7 @@ public abstract class Coordinate {
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
 
+    @JsonView(Views.Public.class)
     @JsonProperty("climate")
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
     private Climate climate;
@@ -249,19 +258,5 @@ public abstract class Coordinate {
                 "xCoord=" + xCoord +
                 ", yCoord=" + yCoord +
                 '}';
-    }
-
-    public Coordinate createClone(World newWorld) {
-        Coordinate clone = new Coordinate();
-        clone.setId(this.id);
-        clone.setWorld(newWorld);
-        clone.setXCoord(this.xCoord);
-        clone.setYCoord(this.yCoord);
-        clone.setContinent(newWorld.getContinents().stream()
-                .filter(oldContinent -> oldContinent.getId().equals(this.continent.getId()))
-                .findFirst().get());
-        clone.setTile(tile.createClone(clone));
-
-        return clone;
     }
 }

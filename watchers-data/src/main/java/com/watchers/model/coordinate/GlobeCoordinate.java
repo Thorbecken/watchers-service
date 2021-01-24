@@ -1,13 +1,11 @@
 package com.watchers.model.coordinate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import lombok.Data;
 
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.util.ArrayList;
@@ -87,6 +85,8 @@ public class GlobeCoordinate extends Coordinate {
         clone.changeContinent(newWorld.getContinents().stream()
                 .filter(oldContinent -> oldContinent.getId().equals(getContinent().getId()))
                 .findFirst().get());
+        clone.setTile(this.getTile().createClone(clone));
+        clone.setClimate(this.getClimate().createClone(clone));
 
         return clone;
     }

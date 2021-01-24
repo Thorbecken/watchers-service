@@ -2,8 +2,8 @@ package com.watchers.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.manager.MapManager;
-import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Views;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import io.swagger.annotations.Api;

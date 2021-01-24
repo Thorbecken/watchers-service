@@ -2,7 +2,7 @@ package com.watchers.model.actors.animals;
 
 import com.watchers.model.actors.Actor;
 import com.watchers.model.actors.Animal;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.NaturalHabitat;
 import com.watchers.model.enums.StateType;

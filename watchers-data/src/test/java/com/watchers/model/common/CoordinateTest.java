@@ -2,8 +2,8 @@ package com.watchers.model.common;
 
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
-import com.watchers.model.environment.Continent;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import org.junit.jupiter.api.Test;
 

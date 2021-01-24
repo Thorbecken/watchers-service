@@ -2,11 +2,11 @@ package com.watchers.service;
 
 import com.watchers.manager.*;
 import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSetting;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -86,8 +86,8 @@ public class WorldService {
         }
     }
 
-    private Boolean addActiveWorldFromPersistence(Long id) {
-        Optional<World> optionalWorld = fileSaveManager.findById(id);
+    private Boolean addActiveWorldFromPersistence(WorldSetting worldSetting) {
+        Optional<World> optionalWorld = fileSaveManager.findById(worldSetting.getWorldId());
         if(optionalWorld.isPresent()) {
             World world = optionalWorld.get();
             saveToMemory(world);
@@ -114,7 +114,8 @@ public class WorldService {
         log.info("current coordinates from memory are: " + persistentWorld.getCoordinates().size());
     }
 
-    private Boolean addActiveWorldFromMemory(Long id) {
+    private Boolean addActiveWorldFromMemory(WorldSetting worldSetting) {
+        Long id = worldSetting.getWorldId();
         if (worldRepository.existsById(id)) {
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
@@ -126,7 +127,7 @@ public class WorldService {
             }
         } else {
             log.warn("The world " + id + " does not exist in the persistence context. A new world is going to be created. Large worlds take a while being generated.");
-            World world = mapManager.createWorld();
+            World world = mapManager.createWorld(worldSetting);
             worldRepository.save(world);
             log.info("Created a new world! Number: " + world.getId());
             activeWorldIds.add(worldSetting.getWorldId());

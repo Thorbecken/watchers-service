@@ -1,6 +1,6 @@
 package com.watchers.helper;
 
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.world.World;
 
 import java.util.ArrayList;

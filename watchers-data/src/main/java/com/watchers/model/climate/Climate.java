@@ -2,8 +2,11 @@ package com.watchers.model.climate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.environment.SurfaceType;
+import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.environment.Tile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +20,7 @@ import javax.persistence.*;
 public class Climate {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
     @GeneratedValue(generator="Climate_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "climate_id", nullable = false)
     private Long id;
@@ -28,10 +31,12 @@ public class Climate {
 
     @JsonProperty("longitude")
     @Column(name = "longitude")
+    @JsonView(Views.Public.class)
     private double longitude;
 
     @JsonProperty("latitude")
     @Column(name = "latitude")
+    @JsonView(Views.Public.class)
     private double latitude;
 
     @JsonIgnore
@@ -39,19 +44,23 @@ public class Climate {
     private Cloud incomingCloud;
 
     @JsonProperty("currentCloud")
+    @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "currentClimate", cascade=CascadeType.ALL, orphanRemoval = false)
     private Cloud currentCloud;
 
     @JsonProperty("climateEnum")
     @Column(name = "climateEnum")
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private ClimateEnum climateEnum;
 
+    @JsonView(Views.Public.class)
     @JsonProperty("temperatureEnum")
     @Column(name = "temperatureEnum")
     @Enumerated(value = EnumType.STRING)
     private TemperatureEnum temperatureEnum;
 
+    @JsonView(Views.Public.class)
     @JsonProperty("precipitationEnum")
     @Column(name = "precipitationEnum")
     @Enumerated(value = EnumType.STRING)
@@ -70,11 +79,13 @@ public class Climate {
         this.currentCloud = new Cloud(this);
     }
 
+    @JsonIgnore
     public boolean isWater(){
         SurfaceType surfaceType = coordinate.getTile().getSurfaceType();
         return  surfaceType.equals(SurfaceType.OCEAN) || surfaceType.equals(SurfaceType.SEA) || surfaceType.equals(SurfaceType.COASTAL);
     }
 
+    @JsonIgnore
     public boolean isLand(){
         return !isWater();
     }
@@ -125,5 +136,18 @@ public class Climate {
         temp = Double.doubleToLongBits(latitude);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
+    }
+
+    public Climate createClone(Coordinate coordinateClone) {
+        Climate clone = new Climate();
+        clone.setCurrentCloud(currentCloud.createClone(clone));
+        clone.setPrecipitationEnum(precipitationEnum);
+        clone.setClimateEnum(climateEnum);
+        clone.setTemperatureEnum(temperatureEnum);
+        clone.setCoordinate(coordinateClone);
+        clone.setLatitude(latitude);
+        clone.setLongitude(longitude);
+        clone.setPrecipitationEnum(precipitationEnum);
+        return clone;
     }
 }

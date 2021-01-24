@@ -1,7 +1,9 @@
 package com.watchers.model.coordinate;
 
-import com.watchers.model.environment.Continent;
+
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldTypeEnum;
 
 import java.util.List;
 

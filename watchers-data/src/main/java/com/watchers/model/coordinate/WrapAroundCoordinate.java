@@ -2,7 +2,7 @@ package com.watchers.model.coordinate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.environment.Continent;
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 
 import javax.persistence.DiscriminatorValue;
@@ -65,6 +65,8 @@ public class WrapAroundCoordinate extends Coordinate {
         clone.changeContinent(newWorld.getContinents().stream()
                 .filter(oldContinent -> oldContinent.getId().equals(getContinent().getId()))
                 .findFirst().get());
+        clone.setTile(this.getTile().createClone(clone));
+        clone.setClimate(this.getClimate().createClone(clone));
 
         return clone;
     }

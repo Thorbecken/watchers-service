@@ -1,4 +1,5 @@
 package com.watchers.model.world;
 
-public class WorldTypeEnum {
+public enum WorldTypeEnum {
+    NON_EUCLIDEAN, WRAP_AROUND, GLOBE
 }

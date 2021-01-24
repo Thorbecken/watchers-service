@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Views;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
 
@@ -30,16 +30,13 @@ public class World {
     @JsonView(Views.Internal.class)
     @SequenceGenerator(name = "World_Gen", sequenceName = "World_Seq", allocationSize = 1)
     @GeneratedValue(generator = "World_Gen", strategy = GenerationType.SEQUENCE)
-    @JsonProperty("worldId")
     private Long id;
 
-    @JsonProperty("xSize")
     @JsonProperty("xSize")
     @Column(name = "x_size")
     @JsonView(Views.Public.class)
     private Long xSize;
 
-    @JsonProperty("ySize")
     @JsonProperty("ySize")
     @Column(name = "y_size")
     @JsonView(Views.Public.class)
@@ -141,7 +138,6 @@ public class World {
         }
     }
 
-    private void setActorList(){
     private void setActorList() {
         actorList = new ArrayList<>();
 

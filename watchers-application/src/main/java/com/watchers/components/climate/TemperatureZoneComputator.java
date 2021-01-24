@@ -5,7 +5,7 @@ import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.climate.TemperatureEnum;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,17 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class TemperatureZoneComputator {
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(WorldTaskDto taskDto){
-        World world = worldRepositoryInMemory.getOne(taskDto.getWorldId());
+        World world = worldRepository.getOne(taskDto.getWorldId());
         world.getCoordinates()
                 .parallelStream()
                 .map(Coordinate::getClimate)
                 .forEach(climate -> climate.setTemperatureEnum(calculateTemperatureEnum(climate)));
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
     private TemperatureEnum calculateTemperatureEnum(Climate climate) {

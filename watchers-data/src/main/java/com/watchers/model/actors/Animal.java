@@ -5,7 +5,6 @@ import com.watchers.model.coordinate.Coordinate;
 import com.fasterxml.jackson.annotation.*;
 import com.watchers.model.actors.animals.Rabbit;
 import com.watchers.model.actors.animals.Whale;
-import com.watchers.model.common.Coordinate;
 import com.watchers.model.common.Views;
 import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.StateType;
@@ -162,5 +161,9 @@ public abstract class Animal extends Actor {
         clone.setAnimalType(this.getAnimalType());
 
         return clone;
+    }
+
+    public Animal(){
+        this.setActorType(ActorType.ANIMAL);
     }
 }

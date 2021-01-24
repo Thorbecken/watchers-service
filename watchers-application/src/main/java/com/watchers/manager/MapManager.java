@@ -2,11 +2,10 @@ package com.watchers.manager;
 
 import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.coordinate.WorldTypeEnum;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSetting;
 import com.watchers.repository.WorldRepository;
-import com.watchers.model.worldsetting.WorldSetting;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

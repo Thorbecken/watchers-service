@@ -7,7 +7,7 @@ import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.climate.PrecipitationEnum;
 import com.watchers.model.world.World;
-import com.watchers.repository.inmemory.WorldRepositoryInMemory;
+import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -41,18 +41,18 @@ public class PrecipiationComputator {
         precipationMap.put(PrecipitationEnum.ARID, ARID_ZONE);
     }
 
-    private WorldRepositoryInMemory worldRepositoryInMemory;
+    private WorldRepository worldRepository;
 
-    @Transactional("inmemoryDatabaseTransactionManager")
+    @Transactional
     public void process(WorldTaskDto taskDto) {
-        World world = worldRepositoryInMemory.getOne(taskDto.getWorldId());
+        World world = worldRepository.getOne(taskDto.getWorldId());
         List<Climate> climates = world.getCoordinates().stream().map(Coordinate::getClimate).collect(Collectors.toList());
 
         computeEvaporation(climates);
         moveCloudsAccordingToAirflow(world.getCoordinates());
         setLandPrecipationEnums(climates);
 
-        worldRepositoryInMemory.save(world);
+        worldRepository.save(world);
     }
 
     private void computeEvaporation(List<Climate> climates) {

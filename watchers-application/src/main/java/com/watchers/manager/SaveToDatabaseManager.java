@@ -2,7 +2,7 @@ package com.watchers.manager;
 
 import com.mchange.util.AssertException;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.repository.*;
@@ -69,7 +69,7 @@ public class SaveToDatabaseManager {
 
         persistentWorld.getCoordinates().
                 forEach(
-                        coordinate -> coordinate.setContinent(continentMapping.get(coordinate.getContinent().getId()))
+                        coordinate -> coordinate.changeContinent(continentMapping.get(coordinate.getContinent().getId()))
                 );
 
         if (continentMapping.keySet().contains(persistentWorld.getLastContinentInFlux())){
@@ -100,7 +100,7 @@ public class SaveToDatabaseManager {
     private void saveCoordinates(Long id, World persistentWorld) {
         World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
         List<Coordinate> coordinates = persistentWorld.getCoordinates().stream()
-                .map(coordinate -> coordinate.createClone(newWorld))
+                .map(coordinate -> coordinate.createBasicClone(newWorld))
                 .sorted(Comparator.comparing(Coordinate::getId))
                 .collect(Collectors.toList());
         newWorld.getCoordinates().addAll(coordinates);

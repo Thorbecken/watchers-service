@@ -2,8 +2,7 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
-import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.environment.Tile;

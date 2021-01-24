@@ -26,7 +26,8 @@ public class TileDefined {
                        @Value("${watch.coastalHight}") long coastalHight,
                        @Value("${watch.plainsHight}") long plainsHight,
                        @Value("${watch.hillHight}") long hillHight,
-                       @Value("${watch.mountainHight}") long mountainHight){
+                       @Value("${watch.mountainHight}") long mountainHight,
+                       WorldRepository worldRepository){
         this.oceanHight = oceanHight;
         this.seaHight = seaHight;
         this.coastalHight = coastalHight;

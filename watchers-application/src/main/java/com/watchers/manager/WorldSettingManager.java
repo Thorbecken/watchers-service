@@ -1,11 +1,8 @@
 package com.watchers.manager;
 
-import com.watchers.model.coordinate.WorldTypeEnum;
-import com.watchers.model.worldsetting.WorldSetting;
-import com.watchers.model.worldsetting.WorldStatusEnum;
-import com.watchers.repository.inmemory.WorldSettingsRepositoryInMemory;
 import com.watchers.model.world.WorldSetting;
 import com.watchers.model.enums.WorldStatusEnum;
+import com.watchers.model.world.WorldTypeEnum;
 import com.watchers.repository.WorldSettingsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -105,10 +102,12 @@ public class WorldSettingManager {
     }
 
     @Transactional
-    public void createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift, long heigtDivider, int minimumContinents) {
-        WorldSetting worldSetting = new WorldSetting(worldId, worldStatusEnum, needsProcessing, needsSaving, needsContinentalshift, heigtDivider, minimumContinents);
+    public WorldSetting createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, WorldTypeEnum worldTypeEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift, long heigtDivider, int minimumContinents) {
+        WorldSetting worldSetting = new WorldSetting(worldId, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift, heigtDivider, minimumContinents);
         worldSettingsRepository.save(worldSetting);
         worldSettingsRepository.flush();
+
+        return worldSetting;
     }
 
     @Transactional

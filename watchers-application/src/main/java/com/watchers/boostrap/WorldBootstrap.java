@@ -1,11 +1,14 @@
 package com.watchers.boostrap;
 
 import com.watchers.config.SettingConfiguration;
+import com.watchers.manager.FileSaveManager;
 import com.watchers.manager.MapManager;
 import com.watchers.manager.WorldSettingManager;
-import com.watchers.model.WorldStatusEnum;
-import com.watchers.model.environment.World;
-import com.watchers.repository.postgres.WorldRepositoryPersistent;
+import com.watchers.model.enums.WorldStatusEnum;
+import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldTypeEnum;
+import com.watchers.repository.WorldRepository;
 import com.watchers.service.WorldService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +34,10 @@ public class WorldBootstrap implements CommandLineRunner {
 
         if(settingConfiguration.isPersistent()){
             if(fileSaveManager.exist(1L)){
-                worldService.addActiveWorld(1L, true);
+                worldService.addActiveWorld(worldSetting, true);
             } else {
                 log.warn("No world was found on startup! Generating a new world.");
-                World newWorld = mapManager.createWorld();
+                World newWorld = mapManager.createWorld(worldSetting);
                 worldRepository.saveAndFlush(newWorld);
                 worldService.saveWorld(newWorld);
                 log.info("Created a new world! Number: " + newWorld.getId());

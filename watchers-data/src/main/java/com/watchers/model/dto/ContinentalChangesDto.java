@@ -1,6 +1,6 @@
 package com.watchers.model.dto;
 
-import com.watchers.model.common.Coordinate;
+import com.watchers.model.coordinate.Coordinate;
 import lombok.Data;
 
 @Data

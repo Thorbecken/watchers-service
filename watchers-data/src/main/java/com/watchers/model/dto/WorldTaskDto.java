@@ -1,6 +1,6 @@
 package com.watchers.model.dto;
 
-import com.watchers.model.worldsetting.WorldSetting;
+import com.watchers.model.world.WorldSetting;
 import lombok.Data;
 
 @Data

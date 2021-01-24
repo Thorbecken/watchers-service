@@ -1,8 +1,16 @@
-package com.watchers.model.actor;
+package com.watchers.model.actors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.watchers.model.SerialTask;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.watchers.model.actors.animals.Rabbit;
+import com.watchers.model.actors.animals.Whale;
+import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.enums.NaturalHabitat;
+import com.watchers.model.enums.StateType;
+import com.watchers.model.interfaces.SerialTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,11 +20,19 @@ import javax.persistence.*;
 @Entity
 @Table(name = "actor")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@DiscriminatorColumn(name="actor_type", discriminatorType = DiscriminatorType.STRING)
 @SequenceGenerator(name="Actor_Gen", sequenceName="Actor_Seq", allocationSize = 1)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Animal.class, name = "Animal")
+})
 public abstract class Actor implements SerialTask {
 
     @Id
-    @JsonIgnore
+    @JsonView(Views.Internal.class)
     @SequenceGenerator(name="Actor_Gen", sequenceName="Actor_Seq", allocationSize = 1)
     @GeneratedValue(generator="Actor_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "actor_id")
@@ -28,23 +44,38 @@ public abstract class Actor implements SerialTask {
     private Coordinate coordinate;
 
 
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private StateType stateType;
+
+    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     private NaturalHabitat naturalHabitat;
+
+    @JsonView(Views.Public.class)
+    @Enumerated(value = EnumType.STRING)
+    private ActorType actorType;
 
     public void setCoordinate(Coordinate coordinate) {
         this.coordinate = coordinate;
     }
+
     public abstract void processSerialTask();
+
     public abstract void handleContinentalMovement();
+
+    @JsonIgnore
     public boolean isCorrectLandType(Coordinate coordinate){
         return this.getNaturalHabitat().movableSurfaces
                 .contains(coordinate.getTile().getSurfaceType());
     }
+
+    @JsonIgnore
     public boolean isOnCorrectLand(){
         return isCorrectLandType(coordinate);
     }
+
+    @JsonIgnore
     public boolean isNotOnCorrectLand(){
         return !isOnCorrectLand();
     }

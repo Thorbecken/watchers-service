@@ -2,10 +2,10 @@ package com.watchers.manager;
 
 import com.watchers.components.life.ActorProcessor;
 import com.watchers.components.life.BiomeProcessor;
-import com.watchers.model.actor.AnimalType;
-import com.watchers.model.actor.animals.AnimalFactory;
+import com.watchers.model.actors.animals.AnimalFactory;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
+import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;

@@ -1,14 +1,15 @@
 package com.watchers;
 
 import com.watchers.config.SettingConfiguration;
-import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
+import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.world.Continent;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldTypeEnum;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
-import com.watchers.model.worldsetting.WorldSetting;
 
 import java.util.*;
 
