@@ -30,9 +30,11 @@ public class SettingConfiguration {
     private int drifFlux;
     private long heigtDivider;
     private int minimumContinents;
+    private int maximumContinents;
     private int continentalToOcceanicRatio;
     private int maxContinentSize;
     private int continentalContinentWeight;
+    private int maxWidthLenghtBalance;
 
     // Erosion configuration
     private int minHeightDifference;
@@ -58,6 +60,8 @@ public class SettingConfiguration {
             @Value("${watch.continentalshift.driftFlux}") int drifFlux,
             @Value("${watch.continentalshift.heightdivider}") long heigtDivider,
             @Value("${watch.continentalshift.minContinents}") int minimumContinents,
+            @Value("${watch.continentalshift.maximumContinents:30}") int maximumContinents,
+            @Value("${watch.continentalshift.maxWidthLenghtBalance:3}") int maxWidthLenghtBalance,
             @Value("${watch.continentalshift.maxContinentsize:0}") int maxContinentSize,
             @Value("${watch.continentalshift.continentalToOcceanicRatio}") int continentalToOcceanicRatio,
             @Value("${watch.continentalshift.continentalContinentWeight}") int continentalContinentWeight,
@@ -71,6 +75,8 @@ public class SettingConfiguration {
         this.directory = environment.getProperty("WATCHERS_SAVE_PATH");
 
         this.minimumContinents = minimumContinents;
+        this.maximumContinents = maximumContinents;
+        this.maxWidthLenghtBalance = maxWidthLenghtBalance;
         this.xSize = xSize;
         this.ySize = ySize;
         this.numberOfContinents = numberOfContinents;

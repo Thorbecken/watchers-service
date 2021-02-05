@@ -63,9 +63,7 @@ public class ContinentalDriftNewTileAssigner {
                         .filter(adjecantCoordinates::contains)
                         .collect(Collectors.toList());
 
-                int maximalCoordinates = settingConfiguration.getMaxContinentSize() == 0?calculateMaximumCoordinates(taskDto, world):settingConfiguration.getMaxContinentSize();
-
-                Continent chosenContinent = getChosenContinent(taskDto, existingCoordinates, maximalCoordinates, world);
+                Continent chosenContinent = getChosenContinent(taskDto, existingCoordinates, world);
 
                 MockContinent mockContinent = new MockContinent(connectedCoordinates,world);
                 mockContinent.setContinent(chosenContinent);
@@ -78,8 +76,8 @@ public class ContinentalDriftNewTileAssigner {
         }
     }
 
-    private Continent getChosenContinent(ContinentalDriftTaskDto taskDto, List<Coordinate> existingCoordinates, int maximalCoordinates, World world) {
-        Continent chosenContinent = getValidAdjacentContinent(taskDto, existingCoordinates, maximalCoordinates);
+    private Continent getChosenContinent(ContinentalDriftTaskDto taskDto, List<Coordinate> existingCoordinates, World world) {
+        Continent chosenContinent = getValidAdjacentContinent(taskDto, existingCoordinates);
 
         if(chosenContinent == null){
             chosenContinent = new Continent(world, getSurfaceType(world));
@@ -90,7 +88,7 @@ public class ContinentalDriftNewTileAssigner {
         return chosenContinent;
     }
 
-    private Continent getValidAdjacentContinent(ContinentalDriftTaskDto taskDto, List<Coordinate> existingCoordinates, int maximalCoordinates) {
+    private Continent getValidAdjacentContinent(ContinentalDriftTaskDto taskDto, List<Coordinate> existingCoordinates) {
         return taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> existingCoordinates.contains(continentalChangesDto.getKey()))
                 .map(ContinentalChangesDto::getMockTile)
@@ -98,8 +96,7 @@ public class ContinentalDriftNewTileAssigner {
                 .map(MockTile::getContinent)
                 .filter(Objects::nonNull)
                 .filter(continent -> continent.getId()!= null)
-                .filter(continent -> continent.getCoordinates().size() < maximalCoordinates)
-                .max(Comparator.comparing(Continent::getId))
+                .min(Comparator.comparing(continent -> continent.getCoordinates().size()))
                 .orElse(null);
     }
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.helper.RandomHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
-import com.watchers.model.world.World;
 import com.watchers.model.common.Views;
 import com.watchers.model.enums.SurfaceType;
 import lombok.Data;
@@ -13,8 +12,8 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -26,9 +25,9 @@ public class Continent {
     @Id
     @JsonProperty("continentId")
     @Column(name = "continent_id")
-    @JsonView(Views.Internal.class)
-    @GeneratedValue(generator="Continent_Gen", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="Continent_Gen", sequenceName="Continent_Seq", allocationSize = 1)
+    @JsonView(Views.Public.class)
+    @GeneratedValue(generator = "Continent_Gen", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "Continent_Gen", sequenceName = "Continent_Seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne
@@ -49,27 +48,28 @@ public class Continent {
 
     @JsonProperty("direction")
     @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, optional = false)
     private Direction direction;
 
-    public Continent(World world, SurfaceType surfaceType){
+    public Continent(World world, SurfaceType surfaceType) {
         this.world = world;
         this.world.getContinents().add(this);
         this.type = surfaceType;
-        this.assignNewDriftDirection(1,world);
+        this.assignNewDriftDirection(1, world);
     }
 
     @JsonCreator
     @SuppressWarnings("unused")
-    private Continent(){}
+    private Continent() {
+    }
 
     /**
      * @param driftVelocity the speed at which the new directions of the continent can be
      * @return the continent which direction has been changed on the x and y axis.
      * These can be possitive or negative (left, right, up down).
      */
-    public Continent assignNewDriftDirection(int driftVelocity, World world){
-        if(this.direction == null) {
+    public Continent assignNewDriftDirection(int driftVelocity, World world) {
+        if (this.direction == null) {
             int xVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
             int yVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
 
@@ -85,19 +85,16 @@ public class Continent {
         return this;
     }
 
-    public void addCoordinate(Coordinate coordinate){
+    public void addCoordinate(Coordinate coordinate) {
         coordinates.add(coordinate);
-        if(!coordinate.getContinent().equals(this)){
+        if (!coordinate.getContinent().equals(this)) {
             coordinate.changeContinent(this);
         }
     }
 
-    public void removeCoordinate(Coordinate coordinate){
+    public void removeCoordinate(Coordinate coordinate) {
         boolean removed = this.getCoordinates().remove(coordinate);
-        if(!removed){
-            // do nothing
-            //throw new RuntimeException("Coordinate " + coordinate + " was to be removed from continent " + this + " but was not present!");
-        } else {
+        if (removed) {
             coordinate.changeContinent(null);
         }
     }
@@ -120,5 +117,20 @@ public class Continent {
         clone.setWorld(newWorld);
         clone.setDirection(this.direction.createClone());
         return clone;
+    }
+
+    @JsonIgnore
+    public Long calculateMostConnectedNeighbouringContinent() {
+        Map<Long, List<Continent>> list = coordinates.stream()
+                .map(Coordinate::getNeighbours)
+                .flatMap(Collection::stream)
+                .map(Coordinate::getContinent)
+                .filter(continent -> !this.id.equals(continent.getId()))
+                .collect(Collectors.groupingBy(Continent::getId));
+
+        Optional<Long> mostConnectedNeighbouringContinent = list.keySet().stream()
+                .max(Comparator.comparingInt((Long key) -> list.get(key).size()));
+
+        return mostConnectedNeighbouringContinent.orElseGet(this::getId);
     }
 }

@@ -3,7 +3,6 @@ package com.watchers.manager;
 import com.watchers.TestableWorld;
 import com.watchers.components.continentaldrift.*;
 import com.watchers.config.SettingConfiguration;
-import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
@@ -34,9 +33,12 @@ class ContinentalDriftManagerTest {
         ErosionAdjuster erosionAdjuster = new ErosionAdjuster(worldRepository, settingConfiguration);
         ContinentalCorrector continentalCorrector = new ContinentalCorrector(worldRepository);
         WorldSettingManager worldSettingManager = new WorldSettingManager(worldSettingsRepository);
+        ContinentalIntegretyAdjuster continentalIntegretyAdjuster = new ContinentalIntegretyAdjuster(worldRepository);
+        ContinentalSplitter continentalSplitter = new ContinentalSplitter(worldRepository, settingConfiguration);
+        ContinentalMerger continentalMerger = new ContinentalMerger(settingConfiguration, worldRepository);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
-        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputator, erosionAdjuster, worldSettingManager);
+        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputator, erosionAdjuster, worldSettingManager, continentalIntegretyAdjuster, continentalSplitter, continentalMerger);
     }
 
     @Test

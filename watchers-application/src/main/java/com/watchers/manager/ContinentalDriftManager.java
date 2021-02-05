@@ -20,6 +20,9 @@ public class ContinentalDriftManager {
     private SurfaceTypeComputator surfaceTypeComputator;
     private ErosionAdjuster erosionAdjuster;
     private WorldSettingManager worldSettingManager;
+    private ContinentalIntegretyAdjuster continentalIntegretyAdjuster;
+    private ContinentalSplitter continentalSplitter;
+    private ContinentalMerger continentalMerger;
 
     public void process(ContinentalDriftTaskDto taskDto){
         continentalDriftDirectionChanger.process(taskDto);
@@ -28,6 +31,10 @@ public class ContinentalDriftManager {
         continentalDriftNewTileAssigner.process(taskDto);
         continentalDriftWorldAdjuster.process(taskDto);
         continentalCorrector.process(taskDto);
+        continentalIntegretyAdjuster.process(taskDto);
+        continentalSplitter.process(taskDto);
+        continentalMerger.process(taskDto);
+        erosionAdjuster.process(taskDto);
         erosionAdjuster.process(taskDto);
         surfaceTypeComputator.process(taskDto);
 

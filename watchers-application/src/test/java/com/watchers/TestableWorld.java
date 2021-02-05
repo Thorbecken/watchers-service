@@ -92,6 +92,8 @@ public class TestableWorld {
                 1,
                 2,
                 2,
+                6,
+                4,
                 9000,
                 2,
                 3,
