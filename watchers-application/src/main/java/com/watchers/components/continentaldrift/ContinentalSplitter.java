@@ -80,7 +80,7 @@ public class ContinentalSplitter {
                 .filter(childCoordinates::contains)
                 .forEach(coordinate -> coordinate.changeContinent(newContinent));
 
-        log.warn("Continent " +  continent.getId() + "is split in two");
+        log.warn("Continent " +  continent.getId() + " is split in two");
     }
 
     private void addAllNeighbouringCoordinatesToSet(Set<Coordinate> coordinates, Set<Coordinate> parentCoordinates) {

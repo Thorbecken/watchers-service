@@ -37,7 +37,9 @@ public class CoordinateFactory {
     }
 
     public static Coordinate createCoordinate(long xCoord, long yCoord, World world, Continent continent) {
-        return new NonEuclideanCoordinate(xCoord, yCoord, world, continent);
+        Coordinate coordinate = new NonEuclideanCoordinate(xCoord, yCoord, world, continent);
+        world.getCoordinates().add(coordinate);
+        return coordinate;
     }
 
 }

@@ -6,11 +6,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.SurfaceType;
-import com.watchers.model.environment.Tile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -39,14 +42,10 @@ public class Climate {
     @JsonView(Views.Public.class)
     private double latitude;
 
-    @JsonIgnore
-    @Transient
-    private Cloud incomingCloud;
-
-    @JsonProperty("currentCloud")
+    @JsonProperty("skyTile")
     @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "currentClimate", cascade=CascadeType.ALL, orphanRemoval = false)
-    private Cloud currentCloud;
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "climate", cascade=CascadeType.ALL, orphanRemoval = true)
+    private SkyTile skyTile;
 
     @JsonProperty("climateEnum")
     @Column(name = "climateEnum")
@@ -76,7 +75,7 @@ public class Climate {
         this.latitude = (int)(y / wy * 180L) - 90L;
         this.longitude = (int)(x / wx * 360L);
 
-        this.currentCloud = new Cloud(this);
+        this.skyTile = new SkyTile(this);
     }
 
     @JsonIgnore
@@ -90,26 +89,12 @@ public class Climate {
         return !isWater();
     }
 
-    public void setIncomingCloud(Cloud incomingCloud) {
-        this.incomingCloud = incomingCloud;
-//        if(!this.equals(incomingCloud.getIncomingClimate())){
-//            incomingCloud.setIncomingClimate(this);
-//        }
-    }
-
-    public void setCurrentCloud(Cloud currentCloud) {
-        this.currentCloud = currentCloud;
-        currentCloud.setCurrentClimate(this);
-    }
-
     @Override
     public String toString() {
         return "Climate{" +
                 "id=" + id +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
-                ", incomingCloud=" + incomingCloud +
-                ", currentCloud=" + currentCloud +
                 ", climateEnum=" + climateEnum +
                 ", temperatureEnum=" + temperatureEnum +
                 ", precipitationEnum=" + precipitationEnum +
@@ -140,7 +125,7 @@ public class Climate {
 
     public Climate createClone(Coordinate coordinateClone) {
         Climate clone = new Climate();
-        clone.setCurrentCloud(currentCloud.createClone(clone));
+        clone.setSkyTile(skyTile.createClone(clone));
         clone.setPrecipitationEnum(precipitationEnum);
         clone.setClimateEnum(climateEnum);
         clone.setTemperatureEnum(temperatureEnum);

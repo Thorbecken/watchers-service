@@ -2,6 +2,9 @@ package com.watchers.manager;
 
 import com.mchange.util.AssertException;
 import com.watchers.model.actors.Actor;
+import com.watchers.model.climate.Aircurrent;
+import com.watchers.model.climate.Climate;
+import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
@@ -38,13 +41,14 @@ public class SaveToDatabaseManager {
     /**
      * This method changes the ids of the actors since these need to be ordered from 1 upwards for being able to be
      * processed by Hibernate
+     *
      * @param persistentWorld the world that is provided from a persistent source
      */
     private void adjustAndMergeActors(World persistentWorld) {
         List<Actor> actors = persistentWorld.getActorList();
         actors.sort(Comparator.comparing(Actor::getId));
         for (int i = 1; i <= actors.size(); i++) {
-            actors.get(i-1).setId((long) i);
+            actors.get(i - 1).setId((long) i);
         }
     }
 
@@ -63,8 +67,8 @@ public class SaveToDatabaseManager {
         continents.sort(Comparator.comparing(Continent::getId));
         Map<Long, Continent> continentMapping = new HashMap<>();
         for (int i = 1; i <= continents.size(); i++) {
-            continentMapping.put(continents.get(i-1).getId(), continents.get(i-1));
-            continents.get(i-1).setId((long) i);
+            continentMapping.put(continents.get(i - 1).getId(), continents.get(i - 1));
+            continents.get(i - 1).setId((long) i);
         }
 
         persistentWorld.getCoordinates().
@@ -72,9 +76,54 @@ public class SaveToDatabaseManager {
                         coordinate -> coordinate.changeContinent(continentMapping.get(coordinate.getContinent().getId()))
                 );
 
-        if (continentMapping.keySet().contains(persistentWorld.getLastContinentInFlux())){
+        if (continentMapping.keySet().contains(persistentWorld.getLastContinentInFlux())) {
             persistentWorld.setLastContinentInFlux(continentMapping.get(persistentWorld.getLastContinentInFlux()).getId());
         }
+    }
+
+    /**
+     * Because the world from the json has sepperated the aircurrents to their ending en starting skies,
+     * this link needs to be reset. Otherwise the aircurrent link within the skies are not the same entity.
+     * This would lead to problems with saving to the inmemory database with hibernate. This method is also used to
+     * prepare for creating clones of the skies with the correct aircurrents.
+     *
+     * @param world
+     */
+    private void adjustAndMergeAircurrents(World world) {
+        List<SkyTile> skyTiles = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .collect(Collectors.toList());
+
+        skyTiles.forEach(skyTile -> skyTile.getOutgoingAircurrents()
+                .forEach(aircurrent -> aircurrent.setStartingSky(skyTile)));
+
+        Map<Long, List<Aircurrent>> outgoingSkytiles = skyTiles.stream()
+                .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
+                .collect(Collectors.groupingBy(Aircurrent::getId));
+
+        skyTiles.forEach(skyTile -> skyTile.setIncommingAircurrents(skyTile.getIncommingAircurrents().stream()
+                .map(aircurrent -> outgoingSkytiles.get(aircurrent.getId()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()))
+        );
+
+        skyTiles.forEach(skyTile -> skyTile.getIncommingAircurrents().get(0).setEndingSky(skyTile));
+
+        List<SkyTile> sortedSkytiles = new ArrayList<>(skyTiles);
+        sortedSkytiles.sort(Comparator.comparing(SkyTile::getId));
+        Map<Long, SkyTile> skyTileMapping = new HashMap<>();
+        for (int i = 1; i <= sortedSkytiles.size(); i++) {
+            skyTileMapping.put(sortedSkytiles.get(i - 1).getId(), sortedSkytiles.get(i - 1));
+            sortedSkytiles.get(i - 1).setId((long) i);
+        }
+
+        skyTiles.forEach(skyTile -> skyTile.getOutgoingAircurrents()
+                .forEach(aircurrent -> {
+                    SkyTile endingSky = skyTileMapping.get(aircurrent.getEndingSky().getId());
+                    aircurrent.setEndingSky(endingSky);
+                    endingSky.getIncommingAircurrents().add(aircurrent);
+                }));
     }
 
     @Transactional
@@ -99,14 +148,54 @@ public class SaveToDatabaseManager {
     @Transactional
     private void saveCoordinates(Long id, World persistentWorld) {
         World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
+        adjustAndMergeAircurrents(persistentWorld);
+
         List<Coordinate> coordinates = persistentWorld.getCoordinates().stream()
                 .map(coordinate -> coordinate.createBasicClone(newWorld))
                 .sorted(Comparator.comparing(Coordinate::getId))
                 .collect(Collectors.toList());
+
         newWorld.getCoordinates().addAll(coordinates);
+        adjustAndMergeAircurrents(newWorld);
+
+        List<Aircurrent> aircurrents = newWorld.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
+                .collect(Collectors.toList());
+
+        newWorld.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .forEach(skyTile -> {
+                    skyTile.getIncommingAircurrents().clear();
+                    skyTile.getOutgoingAircurrents().clear();
+                });
+
         log.info("Current coordinates in memory: " + coordinates.size() + " " + Arrays.toString(coordinates.stream().map(Coordinate::getId).toArray()));
         coordinateRepository.saveAll(coordinates);
-        Assert.isTrue(persistentWorld.getCoordinates().size() == coordinateRepository.count(),"Expected " + persistentWorld.getCoordinates().size() + " but was " + coordinateRepository.count());
+
+
+        List<Coordinate> coordinateList = coordinateRepository.findAll();
+
+        Map<Long, SkyTile> skyMap = coordinateList.stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .collect(Collectors.toMap(SkyTile::getId, skytile -> skytile));
+
+        aircurrents.forEach(aircurrent -> {
+            SkyTile endingSky = skyMap.get(aircurrent.getEndingSky().getId());
+            endingSky.getIncommingAircurrents().add(aircurrent);
+            aircurrent.setEndingSky(endingSky);
+
+            SkyTile startingSky = skyMap.get(aircurrent.getStartingSky().getId());
+            startingSky.getOutgoingAircurrents().add(aircurrent);
+            aircurrent.setStartingSky(startingSky);
+        });
+
+        coordinateRepository.saveAll(coordinateList);
+
+        Assert.isTrue(persistentWorld.getCoordinates().size() == coordinateRepository.count(), "Expected " + persistentWorld.getCoordinates().size() + " but was " + coordinateRepository.count());
     }
 
     @Transactional

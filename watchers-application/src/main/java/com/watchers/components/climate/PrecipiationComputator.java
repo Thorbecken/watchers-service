@@ -1,11 +1,8 @@
 package com.watchers.components.climate;
 
-import com.watchers.model.climate.AirCurrent;
-import com.watchers.model.climate.Cloud;
+import com.watchers.model.climate.*;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.climate.Climate;
-import com.watchers.model.climate.PrecipitationEnum;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
@@ -49,7 +46,7 @@ public class PrecipiationComputator {
         List<Climate> climates = world.getCoordinates().stream().map(Coordinate::getClimate).collect(Collectors.toList());
 
         computeEvaporation(climates);
-        moveCloudsAccordingToAirflow(world.getCoordinates());
+        moveCloudsAccordingToAirflow(climates);
         setLandPrecipationEnums(climates);
 
         worldRepository.save(world);
@@ -61,22 +58,19 @@ public class PrecipiationComputator {
                 .forEach(this::procesWaterClimate);
     }
 
+    @Transactional
     private void procesWaterClimate(Climate climate) {
-        climate.getCurrentCloud().addAirMoisture(10);
+        climate.getSkyTile().addAirMoisture(10);
         climate.setPrecipitationEnum(PrecipitationEnum.WET);
     }
 
-    protected void moveCloudsAccordingToAirflow(Set<Coordinate> coordinates) {
-        Map<Long, List<Coordinate>> airCurrentsMap = coordinates.stream()
-                .collect(Collectors.groupingBy(Coordinate::getYCoord));
-        Map<Long, AirCurrent> airCurrents = airCurrentsMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> new AirCurrent(entry.getValue().stream()
-                        .map(Coordinate::getClimate)
-                        .collect(Collectors.toList()))));
-        Set<AirCurrent> currents = airCurrents.entrySet().stream()
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toSet());
-        currents.forEach(AirCurrent::moveClouds);
+    protected void moveCloudsAccordingToAirflow(List<Climate> climates) {
+        climates.parallelStream()
+                .map(Climate::getSkyTile)
+                .forEach(SkyTile::moveClouds);
+        climates.parallelStream()
+                .map(Climate::getSkyTile)
+                .forEach(SkyTile::processIncommingMoisture);
     }
 
     protected void setLandPrecipationEnums(List<Climate> climates) {
@@ -86,23 +80,21 @@ public class PrecipiationComputator {
     }
 
     private void procesLandClimate(Climate climate){
-            Cloud currentCloud = climate.getCurrentCloud();
-            if (currentCloud.getAirMoisture() >= WET_ZONE) {
-                currentCloud.setAirMoistureLossage(WET_PRECIPITION);
-            } else if (currentCloud.getAirMoisture() >= HUMID_ZONE) {
-                currentCloud.setAirMoistureLossage(HUMID_PRECIPITION);
-            } else if (currentCloud.getAirMoisture() >= SEMI_ARID_ZONE) {
-                currentCloud.setAirMoistureLossage(SEMI_ARID__PRECIPITION);
-            } else if (currentCloud.getAirMoisture() >= ARID_ZONE) {
-                currentCloud.setAirMoistureLossage(ARID_PRECIPITION);
+            SkyTile currentSkyTile = climate.getSkyTile();
+            if (currentSkyTile.getAirMoisture() >= WET_ZONE) {
+                currentSkyTile.setAirMoistureLossage(WET_PRECIPITION);
+            } else if (currentSkyTile.getAirMoisture() >= HUMID_ZONE) {
+                currentSkyTile.setAirMoistureLossage(HUMID_PRECIPITION);
+            } else if (currentSkyTile.getAirMoisture() >= SEMI_ARID_ZONE) {
+                currentSkyTile.setAirMoistureLossage(SEMI_ARID__PRECIPITION);
+            } else if (currentSkyTile.getAirMoisture() >= ARID_ZONE) {
+                currentSkyTile.setAirMoistureLossage(ARID_PRECIPITION);
             } else {
-                currentCloud.setAirMoistureLossage(NO_PRECIPITION);
+                currentSkyTile.setAirMoistureLossage(NO_PRECIPITION);
             }
 
-            currentCloud.calculateHeightDifferenceEffect();
-            currentCloud.calculateNewMoistureLevel();
-            climate.setPrecipitationEnum(precipationCaluculator(currentCloud.getAirMoistureLossage()));
-            //climate.getCurrentCloud().reduceAirMoisture(precipationMap.get(climate.getPrecipitationEnum()));
+            currentSkyTile.calculateNewMoistureLevel();
+            climate.setPrecipitationEnum(precipationCaluculator(currentSkyTile.getAirMoistureLossage()));
     }
 
     private PrecipitationEnum precipationCaluculator(long airMoistureLossage) {

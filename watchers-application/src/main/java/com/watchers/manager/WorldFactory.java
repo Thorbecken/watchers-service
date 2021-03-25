@@ -2,6 +2,7 @@ package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.config.SettingConfiguration;
+import com.watchers.helper.SkyHelper;
 import com.watchers.model.dto.MockContinent;
 import com.watchers.model.dto.WorldFactoryDTO;
 import com.watchers.model.enums.SurfaceType;
@@ -25,9 +26,6 @@ class WorldFactory {
 
     private TileDefined tileDefined;
     private SettingConfiguration settingConfiguration;
-
-    private static final long LONGITUDE_DIGREES = 360;
-    private static final long LATHITUDE_DIGREES = 360;
 
     World generateWorld(long xSize, long ySize, long continents, WorldSetting worldSetting){
         World world = new World(xSize, ySize);
@@ -66,11 +64,15 @@ class WorldFactory {
 
         }
 
+        log.info("Sepperating the skies");
+        SkyHelper.calculateAirflows(world);
+        log.info("Skies are sepperated");
+
         return world;
     }
 
     private void specifyWaterZones(World world) {
-        log.info("sepperating the oceans");
+        log.info("Sepperating the oceans");
         world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .filter(tile -> SurfaceType.SEA.equals(tile.getSurfaceType()))
