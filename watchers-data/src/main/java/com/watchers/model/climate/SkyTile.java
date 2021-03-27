@@ -42,14 +42,34 @@ public class SkyTile {
 
     @JsonView(Views.Public.class)
     @OneToMany(mappedBy = "endingSky", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
-    public List<Aircurrent> incommingAircurrents = new ArrayList<>(1);
+    private List<Aircurrent> incommingAircurrents = new ArrayList<>(2);
 
     @JsonView(Views.Public.class)
     @OneToMany(mappedBy = "startingSky", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
-    public List<Aircurrent> outgoingAircurrents = new ArrayList<>(1);
+    private List<Aircurrent> outgoingAircurrents = new ArrayList<>(2);
 
     public SkyTile(Climate climate){
         this.climate = climate;
+    }
+
+    public Aircurrent getIncommingLongitudalAirflow(){
+        return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
+    }
+
+    public Aircurrent getOutgoingLongitudalAirflow(){
+        return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
+    }
+
+    public Aircurrent getIncommingLatitudalAirflow(){
+        return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
+    }
+
+    public Aircurrent getOutgoingLatitudallAirflow(){
+        return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
     public void addIncommingMoisture(long incommingMoisture){

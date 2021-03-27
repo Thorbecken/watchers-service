@@ -17,6 +17,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.text.NumberFormat;
 import java.util.*;
 
 @Slf4j
@@ -95,8 +96,17 @@ class WorldFactory {
                 continent -> mockContinents.add(new MockContinent(continent, world))
                 );
 
+        long numberOfCoordinateToSplit = world.getXSize() * world.getYSize();
+        log.info("Sepperating the earth.");
+
+        int counter = 0;
         while(dto.getOpenCoordinates().size() >= 1){
-            log.debug("In loop: " + dto.getOpenCoordinates().size() + " coordinates left");
+            if(++counter == 25) {
+                counter = 0;
+                double percentageDone = 1 - (double) dto.getOpenCoordinates().size() / (double) numberOfCoordinateToSplit;
+                log.info("Sepperated " + NumberFormat.getPercentInstance().format(percentageDone) + " of the earth.");
+            }
+
             mockContinents.stream()
                     .filter(mockContinent -> !CollectionUtils.isEmpty(mockContinent.getPossibleCoordinates()))
                     .forEach(
@@ -104,7 +114,7 @@ class WorldFactory {
             );
         }
 
-        log.info("Coordinates assigned to continents.");
+        log.info("Earth is sepperated");
 
         world.getCoordinates().clear();
         world.getContinents().removeIf(continent -> continent.getType() == null);

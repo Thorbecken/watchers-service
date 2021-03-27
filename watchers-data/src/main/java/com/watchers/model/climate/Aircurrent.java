@@ -29,12 +29,15 @@ public class Aircurrent {
     @ManyToOne//(cascade = CascadeType.ALL)
     private SkyTile endingSky;
 
+    private AircurrentType aircurrentType;
+
     @JsonView(Views.Public.class)
     private long heightDifference;
 
-    public Aircurrent(SkyTile startingSky, SkyTile endingSky){
+    public Aircurrent(SkyTile startingSky, SkyTile endingSky, AircurrentType aircurrentType){
         this.startingSky = startingSky;
         this.endingSky = endingSky;
+        this.aircurrentType = aircurrentType;
 
         long startingHeight = startingSky.getClimate().getCoordinate().getTile().getHeight();
         long endingHeight = endingSky.getClimate().getCoordinate().getTile().getHeight();
@@ -64,7 +67,9 @@ public class Aircurrent {
     public Aircurrent createOutgoingClone(SkyTile skyClone) {
         Aircurrent clone = new Aircurrent();
         clone.setId(this.id);
-        this.startingSky = skyClone;
+        clone.setAircurrentType(this.aircurrentType);
+        clone.setStartingSky(skyClone);
+
         clone.setHeightDifference(this.heightDifference);
         return clone;
     }
@@ -72,7 +77,8 @@ public class Aircurrent {
     public Aircurrent createIncommingClone(SkyTile skyClone) {
         Aircurrent clone = new Aircurrent();
         clone.setId(this.id);
-        this.endingSky = skyClone;
+        clone.setAircurrentType(this.aircurrentType);
+        clone.setEndingSky(skyClone);
         clone.setHeightDifference(this.heightDifference);
         return clone;
     }
