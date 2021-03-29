@@ -87,7 +87,7 @@ public class SaveToDatabaseManager {
      * This would lead to problems with saving to the inmemory database with hibernate. This method is also used to
      * prepare for creating clones of the skies with the correct aircurrents.
      *
-     * @param world
+     * @param world world
      */
     private void adjustAndMergeAircurrents(World world) {
         List<SkyTile> skyTiles = world.getCoordinates().stream()
@@ -95,35 +95,36 @@ public class SaveToDatabaseManager {
                 .map(Climate::getSkyTile)
                 .collect(Collectors.toList());
 
-        skyTiles.forEach(skyTile -> skyTile.getOutgoingAircurrents()
-                .forEach(aircurrent -> aircurrent.setStartingSky(skyTile)));
+        skyTiles.forEach(skyTile -> {
+            skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingSky(skyTile));
+            skyTile.getIncommingAircurrents().forEach(aircurrent -> aircurrent.setEndingSky(skyTile));
+        });
 
-        Map<Long, List<Aircurrent>> outgoingSkytiles = skyTiles.stream()
-                .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
-                .collect(Collectors.groupingBy(Aircurrent::getId));
+        List<Aircurrent> incommingAircurrents = skyTiles.stream()
+                .flatMap(x-> x.getIncommingAircurrents().stream())
+                .collect(Collectors.toList());
 
-        skyTiles.forEach(skyTile -> skyTile.setIncommingAircurrents(skyTile.getIncommingAircurrents().stream()
-                .map(aircurrent -> outgoingSkytiles.get(aircurrent.getId()))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList()))
-        );
+        List<Aircurrent> outgoingAircurrents = skyTiles.stream()
+                .flatMap(x-> x.getOutgoingAircurrents().stream())
+                .collect(Collectors.toList());
 
-        skyTiles.forEach(skyTile -> skyTile.getIncommingAircurrents().get(0).setEndingSky(skyTile));
+        Map<Long, SkyTile> endingSkies = incommingAircurrents.stream()
+                .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getEndingSky, (x,y)-> x));
+        Map<Long, SkyTile> startingSkies = outgoingAircurrents.stream()
+                .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getStartingSky, (x,y)-> x));
 
-        List<SkyTile> sortedSkytiles = new ArrayList<>(skyTiles);
-        sortedSkytiles.sort(Comparator.comparing(SkyTile::getId));
-        Map<Long, SkyTile> skyTileMapping = new HashMap<>();
-        for (int i = 1; i <= sortedSkytiles.size(); i++) {
-            skyTileMapping.put(sortedSkytiles.get(i - 1).getId(), sortedSkytiles.get(i - 1));
-            sortedSkytiles.get(i - 1).setId((long) i);
-        }
+        skyTiles.forEach(skyTile -> {
+            skyTile.getIncommingAircurrents().clear();
+            skyTile.getOutgoingAircurrents().clear();
+        });
 
-        skyTiles.forEach(skyTile -> skyTile.getOutgoingAircurrents()
-                .forEach(aircurrent -> {
-                    SkyTile endingSky = skyTileMapping.get(aircurrent.getEndingSky().getId());
-                    aircurrent.setEndingSky(endingSky);
-                    endingSky.getIncommingAircurrents().add(aircurrent);
-                }));
+        incommingAircurrents.forEach(aircurrent -> {
+            aircurrent.setStartingSky(startingSkies.get(aircurrent.getId()));
+            aircurrent.getStartingSky().getOutgoingAircurrents().add(aircurrent);
+
+            aircurrent.setEndingSky(endingSkies.get(aircurrent.getId()));
+            aircurrent.getEndingSky().getIncommingAircurrents().add(aircurrent);
+        });
     }
 
     @Transactional

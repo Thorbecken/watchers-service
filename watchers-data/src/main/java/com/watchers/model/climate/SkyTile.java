@@ -52,28 +52,32 @@ public class SkyTile {
         this.climate = climate;
     }
 
+    @JsonIgnore
     public Aircurrent getIncommingLongitudalAirflow(){
         return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
+    @JsonIgnore
     public Aircurrent getOutgoingLongitudalAirflow(){
         return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
+    @JsonIgnore
     public Aircurrent getIncommingLatitudalAirflow(){
         return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
+    @JsonIgnore
     public Aircurrent getOutgoingLatitudallAirflow(){
         return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
     public void addIncommingMoisture(long incommingMoisture){
-        this.incommingMoisture =+ incommingMoisture;
+        this.incommingMoisture = this.incommingMoisture + incommingMoisture;
     }
 
     public void processIncommingMoisture(){
@@ -107,9 +111,11 @@ public class SkyTile {
 
     public void moveClouds() {
         List<Aircurrent> outgoingAircurrents = this.outgoingAircurrents;
-        int totalUpstreamSkies = outgoingAircurrents.size();
-        long transfer = airMoisture/totalUpstreamSkies;
-        this.airMoisture = this.airMoisture-(transfer*totalUpstreamSkies);
+        int diffider = outgoingAircurrents.stream()
+                .mapToInt(Aircurrent::getCurrentStrength)
+                .sum();
+        long transfer = airMoisture/diffider;
+        this.airMoisture = this.airMoisture-(transfer*diffider);
 
         outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transfer));
     }

@@ -12,6 +12,11 @@ import java.util.stream.Collectors;
 
 public class SkyHelper {
 
+    // left <-> right
+    static int LATITUDAL_STRENGTH = 1;
+    // up <-> down
+    static int LONGITUDAL_STRENGTH = 0;
+
     public static void calculateAirflows(World world) {
         Set<Coordinate> coordinateList = world.getCoordinates();
         Map<Double, List<Climate>> airCurrents = calculateAircurrents(coordinateList);
@@ -21,7 +26,7 @@ public class SkyHelper {
 
     static private AirFlows generateAirflows(World world) {
         Long ySize = world.getYSize();
-        Double doubleYSize = (double)ySize;
+        Double doubleYSize = (double) ySize;
         Map<Double, Boolean> rightwardCurrent = new HashMap<>();
         Map<Double, Boolean> upwardcurrents = new HashMap<>();
 
@@ -30,40 +35,40 @@ public class SkyHelper {
                 rightwardCurrent.put(1d, false);
                 upwardcurrents.put(1d, null);
             } else {
-                for (long i = 0; i < ySize; i++) {
-                    double longitude = transformToLongitude(i, ySize);
-                    if (longitude <= 90) {
-                        rightwardCurrent.put(1d, false);
-                        upwardcurrents.put(1d, false);
+                for (long i = 1; i <= ySize; i++) {
+                    double latitude = ClimateHelper.transformToLatitude(i, ySize);
+                    if (latitude >= 0) {
+                        rightwardCurrent.put(latitude, false);
+                        upwardcurrents.put(latitude, false);
                     } else {
-                        rightwardCurrent.put(1d, false);
-                        upwardcurrents.put(1d, true);
+                        rightwardCurrent.put(latitude, false);
+                        upwardcurrents.put(latitude, true);
                     }
                 }
             }
         } else {
             for (double i = 1; i <= ySize; i++) {
-                double longitude = transformToLongitude(i, ySize);
-                if (longitude >= 150) {
-                    rightwardCurrent.put(longitude, false);
-                    upwardcurrents.put(longitude, false);
-                } else if (longitude >= 120) {
-                    rightwardCurrent.put(longitude, true);
-                    upwardcurrents.put(longitude, true);
-                } else if (longitude >= 90) {
-                    rightwardCurrent.put(longitude, false);
-                    upwardcurrents.put(longitude, false);
-                } else if (longitude >= 60) {
-                    rightwardCurrent.put(longitude, false);
-                    upwardcurrents.put(longitude, true);
-                } else if (longitude >= 30) {
-                    rightwardCurrent.put(longitude, true);
-                    upwardcurrents.put(longitude, false);
-                } else if (longitude >= 0) {
-                    rightwardCurrent.put(longitude, false);
-                    upwardcurrents.put(longitude, true);
+                double latitude = ClimateHelper.transformToLatitude(i, ySize);
+                if (latitude > 60) {
+                    rightwardCurrent.put(latitude, false);
+                    upwardcurrents.put(latitude, false);
+                } else if (latitude > 30) {
+                    rightwardCurrent.put(latitude, true);
+                    upwardcurrents.put(latitude, true);
+                } else if (latitude > 0) {
+                    rightwardCurrent.put(latitude, false);
+                    upwardcurrents.put(latitude, false);
+                } else if (latitude > -30) {
+                    rightwardCurrent.put(latitude, false);
+                    upwardcurrents.put(latitude, true);
+                } else if (latitude > -60) {
+                    rightwardCurrent.put(latitude, true);
+                    upwardcurrents.put(latitude, false);
+                } else if (latitude > -90) {
+                    rightwardCurrent.put(latitude, false);
+                    upwardcurrents.put(latitude, true);
                 } else {
-                    throw new RuntimeException(longitude + " is larger than 180!");
+                    throw new RuntimeException(latitude + " is larger than 180!");
                 }
             }
         }
@@ -73,7 +78,7 @@ public class SkyHelper {
 
     private static Map<Double, List<Climate>> calculateAircurrents(Set<Coordinate> coordinates) {
         Map<Double, List<Coordinate>> airCurrentsMap = coordinates.stream()
-                .collect(Collectors.groupingBy(SkyHelper::getLongitude));
+                .collect(Collectors.groupingBy(coordinate -> coordinate.getClimate().getLatitude()));
 
         return airCurrentsMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
@@ -85,25 +90,10 @@ public class SkyHelper {
                         }));
     }
 
-    private static double getLongitude(Coordinate coordinate) {
-        double ySize = coordinate.getWorld().getYSize();
-        double invertedY = ySize-coordinate.getYCoord();
-        double value = invertedY/ySize*180d;
-        return  value;
-
-    }
-
-    static private double transformToLongitude(double y, double ySize) {
-        double invertedY = ySize-y;
-        double value = invertedY / ySize * 180d;
-        return value;
-    }
-
-
     private static void setUpwardSkyTiles(Map<Double, List<Climate>> airCurrents, AirFlows airFlows, World world) {
-        airCurrents.forEach((Double longitude, List<Climate> airCurrent) -> {
-            boolean rightward = airFlows.rightwardCurrent.get(longitude);
-            Boolean upward = airFlows.upwardcurrents.get(longitude);
+        airCurrents.forEach((Double latitude, List<Climate> airCurrent) -> {
+            boolean rightward = airFlows.rightwardCurrent.get(latitude);
+            Boolean upward = airFlows.upwardcurrents.get(latitude);
             int airCurrentSize = airCurrent.size();
             SkyTile startingSky;
             SkyTile endingSky;
@@ -117,10 +107,8 @@ public class SkyHelper {
             }
 
             // sets the first SkyTile as the upstream SkyTile for the last in the array.
-            Aircurrent firstAircurrent = new Aircurrent(startingSky, endingSky, AircurrentType.LATITUDAL);
-            firstAircurrent.getStartingSky().getOutgoingAircurrents().add(firstAircurrent);
-            firstAircurrent.getEndingSky().getIncommingAircurrents().add(firstAircurrent);
-            //addLatidualFlow(firstAircurrent, upward, world, startingSky);
+            Aircurrent firstAircurrent = addLatitudalAircurrent(startingSky, endingSky);
+            addLongitudalAircurrent(firstAircurrent, upward, world, startingSky);
 
             // transfers the rest of the SkyTiles.
             for (int currentX = 0; currentX < airCurrentSize - 1; currentX++) {
@@ -133,33 +121,38 @@ public class SkyHelper {
                     endingSky = airCurrent.get(currentX).getSkyTile();
                 }
 
-                Aircurrent aircurrent = new Aircurrent(startingSky, endingSky, AircurrentType.LATITUDAL);
-
-                aircurrent.getStartingSky().getOutgoingAircurrents().add(aircurrent);
-                aircurrent.getEndingSky().getIncommingAircurrents().add(aircurrent);
-
-                //addLatidualFlow(aircurrent, upward, world, startingSky);
+                Aircurrent aircurrent = addLatitudalAircurrent(startingSky, endingSky);
+                addLongitudalAircurrent(aircurrent, upward, world, startingSky);
             }
         });
     }
 
-    private static void addLatidualFlow(Aircurrent aircurrent, Boolean upward, World world, SkyTile startingSky) {
+    private static Aircurrent addLatitudalAircurrent(SkyTile startingSky, SkyTile endingSky) {
+        Aircurrent latitudalAircurrent = new Aircurrent(startingSky, endingSky, AircurrentType.LATITUDAL, LATITUDAL_STRENGTH);
+        latitudalAircurrent.getStartingSky().getOutgoingAircurrents().add(latitudalAircurrent);
+        latitudalAircurrent.getEndingSky().getIncommingAircurrents().add(latitudalAircurrent);
+        return latitudalAircurrent;
+    }
+
+    private static void addLongitudalAircurrent(Aircurrent aircurrent, Boolean upward, World world, SkyTile startingSky) {
         Coordinate upcurrentCoordinate = aircurrent.getEndingSky().getClimate().getCoordinate();
+        SkyTile skyTile;
         if (upward.equals(Boolean.TRUE)) {
             long upY = upcurrentCoordinate.getUpCoordinate();
             long upX = upcurrentCoordinate.getXCoord();
             Coordinate above = world.getCoordinate(upX, upY);
-            Aircurrent upstreamCurrent = new Aircurrent(startingSky, above.getClimate().getSkyTile(), AircurrentType.LONGITUDAL);
-            upstreamCurrent.getStartingSky().getOutgoingAircurrents().add(upstreamCurrent);
-            upstreamCurrent.getEndingSky().getIncommingAircurrents().add(upstreamCurrent);
+            skyTile = above.getClimate().getSkyTile();
         } else if (upward.equals(Boolean.FALSE)) {
             long downY = upcurrentCoordinate.getDownCoordinate();
             long downX = upcurrentCoordinate.getXCoord();
             Coordinate downCoordinate = world.getCoordinate(downX, downY);
-            Aircurrent upstreamCurrent = new Aircurrent(startingSky, downCoordinate.getClimate().getSkyTile(), AircurrentType.LONGITUDAL);
-            upstreamCurrent.getStartingSky().getOutgoingAircurrents().add(upstreamCurrent);
-            upstreamCurrent.getEndingSky().getIncommingAircurrents().add(upstreamCurrent);
+            skyTile = downCoordinate.getClimate().getSkyTile();
+        } else {
+            throw new RuntimeException();
         }
+        Aircurrent upstreamCurrent = new Aircurrent(startingSky, skyTile, AircurrentType.LONGITUDAL, LONGITUDAL_STRENGTH);
+        upstreamCurrent.getStartingSky().getOutgoingAircurrents().add(upstreamCurrent);
+        upstreamCurrent.getEndingSky().getIncommingAircurrents().add(upstreamCurrent);
     }
 
     static private class AirFlows {

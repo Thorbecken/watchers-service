@@ -57,12 +57,17 @@ class WorldFactory {
         tileDefined.setStartingHeights(world);
         tileDefined.assignStartingType(world);
 
+        log.info("Sepperating the skies");
+        SkyHelper.calculateAirflows(world);
+        log.info("Skies are sepperated");
+
         if(settingConfiguration.isLifePreSeeded()) {
             world.getContinents().forEach(continent -> world.getCoordinates().stream()
                     .filter(coordinate -> coordinate.getContinent() == continent)
                     .findFirst()
                     .ifPresent(LifeManager::seedLife));
 
+            log.info("Pre seeded the world with life");
         }
 
         log.info("Sepperating the skies");

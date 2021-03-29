@@ -22,30 +22,31 @@ public class Aircurrent {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne//(cascade = CascadeType.ALL)
+    @ManyToOne
     private SkyTile startingSky;
 
     @JsonIgnore
-    @ManyToOne//(cascade = CascadeType.ALL)
+    @ManyToOne
     private SkyTile endingSky;
+
+    private int currentStrength;
 
     private AircurrentType aircurrentType;
 
     @JsonView(Views.Public.class)
     private long heightDifference;
 
-    public Aircurrent(SkyTile startingSky, SkyTile endingSky, AircurrentType aircurrentType){
+    public Aircurrent(SkyTile startingSky, SkyTile endingSky, AircurrentType aircurrentType, int currentStrength){
         this.startingSky = startingSky;
         this.endingSky = endingSky;
         this.aircurrentType = aircurrentType;
+        this.currentStrength = currentStrength;
 
-        long startingHeight = startingSky.getClimate().getCoordinate().getTile().getHeight();
-        long endingHeight = endingSky.getClimate().getCoordinate().getTile().getHeight();
-
-        this.heightDifference = startingHeight - endingHeight;
+        recalculateHeigthDifference();
     }
 
-    public void transfer(long amount){
+    public void transfer(long amountPerStrength){
+        long amount = amountPerStrength*currentStrength;
         long heightAmount = calculateHeightDifferenceEffect(amount);
 
         endingSky.addIncommingMoisture(amount);
@@ -68,6 +69,7 @@ public class Aircurrent {
         Aircurrent clone = new Aircurrent();
         clone.setId(this.id);
         clone.setAircurrentType(this.aircurrentType);
+        clone.setCurrentStrength(this.currentStrength);
         clone.setStartingSky(skyClone);
 
         clone.setHeightDifference(this.heightDifference);
@@ -78,6 +80,7 @@ public class Aircurrent {
         Aircurrent clone = new Aircurrent();
         clone.setId(this.id);
         clone.setAircurrentType(this.aircurrentType);
+        clone.setCurrentStrength(this.currentStrength);
         clone.setEndingSky(skyClone);
         clone.setHeightDifference(this.heightDifference);
         return clone;
@@ -89,5 +92,12 @@ public class Aircurrent {
                 "id=" + id +
                 ", heightDifference=" + heightDifference +
                 '}';
+    }
+
+    public void recalculateHeigthDifference() {
+        long startingHeight = startingSky.getClimate().getCoordinate().getTile().getHeight();
+        long endingHeight = endingSky.getClimate().getCoordinate().getTile().getHeight();
+
+        this.heightDifference = startingHeight - endingHeight;
     }
 }

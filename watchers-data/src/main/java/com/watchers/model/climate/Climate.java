@@ -3,6 +3,7 @@ package com.watchers.model.climate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.watchers.helper.ClimateHelper;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.SurfaceType;
@@ -10,10 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
@@ -72,8 +69,8 @@ public class Climate {
         double x = coordinate.getXCoord();
         double y = coordinate.getYCoord();
 
-        this.latitude = (int)(y / wy * 180L) - 90L;
-        this.longitude = (int)(x / wx * 360L);
+        this.latitude = ClimateHelper.transformToLatitude(y, wy);
+        this.longitude = ClimateHelper.transformToLongitude(x, wx);
 
         this.skyTile = new SkyTile(this);
     }
