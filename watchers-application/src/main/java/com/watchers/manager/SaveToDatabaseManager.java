@@ -1,20 +1,25 @@
 package com.watchers.manager;
 
-import com.mchange.util.AssertException;
 import com.watchers.model.actors.Actor;
 import com.watchers.model.climate.Aircurrent;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.environment.Biome;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,19 +28,18 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class SaveToDatabaseManager {
 
-    private WorldRepository worldRepository;
-    private ContinentRepository continentRepository;
-    private CoordinateRepository coordinateRepository;
-    private ActorRepository actorRepository;
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     public void complexSaveToMemory(World persistentWorld) {
         adjustAndMergeContinents(persistentWorld);
         adjustAndMergeActors(persistentWorld);
 
-        Long newWorldId = saveBasicWorld(persistentWorld);
-        saveContinents(newWorldId, persistentWorld);
-        saveCoordinates(newWorldId, persistentWorld);
-        saveActors(newWorldId, persistentWorld);
+        World newWorld = saveBasicWorld(persistentWorld);
+        saveContinents(persistentWorld, newWorld);
+        saveCoordinates(persistentWorld, newWorld);
+        saveActors(persistentWorld, newWorld);
+        log.info("World " + persistentWorld.getId() + " is loaded from persistence into memory.");
     }
 
     /**
@@ -76,7 +80,7 @@ public class SaveToDatabaseManager {
                         coordinate -> coordinate.changeContinent(continentMapping.get(coordinate.getContinent().getId()))
                 );
 
-        if (continentMapping.keySet().contains(persistentWorld.getLastContinentInFlux())) {
+        if (continentMapping.containsKey(persistentWorld.getLastContinentInFlux())) {
             persistentWorld.setLastContinentInFlux(continentMapping.get(persistentWorld.getLastContinentInFlux()).getId());
         }
     }
@@ -127,11 +131,10 @@ public class SaveToDatabaseManager {
         });
     }
 
-    @Transactional
-    private void saveActors(Long id, World persistentWorld) {
-        Assert.isTrue(0 == actorRepository.count(), "Expected 0 but was " + actorRepository.count());
+    private void saveActors(World persistentWorld, World newWorld) {
+        log.info("Loading actors.");
+        //Assert.isTrue(0 == actorRepository.count(), "Expected 0 but was " + actorRepository.count());
 
-        World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
         List<Actor> actors = persistentWorld.getCoordinates().stream()
                 .peek(coordinate -> coordinate.getActors().forEach(actor -> actor.setCoordinate(coordinate)))
                 .map(Coordinate::getActors)
@@ -140,32 +143,37 @@ public class SaveToDatabaseManager {
                 .sorted(Comparator.comparing(Actor::getId))
                 .collect(Collectors.toList());
         actors.forEach(actor -> actor.getCoordinate().getActors().add(actor));
-        log.info(actors.size() + " " + Arrays.toString(actors.stream().map(Actor::getId).toArray()));
-        actorRepository.saveAll(actors);
+        log.debug(actors.size() + " " + Arrays.toString(actors.stream().map(Actor::getId).toArray()));
+
+        //actorRepository.saveAll(actors);
+        saveActorsMethod(actors);
         log.info("Current actors in memory: " + actors.size());
-        Assert.isTrue(persistentWorld.getActorList().size() == actorRepository.count(), "Expected " + persistentWorld.getActorList().size() + " but was " + actorRepository.count());
+        //Assert.isTrue(persistentWorld.getActorList().size() == actorRepository.count(), "Expected " + persistentWorld.getActorList().size() + " but was " + actorRepository.count());
+        log.info("Actors loaded.");
     }
 
-    @Transactional
-    private void saveCoordinates(Long id, World persistentWorld) {
-        World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
+    private void saveCoordinates(World persistentWorld, World newWorld) {
+        log.info("Loading coordinates.");
+        //World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
         adjustAndMergeAircurrents(persistentWorld);
 
-        List<Coordinate> coordinates = persistentWorld.getCoordinates().stream()
+        List<Coordinate> coordinates = persistentWorld.getCoordinates().parallelStream()
                 .map(coordinate -> coordinate.createBasicClone(newWorld))
                 .sorted(Comparator.comparing(Coordinate::getId))
                 .collect(Collectors.toList());
 
         newWorld.getCoordinates().addAll(coordinates);
+        log.info("Adjusting aircurrents for merging");
         adjustAndMergeAircurrents(newWorld);
+        log.info("Aircurrents adjusted for merging");
 
-        List<Aircurrent> aircurrents = newWorld.getCoordinates().stream()
+        List<Aircurrent> aircurrents = newWorld.getCoordinates().parallelStream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
                 .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
                 .collect(Collectors.toList());
 
-        newWorld.getCoordinates().stream()
+        newWorld.getCoordinates().parallelStream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
                 .forEach(skyTile -> {
@@ -173,52 +181,193 @@ public class SaveToDatabaseManager {
                     skyTile.getOutgoingAircurrents().clear();
                 });
 
-        log.info("Current coordinates in memory: " + coordinates.size() + " " + Arrays.toString(coordinates.stream().map(Coordinate::getId).toArray()));
-        coordinateRepository.saveAll(coordinates);
+        log.debug("Current coordinates in memory: " + coordinates.size() + " " + Arrays.toString(coordinates.stream().map(Coordinate::getId).toArray()) + ".");
+
+        saveOCoordinateMethod(coordinates);
+
+        //coordinateRepository.saveAll(coordinates);
+        log.info("loading coordinates");
+        //List<Coordinate> coordinateList = coordinateRepository.findAll();
+        log.info("coordinates loaded");
+
+        //Assert.isTrue(persistentWorld.getCoordinates().size() == coordinateList.size(), "Expected " + persistentWorld.getCoordinates().size() + " but was " + coordinateList.size());
+        log.info("Coordinates loaded.");
+
+        saveSkies(aircurrents, coordinates);
+    }
+
+    private void saveOCoordinateMethod(List<Coordinate> objects) {
+        objects.sort(Comparator.comparing(Coordinate::getId));
+        SessionFactory sessionFactory = getCurrentSessionFromJPA();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            for ( int i=0; i<objects.size(); i++ ) {
+                Coordinate coordinate = objects.get(i);
+
+                Tile tile = coordinate.getTile();
+                Biome biome = tile.getBiome();
+                Climate climate = coordinate.getClimate();
+                SkyTile skyTile = climate.getSkyTile();
+
+                coordinate.getTile().setBiome(null);
+                coordinate.setTile(null);
+                coordinate.getClimate().setSkyTile(null);
+                coordinate.setClimate(null);
+
+                session.save(coordinate);
+                session.save(tile);
+                session.save(biome);
+                session.save(climate);
+                session.save(skyTile);
+
+                if ( i % 200 == 0 ) { //1000/5 enitities, same as the JDBC batch size
+                    //flush a batch of inserts and release memory:
+                    session.flush();
+                    session.clear();
+                    log.info("processed " + (((double) i)/((double) objects.size())) + " procent");
+                }
+            }
+
+            log.info("commiting coordinates");
+
+            tx.commit();
+
+            log.info("coordinates commited");
+        }
+    }
+
+    private void saveContinentsMethod(List<Continent> objects) {
+        objects.sort(Comparator.comparing(Continent::getId));
+        objects.forEach(continent -> continent.getCoordinates().clear());
+        SessionFactory sessionFactory = getCurrentSessionFromJPA();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            for ( int i=0; i<objects.size(); i++ ) {
+                Continent continent = objects.get(i);
+                session.save(continent.getDirection());
+                session.save(continent);
+                if ( i % 500 == 0 ) {
+                    //flush a batch of inserts and release memory:
+                    session.flush();
+                    session.clear();
+                }
+            }
+
+            log.info("commiting coordinates");
+
+            tx.commit();
+
+            log.info("coordinates commited");
+        }
+    }
+
+    private void saveActorsMethod(List<Actor> objects) {
+        objects.sort(Comparator.comparing(Actor::getId));
+        SessionFactory sessionFactory = getCurrentSessionFromJPA();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            for ( int i=0; i<objects.size(); i++ ) {
+                session.save(objects.get(i));
+                if ( i % 1000 == 0 ) {
+                    //flush a batch of inserts and release memory:
+                    session.flush();
+                    session.clear();
+                }
+            }
 
 
-        List<Coordinate> coordinateList = coordinateRepository.findAll();
+            tx.commit();
 
-        Map<Long, SkyTile> skyMap = coordinateList.stream()
-                .map(Coordinate::getClimate)
-                .map(Climate::getSkyTile)
-                .collect(Collectors.toMap(SkyTile::getId, skytile -> skytile));
+        }
+    }
 
-        aircurrents.forEach(aircurrent -> {
-            SkyTile endingSky = skyMap.get(aircurrent.getEndingSky().getId());
-            endingSky.getIncommingAircurrents().add(aircurrent);
-            aircurrent.setEndingSky(endingSky);
+    private void saveAircurrentMethod(List<Aircurrent> aircurrents) {
+        aircurrents.sort(Comparator.comparing(Aircurrent::getId));
+        SessionFactory sessionFactory = getCurrentSessionFromJPA();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
 
-            SkyTile startingSky = skyMap.get(aircurrent.getStartingSky().getId());
-            startingSky.getOutgoingAircurrents().add(aircurrent);
-            aircurrent.setStartingSky(startingSky);
-        });
+            for ( int i=0; i<aircurrents.size(); i++ ) {
+                session.save(aircurrents.get(i));
+                if ( i % 1000 == 0 ) {
+                    //flush a batch of inserts and release memory:
+                    session.flush();
+                    session.clear();
+                }
+            }
+            tx.commit();
+        }
+    }
 
-        coordinateRepository.saveAll(coordinateList);
+    private void saveWorldMethod(World world) {
+        SessionFactory sessionFactory = getCurrentSessionFromJPA();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
 
-        Assert.isTrue(persistentWorld.getCoordinates().size() == coordinateRepository.count(), "Expected " + persistentWorld.getCoordinates().size() + " but was " + coordinateRepository.count());
+            session.save(world);
+
+            tx.commit();
+        }
+    }
+
+    public SessionFactory getCurrentSessionFromJPA() {
+        // JPA and Hibernate SessionFactory example
+        EntityManagerFactory emf = entityManager.getEntityManagerFactory();
+        EntityManager entityManager = emf.createEntityManager();
+        // Get the Hibernate Session from the EntityManager in JPA
+        Session session = entityManager.unwrap(org.hibernate.Session.class);
+        return session.getSessionFactory();
     }
 
     @Transactional
-    private void saveContinents(Long id, World persistentWorld) {
-        World newWorld = worldRepository.findById(id).orElseThrow(() -> new AssertException("world not found"));
+    private void saveSkies(List<Aircurrent> aircurrents, List<Coordinate> coordinateList){
+        log.info("Loading aircurrents.");
+//        Map<Long, SkyTile> skyMap = coordinateList.parallelStream()
+//                .map(Coordinate::getClimate)
+//                .map(Climate::getSkyTile)
+//                .collect(Collectors.toMap(SkyTile::getId, skytile -> skytile));
+
+//        aircurrents.parallelStream().forEach(aircurrent -> {
+//            SkyTile endingSky = skyMap.get(aircurrent.getEndingSky().getId());
+//            endingSky.getIncommingAircurrents().add(aircurrent);
+//            aircurrent.setEndingSky(endingSky);
+//
+//            SkyTile startingSky = skyMap.get(aircurrent.getStartingSky().getId());
+//            startingSky.getOutgoingAircurrents().add(aircurrent);
+//            aircurrent.setStartingSky(startingSky);
+//        });
+
+        log.info("Aircurrents loaded.");
+
+        saveAircurrentMethod(aircurrents);
+    }
+
+    private void saveContinents(World persistentWorld, World newWorld) {
+        log.info("Loading continents.");
         List<Continent> continents = persistentWorld.getContinents().stream()
                 .map(continent -> continent.createClone(newWorld))
                 .sorted(Comparator.comparing(Continent::getId))
                 .collect(Collectors.toList());
         newWorld.getContinents().addAll(continents);
-        log.info("Current continents in memory: " + continents.size() + " " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
+        log.debug("Current continents in memory: " + continents.size() + " " + Arrays.toString(continents.stream().map(Continent::getId).toArray()));
         continents.sort(Comparator.comparing(Continent::getId));
-        continentRepository.saveAll(continents);
+        saveContinentsMethod(continents);
 
-        Assert.isTrue(persistentWorld.getContinents().size() == continentRepository.count(), "Expected " + persistentWorld.getContinents().size() + " but was " + continentRepository.count());
+        //Assert.isTrue(persistentWorld.getContinents().size() == continentRepository.count(), "Expected " + persistentWorld.getContinents().size() + " but was " + continentRepository.count());
+        log.info("Continents loaded.");
     }
 
-    @Transactional
-    private Long saveBasicWorld(World persistentWorld) {
+    private World saveBasicWorld(World persistentWorld) {
+        log.info("Loading the barren world.");
         World memoryWorld = persistentWorld.createBasicClone();
-        World flushedWorld = worldRepository.saveAndFlush(memoryWorld);
-        return flushedWorld.getId();
+
+        saveWorldMethod(memoryWorld);
+
+        log.info("Barren world loaded.");
+        return memoryWorld;
     }
 }
 

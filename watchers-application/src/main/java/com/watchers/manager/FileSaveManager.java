@@ -21,9 +21,9 @@ import java.util.Optional;
 @AllArgsConstructor
 public class FileSaveManager {
 
-    private WorldRepository worldRepository;
-    private WorldSettingManager worldSettingManager;
-    private SettingConfiguration settingConfiguration;
+    private final WorldRepository worldRepository;
+    private final WorldSettingManager worldSettingManager;
+    private final SettingConfiguration settingConfiguration;
 
     @Transactional
     public void saveWorld(WorldTaskDto taskDto) {

@@ -16,6 +16,7 @@ public class SettingConfiguration {
     private int continentalshiftTimer;
     private int saveTimer;
     private String directory;
+    private String prefix;
 
     // World configuration
     private long xSize;
@@ -48,6 +49,7 @@ public class SettingConfiguration {
             @Value("${watch.startup.turnTimer}") int turnTimer,
             @Value("${watch.startup.continentalshiftTimer}") int continentalshiftTimer,
             @Value("${watch.startup.saveTimer}") int saveTimer,
+            @Value("${watch.startup.prefix:}") String prefix,
 
             @Value("${watch.worldsettings.xSize}") long xSize,
             @Value("${watch.worldsettings.ySize}") long ySize,
@@ -73,6 +75,7 @@ public class SettingConfiguration {
         this.continentalshiftTimer = continentalshiftTimer;
         this.saveTimer = saveTimer;
         this.directory = environment.getProperty("WATCHERS_SAVE_PATH");
+        this.prefix = prefix;
 
         this.minimumContinents = minimumContinents;
         this.maximumContinents = maximumContinents;

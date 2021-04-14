@@ -45,15 +45,15 @@ public class Aircurrent {
         recalculateHeigthDifference();
     }
 
-    public void transfer(long amountPerStrength){
-        long amount = amountPerStrength*currentStrength;
-        long heightAmount = calculateHeightDifferenceEffect(amount);
+    public void transfer(double amountPerStrength){
+        double amount = amountPerStrength*currentStrength;
+        double heightAmount = calculateHeightDifferenceEffect(amount);
 
         endingSky.addIncommingMoisture(amount);
         endingSky.addAirMoistureLossage(heightAmount);
     }
 
-    public long calculateHeightDifferenceEffect(long airMoisture) {
+    public double calculateHeightDifferenceEffect(double airMoisture) {
         if(airMoisture > 0L && heightDifference > 0L) {
             if(airMoisture>heightDifference) {
                 return heightDifference;

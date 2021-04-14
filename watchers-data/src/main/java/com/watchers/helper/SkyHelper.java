@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 public class SkyHelper {
 
     // left <-> right
-    static int LATITUDAL_STRENGTH = 1;
+    static int LATITUDAL_STRENGTH = 7;
     // up <-> down
-    static int LONGITUDAL_STRENGTH = 0;
+    static int LONGITUDAL_STRENGTH = 1;
 
     public static void calculateAirflows(World world) {
         Set<Coordinate> coordinateList = world.getCoordinates();
@@ -33,7 +33,7 @@ public class SkyHelper {
         if ((doubleYSize / 6d) < 1d) {
             if ((doubleYSize / 2d) < 1d) {
                 rightwardCurrent.put(1d, false);
-                upwardcurrents.put(1d, null);
+                upwardcurrents.put(1d, false);
             } else {
                 for (long i = 1; i <= ySize; i++) {
                     double latitude = ClimateHelper.transformToLatitude(i, ySize);

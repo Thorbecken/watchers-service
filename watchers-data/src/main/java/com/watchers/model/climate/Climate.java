@@ -122,6 +122,7 @@ public class Climate {
 
     public Climate createClone(Coordinate coordinateClone) {
         Climate clone = new Climate();
+        clone.setId(id);
         clone.setSkyTile(skyTile.createClone(clone));
         clone.setPrecipitationEnum(precipitationEnum);
         clone.setClimateEnum(climateEnum);

@@ -25,10 +25,10 @@ public class SkyTile {
     private Long id;
 
     @JsonView(Views.Public.class)
-    long airMoisture;
+    double airMoisture;
 
     @Transient
-    long incommingMoisture;
+    double incommingMoisture;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
@@ -38,7 +38,7 @@ public class SkyTile {
     @Transient
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    private long airMoistureLossage;
+    private double airMoistureLossage;
 
     @JsonView(Views.Public.class)
     @OneToMany(mappedBy = "endingSky", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
@@ -76,7 +76,7 @@ public class SkyTile {
                 .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
-    public void addIncommingMoisture(long incommingMoisture){
+    public void addIncommingMoisture(double incommingMoisture){
         this.incommingMoisture = this.incommingMoisture + incommingMoisture;
     }
 
@@ -85,7 +85,7 @@ public class SkyTile {
         this.incommingMoisture = 0;
     }
 
-    public void addAirMoisture(long extraAirmoisture){
+    public void addAirMoisture(double extraAirmoisture){
         if(extraAirmoisture > 0L) {
             if(extraAirmoisture+this.airMoisture < 100L) {
                 this.airMoisture = this.airMoisture + extraAirmoisture;
@@ -95,7 +95,7 @@ public class SkyTile {
         }
     }
 
-    public void reduceAirMoisture(long airmoistureReduction){
+    public void reduceAirMoisture(double airmoistureReduction){
         if(airmoistureReduction > 0L) {
             if(this.airMoisture-airmoistureReduction > 0L) {
                 this.airMoisture = this.airMoisture - airmoistureReduction;
@@ -111,17 +111,17 @@ public class SkyTile {
 
     public void moveClouds() {
         List<Aircurrent> outgoingAircurrents = this.outgoingAircurrents;
-        int diffider = outgoingAircurrents.stream()
+        double diffider = outgoingAircurrents.stream()
                 .mapToInt(Aircurrent::getCurrentStrength)
                 .sum();
-        long transfer = airMoisture/diffider;
+        double transfer = airMoisture/diffider;
         this.airMoisture = this.airMoisture-(transfer*diffider);
 
         outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transfer));
     }
 
-    public void addAirMoistureLossage(long heightAmount) {
-        this.airMoistureLossage =+ heightAmount;
+    public void addAirMoistureLossage(double heightAmount) {
+        this.airMoistureLossage = this.airMoistureLossage + heightAmount;
     }
 
     @Override

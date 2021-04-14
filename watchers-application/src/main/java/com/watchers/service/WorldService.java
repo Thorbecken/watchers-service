@@ -23,15 +23,15 @@ import java.util.Optional;
 @AllArgsConstructor
 public class WorldService {
 
-    private WorldRepository worldRepository;
-    private FileSaveManager fileSaveManager;
-    private SaveToDatabaseManager saveToDatabaseManager;
-    private MapManager mapManager;
-    private ContinentalDriftManager continentalDriftManager;
-    private ClimateManager climateManager;
-    private CleansingManager cleansingManager;
-    private LifeManager lifeManager;
-    private ArrayList<Long> activeWorldIds;
+    private final WorldRepository worldRepository;
+    private final FileSaveManager fileSaveManager;
+    private final SaveToDatabaseManager saveToDatabaseManager;
+    private final MapManager mapManager;
+    private final ContinentalDriftManager continentalDriftManager;
+    private final ClimateManager climateManager;
+    private final CleansingManager cleansingManager;
+    private final LifeManager lifeManager;
+    private final ArrayList<Long> activeWorldIds;
 
     public void saveWorld(World memoryWorld){
         boolean exists = fileSaveManager.exist(memoryWorld.getId());
@@ -105,7 +105,6 @@ public class WorldService {
         }
     }
 
-    @Transactional
     private void saveToMemory(World persistentWorld) {
         saveToDatabaseManager.complexSaveToMemory(persistentWorld);
 

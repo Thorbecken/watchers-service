@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class PrecipiationComputator {
 
     private final static long WET_ZONE = 60;
-    private final static long HUMID_ZONE = 30;
-    private final static long SEMI_ARID_ZONE = 15;
+    private final static long HUMID_ZONE = 40;
+    private final static long SEMI_ARID_ZONE = 20;
     private final static long ARID_ZONE = 0;
 
     private final static long WET_PRECIPITION = 10;
     private final static long HUMID_PRECIPITION = 5;
-    private final static long SEMI_ARID__PRECIPITION = 3;
+    private final static long SEMI_ARID__PRECIPITION = 2;
     private final static long ARID_PRECIPITION = 1;
     private final static long NO_PRECIPITION = 0;
 
@@ -97,7 +97,7 @@ public class PrecipiationComputator {
             climate.setPrecipitationEnum(precipationCaluculator(currentSkyTile.getAirMoistureLossage()));
     }
 
-    private PrecipitationEnum precipationCaluculator(long airMoistureLossage) {
+    private PrecipitationEnum precipationCaluculator(double airMoistureLossage) {
         if (airMoistureLossage >= WET_PRECIPITION) {
             return PrecipitationEnum.WET;
         } else if (airMoistureLossage >= HUMID_PRECIPITION) {
