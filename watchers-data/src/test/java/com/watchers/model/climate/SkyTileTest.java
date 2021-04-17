@@ -1,7 +1,6 @@
 package com.watchers.model.climate;
 
 import com.watchers.helper.SkyHelper;
-import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
@@ -10,7 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalDouble;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SkyTileTest {
@@ -107,6 +109,9 @@ class SkyTileTest {
         );
 
         skyTileList.forEach(skyTile -> assertEquals(2, skyTile.getOutgoingAircurrents().size()));
+        skyTileList.stream()
+                .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
+                .forEach(aircurrent -> aircurrent.setCurrentStrength(1));
 
         // preperation for heightdifference check
         sky1.getClimate().getCoordinate().getTile().setHeight(2);
@@ -137,43 +142,38 @@ class SkyTileTest {
                 }
         );
 
-        assertEquals(2, sky1.getAirMoisture());
-        assertEquals(4, sky2.getAirMoisture());
-        assertEquals(6, sky3.getAirMoisture());
-        assertEquals(8, sky4.getAirMoisture());
-        assertEquals(10, sky5.getAirMoisture());
+        double totalAirmoistureBefore = skyTileList.stream()
+                .mapToDouble(SkyTile::getAirMoisture)
+                .sum();
+
+        double expected1 = calculateExpectedIncommingAirmoisture(sky1);
+        double expected2 = calculateExpectedIncommingAirmoisture(sky2);
+        double expected3 = calculateExpectedIncommingAirmoisture(sky3);
+        double expected4 = calculateExpectedIncommingAirmoisture(sky4);
+        double expected5 = calculateExpectedIncommingAirmoisture(sky5);
 
         skyTileList.parallelStream().forEach(SkyTile::moveClouds);
         skyTileList.parallelStream().forEach(SkyTile::processIncommingMoisture);
 
-        assertEquals(2, sky1.getAirMoisture());
-        assertEquals(3, sky2.getAirMoisture());
-        assertEquals(4, sky3.getAirMoisture());
-        assertEquals(5, sky4.getAirMoisture());
-        assertEquals(1, sky5.getAirMoisture());
-//
-//        skyTileList.parallelStream().forEach(SkyTile::moveClouds);
-//        skyTileList.parallelStream().forEach(SkyTile::processIncommingMoisture);
-//
-//        assertEquals(3, skyTile1.getAirMoisture());
-//        assertEquals(4, skyTile2.getAirMoisture());
-//        assertEquals(1, skyTile3.getAirMoisture());
-//        assertEquals(2, skyTile4.getAirMoisture());
-//
-//        skyTileList.parallelStream().forEach(SkyTile::moveClouds);
-//        skyTileList.parallelStream().forEach(SkyTile::processIncommingMoisture);
-//
-//        assertEquals(2, skyTile1.getAirMoisture());
-//        assertEquals(3, skyTile2.getAirMoisture());
-//        assertEquals(4, skyTile3.getAirMoisture());
-//        assertEquals(1, skyTile4.getAirMoisture());
-//
-//        skyTileList.parallelStream().forEach(SkyTile::moveClouds);
-//        skyTileList.parallelStream().forEach(SkyTile::processIncommingMoisture);
-//
-//        assertEquals(1, skyTile1.getAirMoisture());
-//        assertEquals(2, skyTile2.getAirMoisture());
-//        assertEquals(3, skyTile3.getAirMoisture());
-//        assertEquals(4, skyTile4.getAirMoisture());
+        double totalAirmoistureAfter = skyTileList.stream()
+                .mapToDouble(SkyTile::getAirMoisture)
+                .sum();
+
+        assertThat(totalAirmoistureAfter, is(totalAirmoistureBefore));
+
+        assertThat(sky1.getAirMoisture(), is(expected1));
+        assertThat(sky2.getAirMoisture(), is(expected2));
+        assertThat(sky3.getAirMoisture(), is(expected3));
+        assertThat(sky4.getAirMoisture(), is(expected4));
+        assertThat(sky5.getAirMoisture(), is(expected5));
+    }
+
+    private double calculateExpectedIncommingAirmoisture(SkyTile skyTile) {
+        OptionalDouble optionalDouble = skyTile.getIncommingAircurrents().stream()
+                .map(Aircurrent::getStartingSky)
+                .mapToDouble(SkyTile::getAirMoisture)
+                .average();
+
+        return optionalDouble.isPresent()?optionalDouble.getAsDouble():0;
     }
 }

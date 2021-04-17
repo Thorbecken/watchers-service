@@ -46,14 +46,14 @@ public class WorldService {
 
     public void processTurn(WorldTaskDto worldTaskDto){
         log.trace(getTotalHeight(worldTaskDto.getWorldId()));
-        if(worldTaskDto.isContinentalshift()) {
-            Assert.isTrue(worldTaskDto instanceof ContinentalDriftTaskDto, "The WorldTaskDto was initiated wrongly");
+        if(worldTaskDto instanceof ContinentalDriftTaskDto) {
             continentalDriftManager.process((ContinentalDriftTaskDto) worldTaskDto);
             climateManager.proces(worldTaskDto);
             cleansingManager.process(worldTaskDto);
+        } else {
+            climateManager.proces(worldTaskDto);
         }
 
-        climateManager.proces(worldTaskDto);
         lifeManager.process(worldTaskDto);
         cleansingManager.process(worldTaskDto);
 

@@ -2,6 +2,7 @@ package com.watchers.manager;
 
 import com.watchers.components.life.ActorProcessor;
 import com.watchers.components.life.BiomeProcessor;
+import com.watchers.helper.StopwatchTimer;
 import com.watchers.model.actors.animals.AnimalFactory;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
@@ -26,8 +27,12 @@ public class LifeManager {
     ActorProcessor actorProcessor;
 
     public void process(WorldTaskDto taskDto){
+        StopwatchTimer.start();
         biomeProcessor.process(taskDto);
+        StopwatchTimer.stop("BiomeProcessor");
+        StopwatchTimer.start();
         actorProcessor.process(taskDto);
+        StopwatchTimer.stop("ActorProcessor");
     }
 
     @Transactional

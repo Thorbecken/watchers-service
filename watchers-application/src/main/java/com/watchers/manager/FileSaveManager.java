@@ -2,6 +2,7 @@ package com.watchers.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchers.config.SettingConfiguration;
+import com.watchers.helper.StopwatchTimer;
 import com.watchers.model.common.Views;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.world.World;
@@ -27,9 +28,11 @@ public class FileSaveManager {
 
     @Transactional
     public void saveWorld(WorldTaskDto taskDto) {
+        StopwatchTimer.start();
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         save(world);
         worldSettingManager.changeSaveSetting(taskDto.getWorldId(), false);
+        StopwatchTimer.stop("saveWorld");
     }
     public void saveWorld(World world){
         save(world);
