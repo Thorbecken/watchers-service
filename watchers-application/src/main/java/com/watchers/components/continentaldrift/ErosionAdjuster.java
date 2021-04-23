@@ -1,6 +1,5 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -19,30 +18,27 @@ import java.util.stream.Collectors;
 public class ErosionAdjuster {
 
     private final int NUMBER_OF_NEIGHBOURS = 4;
-    private WorldRepository worldRepository;
-    private SettingConfiguration settingConfiguration;
+    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, Long> erosionMap = new HashMap<>();
 
-        CoordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> {
-            erosionMap.put(coordinate, 0L);
-        });
+        CoordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> erosionMap.put(coordinate, 0L));
 
         Set<Coordinate> coordinates = world.getCoordinates();
 
         coordinates.stream().map(Coordinate::getTile).forEach(tile -> {
             List<Tile> neighbouringTiles = tile.getNeighbours();
             List<Tile> receivingTiles = neighbouringTiles.stream()
-                    .filter(neighbouringTile -> (tile.getHeight() - neighbouringTile.getHeight()) > settingConfiguration.getMinHeightDifference())
+                    .filter(neighbouringTile -> (tile.getHeight() - neighbouringTile.getHeight()) > world.getWorldSettings().getMinHeightDifference())
                     .collect(Collectors.toList());
 
             for (Tile recievingTile : receivingTiles) {
                 long heightTransfer = (tile.getHeight() - recievingTile.getHeight()) / NUMBER_OF_NEIGHBOURS;
-                if (heightTransfer > settingConfiguration.getMaxErosion()) {
-                    heightTransfer = settingConfiguration.getMaxErosion();
+                if (heightTransfer > world.getWorldSettings().getMaxErosion()) {
+                    heightTransfer = world.getWorldSettings().getMaxErosion();
                 }
 
                 long aLong = erosionMap.get(recievingTile.getCoordinate());

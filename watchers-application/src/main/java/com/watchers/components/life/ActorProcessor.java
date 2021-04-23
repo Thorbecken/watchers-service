@@ -32,7 +32,7 @@ public class ActorProcessor {
         List<Actor> currentActors = world.getActorList();
         Assert.notNull(currentActors, "There was no list found of Actors!");
         if (currentActors.size() == 0){
-            log.warn("The actorslist was empty!");
+            log.info("The actorslist was empty!");
         } else {
             currentActors.forEach(Actor::processSerialTask);
         }

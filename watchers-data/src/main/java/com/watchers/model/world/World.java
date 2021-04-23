@@ -42,9 +42,15 @@ public class World {
     @JsonView(Views.Public.class)
     private Long ySize;
 
-    @Transient
-    @JsonIgnore
-    private WorldSetting worldSetting;
+    @JsonProperty("worldMetaData")
+    @JsonView(Views.Public.class)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    private WorldMetaData worldMetaData;
+
+    @JsonProperty("worldSettings")
+    @JsonView(Views.Public.class)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    private WorldSettings worldSettings;
 
     @JsonProperty("coordinates")
     @JsonView(Views.Public.class)

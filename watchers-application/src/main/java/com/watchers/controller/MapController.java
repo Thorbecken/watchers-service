@@ -6,7 +6,7 @@ import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.WorldStatusEnum;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldSettingsRepository;
+import com.watchers.repository.WorldMetaDataRepository;
 import lombok.AllArgsConstructor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,18 +21,18 @@ import java.util.HashSet;
 @CrossOrigin
 @RestController
 @AllArgsConstructor
-@Api(description = "This controller exposes functionalitie about retrieving all the worlds.")
+@Api("This controller exposes functionalitie about retrieving all the worlds.")
 public class MapController {
 
-    private MapManager mapManager;
-    private WorldSettingsRepository worldSettingsRepository;
+    private final MapManager mapManager;
+    private final WorldMetaDataRepository worldMetaDataRepository;
 
     @JsonView(Views.Public.class)
     @RequestMapping(value = "/world/{worldId}", method = RequestMethod.GET)
     @ApiOperation(value = "Returns the json of the chosen world.")
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId) {
         Assert.notNull(worldId, "No world id was found");
-        if (worldSettingsRepository.existsById(worldId) && !worldSettingsRepository.getOne(worldId).getWorldStatusEnum().equals(WorldStatusEnum.INITIALLIZING)) {
+        if (worldMetaDataRepository.existsById(worldId) && !worldMetaDataRepository.getOne(worldId).getWorldStatusEnum().equals(WorldStatusEnum.INITIALLIZING)) {
             World world = mapManager.getUninitiatedWorld(worldId);
             if (world != null) {
                 log.info(generateGetWorldMapLogMessage(world));

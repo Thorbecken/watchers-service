@@ -31,13 +31,12 @@ class ContinentalDriftWorldAdjusterTest {
     @BeforeEach
     void setUp() {
         this.world = TestableWorld.createWorld();
-        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
-        settingConfiguration.setContinentalContinentWeight(1);
+        world.getWorldSettings().setContinentalContinentWeight(1);
         WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
-        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(worldRepository, settingConfiguration);
+        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(worldRepository);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, null, settingConfiguration);
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, null);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);

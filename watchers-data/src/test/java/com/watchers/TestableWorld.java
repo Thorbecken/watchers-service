@@ -2,11 +2,10 @@ package com.watchers;
 
 import com.watchers.model.common.Direction;
 import com.watchers.model.coordinate.CoordinateFactory;
-import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.*;
+import com.watchers.model.enums.SurfaceType;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 public class TestableWorld {
 
@@ -77,7 +76,7 @@ public class TestableWorld {
     public static WorldSettings createWorldSettings(){
         return new WorldSettings(
                 null,
-            null,
+                null,
 
                 12,
                 6,

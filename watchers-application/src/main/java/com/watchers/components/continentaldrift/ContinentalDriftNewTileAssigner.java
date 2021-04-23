@@ -1,6 +1,5 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
@@ -25,7 +24,6 @@ public class ContinentalDriftNewTileAssigner {
 
     private final WorldRepository worldRepository;
     private final ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
-    private final SettingConfiguration settingConfiguration;
     long nextContinentalId = 0;
 
 
@@ -40,7 +38,7 @@ public class ContinentalDriftNewTileAssigner {
         Assert.notNull(newestContinent, "There was no continent found on the world with an id number!");
         nextContinentalId = newestContinent+1;
 
-        int minimumContinents = taskDto.getMinContinents();
+        int minimumContinents = world.getWorldSettings().getMinimumContinents();
 
         List<List<Coordinate>> listOfConnectedCoordinates = generateEmptyTileClusters(taskDto);
 
@@ -103,14 +101,14 @@ public class ContinentalDriftNewTileAssigner {
     private SurfaceType getSurfaceType(World world) {
         long numberOfOceaanicContinents = world.getContinents().stream().filter(continent -> continent.getType().equals(SurfaceType.OCEAN)).count();
         long numberOfContinents = world.getContinents().size();
-        int oceanincContinentsPerContinentalContinent = settingConfiguration.getContinentalToOcceanicRatio() + 1;
+        int oceanincContinentsPerContinentalContinent = world.getWorldSettings().getContinentalToOcceanicRatio() + 1;
         boolean tooMuckOceeanicContinents = numberOfOceaanicContinents * oceanincContinentsPerContinentalContinent > numberOfContinents;
         return  tooMuckOceeanicContinents ? SurfaceType.PLAIN:SurfaceType.OCEAN;
     }
 
-    private int calculateMaximumCoordinates(ContinentalDriftTaskDto taskDto, World world) {
+    private int calculateMaximumCoordinates(World world) {
         int totalCoordinates = world.getCoordinates().size();
-        return totalCoordinates/taskDto.getMinContinents();
+        return totalCoordinates/world.getWorldSettings().getMinimumContinents();
     }
 
     private int createNewContinents(ContinentalDriftTaskDto taskDto, int currentContinents, int minimumContinents, List<List<Coordinate>> listOfConnectedCoordinates, World world) {

@@ -1,7 +1,7 @@
 package com.watchers.manager;
 
+import com.watchers.components.climate.TemperatureZoneComputator;
 import com.watchers.components.continentaldrift.TileDefined;
-import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.SkyHelper;
 import com.watchers.model.dto.MockContinent;
 import com.watchers.model.dto.WorldFactoryDTO;
@@ -10,7 +10,11 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
-import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldMetaData;
+import com.watchers.model.world.WorldSettings;
+import com.watchers.repository.WorldMetaDataRepository;
+import com.watchers.repository.WorldRepository;
+import com.watchers.repository.WorldSettingsRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -25,17 +29,27 @@ import java.util.*;
 @AllArgsConstructor
 class WorldFactory {
 
-    private TileDefined tileDefined;
-    private SettingConfiguration settingConfiguration;
+    private final TileDefined tileDefined;
+    private final WorldRepository worldRepository;
+    private final WorldSettingsRepository worldSettingsRepository;
+    private final WorldMetaDataRepository worldMetaDataRepository;
+    private final TemperatureZoneComputator temperatureZoneComputator;
 
-    World generateWorld(long xSize, long ySize, long continents, WorldSetting worldSetting){
-        World world = new World(xSize, ySize);
-        world.setWorldSetting(worldSetting);
+    World generateWorld(WorldSettings worldSettings, WorldMetaData worldMetaData){
+        World world = new World(worldSettings.getXSize(), worldSettings.getYSize());
+        worldRepository.save(world);
+        world.setWorldMetaData(worldMetaData);
+        world.setWorldSettings(worldSettings);
+        worldSettings.setWorld(world);
+        worldMetaData.setWorld(world);
+        worldSettingsRepository.saveAndFlush(worldSettings);
+        worldMetaDataRepository.saveAndFlush(worldMetaData);
+
         int continental = 0;
         int oceeanic = 0;
-        for (int i = 0; i < continents; i++) {
+        for (int i = 0; i < worldSettings.getNumberOfContinents(); i++) {
             SurfaceType surfaceType;
-            if(oceeanic * settingConfiguration.getContinentalToOcceanicRatio() >= continental){
+            if(oceeanic * worldSettings.getContinentalToOcceanicRatio() >= continental){
                 surfaceType = SurfaceType.PLAIN;
                 continental++;
             } else {
@@ -61,7 +75,7 @@ class WorldFactory {
         SkyHelper.calculateAirflows(world);
         log.info("Skies are sepperated");
 
-        if(settingConfiguration.isLifePreSeeded()) {
+        if(worldSettings.isLifePreSeeded()) {
             world.getContinents().forEach(continent -> world.getCoordinates().stream()
                     .filter(coordinate -> coordinate.getContinent() == continent)
                     .findFirst()
@@ -74,6 +88,8 @@ class WorldFactory {
         SkyHelper.calculateAirflows(world);
         log.info("Skies are sepperated");
 
+        temperatureZoneComputator.process(world);
+
         return world;
     }
 
@@ -84,9 +100,9 @@ class WorldFactory {
                 .filter(tile -> SurfaceType.SEA.equals(tile.getSurfaceType()))
                 .forEach(
                 tile -> {
-                    if(tile.getNeighboursWithinRange(Collections.singletonList(tile), settingConfiguration.getCoastalZone()).stream().anyMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
+                    if(tile.getNeighboursWithinRange(Collections.singletonList(tile), world.getWorldSettings().getCoastalZone()).stream().anyMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
                         tile.setSurfaceType(SurfaceType.COASTAL);
-                    } else if(tile.getNeighboursWithinRange(Collections.singletonList(tile), settingConfiguration.getOceanicZone()).stream().noneMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
+                    } else if(tile.getNeighboursWithinRange(Collections.singletonList(tile), world.getWorldSettings().getOceanicZone()).stream().noneMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))){
                         tile.setSurfaceType(SurfaceType.OCEAN);
                     }
                 }

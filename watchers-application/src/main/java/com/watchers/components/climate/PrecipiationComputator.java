@@ -4,6 +4,7 @@ import com.watchers.model.climate.*;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSettings;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -18,27 +20,20 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class PrecipiationComputator {
 
-    private final static long WET_ZONE = 60;
-    private final static long HUMID_ZONE = 40;
-    private final static long SEMI_ARID_ZONE = 20;
-    private final static long ARID_ZONE = 0;
-
-    private final static long WET_PRECIPITION = 10;
-    private final static long HUMID_PRECIPITION = 5;
-    private final static long SEMI_ARID__PRECIPITION = 2;
-    private final static long ARID_PRECIPITION = 1;
-    private final static long NO_PRECIPITION = 0;
-
-    static Map<PrecipitationEnum, Long> precipationMap = new HashMap<>();
+    static Map<PrecipitationEnum, Function<WorldSettings, Long>> precipationMap = new HashMap<>();
+    static Map<AircurrentType, Function<WorldSettings, Integer>> airCurrentStrengthSetter = new HashMap<>();
 
     static {
-        precipationMap.put(PrecipitationEnum.WET, WET_PRECIPITION);
-        precipationMap.put(PrecipitationEnum.HUMID, HUMID_PRECIPITION);
-        precipationMap.put(PrecipitationEnum.SEMI_ARID, SEMI_ARID__PRECIPITION);
-        precipationMap.put(PrecipitationEnum.ARID, ARID_ZONE);
+        airCurrentStrengthSetter.put(AircurrentType.LATITUDAL, WorldSettings::getLatitudinalStrength);
+        airCurrentStrengthSetter.put(AircurrentType.LONGITUDAL, WorldSettings::getLongitudinalStrength);
+
+        precipationMap.put(PrecipitationEnum.WET, WorldSettings::getWetPrecipitation);
+        precipationMap.put(PrecipitationEnum.HUMID, WorldSettings::getHumidPrecipitation);
+        precipationMap.put(PrecipitationEnum.SEMI_ARID, WorldSettings::getSemiAridPrecipitation);
+        precipationMap.put(PrecipitationEnum.ARID, WorldSettings::getAridPrecipitation);
     }
 
-    private WorldRepository worldRepository;
+    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(WorldTaskDto taskDto) {
@@ -46,8 +41,8 @@ public class PrecipiationComputator {
         List<Climate> climates = world.getCoordinates().stream().map(Coordinate::getClimate).collect(Collectors.toList());
 
         computeEvaporation(climates);
-        moveCloudsAccordingToAirflow(climates);
-        setLandPrecipationEnums(climates);
+        moveCloudsAccordingToAirflow(climates, world.getWorldSettings());
+        setLandPrecipationEnums(climates, world.getWorldSettings());
 
         worldRepository.save(world);
     }
@@ -64,7 +59,16 @@ public class PrecipiationComputator {
         climate.setPrecipitationEnum(PrecipitationEnum.WET);
     }
 
-    protected void moveCloudsAccordingToAirflow(List<Climate> climates) {
+    @Transactional
+    protected void moveCloudsAccordingToAirflow(List<Climate> climates, WorldSettings worldSettings) {
+        climates.parallelStream()
+                .map(Climate::getSkyTile)
+                .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
+                .forEach(aircurrent -> aircurrent.setCurrentStrength(
+                        airCurrentStrengthSetter.get(
+                                aircurrent.getAircurrentType()).apply(worldSettings)
+                        )
+                );
         climates.parallelStream()
                 .map(Climate::getSkyTile)
                 .forEach(SkyTile::moveClouds);
@@ -73,13 +77,39 @@ public class PrecipiationComputator {
                 .forEach(SkyTile::processIncommingMoisture);
     }
 
-    protected void setLandPrecipationEnums(List<Climate> climates) {
+    protected void setLandPrecipationEnums(List<Climate> climates, WorldSettings worldSettings) {
+        LandClimateProcessor landClimateProcessor = new LandClimateProcessor(worldSettings);
         climates.parallelStream()
                 .filter(Climate::isLand)
-                .forEach(this::procesLandClimate);
+                .forEach(landClimateProcessor::procesLandClimate);
     }
 
-    private void procesLandClimate(Climate climate){
+    private class LandClimateProcessor {
+        private final long WET_ZONE;
+        private final long HUMID_ZONE;
+        private final long SEMI_ARID_ZONE;
+        private final long ARID_ZONE;
+
+        private final long WET_PRECIPITION;
+        private final long HUMID_PRECIPITION;
+        private final long SEMI_ARID__PRECIPITION;
+        private final long ARID_PRECIPITION;
+        private static final long NO_PRECIPITION = 0;
+
+        LandClimateProcessor(WorldSettings worldSettings){
+            this.WET_ZONE = worldSettings.getWetZone();
+            this.HUMID_ZONE = worldSettings.getHumidZone();
+            this.SEMI_ARID_ZONE = worldSettings.getSemiAridZone();
+            this.ARID_ZONE = worldSettings.getAridZone();
+
+            this.WET_PRECIPITION = worldSettings.getWetPrecipitation();
+            this.HUMID_PRECIPITION = worldSettings.getHumidPrecipitation();
+            this.SEMI_ARID__PRECIPITION = worldSettings.getSemiAridPrecipitation();
+            this.ARID_PRECIPITION = worldSettings.getAridPrecipitation();
+        }
+
+        @Transactional
+        private void procesLandClimate(Climate climate) {
             SkyTile currentSkyTile = climate.getSkyTile();
             if (currentSkyTile.getAirMoisture() >= WET_ZONE) {
                 currentSkyTile.setAirMoistureLossage(WET_PRECIPITION);
@@ -95,19 +125,22 @@ public class PrecipiationComputator {
 
             currentSkyTile.calculateNewMoistureLevel();
             climate.setPrecipitationEnum(precipationCaluculator(currentSkyTile.getAirMoistureLossage()));
-    }
+        }
 
-    private PrecipitationEnum precipationCaluculator(double airMoistureLossage) {
-        if (airMoistureLossage >= WET_PRECIPITION) {
-            return PrecipitationEnum.WET;
-        } else if (airMoistureLossage >= HUMID_PRECIPITION) {
-            return PrecipitationEnum.HUMID;
-        } else if (airMoistureLossage >= SEMI_ARID__PRECIPITION) {
-            return PrecipitationEnum.SEMI_ARID;
-        } else if (airMoistureLossage >= ARID_PRECIPITION) {
-            return PrecipitationEnum.ARID;
-        } else {
-            return PrecipitationEnum.ARID;
+        @Transactional
+        private PrecipitationEnum precipationCaluculator(double airMoistureLossage) {
+            if (airMoistureLossage >= WET_PRECIPITION) {
+                return PrecipitationEnum.WET;
+            } else if (airMoistureLossage >= HUMID_PRECIPITION) {
+                return PrecipitationEnum.HUMID;
+            } else if (airMoistureLossage >= SEMI_ARID__PRECIPITION) {
+                return PrecipitationEnum.SEMI_ARID;
+            } else if (airMoistureLossage >= ARID_PRECIPITION) {
+                return PrecipitationEnum.ARID;
+            } else {
+                return PrecipitationEnum.ARID;
+            }
         }
     }
+
 }

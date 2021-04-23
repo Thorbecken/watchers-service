@@ -1,6 +1,6 @@
 package com.watchers.model.dto;
 
-import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldMetaData;
 import lombok.Data;
 
 @Data
@@ -10,8 +10,8 @@ public class WorldTaskDto {
     boolean saving;
     boolean continentalshift;
 
-    public WorldTaskDto(WorldSetting worldSetting){
-        this(worldSetting.getWorldId(), worldSetting.isNeedsSaving(), worldSetting.isNeedsContinentalShift());
+    public WorldTaskDto(WorldMetaData worldMetaData){
+        this(worldMetaData.getId(), worldMetaData.isNeedsSaving(), worldMetaData.isNeedsContinentalShift());
     }
 
     public WorldTaskDto(Long worldId, boolean needsSaving, boolean needsContinentaldrift){

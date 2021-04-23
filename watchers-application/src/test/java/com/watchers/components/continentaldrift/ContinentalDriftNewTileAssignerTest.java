@@ -1,12 +1,10 @@
 package com.watchers.components.continentaldrift;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
-import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.ContinentalChangesDto;
@@ -16,9 +14,11 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.dto.MockContinent;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSettings;
+import com.watchers.model.world.WorldTypeEnum;
 import com.watchers.repository.WorldRepository;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
@@ -32,21 +32,20 @@ class ContinentalDriftNewTileAssignerTest {
 
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
     private ContinentalDriftTaskDto taskDto;
-    private WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
+    private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
 
 
     @BeforeEach
     void setUp() {
-        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
-        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository, settingConfiguration);
-        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, continentalDriftDirectionChanger, settingConfiguration);
+        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository);
+        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, continentalDriftDirectionChanger);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
 
         World world = TestableWorld.createWorld();
+        world.getWorldSettings().setMinimumContinents(1);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        taskDto.setMinContinents(1);
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
         continentalDriftTileChangeComputer.process(taskDto);
@@ -64,7 +63,7 @@ class ContinentalDriftNewTileAssignerTest {
 
     @Test
     void processTestLargeNewMockContinent(){
-        World world = new World();
+        World world = TestableWorld.createWorld(WorldTypeEnum.SQUARE);
 
         Continent continentX = new Continent(world, SurfaceType.PLAIN);
         Continent continentY = new Continent(world, SurfaceType.PLAIN);
@@ -98,39 +97,39 @@ class ContinentalDriftNewTileAssignerTest {
         continentalDriftNewTileAssigner.process(taskDto);
 
         assertEquals(5, taskDto.getChanges().values().stream().filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null).count());
-        assertEquals(2, taskDto.getChanges().values().stream()
-                .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
+        assertEquals(1, taskDto.getChanges().values().stream()
                 .map(ContinentalChangesDto::getNewMockContinent)
+                .filter(Objects::nonNull)
                 .map(MockContinent::getContinent)
                 .max(Comparator.comparing(Continent::getId))
                 .map(Continent::getId)
-                .get()
+                .orElseThrow()
                 .longValue());
 
         // asserts that only one continent is created
         assertEquals(1,taskDto.getChanges().values().stream()
-                .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
                 .map(ContinentalChangesDto::getNewMockContinent)
+                .filter(Objects::nonNull)
                 .map(MockContinent::getContinent)
                 .filter(distinctByKey(Continent::getId))
                 .count());
 
         //assert that all the new coordinates have the same mock continent.
         assertEquals(5, taskDto.getChanges().values().stream()
-                .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
                 .map(ContinentalChangesDto::getNewMockContinent)
+                .filter(Objects::nonNull)
                 .findFirst()
-                .get()
+                .orElseThrow()
                 .getCoordinates()
                 .size());
 
         // Assert that only four coordinates that are adjecent to the mockcontinent
         // checks the possible continent to be merged with
         assertEquals(4, taskDto.getChanges().values().stream()
-                .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
                 .map(ContinentalChangesDto::getNewMockContinent)
+                .filter(Objects::nonNull)
                 .findFirst()
-                .get()
+                .orElseThrow()
                 .getPossibleCoordinates()
                 .size());
     }
@@ -142,8 +141,7 @@ class ContinentalDriftNewTileAssignerTest {
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
         taskDto.setWorldId(1L);
-        taskDto.setMinContinents(minimumContinents);
-
+        world.getWorldSettings().setMinimumContinents(minimumContinents);
 
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
@@ -160,8 +158,8 @@ class ContinentalDriftNewTileAssignerTest {
         assertEquals(3, taskDto.getChanges().values().stream().filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null).count());
 
         long newContinents = taskDto.getChanges().values().stream()
-                .filter(continentalChangesDto -> continentalChangesDto.getNewMockContinent() != null)
                 .map(ContinentalChangesDto::getNewMockContinent)
+                .filter(Objects::nonNull)
                 .map(MockContinent::getContinent)
                 .filter(continent -> world.getContinents().stream()
                         .map(Continent::getId)
@@ -175,6 +173,8 @@ class ContinentalDriftNewTileAssignerTest {
 
     private World createTestWorld() {
         World world = new World(3,3);
+        WorldSettings worldSettings = TestableWorld.createWorldSettings();
+        world.setWorldSettings(worldSettings);
         world.setId(1L);
 
         Continent continentX = new Continent(world, SurfaceType.PLAIN);

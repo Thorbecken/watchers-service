@@ -1,6 +1,6 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.config.SettingConfiguration;
+import com.watchers.TestableWorld;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
@@ -19,18 +19,17 @@ class ContinentalSplitterTest {
 
 
     private World world;
-    private SettingConfiguration settingConfiguration;
     private WorldRepository worldRepository;
     private ContinentalSplitter continentalSplitter;
 
     @BeforeEach
     void setUp() {
-        settingConfiguration = Mockito.mock(SettingConfiguration.class);
         worldRepository = Mockito.mock(WorldRepository.class);
-        continentalSplitter = new ContinentalSplitter(worldRepository, settingConfiguration);
+        continentalSplitter = new ContinentalSplitter(worldRepository);
 
 
         world = new World();
+        world.setWorldSettings(TestableWorld.createWorldSettings());
         world.setYSize(5L);
         world.setXSize(3L);
         Continent continent1 = new Continent(world, SurfaceType.OCEAN);
@@ -68,8 +67,11 @@ class ContinentalSplitterTest {
 
     @Test
     void process() {
+        world.getWorldSettings().setMaxWidthLenghtBalance(2);
+        world.getWorldSettings().setHeigtDivider(1);
+        world.getWorldSettings().setMinimumContinents(1);
+
         Mockito.when(worldRepository.findById(1L)).thenReturn(Optional.of(world));
-        Mockito.when(settingConfiguration.getMaxWidthLenghtBalance()).thenReturn(2);
 
         Assertions.assertEquals(8, world.getCoordinates().stream()
                 .filter(coordinate -> coordinate.getContinent().getId().equals(1L)).count());
@@ -81,7 +83,7 @@ class ContinentalSplitterTest {
                 .filter(coordinate -> coordinate.getContinent().getId().equals(4L)).count());
         Assertions.assertEquals(4, world.getContinents().size());
 
-        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false, 1, 1);
+        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false);
         continentalSplitter.process(continentalDriftTaskDto);
 
         Assertions.assertEquals(8, world.getCoordinates().stream()

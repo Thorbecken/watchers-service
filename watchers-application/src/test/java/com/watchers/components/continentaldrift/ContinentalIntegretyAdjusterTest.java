@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.TestableWorld;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
@@ -27,6 +28,7 @@ class ContinentalIntegretyAdjusterTest {
     @Test
     void process() {
         World world = createWorld();
+        world.setWorldSettings(TestableWorld.createWorldSettings());
         Continent toBeSplitContinent = world.getContinents().stream().filter(continent -> continent.getId() == 1L).findFirst().get();
         Continent fillerContinent = world.getContinents().stream().filter(continent -> continent.getId() == 2L).findFirst().get();
         Assertions.assertEquals(2, toBeSplitContinent.getCoordinates().size());
@@ -34,7 +36,9 @@ class ContinentalIntegretyAdjusterTest {
 
         Mockito.when(worldRepository.findById(1L)).thenReturn(Optional.of(world));
 
-        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false, 1, 1);
+        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false);
+        world.getWorldSettings().setHeigtDivider(1);
+        world.getWorldSettings().setMinimumContinents(1);
         continentalIntegretyAdjuster.process(continentalDriftTaskDto);
 
         Assertions.assertEquals(1, toBeSplitContinent.getCoordinates().size());

@@ -1,6 +1,5 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
@@ -20,29 +19,28 @@ import java.util.List;
 @AllArgsConstructor
 public class ContinentalDriftDirectionChanger {
 
-    private WorldRepository worldRepository;
-    private SettingConfiguration settingConfiguration;
+    private final WorldRepository worldRepository;
 
     public void assignFirstOrNewDriftDirections(World world){
-        world.getContinents().forEach(continent -> continent.assignNewDriftDirection(settingConfiguration.getDriftVelocity(), world));
+        world.getContinents().forEach(continent -> continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world));
     }
 
     public void assignFirstDriftDirrecion(Continent continent, World world){
-        continent.assignNewDriftDirection(settingConfiguration.getDriftVelocity(), world);
+        continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world);
     }
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto){
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
-        new ContinentalDriftDirectionMethodObject(false,  world.getLastContinentInFlux())
-                .adjustContinentelDriftFlux(world, settingConfiguration.getDrifFlux(), settingConfiguration.getDriftVelocity());
+        new ContinentalDriftDirectionMethodObject(false, world.getLastContinentInFlux())
+                .adjustContinentelDriftFlux(world, world.getWorldSettings().getDrifFlux(), world.getWorldSettings().getDriftVelocity());
         worldRepository.save(world);
     }
 
-    class ContinentalDriftDirectionMethodObject {
+    static class ContinentalDriftDirectionMethodObject {
         private boolean lastChangedContinentFound;
         private int currentDriftChanges;
-        private long lastChangedContinentelDrift;
+        private final long lastChangedContinentelDrift;
 
         ContinentalDriftDirectionMethodObject(boolean lastChangedContinentFound, long lastChangedContinentelDrift){
             this.lastChangedContinentFound = lastChangedContinentFound;

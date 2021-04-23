@@ -1,5 +1,6 @@
 package com.watchers.model.world;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
@@ -14,13 +15,19 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorldSetting {
+@Table(name = "world_meta_data")
+public class WorldMetaData {
 
     @Id
-    @JsonProperty("animalId")
-    @Column(name = "world_id")
+    @JsonProperty("meta_id")
     @JsonView(Views.Internal.class)
-    private Long worldId;
+    @SequenceGenerator(name = "World_Meta_Gen", sequenceName = "World_Meta_Seq", allocationSize = 1)
+    @GeneratedValue(generator = "World_Meta_Seq", strategy = GenerationType.SEQUENCE)
+    private Long id;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER)
+    private World world;
 
     @JsonProperty("worldStatus")
     @Column(name = "world_status")
@@ -41,12 +48,4 @@ public class WorldSetting {
     @JsonProperty("needsContinentalShift")
     @Column(name = "needs_continental_shift")
     private boolean needsContinentalShift;
-
-    @JsonProperty("heigtDivider")
-    @Column(name = "height_divider")
-    private long heigtDivider;
-
-    @JsonProperty("minimumContinents")
-    @Column(name = "minimum_continents")
-    private int minimumContinents;
 }

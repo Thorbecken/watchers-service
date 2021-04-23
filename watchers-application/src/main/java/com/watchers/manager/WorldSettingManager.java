@@ -1,9 +1,9 @@
 package com.watchers.manager;
 
-import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldMetaData;
 import com.watchers.model.enums.WorldStatusEnum;
 import com.watchers.model.world.WorldTypeEnum;
-import com.watchers.repository.WorldSettingsRepository;
+import com.watchers.repository.WorldMetaDataRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,106 +17,101 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class WorldSettingManager {
 
-    private WorldSettingsRepository worldSettingsRepository;
+    private final WorldMetaDataRepository worldMetaDataRepository;
 
     @Transactional
     public void changeContinentalSetting(Long worldId, boolean newValue){
-        Optional<WorldSetting> optionalWorldSetting =  worldSettingsRepository.findById(worldId);
+        Optional<WorldMetaData> optionalWorldSetting =  worldMetaDataRepository.findById(worldId);
         if(optionalWorldSetting.isPresent()){
-            WorldSetting worldSetting = optionalWorldSetting.get();
-            worldSetting.setNeedsContinentalShift(newValue);
-            worldSettingsRepository.saveAndFlush(worldSetting);
+            WorldMetaData worldMetaData = optionalWorldSetting.get();
+            worldMetaData.setNeedsContinentalShift(newValue);
+            worldMetaDataRepository.saveAndFlush(worldMetaData);
         }
     }
 
     @Transactional
     public List<Long> getAllWaitingWorldSettings() {
-        return worldSettingsRepository.findAll().stream()
+        return worldMetaDataRepository.findAll().stream()
                 .filter(worldSetting -> worldSetting.getWorldStatusEnum().equals(WorldStatusEnum.WAITING))
-                .map(WorldSetting::getWorldId)
+                .map(WorldMetaData::getId)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public void setWorldInProgress(Long worldId) {
-        Optional<WorldSetting> optionalWorldSetting = worldSettingsRepository.findById(worldId);
+        Optional<WorldMetaData> optionalWorldSetting = worldMetaDataRepository.findById(worldId);
         if(optionalWorldSetting.isPresent()) {
-            WorldSetting worldSetting = optionalWorldSetting.get();
-            worldSetting.setWorldStatusEnum(WorldStatusEnum.IN_PROGRESS);
-            worldSettingsRepository.save(worldSetting);
-            worldSettingsRepository.flush();
+            WorldMetaData worldMetaData = optionalWorldSetting.get();
+            worldMetaData.setWorldStatusEnum(WorldStatusEnum.IN_PROGRESS);
+            worldMetaDataRepository.save(worldMetaData);
+            worldMetaDataRepository.flush();
         }
     }
 
     @Transactional
     public void setWorldInWaiting(Long worldId) {
-        Optional<WorldSetting> optionalWorldSetting = worldSettingsRepository.findById(worldId);
+        Optional<WorldMetaData> optionalWorldSetting = worldMetaDataRepository.findById(worldId);
         if(optionalWorldSetting.isPresent()) {
-            WorldSetting worldSetting = optionalWorldSetting.get();
-            worldSetting.setWorldStatusEnum(WorldStatusEnum.WAITING);
-            worldSettingsRepository.save(worldSetting);
-            worldSettingsRepository.flush();
+            WorldMetaData worldMetaData = optionalWorldSetting.get();
+            worldMetaData.setWorldStatusEnum(WorldStatusEnum.WAITING);
+            worldMetaDataRepository.save(worldMetaData);
+            worldMetaDataRepository.flush();
         }
     }
 
     @Transactional
     public void queInTurn() {
-        worldSettingsRepository.findAll()
+        worldMetaDataRepository.findAll()
                 .forEach(worldSetting -> {
                             worldSetting.setNeedsProcessing(true);
-                            worldSettingsRepository.save(worldSetting);
+                            worldMetaDataRepository.save(worldSetting);
                         }
                 );
-        worldSettingsRepository.flush();
+        worldMetaDataRepository.flush();
     }
 
     @Transactional
     public void queInSave() {
-        worldSettingsRepository.findAll()
+        worldMetaDataRepository.findAll()
                 .forEach(worldSetting -> {
                             worldSetting.setNeedsSaving(true);
-                            worldSettingsRepository.save(worldSetting);
+                            worldMetaDataRepository.save(worldSetting);
                         }
                 );
-        worldSettingsRepository.flush();
+        worldMetaDataRepository.flush();
     }
 
     @Transactional
     public void queInContinentalshift() {
-        worldSettingsRepository.findAll()
+        worldMetaDataRepository.findAll()
                 .forEach(worldSetting -> {
                             worldSetting.setNeedsContinentalShift(true);
-                            worldSettingsRepository.save(worldSetting);
+                            worldMetaDataRepository.save(worldSetting);
                         }
                 );
-        worldSettingsRepository.flush();
+        worldMetaDataRepository.flush();
     }
 
     @Transactional
-    public WorldSetting getWorldSetting(Long worldId) {
-        WorldSetting worldSetting = worldSettingsRepository.getOne(worldId);
-        Assert.notNull(worldSetting.getWorldId(), "The worldId was null.");
-        Assert.notNull(worldSetting.getWorldStatusEnum(), "The worldStatusEnum was null");
-        Assert.notNull(worldSetting.getWorldTypeEnum(), "The WorldTypeEnum was null");
-        return worldSetting;
+    public WorldMetaData getWorldSetting(Long worldId) {
+        WorldMetaData worldMetaData = worldMetaDataRepository.getOne(worldId);
+        Assert.notNull(worldMetaData.getId(), "The worldId was null.");
+        Assert.notNull(worldMetaData.getWorldStatusEnum(), "The worldStatusEnum was null");
+        Assert.notNull(worldMetaData.getWorldTypeEnum(), "The WorldTypeEnum was null");
+        return worldMetaData;
     }
 
-    @Transactional
-    public WorldSetting createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, WorldTypeEnum worldTypeEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift, long heigtDivider, int minimumContinents) {
-        WorldSetting worldSetting = new WorldSetting(worldId, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift, heigtDivider, minimumContinents);
-        worldSettingsRepository.save(worldSetting);
-        worldSettingsRepository.flush();
-
-        return worldSetting;
+    public WorldMetaData createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, WorldTypeEnum worldTypeEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift) {
+        return new WorldMetaData(worldId, null, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift);
     }
 
     @Transactional
     public void changeSaveSetting(Long worldId, boolean newValue){
-        Optional<WorldSetting> optionalWorldSetting =  worldSettingsRepository.findById(worldId);
+        Optional<WorldMetaData> optionalWorldSetting =  worldMetaDataRepository.findById(worldId);
         if(optionalWorldSetting.isPresent()){
-            WorldSetting worldSetting = optionalWorldSetting.get();
-            worldSetting.setNeedsSaving(newValue);
-            worldSettingsRepository.saveAndFlush(worldSetting);
+            WorldMetaData worldMetaData = optionalWorldSetting.get();
+            worldMetaData.setNeedsSaving(newValue);
+            worldMetaDataRepository.saveAndFlush(worldMetaData);
         }
     }
 }

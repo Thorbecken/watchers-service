@@ -1,6 +1,6 @@
 package com.watchers.manager;
 
-import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldMetaData;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.service.WorldService;
@@ -22,29 +22,29 @@ public class TurnManager {
                 worldId -> {
                     StopWatch stopWatch = new StopWatch();
                     stopWatch.start();
-                    WorldSetting worldSetting = worldSettingManager.getWorldSetting(worldId);
+                    WorldMetaData worldMetaData = worldSettingManager.getWorldSetting(worldId);
                     worldSettingManager.setWorldInProgress(worldId);
 
-                    WorldTaskDto worldTaskDto = getNewWorldTask(worldSetting);
+                    WorldTaskDto worldTaskDto = getNewWorldTask(worldMetaData);
                     worldService.processTurn(worldTaskDto);
 
                     worldSettingManager.setWorldInWaiting(worldId);
-                    log.info(generateLogMessage(worldSetting, stopWatch));
+                    log.info(generateLogMessage(worldMetaData, stopWatch));
                 }
         );
     }
 
-    private String generateLogMessage(WorldSetting worldSetting, StopWatch stopWatch) {
+    private String generateLogMessage(WorldMetaData worldMetaData, StopWatch stopWatch) {
         String  logMessage ="Processing a turn ";
-        if(worldSetting.isNeedsContinentalShift()){
+        if(worldMetaData.isNeedsContinentalShift()){
             logMessage = logMessage + "and continentalshifting ";
         }
-        if(worldSetting.isNeedsSaving()){
+        if(worldMetaData.isNeedsSaving()){
             logMessage = logMessage + "and saving ";
         }
 
         stopWatch.stop();
-        logMessage = logMessage + "for world " + worldSetting.getWorldId() + ", and took " + stopWatch.getTotalTimeSeconds() + " seconds.";
+        logMessage = logMessage + "for world " + worldMetaData.getId() + ", and took " + stopWatch.getTotalTimeSeconds() + " seconds.";
         return logMessage;
     }
 
@@ -60,11 +60,11 @@ public class TurnManager {
         worldSettingManager.queInContinentalshift();
     }
 
-    private WorldTaskDto getNewWorldTask(WorldSetting worldSetting) {
-        if(worldSetting.isNeedsContinentalShift()){
-            return new ContinentalDriftTaskDto(worldSetting);
+    private WorldTaskDto getNewWorldTask(WorldMetaData worldMetaData) {
+        if(worldMetaData.isNeedsContinentalShift()){
+            return new ContinentalDriftTaskDto(worldMetaData);
         } else {
-            return new WorldTaskDto(worldSetting);
+            return new WorldTaskDto(worldMetaData);
         }
     }
 

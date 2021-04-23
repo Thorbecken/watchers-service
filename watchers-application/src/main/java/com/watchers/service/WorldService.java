@@ -1,19 +1,19 @@
 package com.watchers.service;
 
+import com.watchers.config.WorldSettingFactory;
 import com.watchers.manager.*;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldMetaData;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -32,6 +32,7 @@ public class WorldService {
     private final CleansingManager cleansingManager;
     private final LifeManager lifeManager;
     private final ArrayList<Long> activeWorldIds;
+    private final WorldSettingFactory worldSettingFactory;
 
     public void saveWorld(World memoryWorld){
         boolean exists = fileSaveManager.exist(memoryWorld.getId());
@@ -74,33 +75,33 @@ public class WorldService {
     }
 
     /**
-     * @param worldSetting the worldsettings of the world
+     * @param worldMetaData the worldsettings of the world
      * @param startFromPersistents boolean value for the use of the persistent database
      * @return Boolean: true means added, null means already added false means not present in memory
      */
-    public Boolean addActiveWorld(WorldSetting worldSetting, boolean startFromPersistents) {
+    public Boolean addActiveWorld(WorldMetaData worldMetaData, boolean startFromPersistents) {
         if (startFromPersistents){
-            return addActiveWorldFromPersistence(worldSetting);
+            return addActiveWorldFromPersistence(worldMetaData);
         } else {
-            return addActiveWorldFromMemory(worldSetting);
+            return addActiveWorldFromMemory(worldMetaData);
         }
     }
 
-    private Boolean addActiveWorldFromPersistence(WorldSetting worldSetting) {
-        Optional<World> optionalWorld = fileSaveManager.findById(worldSetting.getWorldId());
+    private Boolean addActiveWorldFromPersistence(WorldMetaData worldMetaData) {
+        Optional<World> optionalWorld = fileSaveManager.findById(worldMetaData.getId());
         if(optionalWorld.isPresent()) {
             World world = optionalWorld.get();
             saveToMemory(world);
-            if (!activeWorldIds.contains(worldSetting.getWorldId())) {
-                activeWorldIds.add(worldSetting.getWorldId());
-                log.info("World " + worldSetting.getWorldId() + " added as active world from the persistence database.");
+            if (!activeWorldIds.contains(worldMetaData.getId())) {
+                activeWorldIds.add(worldMetaData.getId());
+                log.info("World " + worldMetaData.getId() + " added as active world from the persistence database.");
                 return true;
             } else {
-                log.info("World " + worldSetting.getWorldId() + " added as active world from the persistence database.");
+                log.info("World " + worldMetaData.getId() + " added as active world from the persistence database.");
                 return null;
             }
         } else {
-            log.info("World " + worldSetting.getWorldId() + " was not present in the persistence database.");
+            log.info("World " + worldMetaData.getId() + " was not present in the persistence database.");
             return false;
         }
     }
@@ -113,23 +114,23 @@ public class WorldService {
         log.info("current coordinates from memory are: " + persistentWorld.getCoordinates().size());
     }
 
-    private Boolean addActiveWorldFromMemory(WorldSetting worldSetting) {
-        Long id = worldSetting.getWorldId();
+    private Boolean addActiveWorldFromMemory(WorldMetaData worldMetaData) {
+        Long id = worldMetaData.getId();
         if (worldRepository.existsById(id)) {
             if (!activeWorldIds.contains(id)) {
                 activeWorldIds.add(id);
                 log.info("The requested world " + id + " is now active.");
                 return true;
             } else {
-                log.info("The requested world " + worldSetting.getWorldId() + " was alreadu active.");
+                log.info("The requested world " + worldMetaData.getId() + " was alreadu active.");
                 return null;
             }
         } else {
             log.warn("The world " + id + " does not exist in the persistence context. A new world is going to be created. Large worlds take a while being generated.");
-            World world = mapManager.createWorld(worldSetting);
+            World world = mapManager.createWorld(worldMetaData, worldSettingFactory.createWorldSetting());
             worldRepository.save(world);
             log.info("Created a new world! Number: " + world.getId());
-            activeWorldIds.add(worldSetting.getWorldId());
+            activeWorldIds.add(worldMetaData.getId());
             return true;
         }
     }

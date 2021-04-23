@@ -1,10 +1,10 @@
 package com.watchers.manager;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.model.world.WorldSetting;
+import com.watchers.model.world.WorldMetaData;
+import com.watchers.model.world.WorldSettings;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +20,8 @@ import java.util.Optional;
 @EnableTransactionManagement
 public class MapManager {
 
-    private WorldRepository worldRepository;
-    private WorldFactory worldFactory;
-    private SettingConfiguration settingConfiguration;
+    private final WorldRepository worldRepository;
+    private final WorldFactory worldFactory;
 
     public World getInitiatedWorld(Long worldId){
         return getWorld(worldId, true);
@@ -36,7 +35,7 @@ public class MapManager {
        Optional<World> optionalWorld = worldRepository.findById(worldId);
        if(optionalWorld.isPresent()) {
            World world = optionalWorld.get();
-           log.trace("world loaden from memory with: " + (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, (x, y) -> x + y) + world.getHeightDeficit()) + " height");
+           log.trace("world loaden from memory with: " + (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, Long::sum) + world.getHeightDeficit()) + " height");
            log.trace("the loaded world contains: " + world.getCoordinates().size() + " number of coordinates");
            if (initiated) {
                world.fillTransactionals();
@@ -49,8 +48,8 @@ public class MapManager {
        }
     }
 
-    public World createWorld(WorldSetting worldSetting){
-        World newWorld = worldFactory.generateWorld(settingConfiguration.getXSize(), settingConfiguration.getYSize(), settingConfiguration.getMinimumContinents(), worldSetting);
+    public World createWorld(WorldMetaData worldMetaData, WorldSettings worldSettings){
+        World newWorld = worldFactory.generateWorld(worldSettings, worldMetaData);
         Assert.isTrue(newWorld.getCoordinates().size() == newWorld.getXSize()*newWorld.getYSize(), "coordinates were " + newWorld.getCoordinates().size());
         return newWorld;
     }

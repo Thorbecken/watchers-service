@@ -1,6 +1,5 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
@@ -18,14 +17,13 @@ import java.util.*;
 @AllArgsConstructor
 public class ContinentalMerger {
 
-    private SettingConfiguration settingConfiguration;
-    private WorldRepository worldRepository;
+    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
         List<Continent> continents = new ArrayList<>(world.getContinents());
-        while(continents.size()>settingConfiguration.getMaximumContinents()){
+        while(continents.size()>world.getWorldSettings().getMaximumContinents()){
             Continent smallestContinent = continents.stream().min(Comparator.comparingInt((Continent continent) -> continent.getCoordinates().size())).get();
             mergeWithNeighbour(world, smallestContinent);
             taskDto.getGetRemovedContinents().add(smallestContinent.getId());

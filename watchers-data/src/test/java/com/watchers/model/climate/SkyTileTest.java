@@ -1,5 +1,6 @@
 package com.watchers.model.climate;
 
+import com.watchers.TestableWorld;
 import com.watchers.helper.SkyHelper;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.enums.SurfaceType;
@@ -20,6 +21,7 @@ class SkyTileTest {
     @Test
     void moveCloudsSimmple(){
         World world = new World();
+        world.setWorldSettings(TestableWorld.createWorldSettings());
         world.setXSize(2L);
         world.setYSize(2L);
         Continent continent = new Continent(world, SurfaceType.OCEAN);
@@ -57,6 +59,7 @@ class SkyTileTest {
     @Test
     void moveClouds() {
         World world = new World();
+        world.setWorldSettings(TestableWorld.createWorldSettings());
         world.setXSize(5L);
         world.setYSize(6L);
         Continent continent = new Continent(world, SurfaceType.OCEAN);

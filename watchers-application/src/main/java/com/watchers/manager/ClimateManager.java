@@ -2,6 +2,7 @@ package com.watchers.manager;
 
 import com.watchers.components.climate.*;
 import com.watchers.helper.StopwatchTimer;
+import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,19 +11,21 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ClimateManager {
 
-    private TemperatureZoneComputator temperatureZoneComputator;
-    private PrecipiationComputator precipiationComputator;
-    private BiomeComputator biomeComputator;
-    private ClimateComputator climateComputator;
-    private AircurrentRecalibrator aircurrentRecalibrator;
+    private final TemperatureZoneComputator temperatureZoneComputator;
+    private final PrecipiationComputator precipiationComputator;
+    private final BiomeComputator biomeComputator;
+    private final ClimateComputator climateComputator;
+    private final AircurrentRecalibrator aircurrentRecalibrator;
 
     public void proces(WorldTaskDto taskDto){
         StopwatchTimer.start();
         aircurrentRecalibrator.process(taskDto);
         StopwatchTimer.stop("aircurrentRecalibrator");
-        StopwatchTimer.start();
-        temperatureZoneComputator.process(taskDto);
-        StopwatchTimer.stop("temperatureZoneComputator");
+        if(taskDto instanceof ContinentalDriftTaskDto || true) {
+            StopwatchTimer.start();
+            temperatureZoneComputator.process(taskDto);
+            StopwatchTimer.stop("temperatureZoneComputator");
+        }
         StopwatchTimer.start();
         precipiationComputator.process(taskDto);
         StopwatchTimer.stop("precipiationComputator");

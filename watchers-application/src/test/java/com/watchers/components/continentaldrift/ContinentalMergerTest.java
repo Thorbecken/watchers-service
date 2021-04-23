@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.TestableWorld;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -25,11 +26,12 @@ class ContinentalMergerTest {
     void setUp() {
         settingConfiguration = Mockito.mock(SettingConfiguration.class);
         worldRepository = Mockito.mock(WorldRepository.class);
-        continentalMerger = new ContinentalMerger(settingConfiguration, worldRepository);
+        continentalMerger = new ContinentalMerger(worldRepository);
 
         world = new World();
         world.setYSize(5L);
         world.setXSize(3L);
+        world.setWorldSettings(TestableWorld.createWorldSettings());
         Continent continent1 = new Continent(world, SurfaceType.OCEAN);
         continent1.setId(1L);
         Continent continent2 = new Continent(world, SurfaceType.OCEAN);
@@ -62,8 +64,10 @@ class ContinentalMergerTest {
 
     @Test
     void process() {
+        world.getWorldSettings().setMinimumContinents(1);
+        world.getWorldSettings().setHeigtDivider(1);
+        world.getWorldSettings().setMaximumContinents(2);
         Mockito.when(worldRepository.findById(1L)).thenReturn(Optional.of(world));
-        Mockito.when(settingConfiguration.getMaximumContinents()).thenReturn(2);
 
         Assertions.assertEquals(3, world.getContinents().size());
 
@@ -71,7 +75,7 @@ class ContinentalMergerTest {
         Assertions.assertTrue(world.getContinents().stream().anyMatch(continent -> continent.getId().equals(2L)));
         Assertions.assertTrue(world.getContinents().stream().anyMatch(continent -> continent.getId().equals(3L)));
 
-        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false, 1, 1);
+        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false);
         continentalMerger.process(continentalDriftTaskDto);
 
         Assertions.assertEquals(2, world.getContinents().size());

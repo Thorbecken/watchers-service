@@ -27,12 +27,11 @@ class ContinentalDriftDirectionChangerTest {
     public void setup(){
         world = TestableWorld.createWorld();
         continents = world.getContinents();
-        SettingConfiguration settingConfiguration = TestableWorld.createConfiguration();
 
-        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository, settingConfiguration);
+        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository);
 
         lastContinentalDrift = world.getContinents().size()-1;
-        methodObject = continentalDriftDirectionChanger.new ContinentalDriftDirectionMethodObject(false,lastContinentalDrift);
+        methodObject = new ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject(false, lastContinentalDrift);
     }
 
     @ParameterizedTest

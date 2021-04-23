@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class TemperatureZoneComputator {
 
-    private WorldRepository worldRepository;
+    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(WorldTaskDto taskDto){
@@ -25,6 +25,14 @@ public class TemperatureZoneComputator {
                 .forEach(climate -> climate.setTemperatureEnum(calculateTemperatureEnum(climate)));
 
         worldRepository.save(world);
+    }
+
+    @Transactional
+    public void process(World world){
+        world.getCoordinates()
+                .parallelStream()
+                .map(Coordinate::getClimate)
+                .forEach(climate -> climate.setTemperatureEnum(calculateTemperatureEnum(climate)));
     }
 
     private TemperatureEnum calculateTemperatureEnum(Climate climate) {

@@ -1,5 +1,6 @@
 package com.watchers.helper;
 
+import com.watchers.TestableWorld;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
@@ -7,6 +8,7 @@ import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ class SkyHelperTest {
     @Test
     void calculateFlowTest() {
         World world = new World();
+        WorldSettings worldSettings = TestableWorld.createWorldSettings();
+        world.setWorldSettings(worldSettings);
         world.setXSize(5L);
         world.setYSize(6L);
         Continent continent = new Continent(world, SurfaceType.OCEAN);

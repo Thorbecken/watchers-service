@@ -1,6 +1,5 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
@@ -23,8 +22,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ContinentalSplitter {
 
-    private WorldRepository worldRepository;
-    private SettingConfiguration settingConfiguration;
+    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto){
@@ -43,11 +41,11 @@ public class ContinentalSplitter {
         Long width = continent.getCoordinates().stream().map(Coordinate::getXCoord).distinct().count();
         Long lenght = continent.getCoordinates().stream().map(Coordinate::getYCoord).distinct().count();
 
-        if(width/lenght>settingConfiguration.getMaxWidthLenghtBalance()){
+        if(width/lenght>continent.getWorld().getWorldSettings().getMaxWidthLenghtBalance()){
             Coordinate leftBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getXCoord)).get();
             Coordinate rightBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getXCoord)).get();
             divideContinentInTwo(continent, leftBound, rightBound);
-        } else if(lenght/width>settingConfiguration.getMaxWidthLenghtBalance()) {
+        } else if(lenght/width>continent.getWorld().getWorldSettings().getMaxWidthLenghtBalance()) {
             Coordinate upBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getYCoord)).get();
             Coordinate downBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getYCoord)).get();
             divideContinentInTwo(continent, upBound, downBound);

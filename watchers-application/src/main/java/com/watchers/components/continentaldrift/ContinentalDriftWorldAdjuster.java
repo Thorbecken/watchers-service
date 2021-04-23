@@ -1,6 +1,5 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
@@ -9,6 +8,7 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSettings;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,8 +20,7 @@ import java.util.*;
 @AllArgsConstructor
 public class ContinentalDriftWorldAdjuster {
 
-    private WorldRepository worldRepository;
-    private SettingConfiguration settingConfiguration;
+    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -45,16 +44,16 @@ public class ContinentalDriftWorldAdjuster {
 
     private long calculateNewHeight(World world, Map<Coordinate, ContinentalChangesDto> changes) {
         long heightDeficit = world.getHeightDeficit();
-        long divider = getWeightedDivider(changes);
+        long divider = getWeightedDivider(changes, world.getWorldSettings());
         long spendableHeightPerWeight = divider == 0 ? 0:heightDeficit/divider;
         long usedHeight = spendableHeightPerWeight*divider;
         world.setHeightDeficit(heightDeficit-usedHeight);
         return spendableHeightPerWeight;
     }
 
-    private long getWeightedDivider(Map<Coordinate, ContinentalChangesDto> changes) {
+    private long getWeightedDivider(Map<Coordinate, ContinentalChangesDto> changes, WorldSettings worldSettings) {
         long numberOfOceanicCoordinates = getContinentTypeCount(changes, SurfaceType.OCEAN);
-        long numberOfContinentalCoordinates = getContinentTypeCount(changes, SurfaceType.PLAIN) * settingConfiguration.getContinentalContinentWeight();
+        long numberOfContinentalCoordinates = getContinentTypeCount(changes, SurfaceType.PLAIN) * worldSettings.getContinentalContinentWeight();
         return numberOfOceanicCoordinates + numberOfContinentalCoordinates;
     }
 
@@ -71,13 +70,13 @@ public class ContinentalDriftWorldAdjuster {
         tile.clear();
         tile.getCoordinate().changeContinent(assignedContinent);
         assignedContinent.getCoordinates().add(dto.getKey());
-        tile.setHeight(weightedHeight(newHeight, assignedContinent));
+        tile.setHeight(weightedHeight(newHeight, assignedContinent, world.getWorldSettings()));
 
         world.getContinents().add(assignedContinent);
     }
 
-    private long weightedHeight(long newHeight, Continent assignedContinent) {
-        return assignedContinent.getType().equals(SurfaceType.PLAIN)? newHeight * settingConfiguration.getContinentalContinentWeight() : newHeight;
+    private long weightedHeight(long newHeight, Continent assignedContinent, WorldSettings worldSettings) {
+        return assignedContinent.getType().equals(SurfaceType.PLAIN)? newHeight * worldSettings.getContinentalContinentWeight() : newHeight;
     }
 
     private void ChangeTileOfCoordinate(ContinentalChangesDto dto, World world) {
