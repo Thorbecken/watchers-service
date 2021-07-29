@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -145,11 +146,10 @@ public class World {
     }
 
     private void setActorList() {
-        actorList = new ArrayList<>();
-
-        coordinates.forEach(
-                coordinate -> actorList.addAll(coordinate.getActors())
-        );
+        actorList = continents.stream()
+                .flatMap(continent -> continent.getCoordinates().stream())
+                .flatMap(coordinate -> coordinate.getActors().stream())
+                .collect(Collectors.toList());
     }
 
     public World createBasicClone(){

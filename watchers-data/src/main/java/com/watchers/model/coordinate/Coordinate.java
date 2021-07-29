@@ -70,7 +70,7 @@ public abstract class Coordinate {
 
     @JsonView(Views.Public.class)
     @JsonIgnoreProperties({"world", "coordinates", "type" })
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Continent continent;
 
     @JsonView(Views.Public.class)
@@ -257,6 +257,7 @@ public abstract class Coordinate {
         return "Coordinate{" +
                 "xCoord=" + xCoord +
                 ", yCoord=" + yCoord +
+                ", actors=" + actors.size() +
                 '}';
     }
 }
