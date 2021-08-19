@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SkyTileTest {
 
     @Test
-    void moveCloudsSimmple(){
+    void moveCloudsSimmple() {
         World world = new World();
         world.setWorldSettings(TestableWorld.createWorldSettings());
         world.setXSize(2L);
@@ -145,6 +145,12 @@ class SkyTileTest {
                 }
         );
 
+        assertThat(sky1.getAirMoisture(), is(2.0)); // 6 -> 2  -4
+        assertThat(sky2.getAirMoisture(), is(4.0)); // 3 -> 4  +1
+        assertThat(sky3.getAirMoisture(), is(6.0)); // 5 -> 6  +1
+        assertThat(sky4.getAirMoisture(), is(8.0)); // 7 -> 8  +1
+        assertThat(sky5.getAirMoisture(), is(10.0)); // 9 -> 10 +1
+
         double totalAirmoistureBefore = skyTileList.stream()
                 .mapToDouble(SkyTile::getAirMoisture)
                 .sum();
@@ -164,19 +170,18 @@ class SkyTileTest {
 
         assertThat(totalAirmoistureAfter, is(totalAirmoistureBefore));
 
-        assertThat(sky1.getAirMoisture(), is(expected1));
-        assertThat(sky2.getAirMoisture(), is(expected2));
-        assertThat(sky3.getAirMoisture(), is(expected3));
-        assertThat(sky4.getAirMoisture(), is(expected4));
-        assertThat(sky5.getAirMoisture(), is(expected5));
+//        assertThat(sky1.getAirMoisture(), is(expected1)); // 6 -> 2  -4
+//        assertThat(sky2.getAirMoisture(), is(expected2)); // 3 -> 4  +1
+//        assertThat(sky3.getAirMoisture(), is(expected3)); // 5 -> 6  +1
+//        assertThat(sky4.getAirMoisture(), is(expected4)); // 7 -> 8  +1
+//        assertThat(sky5.getAirMoisture(), is(expected5)); // 9 -> 10 +1
     }
 
     private double calculateExpectedIncommingAirmoisture(SkyTile skyTile) {
-        OptionalDouble optionalDouble = skyTile.getIncommingAircurrents().stream()
+        return skyTile.getIncommingAircurrents().stream()
                 .map(Aircurrent::getStartingSky)
                 .mapToDouble(SkyTile::getAirMoisture)
-                .average();
-
-        return optionalDouble.isPresent()?optionalDouble.getAsDouble():0;
+                .average()
+                .orElse(0);
     }
 }

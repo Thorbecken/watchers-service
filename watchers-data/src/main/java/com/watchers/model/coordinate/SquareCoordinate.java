@@ -7,6 +7,7 @@ import com.watchers.model.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SquareCoordinate extends Coordinate {
     public SquareCoordinate(long xCoord, long yCoord, World world, Continent continent) {
@@ -50,17 +51,24 @@ public class SquareCoordinate extends Coordinate {
         }
     }
 
-    public Coordinate createBasicClone(World newWorld) {
+    public Coordinate createClone(World newWorld) {
         Coordinate clone = new SquareCoordinate();
         clone.setId(getId());
         clone.setWorld(newWorld);
         clone.setXCoord(getXCoord());
         clone.setYCoord(getYCoord());
+        clone.setCoordinateType(getCoordinateType());
         clone.changeContinent(newWorld.getContinents().stream()
                 .filter(oldContinent -> oldContinent.getId().equals(getContinent().getId()))
                 .findFirst().orElseThrow());
         clone.setTile(this.getTile().createClone(clone));
         clone.setClimate(this.getClimate().createClone(clone));
+
+        clone.getActors().addAll(
+                this.getActors().stream()
+                        .map(actor -> actor.createClone(clone))
+                        .collect(Collectors.toSet())
+        );
 
         return clone;
     }

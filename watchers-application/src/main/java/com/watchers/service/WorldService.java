@@ -128,7 +128,7 @@ public class WorldService {
         } else {
             log.warn("The world " + id + " does not exist in the persistence context. A new world is going to be created. Large worlds take a while being generated.");
             World world = mapManager.createWorld(worldMetaData, worldSettingFactory.createWorldSetting());
-            worldRepository.save(world);
+            saveToDatabaseManager.complexSaveToMemory(world, true);
             log.info("Created a new world! Number: " + world.getId());
             activeWorldIds.add(worldMetaData.getId());
             return true;

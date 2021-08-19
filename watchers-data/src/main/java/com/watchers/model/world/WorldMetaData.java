@@ -48,4 +48,18 @@ public class WorldMetaData {
     @JsonProperty("needsContinentalShift")
     @Column(name = "needs_continental_shift")
     private boolean needsContinentalShift;
+
+    public WorldMetaData createClone(World world) {
+        WorldMetaData clone = new WorldMetaData();
+        clone.id = world.getId();
+        clone.world = world;
+
+        clone.worldStatusEnum = this.worldStatusEnum;
+        clone.worldTypeEnum = this.worldTypeEnum;
+        clone.needsProcessing = this.needsProcessing;
+        clone.needsSaving = this.needsSaving;
+        clone.needsContinentalShift = this.needsContinentalShift;
+
+        return clone;
+    }
 }

@@ -2,6 +2,7 @@ package com.watchers.helper;
 
 import com.watchers.TestableWorld;
 import com.watchers.model.climate.Climate;
+import com.watchers.model.climate.OutgoingAircurrent;
 import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
@@ -14,10 +15,42 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SkyHelperTest {
+
+    @Test
+    void assertAssertionsTest(){
+        World world = TestableWorld.createWorld();
+        SkyHelper.calculateAirflows(world);
+
+        boolean allSkytilesHaveTwoIncommingAircurrents = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .map(SkyTile::getIncommingAircurrents)
+                .allMatch(incommingAircurrent -> incommingAircurrent.size() == 2);
+
+        Long outgoingAircurrents = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .map(SkyTile::getRawOutgoingAircurrents)
+                .mapToLong(outgoingAircurrent -> outgoingAircurrent.getOutgoingAircurrent().size())
+                .sum();
+
+        Long incommingAircurrents = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .map(SkyTile::getRawIncommingAircurrents)
+                .mapToLong(incommingAircurrent -> incommingAircurrent.getIncommingAircurrents().size())
+                .sum();
+
+        assertThat(allSkytilesHaveTwoIncommingAircurrents, equalTo(true));
+        assertThat(outgoingAircurrents, equalTo(incommingAircurrents));
+    }
 
     @Test
     void calculateFlowTest() {
@@ -159,81 +192,81 @@ class SkyHelperTest {
         assertEquals(60, aircurrentCount);
 
         // leftward -1
-        assertEquals(1L, sky5.getIncommingLatitudalAirflow().getId());
-        assertEquals(2L, sky1.getIncommingLatitudalAirflow().getId());
-        assertEquals(3L, sky2.getIncommingLatitudalAirflow().getId());
-        assertEquals(4L, sky3.getIncommingLatitudalAirflow().getId());
-        assertEquals(5L, sky4.getIncommingLatitudalAirflow().getId());
+        assertEquals(1L, sky2.getIncommingLatitudalAirflow().getId());
+        assertEquals(2L, sky3.getIncommingLatitudalAirflow().getId());
+        assertEquals(3L, sky4.getIncommingLatitudalAirflow().getId());
+        assertEquals(4L, sky5.getIncommingLatitudalAirflow().getId());
+        assertEquals(5L, sky1.getIncommingLatitudalAirflow().getId());
 
         // rightward +1
-        assertEquals(9L, sky10.getIncommingLatitudalAirflow().getId());
-        assertEquals(10L, sky6.getIncommingLatitudalAirflow().getId());
-        assertEquals(6L, sky7.getIncommingLatitudalAirflow().getId());
-        assertEquals(7L, sky8.getIncommingLatitudalAirflow().getId());
-        assertEquals(8L, sky9.getIncommingLatitudalAirflow().getId());
+        assertEquals(6L, sky10.getIncommingLatitudalAirflow().getId());
+        assertEquals(7L, sky6.getIncommingLatitudalAirflow().getId());
+        assertEquals(8L, sky7.getIncommingLatitudalAirflow().getId());
+        assertEquals(9L, sky8.getIncommingLatitudalAirflow().getId());
+        assertEquals(10L, sky9.getIncommingLatitudalAirflow().getId());
 
         // leftward -1
-        assertEquals(11L, sky15.getIncommingLatitudalAirflow().getId());
-        assertEquals(12L, sky11.getIncommingLatitudalAirflow().getId());
-        assertEquals(13L, sky12.getIncommingLatitudalAirflow().getId());
-        assertEquals(14L, sky13.getIncommingLatitudalAirflow().getId());
-        assertEquals(15L, sky14.getIncommingLatitudalAirflow().getId());
+        assertEquals(11L, sky12.getIncommingLatitudalAirflow().getId());
+        assertEquals(12L, sky13.getIncommingLatitudalAirflow().getId());
+        assertEquals(13L, sky14.getIncommingLatitudalAirflow().getId());
+        assertEquals(14L, sky15.getIncommingLatitudalAirflow().getId());
+        assertEquals(15L, sky11.getIncommingLatitudalAirflow().getId());
 
         // leftward -1
-        assertEquals(16L, sky20.getIncommingLatitudalAirflow().getId());
-        assertEquals(17L, sky16.getIncommingLatitudalAirflow().getId());
-        assertEquals(18L, sky17.getIncommingLatitudalAirflow().getId());
-        assertEquals(19L, sky18.getIncommingLatitudalAirflow().getId());
-        assertEquals(20L, sky19.getIncommingLatitudalAirflow().getId());
+        assertEquals(19L, sky20.getIncommingLatitudalAirflow().getId());
+        assertEquals(20L, sky16.getIncommingLatitudalAirflow().getId());
+        assertEquals(16L, sky17.getIncommingLatitudalAirflow().getId());
+        assertEquals(17L, sky18.getIncommingLatitudalAirflow().getId());
+        assertEquals(18L, sky19.getIncommingLatitudalAirflow().getId());
 
         // rightward -1
-        assertEquals(24L, sky25.getIncommingLatitudalAirflow().getId());
-        assertEquals(25L, sky21.getIncommingLatitudalAirflow().getId());
-        assertEquals(21L, sky22.getIncommingLatitudalAirflow().getId());
-        assertEquals(22L, sky23.getIncommingLatitudalAirflow().getId());
-        assertEquals(23L, sky24.getIncommingLatitudalAirflow().getId());
+        assertEquals(21L, sky25.getIncommingLatitudalAirflow().getId());
+        assertEquals(22L, sky21.getIncommingLatitudalAirflow().getId());
+        assertEquals(23L, sky22.getIncommingLatitudalAirflow().getId());
+        assertEquals(24L, sky23.getIncommingLatitudalAirflow().getId());
+        assertEquals(25L, sky24.getIncommingLatitudalAirflow().getId());
 
         // leftward +1
-        assertEquals(26L, sky30.getIncommingLatitudalAirflow().getId());
-        assertEquals(27L, sky26.getIncommingLatitudalAirflow().getId());
-        assertEquals(28L, sky27.getIncommingLatitudalAirflow().getId());
-        assertEquals(29L, sky28.getIncommingLatitudalAirflow().getId());
-        assertEquals(30L, sky29.getIncommingLatitudalAirflow().getId());
+        assertEquals(26L, sky27.getIncommingLatitudalAirflow().getId());
+        assertEquals(27L, sky28.getIncommingLatitudalAirflow().getId());
+        assertEquals(28L, sky29.getIncommingLatitudalAirflow().getId());
+        assertEquals(29L, sky30.getIncommingLatitudalAirflow().getId());
+        assertEquals(30, sky26.getIncommingLatitudalAirflow().getId());
 
         // left-upward + 30 -1 +5
-        assertEquals(40L, sky1.getIncommingLongitudalAirflow().getId());
-        assertEquals(36L, sky2.getIncommingLongitudalAirflow().getId());
-        assertEquals(37L, sky3.getIncommingLongitudalAirflow().getId());
-        assertEquals(38L, sky4.getIncommingLongitudalAirflow().getId());
-        assertEquals(39L, sky5.getIncommingLongitudalAirflow().getId());
+        assertEquals(36L, sky1.getIncommingLongitudalAirflow().getId());
+        assertEquals(37L, sky2.getIncommingLongitudalAirflow().getId());
+        assertEquals(38L, sky3.getIncommingLongitudalAirflow().getId());
+        assertEquals(39L, sky4.getIncommingLongitudalAirflow().getId());
+        assertEquals(40L, sky5.getIncommingLongitudalAirflow().getId());
 
         // right-downward +30 +1 -5
-        assertEquals(32L, sky6.getIncommingLongitudalAirflow().getId());
-        assertEquals(33L, sky7.getIncommingLongitudalAirflow().getId());
-        assertEquals(34L, sky8.getIncommingLongitudalAirflow().getId());
-        assertEquals(35L, sky9.getIncommingLongitudalAirflow().getId());
-        assertEquals(31L, sky10.getIncommingLongitudalAirflow().getId());
+        assertEquals(31L, sky6.getIncommingLongitudalAirflow().getId());
+        assertEquals(32L, sky7.getIncommingLongitudalAirflow().getId());
+        assertEquals(33L, sky8.getIncommingLongitudalAirflow().getId());
+        assertEquals(34L, sky9.getIncommingLongitudalAirflow().getId());
+        assertEquals(35L, sky10.getIncommingLongitudalAirflow().getId());
 
         // left-upward +30 -1 +5
-        assertEquals(47L, sky11.getIncommingLongitudalAirflow().getId());
-        assertEquals(48L, sky12.getIncommingLongitudalAirflow().getId());
-        assertEquals(49L, sky13.getIncommingLongitudalAirflow().getId());
-        assertEquals(50L, sky14.getIncommingLongitudalAirflow().getId());
-        assertEquals(46L, sky15.getIncommingLongitudalAirflow().getId());
+        assertEquals(46L, sky11.getIncommingLongitudalAirflow().getId());
+        assertEquals(47L, sky12.getIncommingLongitudalAirflow().getId());
+        assertEquals(48L, sky13.getIncommingLongitudalAirflow().getId());
+        assertEquals(49L, sky14.getIncommingLongitudalAirflow().getId());
+        assertEquals(50L, sky15.getIncommingLongitudalAirflow().getId());
 
         // left-downward +30 -1 -5
-        assertEquals(42L, sky16.getIncommingLongitudalAirflow().getId());
-        assertEquals(43L, sky17.getIncommingLongitudalAirflow().getId());
-        assertEquals(44L, sky18.getIncommingLongitudalAirflow().getId());
-        assertEquals(45L, sky19.getIncommingLongitudalAirflow().getId());
+        assertEquals(41L, sky16.getIncommingLongitudalAirflow().getId());
+        assertEquals(42L, sky17.getIncommingLongitudalAirflow().getId());
+        assertEquals(43L, sky18.getIncommingLongitudalAirflow().getId());
+        assertEquals(44L, sky19.getIncommingLongitudalAirflow().getId());
         assertEquals(50L, sky20.getOutgoingLongitudalAirflow().getId());
 
         // right-upward +30 +1 +5
-        assertEquals(57L, sky21.getIncommingLongitudalAirflow().getId());
-        assertEquals(58L, sky22.getIncommingLongitudalAirflow().getId());
-        assertEquals(59L, sky23.getIncommingLongitudalAirflow().getId());
-        assertEquals(60L, sky24.getIncommingLongitudalAirflow().getId());
-        assertEquals(56L, sky25.getIncommingLongitudalAirflow().getId());
+        assertEquals(56L, sky21.getIncommingLongitudalAirflow().getId());
+        assertEquals(57L, sky22.getIncommingLongitudalAirflow().getId());
+        assertEquals(58L, sky23.getIncommingLongitudalAirflow().getId());
+        assertEquals(59L, sky24.getIncommingLongitudalAirflow().getId());
+        assertEquals(60L, sky25.getIncommingLongitudalAirflow().getId());
 
         // left-downward +30 -1 -5
         assertEquals(56L, sky26.getOutgoingLongitudalAirflow().getId());

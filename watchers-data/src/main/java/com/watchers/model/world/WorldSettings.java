@@ -67,4 +67,51 @@ public class WorldSettings {
 
     private int latitudinalStrength;
     private int longitudinalStrength;
+
+    public WorldSettings createClone(World world) {
+        WorldSettings clone = new WorldSettings();
+
+        clone.id = world.getId();
+        clone.world = world;
+
+        // World configuration
+        clone.xSize = this.xSize;
+        clone.ySize = this. ySize;
+        clone.numberOfContinents = this.numberOfContinents;
+        clone.lifePreSeeded = this.lifePreSeeded;
+        clone.coastalZone = this.coastalZone;
+        clone.oceanicZone = this.oceanicZone;
+        clone.continentalToOcceanicRatio = this.continentalToOcceanicRatio;
+        clone.continentalContinentWeight = this.continentalContinentWeight;
+
+        // Continentalshift configuration
+        clone.driftVelocity = this.driftVelocity;
+        clone.drifFlux = this.drifFlux;
+        clone.heigtDivider = this.heigtDivider;
+        clone.minimumContinents = this.minimumContinents;
+        clone.maximumContinents = this.maximumContinents;
+        clone.maxContinentSize = this.maxContinentSize;
+        clone.maxWidthLenghtBalance = this.maxWidthLenghtBalance;
+
+        // Erosion configuration
+        clone.minHeightDifference = this.minHeightDifference;
+        clone.maxErosion = this.maxErosion;
+
+        // Climate configuration
+        clone.wetZone = this.wetZone;
+        clone.humidZone = this.humidZone;
+        clone.semiAridZone = this.semiAridZone;
+        clone.aridZone = this.aridZone;
+
+        clone.wetPrecipitation = this. wetPrecipitation;
+        clone.humidPrecipitation = this.humidPrecipitation;
+        clone.semiAridPrecipitation = this.semiAridPrecipitation;
+        clone.aridPrecipitation = this.aridPrecipitation;
+        clone.noPrecipitation = this.noPrecipitation;
+
+        clone.latitudinalStrength = this.latitudinalStrength;
+        clone.longitudinalStrength = this.longitudinalStrength;
+
+        return clone;
+    }
 }

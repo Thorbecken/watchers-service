@@ -2,6 +2,7 @@ package com.watchers.model.coordinate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.actors.Actor;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import lombok.Data;
@@ -10,6 +11,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -76,17 +78,24 @@ public class GlobeCoordinate extends Coordinate {
         }
     }
 
-    public Coordinate createBasicClone(World newWorld) {
+    public Coordinate createClone(World newWorld) {
         Coordinate clone = new GlobeCoordinate();
         clone.setId(getId());
         clone.setWorld(newWorld);
         clone.setXCoord(getXCoord());
         clone.setYCoord(getYCoord());
+        clone.setCoordinateType(getCoordinateType());
         clone.changeContinent(newWorld.getContinents().stream()
                 .filter(oldContinent -> oldContinent.getId().equals(getContinent().getId()))
                 .findFirst().get());
         clone.setTile(this.getTile().createClone(clone));
         clone.setClimate(this.getClimate().createClone(clone));
+
+        clone.getActors().addAll(
+                this.getActors().stream()
+                .map(actor -> actor.createClone(clone))
+                .collect(Collectors.toSet())
+        );
 
         return clone;
     }

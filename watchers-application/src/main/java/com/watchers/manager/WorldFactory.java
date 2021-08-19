@@ -3,18 +3,15 @@ package com.watchers.manager;
 import com.watchers.components.climate.TemperatureZoneComputator;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.helper.SkyHelper;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.MockContinent;
 import com.watchers.model.dto.WorldFactoryDTO;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.world.WorldMetaData;
 import com.watchers.model.world.WorldSettings;
-import com.watchers.repository.WorldMetaDataRepository;
-import com.watchers.repository.WorldRepository;
-import com.watchers.repository.WorldSettingsRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -22,7 +19,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -30,20 +29,14 @@ import java.util.*;
 class WorldFactory {
 
     private final TileDefined tileDefined;
-    private final WorldRepository worldRepository;
-    private final WorldSettingsRepository worldSettingsRepository;
-    private final WorldMetaDataRepository worldMetaDataRepository;
     private final TemperatureZoneComputator temperatureZoneComputator;
 
     World generateWorld(WorldSettings worldSettings, WorldMetaData worldMetaData){
         World world = new World(worldSettings.getXSize(), worldSettings.getYSize());
-        worldRepository.save(world);
         world.setWorldMetaData(worldMetaData);
         world.setWorldSettings(worldSettings);
         worldSettings.setWorld(world);
         worldMetaData.setWorld(world);
-        worldSettingsRepository.saveAndFlush(worldSettings);
-        worldMetaDataRepository.saveAndFlush(worldMetaData);
 
         int continental = 0;
         int oceeanic = 0;
@@ -83,10 +76,6 @@ class WorldFactory {
 
             log.info("Pre seeded the world with life");
         }
-
-        log.info("Sepperating the skies");
-        SkyHelper.calculateAirflows(world);
-        log.info("Skies are sepperated");
 
         temperatureZoneComputator.process(world);
 

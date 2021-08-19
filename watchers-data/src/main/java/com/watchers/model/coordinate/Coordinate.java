@@ -41,7 +41,6 @@ public abstract class Coordinate {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
     @JsonView(Views.Public.class)
@@ -70,7 +69,7 @@ public abstract class Coordinate {
 
     @JsonView(Views.Public.class)
     @JsonIgnoreProperties({"world", "coordinates", "type" })
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
 
     @JsonView(Views.Public.class)
@@ -235,7 +234,7 @@ public abstract class Coordinate {
         }
     }
 
-    public abstract Coordinate createBasicClone(World newWorld);
+    public abstract Coordinate createClone(World newWorld);
 
     @Override
     public boolean equals(Object o) {

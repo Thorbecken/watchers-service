@@ -4,15 +4,13 @@ import com.watchers.config.SettingConfiguration;
 import com.watchers.config.WorldSettingFactory;
 import com.watchers.manager.FileSaveManager;
 import com.watchers.manager.MapManager;
+import com.watchers.manager.SaveToDatabaseManager;
 import com.watchers.manager.WorldSettingManager;
 import com.watchers.model.enums.WorldStatusEnum;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
 import com.watchers.model.world.WorldSettings;
 import com.watchers.model.world.WorldTypeEnum;
-import com.watchers.repository.WorldMetaDataRepository;
-import com.watchers.repository.WorldRepository;
-import com.watchers.repository.WorldSettingsRepository;
 import com.watchers.service.WorldService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +26,10 @@ public class WorldBootstrap implements CommandLineRunner {
     private final FileSaveManager fileSaveManager;
     private final WorldService worldService;
     private final MapManager mapManager;
-    private final WorldRepository worldRepository;
     private final SettingConfiguration settingConfiguration;
     private final WorldSettingManager worldSettingManager;
     private final WorldSettingFactory worldSettingFactory;
+    private final SaveToDatabaseManager saveToDatabaseManager;
 
     @Override
     public void run(String... args) {
@@ -44,10 +42,8 @@ public class WorldBootstrap implements CommandLineRunner {
             } else {
                 log.warn("No world was found on startup! Generating a new world.");
                 World newWorld = mapManager.createWorld(worldMetaData, worldSettings);
-                worldRepository.saveAndFlush(newWorld);
 
-
-                worldService.saveWorld(newWorld);
+                saveToDatabaseManager.complexSaveToMemory(newWorld);
                 log.info("Created a new world! Number: " + newWorld.getId());
             }
         } else {

@@ -1,40 +1,33 @@
 package com.watchers.components.continentaldrift;
 
 import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class TileDefined {
 
-    private long oceanHight;
-    private long seaHight;
-    private long coastalHight;
-    private long plainsHight;
-    private long hillHight;
-    private long mountainHight;
-
-    private WorldRepository worldRepository;
+    private final long oceanHight;
+    private final long seaHight;
+    private final long coastalHight;
+    private final long plainsHight;
+    private final long hillHight;
+    private final long mountainHight;
 
     public TileDefined(@Value("${watch.oceanHight}") long oceanHight,
                        @Value("${watch.seaHight}") long seaHight,
                        @Value("${watch.coastalHight}") long coastalHight,
                        @Value("${watch.plainsHight}") long plainsHight,
                        @Value("${watch.hillHight}") long hillHight,
-                       @Value("${watch.mountainHight}") long mountainHight,
-                       WorldRepository worldRepository){
+                       @Value("${watch.mountainHight}") long mountainHight){
         this.oceanHight = oceanHight;
         this.seaHight = seaHight;
         this.coastalHight = coastalHight;
         this.plainsHight = plainsHight;
         this.hillHight = hillHight;
         this.mountainHight = mountainHight;
-        this.worldRepository = worldRepository;
     }
 
     public void setStartingHeights(World world){
@@ -76,7 +69,5 @@ public class TileDefined {
                 tile.setSurfaceType(SurfaceType.MOUNTAIN);
             }
         });
-
-        worldRepository.save(world);
     }
 }

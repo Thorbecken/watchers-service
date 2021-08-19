@@ -28,6 +28,7 @@ public class World {
 
     @Id
     @JsonProperty("worldId")
+    @Column(name = "world_id")
     @JsonView(Views.Internal.class)
     @SequenceGenerator(name = "World_Gen", sequenceName = "World_Seq", allocationSize = 1)
     @GeneratedValue(generator = "World_Gen", strategy = GenerationType.SEQUENCE)
@@ -55,12 +56,12 @@ public class World {
 
     @JsonProperty("coordinates")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world")
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("continents")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world")
     private Set<Continent> continents = new HashSet<>();
 
     @JsonProperty("lastContinentInFlux")
@@ -104,7 +105,7 @@ public class World {
 
     @JsonIgnore
     public List<Actor> getActorList() {
-        if (actorList == null) {
+        if (actorList == null || actorList.size() == 0) {
             setActorList();
         }
 
@@ -146,8 +147,7 @@ public class World {
     }
 
     private void setActorList() {
-        actorList = continents.stream()
-                .flatMap(continent -> continent.getCoordinates().stream())
+        actorList = coordinates.stream()
                 .flatMap(coordinate -> coordinate.getActors().stream())
                 .collect(Collectors.toList());
     }
@@ -157,6 +157,10 @@ public class World {
         newWorld.setId(this.id);
         newWorld.setHeightDeficit(this.heightDeficit);
         newWorld.setLastContinentInFlux(this.lastContinentInFlux);
+
+        newWorld.setWorldSettings(worldSettings.createClone(newWorld));
+        newWorld.setWorldMetaData(worldMetaData.createClone(newWorld));
+
         return newWorld;
     }
 
