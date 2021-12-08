@@ -38,7 +38,9 @@ public class PrecipiationComputator {
     @Transactional
     public void process(WorldTaskDto taskDto) {
         World world = worldRepository.getOne(taskDto.getWorldId());
-        List<Climate> climates = world.getCoordinates().stream().map(Coordinate::getClimate).collect(Collectors.toList());
+        List<Climate> climates = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .collect(Collectors.toList());
 
         computeEvaporation(climates);
         moveCloudsAccordingToAirflow(climates, world.getWorldSettings());
@@ -61,14 +63,20 @@ public class PrecipiationComputator {
 
     @Transactional
     protected void moveCloudsAccordingToAirflow(List<Climate> climates, WorldSettings worldSettings) {
-        climates.parallelStream()
+        List<SkyTile> skyTiles = climates.parallelStream()
                 .map(Climate::getSkyTile)
+                .collect(Collectors.toList());
+
+        List<Aircurrent> aircurrents = skyTiles.stream()
                 .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
-                .forEach(aircurrent -> aircurrent.setCurrentStrength(
-                        airCurrentStrengthSetter.get(
-                                aircurrent.getAircurrentType()).apply(worldSettings)
-                        )
-                );
+                .collect(Collectors.toList());
+
+        aircurrents.forEach(aircurrent -> {
+            AircurrentType aircurrentType = aircurrent.getAircurrentType();
+            int currentStrength = airCurrentStrengthSetter.get(aircurrentType).apply(worldSettings);
+            aircurrent.setCurrentStrength(currentStrength);
+        });
+
         climates.parallelStream()
                 .map(Climate::getSkyTile)
                 .forEach(SkyTile::moveClouds);
@@ -96,7 +104,7 @@ public class PrecipiationComputator {
         private final long ARID_PRECIPITION;
         private static final long NO_PRECIPITION = 0;
 
-        LandClimateProcessor(WorldSettings worldSettings){
+        LandClimateProcessor(WorldSettings worldSettings) {
             this.WET_ZONE = worldSettings.getWetZone();
             this.HUMID_ZONE = worldSettings.getHumidZone();
             this.SEMI_ARID_ZONE = worldSettings.getSemiAridZone();

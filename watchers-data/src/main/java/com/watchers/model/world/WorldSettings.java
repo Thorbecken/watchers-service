@@ -27,7 +27,8 @@ public class WorldSettings {
     private Long id;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
     // World configuration

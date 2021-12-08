@@ -20,9 +20,9 @@ public class WorldSettingManager {
     private final WorldMetaDataRepository worldMetaDataRepository;
 
     @Transactional
-    public void changeContinentalSetting(Long worldId, boolean newValue){
-        Optional<WorldMetaData> optionalWorldSetting =  worldMetaDataRepository.findById(worldId);
-        if(optionalWorldSetting.isPresent()){
+    public void changeContinentalSetting(Long worldId, boolean newValue) {
+        Optional<WorldMetaData> optionalWorldSetting = worldMetaDataRepository.findById(worldId);
+        if (optionalWorldSetting.isPresent()) {
             WorldMetaData worldMetaData = optionalWorldSetting.get();
             worldMetaData.setNeedsContinentalShift(newValue);
             worldMetaDataRepository.saveAndFlush(worldMetaData);
@@ -31,7 +31,9 @@ public class WorldSettingManager {
 
     @Transactional
     public List<Long> getAllWaitingWorldSettings() {
-        return worldMetaDataRepository.findAll().stream()
+        List<WorldMetaData> worldMetaDataList = worldMetaDataRepository.findAll();
+
+        return worldMetaDataList.stream()
                 .filter(worldSetting -> worldSetting.getWorldStatusEnum().equals(WorldStatusEnum.WAITING))
                 .map(WorldMetaData::getId)
                 .collect(Collectors.toList());
@@ -40,7 +42,7 @@ public class WorldSettingManager {
     @Transactional
     public void setWorldInProgress(Long worldId) {
         Optional<WorldMetaData> optionalWorldSetting = worldMetaDataRepository.findById(worldId);
-        if(optionalWorldSetting.isPresent()) {
+        if (optionalWorldSetting.isPresent()) {
             WorldMetaData worldMetaData = optionalWorldSetting.get();
             worldMetaData.setWorldStatusEnum(WorldStatusEnum.IN_PROGRESS);
             worldMetaDataRepository.save(worldMetaData);
@@ -51,7 +53,7 @@ public class WorldSettingManager {
     @Transactional
     public void setWorldInWaiting(Long worldId) {
         Optional<WorldMetaData> optionalWorldSetting = worldMetaDataRepository.findById(worldId);
-        if(optionalWorldSetting.isPresent()) {
+        if (optionalWorldSetting.isPresent()) {
             WorldMetaData worldMetaData = optionalWorldSetting.get();
             worldMetaData.setWorldStatusEnum(WorldStatusEnum.WAITING);
             worldMetaDataRepository.save(worldMetaData);
@@ -61,35 +63,23 @@ public class WorldSettingManager {
 
     @Transactional
     public void queInTurn() {
-        worldMetaDataRepository.findAll()
-                .forEach(worldSetting -> {
-                            worldSetting.setNeedsProcessing(true);
-                            worldMetaDataRepository.save(worldSetting);
-                        }
-                );
-        worldMetaDataRepository.flush();
+        List<WorldMetaData> worldMetaDataList = worldMetaDataRepository.findAll();
+
+        worldMetaDataList.forEach(worldSetting -> worldSetting.setNeedsProcessing(true));
     }
 
     @Transactional
     public void queInSave() {
-        worldMetaDataRepository.findAll()
-                .forEach(worldSetting -> {
-                            worldSetting.setNeedsSaving(true);
-                            worldMetaDataRepository.save(worldSetting);
-                        }
-                );
-        worldMetaDataRepository.flush();
+        List<WorldMetaData> worldMetaDataList = worldMetaDataRepository.findAll();
+
+        worldMetaDataList.forEach(worldSetting -> worldSetting.setNeedsSaving(true));
     }
 
     @Transactional
     public void queInContinentalshift() {
-        worldMetaDataRepository.findAll()
-                .forEach(worldSetting -> {
-                            worldSetting.setNeedsContinentalShift(true);
-                            worldMetaDataRepository.save(worldSetting);
-                        }
-                );
-        worldMetaDataRepository.flush();
+        List<WorldMetaData> worldMetaDataList = worldMetaDataRepository.findAll();
+
+        worldMetaDataList.forEach(worldSetting -> worldSetting.setNeedsContinentalShift(true));
     }
 
     @Transactional
@@ -106,9 +96,9 @@ public class WorldSettingManager {
     }
 
     @Transactional
-    public void changeSaveSetting(Long worldId, boolean newValue){
-        Optional<WorldMetaData> optionalWorldSetting =  worldMetaDataRepository.findById(worldId);
-        if(optionalWorldSetting.isPresent()){
+    public void changeSaveSetting(Long worldId, boolean newValue) {
+        Optional<WorldMetaData> optionalWorldSetting = worldMetaDataRepository.findById(worldId);
+        if (optionalWorldSetting.isPresent()) {
             WorldMetaData worldMetaData = optionalWorldSetting.get();
             worldMetaData.setNeedsSaving(newValue);
             worldMetaDataRepository.saveAndFlush(worldMetaData);

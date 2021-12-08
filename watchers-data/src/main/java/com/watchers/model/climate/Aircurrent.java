@@ -3,6 +3,8 @@ package com.watchers.model.climate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.environment.Tile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,12 +24,12 @@ public class Aircurrent {
     private Long id;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "incommingAircurrent_id", nullable = false)
     private IncommingAircurrent incommingAircurrent;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "outgoingAircurrent_id", nullable = false)
     private OutgoingAircurrent outgoingAircurrent;
 
@@ -96,18 +98,20 @@ public class Aircurrent {
         return clone;
     }
 
-    @Override
-    public String toString() {
-        return "Aircurrent{" +
-                "id =" + id +
-                ", heightDifference =" + heightDifference +
-                ", direction = " + aircurrentType +
-                '}';
-    }
-
     public void recalculateHeigthDifference() {
-        long startingHeight = incommingAircurrent.getEndingSky().getClimate().getCoordinate().getTile().getHeight();
-        long endingHeight = outgoingAircurrent.getStartingSky().getClimate().getCoordinate().getTile().getHeight();
+        IncommingAircurrent incommingAircurrent = this.incommingAircurrent;
+        SkyTile endingSky = incommingAircurrent.getEndingSky();
+        Climate endingClimate = endingSky.getClimate();
+        Coordinate endingCoordinate = endingClimate.getCoordinate();
+        Tile endingTile = endingCoordinate.getTile();
+        long startingHeight = endingTile.getHeight();
+
+        OutgoingAircurrent outgoingAircurrent = this.outgoingAircurrent;
+        SkyTile startingSky = outgoingAircurrent.getStartingSky();
+        Climate startingClimate = startingSky.getClimate();
+        Coordinate startingCoordinate = startingClimate.getCoordinate();
+        Tile startingTile = startingCoordinate.getTile();
+        long endingHeight = startingTile.getHeight();
 
         this.heightDifference = startingHeight - endingHeight;
     }
@@ -126,5 +130,15 @@ public class Aircurrent {
 
     public void setStartingSky(SkyTile startingSky) {
         this.outgoingAircurrent.setStartingSky(startingSky);
+    }
+
+    @Override
+    public String toString() {
+        return "Aircurrent{" +
+                "id=" + id +
+                ", currentStrength=" + currentStrength +
+                ", aircurrentType=" + aircurrentType +
+                ", heightDifference=" + heightDifference +
+                '}';
     }
 }

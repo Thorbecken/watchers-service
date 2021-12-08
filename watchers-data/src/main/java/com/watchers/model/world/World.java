@@ -56,12 +56,12 @@ public class World {
 
     @JsonProperty("coordinates")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("continents")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents = new HashSet<>();
 
     @JsonProperty("lastContinentInFlux")

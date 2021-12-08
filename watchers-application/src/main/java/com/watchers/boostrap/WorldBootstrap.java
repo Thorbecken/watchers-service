@@ -43,7 +43,7 @@ public class WorldBootstrap implements CommandLineRunner {
                 log.warn("No world was found on startup! Generating a new world.");
                 World newWorld = mapManager.createWorld(worldMetaData, worldSettings);
 
-                saveToDatabaseManager.complexSaveToMemory(newWorld);
+                saveToDatabaseManager.complexSaveToMemory(newWorld, true);
                 log.info("Created a new world! Number: " + newWorld.getId());
             }
         } else {

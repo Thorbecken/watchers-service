@@ -25,7 +25,8 @@ public class Tile {
     private Long id;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coordinate_id", nullable = false)
     private Coordinate coordinate;
 
     @JsonProperty("height")

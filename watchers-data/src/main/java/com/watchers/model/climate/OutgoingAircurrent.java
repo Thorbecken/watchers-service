@@ -24,21 +24,30 @@ public class OutgoingAircurrent {
         private Long id;
 
         @JsonIgnore
-        @OneToOne
+        @OneToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "sky_id", nullable = false)
         private SkyTile startingSky;
 
         @OneToMany(mappedBy = "outgoingAircurrent", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
-        private List<Aircurrent> outgoingAircurrent = new ArrayList<>(2);
+        private List<Aircurrent> aircurrentList = new ArrayList<>(2);
 
         public OutgoingAircurrent(SkyTile startingSky){
                 this.startingSky = startingSky;
         }
 
         public void add(Aircurrent aircurrent){
-                this.outgoingAircurrent.add(aircurrent);
+                this.aircurrentList.add(aircurrent);
         }
 
         public void clear(){
-                this.getOutgoingAircurrent().clear();
+                this.getAircurrentList().clear();
+        }
+
+        @Override
+        public String toString() {
+                return "OutgoingAircurrent{" +
+                        "id=" + id +
+                        ", aircurrentList=" + aircurrentList +
+                        '}';
         }
 }

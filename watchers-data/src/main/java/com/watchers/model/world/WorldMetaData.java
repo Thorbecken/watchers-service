@@ -19,14 +19,15 @@ import javax.persistence.*;
 public class WorldMetaData {
 
     @Id
-    @JsonProperty("meta_id")
+    @JsonProperty("world_meta_id")
     @JsonView(Views.Internal.class)
     @SequenceGenerator(name = "World_Meta_Gen", sequenceName = "World_Meta_Seq", allocationSize = 1)
     @GeneratedValue(generator = "World_Meta_Seq", strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
     @JsonProperty("worldStatus")

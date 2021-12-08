@@ -506,7 +506,7 @@ public class SaveToDatabaseManager {
 
         List<Aircurrent> aircurrents = skyTileHolderList.stream()
                 .map(SkyTileHolder::getIncommingAircurrent)
-                .flatMap(incommingAircurrent -> incommingAircurrent.getIncommingAircurrents().stream())
+                .flatMap(incommingAircurrent -> incommingAircurrent.getAircurrentList().stream())
                 .collect(Collectors.toList());
 
         List<IncomingAircurrentHolder> incomingAircurrentHolderList = saveIncommingAircurrents(incommingAircurrents);
@@ -524,16 +524,16 @@ public class SaveToDatabaseManager {
 
         IncomingAircurrentHolder(IncommingAircurrent incommingAircurrent) {
             this.incommingAircurrent = incommingAircurrent;
-            this.aircurrents = incommingAircurrent.getIncommingAircurrents();
+            this.aircurrents = incommingAircurrent.getAircurrentList();
         }
 
         void clearInformation() {
             incommingAircurrent.setId(null);
-            incommingAircurrent.setIncommingAircurrents(null);
+            incommingAircurrent.setAircurrentList(null);
         }
 
         void setInformation() {
-            incommingAircurrent.setIncommingAircurrents(aircurrents);
+            incommingAircurrent.setAircurrentList(aircurrents);
         }
     }
 
@@ -575,16 +575,16 @@ public class SaveToDatabaseManager {
 
         OutgoingAircurrentHolder(OutgoingAircurrent outgoingAircurrent) {
             this.outgoingAircurrent = outgoingAircurrent;
-            this.aircurrents = outgoingAircurrent.getOutgoingAircurrent();
+            this.aircurrents = outgoingAircurrent.getAircurrentList();
         }
 
         void clearInformation() {
             outgoingAircurrent.setId(null);
-            outgoingAircurrent.setOutgoingAircurrent(null);
+            outgoingAircurrent.setAircurrentList(null);
         }
 
         public void setInformation() {
-            outgoingAircurrent.setOutgoingAircurrent(aircurrents);
+            outgoingAircurrent.setAircurrentList(aircurrents);
         }
     }
 

@@ -37,7 +37,7 @@ public class Continent {
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "continent")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "continent", cascade=CascadeType.ALL)
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("surfaceType")

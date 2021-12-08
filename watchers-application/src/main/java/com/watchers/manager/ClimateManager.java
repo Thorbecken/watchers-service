@@ -18,10 +18,11 @@ public class ClimateManager {
     private final AircurrentRecalibrator aircurrentRecalibrator;
 
     public void proces(WorldTaskDto taskDto){
-        StopwatchTimer.start();
-        aircurrentRecalibrator.process(taskDto);
-        StopwatchTimer.stop("aircurrentRecalibrator");
-        if(taskDto instanceof ContinentalDriftTaskDto || true) {
+        if(taskDto instanceof ContinentalDriftTaskDto) {
+            StopwatchTimer.start();
+            aircurrentRecalibrator.process(taskDto);
+            StopwatchTimer.stop("aircurrentRecalibrator");
+
             StopwatchTimer.start();
             temperatureZoneComputator.process(taskDto);
             StopwatchTimer.stop("temperatureZoneComputator");

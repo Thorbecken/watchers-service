@@ -44,8 +44,8 @@ public class Biome implements ParallelTask {
     @JsonProperty("fertility")
     private float fertility;
 
-    @JsonIgnore
     @OneToOne
+    @JsonIgnore
     @JoinColumn(name = "tile_id", nullable = false)
     private Tile tile;
 

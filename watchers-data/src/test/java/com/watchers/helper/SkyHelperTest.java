@@ -2,7 +2,6 @@ package com.watchers.helper;
 
 import com.watchers.TestableWorld;
 import com.watchers.model.climate.Climate;
-import com.watchers.model.climate.OutgoingAircurrent;
 import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -38,14 +36,14 @@ class SkyHelperTest {
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
                 .map(SkyTile::getRawOutgoingAircurrents)
-                .mapToLong(outgoingAircurrent -> outgoingAircurrent.getOutgoingAircurrent().size())
+                .mapToLong(outgoingAircurrent -> outgoingAircurrent.getAircurrentList().size())
                 .sum();
 
         Long incommingAircurrents = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
                 .map(SkyTile::getRawIncommingAircurrents)
-                .mapToLong(incommingAircurrent -> incommingAircurrent.getIncommingAircurrents().size())
+                .mapToLong(incommingAircurrent -> incommingAircurrent.getAircurrentList().size())
                 .sum();
 
         assertThat(allSkytilesHaveTwoIncommingAircurrents, equalTo(true));

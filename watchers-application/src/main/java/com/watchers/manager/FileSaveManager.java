@@ -67,7 +67,7 @@ public class FileSaveManager {
     }
 
     private File getWorldFile(String id) {
-        return new File(settingConfiguration.getDirectory() + "world_" + id + ".json");
+        return new File(settingConfiguration.getDirectory() + settingConfiguration.getPrefix() + "world_" + id + ".json");
     }
 
     private World load(@NonNull Long aLong) throws IOException {
