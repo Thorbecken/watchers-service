@@ -1,16 +1,11 @@
 package com.watchers.scheduler;
 
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import java.io.IOException;
-
-import javax.annotation.PostConstruct;
-
-
 import com.watchers.config.AutoWiringSpringBeanJobFactory;
-import org.quartz.*;
+import lombok.extern.slf4j.Slf4j;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,26 +18,24 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Properties;
 
+@Slf4j
 @Configuration
 @ConditionalOnExpression("'${using.spring.schedulerFactory}'=='false'")
 public class QrtzScheduler {
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
     @PostConstruct
     public void init() {
-        logger.info("Quartz scheduler initiated");
+        log.info("Quartz scheduler initiated");
     }
 
     @Bean
-    public SpringBeanJobFactory springBeanJobFactory() {
+    public SpringBeanJobFactory springBeanJobFactory(ApplicationContext applicationContext) {
         AutoWiringSpringBeanJobFactory jobFactory = new AutoWiringSpringBeanJobFactory();
-        logger.debug("Configuring Job factory");
+        log.debug("Configuring Job factory");
 
         jobFactory.setApplicationContext(applicationContext);
         return jobFactory;
@@ -50,19 +43,19 @@ public class QrtzScheduler {
 
     @Bean
     public Scheduler scheduler(Trigger trigger, JobDetail job, SchedulerFactoryBean factory) throws SchedulerException {
-        logger.debug("Getting a handle to the Scheduler");
+        log.debug("Getting a handle to the Scheduler");
         Scheduler scheduler = factory.getScheduler();
         scheduler.scheduleJob(job, trigger);
 
-        logger.debug("Starting Scheduler threads");
+        log.debug("Starting Scheduler threads");
         scheduler.start();
         return scheduler;
     }
 
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean() throws IOException {
+    public SchedulerFactoryBean schedulerFactoryBean(SpringBeanJobFactory springBeanJobFactory) throws IOException {
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        factory.setJobFactory(springBeanJobFactory());
+        factory.setJobFactory(springBeanJobFactory);
         factory.setQuartzProperties(quartzProperties());
         return factory;
     }

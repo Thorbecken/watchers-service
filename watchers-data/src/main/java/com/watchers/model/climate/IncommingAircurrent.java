@@ -28,6 +28,7 @@ public class IncommingAircurrent {
     @JoinColumn(name = "sky_id", nullable = false)
     private SkyTile endingSky;
 
+    @JsonView(Views.Public.class)
     @OneToMany(mappedBy = "incommingAircurrent", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
     private List<Aircurrent> aircurrentList = new ArrayList<>(2);
 

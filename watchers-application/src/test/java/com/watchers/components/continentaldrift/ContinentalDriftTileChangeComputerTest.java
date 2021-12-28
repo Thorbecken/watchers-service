@@ -9,7 +9,6 @@ import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ContinentalDriftTileChangeComputerTest {
@@ -76,6 +77,6 @@ class ContinentalDriftTileChangeComputerTest {
                 .get();
         endHeight += world.getHeightDeficit();
 
-        Assert.assertEquals(startingHeight, endHeight);
+        assertThat(endHeight, equalTo(startingHeight));
     }
 }

@@ -116,6 +116,7 @@ public class Aircurrent {
         this.heightDifference = startingHeight - endingHeight;
     }
 
+    @JsonIgnore
     public SkyTile getEndingSky() {
         return this.incommingAircurrent.getEndingSky();
     }
@@ -124,6 +125,7 @@ public class Aircurrent {
         this.incommingAircurrent.setEndingSky(endingSky);
     }
 
+    @JsonIgnore
     public SkyTile getStartingSky() {
         return this.outgoingAircurrent.getStartingSky();
     }

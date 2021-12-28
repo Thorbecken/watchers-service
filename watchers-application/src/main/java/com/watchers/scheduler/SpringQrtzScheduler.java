@@ -1,17 +1,16 @@
 package com.watchers.scheduler;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-
 import com.watchers.config.AutoWiringSpringBeanJobFactory;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.scheduler.job.ContinentalshiftTimerJob;
 import com.watchers.scheduler.job.ProcessingUnitJob;
 import com.watchers.scheduler.job.SaveTimerJob;
 import com.watchers.scheduler.job.TurnTimerJob;
-import org.quartz.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.quartz.Job;
+import org.quartz.JobDetail;
+import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -28,12 +27,14 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+
+@Slf4j
 @Configuration
 @EnableAutoConfiguration
 @ConditionalOnExpression("'${using.spring.schedulerFactory}'=='true'")
 public class SpringQrtzScheduler {
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -43,13 +44,13 @@ public class SpringQrtzScheduler {
 
     @PostConstruct
     public void init() {
-        logger.info("Spring Quartz Schedular initiated");
+        log.info("Spring Quartz Schedular initiated");
     }
 
     @Bean
     public SpringBeanJobFactory springBeanJobFactory() {
         AutoWiringSpringBeanJobFactory jobFactory = new AutoWiringSpringBeanJobFactory();
-        logger.debug("Configuring Job factory");
+        log.debug("Configuring Job factory");
 
         jobFactory.setApplicationContext(applicationContext);
         return jobFactory;
@@ -79,7 +80,7 @@ public class SpringQrtzScheduler {
         SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
         schedulerFactory.setConfigLocation(new ClassPathResource("quartz.properties"));
 
-        logger.debug("Setting the Scheduler up");
+        log.debug("Setting the Scheduler up");
         schedulerFactory.setJobFactory(springBeanJobFactory());
         schedulerFactory.setJobDetails(job);
         schedulerFactory.setTriggers(trigger);
@@ -155,7 +156,7 @@ public class SpringQrtzScheduler {
         SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
         trigger.setJobDetail(job);
 
-        logger.info("Configuring trigger to fire every {} seconds", frequencyInSec);
+        log.info("Configuring trigger to fire every {} seconds", frequencyInSec);
 
         trigger.setRepeatInterval(frequencyInSec * 1000);
         trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);

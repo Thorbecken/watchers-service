@@ -8,7 +8,6 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,8 @@ import org.mockito.Mockito;
 
 import java.util.*;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ContinentalDriftPredicterTest {
@@ -42,7 +43,7 @@ class ContinentalDriftPredicterTest {
         long startingHeight = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .map(Tile::getHeight)
-                .reduce((x,y)-> x+y)
+                .reduce(Long::sum)
                 .orElse(0L);
 
         taskDto.setNewTileLayout(new HashMap<>());
@@ -52,10 +53,10 @@ class ContinentalDriftPredicterTest {
 
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
-        Assert.assertTrue("New continentalLayout was still empty", !newTileLayout.isEmpty());
+        assertThat("New continentalLayout was still empty", !newTileLayout.isEmpty(), is(true));
         int count = taskDto.getNewTileLayout().values().stream()
                 .map(List::size)
-                .reduce((x, y) -> x+y)
+                .reduce(Integer::sum)
                 .orElse(0);
         Assertions.assertEquals(9, count);
 
@@ -70,7 +71,7 @@ class ContinentalDriftPredicterTest {
                 .get()
                 .stream()
                 .map(Tile::getHeight)
-                .reduce((x, y) -> x + y)
+                .reduce(Long::sum)
                 .orElse(0L);
         Assertions.assertEquals(startingHeight, endHeight);
 
@@ -95,7 +96,7 @@ class ContinentalDriftPredicterTest {
         long startingHeight = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .map(Tile::getHeight)
-                .reduce((x,y)-> x+y)
+                .reduce(Long::sum)
                 .orElse(0L);
 
         taskDto.setNewTileLayout(new HashMap<>());
@@ -105,10 +106,10 @@ class ContinentalDriftPredicterTest {
 
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
-        Assert.assertTrue("New continentalLayout was still empty", !newTileLayout.isEmpty());
+        assertThat("New continentalLayout was still empty", !newTileLayout.isEmpty(), is(true));
         int count = taskDto.getNewTileLayout().values().stream()
                 .map(List::size)
-                .reduce((x, y) -> x+y)
+                .reduce(Integer::sum)
                 .orElse(0);
         Assertions.assertEquals(9, count);
 
@@ -123,7 +124,7 @@ class ContinentalDriftPredicterTest {
                 .get()
                 .stream()
                 .map(Tile::getHeight)
-                .reduce((x, y) -> x + y)
+                .reduce(Long::sum)
                 .orElse(0L);
         Assertions.assertEquals(startingHeight, endHeight);
 

@@ -154,6 +154,16 @@ public class SaveToDatabaseManager {
 
         skyTiles.forEach(skyTile -> {
             skyTile.getOutgoingAircurrents()
+                    .forEach(aircurrent -> aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents()));
+        });
+
+        skyTiles.forEach(skyTile -> {
+            skyTile.getIncommingAircurrents()
+                    .forEach(aircurrent -> aircurrent.setIncommingAircurrent(skyTile.getRawIncommingAircurrents()));
+        });
+
+        skyTiles.forEach(skyTile -> {
+            skyTile.getOutgoingAircurrents()
                     .forEach(aircurrent -> aircurrent.setStartingSky(skyTile));
 
             skyTile.getIncommingAircurrents()
@@ -178,12 +188,26 @@ public class SaveToDatabaseManager {
             skyTile.getOutgoingAircurrents().clear();
         });
 
-        incommingAircurrents.forEach(aircurrent -> {
-            aircurrent.setStartingSky(startingSkies.get(aircurrent.getId()));
-            aircurrent.getStartingSky().getOutgoingAircurrents().add(aircurrent);
+        skyTiles.forEach(skyTile -> {
+            Long id = skyTile.getId();
 
-            aircurrent.setEndingSky(endingSkies.get(aircurrent.getId()));
-            aircurrent.getEndingSky().getIncommingAircurrents().add(aircurrent);
+            SkyTile startingSkytile = Optional.ofNullable(startingSkies.get(id)).orElse(skyTile);
+            skyTile.setRawIncommingAircurrents(startingSkytile.getRawIncommingAircurrents());
+
+            SkyTile endingSkytile = Optional.ofNullable(endingSkies.get(id)).orElse(skyTile);
+            skyTile.setRawOutgoingAircurrents(endingSkytile.getRawOutgoingAircurrents());
+        });
+
+        incommingAircurrents.forEach(aircurrent -> {
+            SkyTile startingSky = startingSkies.get(aircurrent.getId());
+            OutgoingAircurrent outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
+            aircurrent.setOutgoingAircurrent(outgoingAircurrent);
+            aircurrent.setStartingSky(startingSky);
+
+            SkyTile endingSky = endingSkies.get(aircurrent.getId());
+            IncommingAircurrent incommingAircurrent = endingSky.getRawIncommingAircurrents();
+            aircurrent.setIncommingAircurrent(incommingAircurrent);
+            aircurrent.setEndingSky(endingSky);
         });
     }
 
@@ -191,7 +215,7 @@ public class SaveToDatabaseManager {
         log.info("Loading coordinates.");
         adjustAndMergeAircurrents(persistentWorld);
 
-        List<Coordinate> coordinates = persistentWorld.getCoordinates().parallelStream()
+        List<Coordinate> coordinates = persistentWorld.getCoordinates().stream()
                 .map(coordinate -> coordinate.createClone(newWorld))
                 .sorted(Comparator.comparing(Coordinate::getId))
                 .collect(Collectors.toList());
@@ -537,7 +561,8 @@ public class SaveToDatabaseManager {
         }
     }
 
-    private List<IncomingAircurrentHolder> saveIncommingAircurrents(List<IncommingAircurrent> incommingAircurrents) {
+    private List<IncomingAircurrentHolder> saveIncommingAircurrents
+            (List<IncommingAircurrent> incommingAircurrents) {
         incommingAircurrents.forEach(incommingAircurrent -> incommingAircurrent.getEndingSky().setRawIncommingAircurrents(incommingAircurrent));
         List<IncomingAircurrentHolder> incomingAircurrentHolderList = incommingAircurrents.stream()
                 .map(IncomingAircurrentHolder::new)
@@ -588,7 +613,8 @@ public class SaveToDatabaseManager {
         }
     }
 
-    private List<OutgoingAircurrentHolder> saveOutgoingAircurrents(List<OutgoingAircurrent> outgoingAircurrents) {
+    private List<OutgoingAircurrentHolder> saveOutgoingAircurrents
+            (List<OutgoingAircurrent> outgoingAircurrents) {
         outgoingAircurrents.forEach(outgoingAircurrent -> outgoingAircurrent.getStartingSky().setRawOutgoingAircurrents(outgoingAircurrent));
         List<OutgoingAircurrentHolder> outgoingAircurrentHolderList = outgoingAircurrents.stream()
                 .map(OutgoingAircurrentHolder::new)

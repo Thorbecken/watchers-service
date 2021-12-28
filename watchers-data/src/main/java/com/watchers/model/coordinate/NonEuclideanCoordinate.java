@@ -2,6 +2,7 @@ package com.watchers.model.coordinate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.climate.Climate;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 
@@ -68,7 +69,9 @@ public class NonEuclideanCoordinate extends Coordinate {
                 .filter(oldContinent -> oldContinent.getId().equals(getContinent().getId()))
                 .findFirst().get());
         clone.setTile(this.getTile().createClone(clone));
-        clone.setClimate(this.getClimate().createClone(clone));
+        Climate climate = this.getClimate();
+        Climate climateClone = climate.createClone(clone);
+        clone.setClimate(climateClone);
 
         clone.getActors().addAll(
                 this.getActors().stream()

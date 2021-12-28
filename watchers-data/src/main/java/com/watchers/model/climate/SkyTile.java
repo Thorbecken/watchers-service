@@ -39,7 +39,7 @@ public class SkyTile {
     @EqualsAndHashCode.Exclude
     private double airMoistureLossage;
 
-    @JsonIgnore
+    @JsonView(Views.Public.class)
     @OneToOne(mappedBy = "startingSky", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     private OutgoingAircurrent outgoingAircurrents = new OutgoingAircurrent(this);
 
