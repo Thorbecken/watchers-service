@@ -6,6 +6,7 @@ import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -24,11 +25,13 @@ public class Aircurrent {
     private Long id;
 
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "incommingAircurrent_id", nullable = false)
     private IncommingAircurrent incommingAircurrent;
 
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "outgoingAircurrent_id", nullable = false)
     private OutgoingAircurrent outgoingAircurrent;
@@ -60,7 +63,7 @@ public class Aircurrent {
         double amount = amountPerStrength * currentStrength;
         double heightAmount = calculateHeightDifferenceEffect(amount);
 
-        outgoingAircurrent.getStartingSky().addIncommingMoisture(amount);
+        incommingAircurrent.getEndingSky().addIncommingMoisture(amount);
         outgoingAircurrent.getStartingSky().addAirMoistureLossage(heightAmount);
     }
 
@@ -78,21 +81,21 @@ public class Aircurrent {
 
     public Aircurrent createOutgoingClone(SkyTile skyClone) {
         Aircurrent clone = new Aircurrent();
-        clone.setId(skyClone.getId());
+        clone.setId(this.getId());
         clone.setAircurrentType(this.aircurrentType);
         clone.setCurrentStrength(this.currentStrength);
         clone.setOutgoingAircurrent(skyClone.getRawOutgoingAircurrents());
-        clone.setIncommingAircurrent(skyClone.getRawIncommingAircurrents());
+        clone.setIncommingAircurrent(incommingAircurrent.createClone());
         clone.setHeightDifference(this.heightDifference);
         return clone;
     }
 
     public Aircurrent createIncommingClone(SkyTile skyClone) {
         Aircurrent clone = new Aircurrent();
-        clone.setId(skyClone.getId());
+        clone.setId(this.getId());
         clone.setAircurrentType(this.aircurrentType);
         clone.setCurrentStrength(this.currentStrength);
-        clone.setOutgoingAircurrent(skyClone.getRawOutgoingAircurrents());
+        clone.setOutgoingAircurrent(outgoingAircurrent.createClone());
         clone.setIncommingAircurrent(skyClone.getRawIncommingAircurrents());
         clone.setHeightDifference(this.heightDifference);
         return clone;

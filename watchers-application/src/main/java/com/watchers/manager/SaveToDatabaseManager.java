@@ -44,7 +44,7 @@ public class SaveToDatabaseManager {
 
         World newWorld = saveBasicWorld(persistentWorld);
         saveContinents(persistentWorld, newWorld);
-        saveCoordinates(persistentWorld, newWorld);
+        saveCoordinates(persistentWorld, newWorld, freshlyCreated);
         log.info("World " + persistentWorld.getId() + " is loaded from persistence into memory.");
     }
 
@@ -146,74 +146,144 @@ public class SaveToDatabaseManager {
      *
      * @param world world
      */
-    private void adjustAndMergeAircurrents(World world) {
+    private void adjustAndMergeAircurrents(World world, boolean newWorld, boolean freshlyCreated) {
         List<SkyTile> skyTiles = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
                 .collect(Collectors.toList());
 
-        skyTiles.forEach(skyTile -> {
-            skyTile.getOutgoingAircurrents()
-                    .forEach(aircurrent -> aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents()));
-        });
+        if (!newWorld) {
+            if (freshlyCreated) {
+                Map<Long, List<Aircurrent>> outgoingAircurrentsOfStartingskiesFromIncommingAircurrents = skyTiles.stream()
+                        .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
+                        .collect(Collectors.toMap(incommingAircurrent -> incommingAircurrent.getOutgoingAircurrent().getStartingSky().getId()
+                                , Collections::singletonList
+                                , (x, y) -> {
+                                    List<Aircurrent> aircurrents = new ArrayList<>(x);
+                                    aircurrents.addAll(y);
+                                    return aircurrents;
+                                }));
 
-        skyTiles.forEach(skyTile -> {
-            skyTile.getIncommingAircurrents()
-                    .forEach(aircurrent -> aircurrent.setIncommingAircurrent(skyTile.getRawIncommingAircurrents()));
-        });
+                skyTiles.forEach(skyTile -> skyTile.setRawOutgoingAircurrents(
+                        outgoingAircurrentsOfStartingskiesFromIncommingAircurrents
+                                .get(skyTile.getId())
+                                .get(0)
+                                .getOutgoingAircurrent()));
+                skyTiles.forEach(skyTile -> {
+                    skyTile.getRawOutgoingAircurrents().clear();
+                    skyTile.getRawOutgoingAircurrents().addAll(outgoingAircurrentsOfStartingskiesFromIncommingAircurrents.get(skyTile.getId()));
+                    skyTile.getRawOutgoingAircurrents().getAircurrentList().forEach(aircurrent -> aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents()));
+                });
 
-        skyTiles.forEach(skyTile -> {
-            skyTile.getOutgoingAircurrents()
-                    .forEach(aircurrent -> aircurrent.setStartingSky(skyTile));
+                return;
+            } else {
+                skyTiles.forEach(skyTile -> {
+                    skyTile.getRawOutgoingAircurrents().setStartingSky(skyTile);
+                    skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents()));
 
-            skyTile.getIncommingAircurrents()
-                    .forEach(aircurrent -> aircurrent.setEndingSky(skyTile));
-        });
+                    skyTile.getRawIncommingAircurrents().setEndingSky(skyTile);
+                    skyTile.getIncommingAircurrents().forEach(aircurrent -> aircurrent.setIncommingAircurrent(skyTile.getRawIncommingAircurrents()));
+                });
+
+                Map<Long, Aircurrent> incommingAircurrentIdForAircurrents = skyTiles.stream()
+                        .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
+                        .collect(Collectors.toMap(Aircurrent::getId, aircurrent -> aircurrent));
+                Map<OutgoingAircurrent, List<Long>> outgoingAircurrents = skyTiles.stream()
+                        .map(SkyTile::getRawOutgoingAircurrents)
+                        .collect(Collectors.toMap(outgoingAircurrent -> outgoingAircurrent,
+                                outgoingAircurrent -> outgoingAircurrent.getAircurrentList().stream()
+                                        .map(Aircurrent::getId)
+                                        .collect(Collectors.toList())));
+                outgoingAircurrents.forEach((outgoingAircurrent, aircurrents) -> {
+                            outgoingAircurrent.clear();
+                            aircurrents.forEach(id -> outgoingAircurrent.add(incommingAircurrentIdForAircurrents.get(id)));
+                        }
+                );
+
+                return;
+            }
+        }
 
         List<Aircurrent> incommingAircurrents = skyTiles.stream()
                 .flatMap(x -> x.getIncommingAircurrents().stream())
                 .collect(Collectors.toList());
 
-        List<Aircurrent> outgoingAircurrents = skyTiles.stream()
-                .flatMap(x -> x.getOutgoingAircurrents().stream())
-                .collect(Collectors.toList());
-
-        Map<Long, SkyTile> endingSkies = incommingAircurrents.stream()
-                .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getEndingSky, (x, y) -> x));
-        Map<Long, SkyTile> startingSkies = outgoingAircurrents.stream()
-                .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getStartingSky, (x, y) -> x));
+        Map<Long, SkyTile> skyTileMap = skyTiles.stream()
+                .collect(Collectors.toMap(SkyTile::getId, x -> x));
 
         skyTiles.forEach(skyTile -> {
-            skyTile.getIncommingAircurrents().clear();
-            skyTile.getOutgoingAircurrents().clear();
-        });
-
-        skyTiles.forEach(skyTile -> {
-            Long id = skyTile.getId();
-
-            SkyTile startingSkytile = Optional.ofNullable(startingSkies.get(id)).orElse(skyTile);
-            skyTile.setRawIncommingAircurrents(startingSkytile.getRawIncommingAircurrents());
-
-            SkyTile endingSkytile = Optional.ofNullable(endingSkies.get(id)).orElse(skyTile);
-            skyTile.setRawOutgoingAircurrents(endingSkytile.getRawOutgoingAircurrents());
+            skyTile.getRawOutgoingAircurrents().getAircurrentList().clear();
         });
 
         incommingAircurrents.forEach(aircurrent -> {
-            SkyTile startingSky = startingSkies.get(aircurrent.getId());
-            OutgoingAircurrent outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
-            aircurrent.setOutgoingAircurrent(outgoingAircurrent);
-            aircurrent.setStartingSky(startingSky);
-
-            SkyTile endingSky = endingSkies.get(aircurrent.getId());
-            IncommingAircurrent incommingAircurrent = endingSky.getRawIncommingAircurrents();
-            aircurrent.setIncommingAircurrent(incommingAircurrent);
-            aircurrent.setEndingSky(endingSky);
+            SkyTile startingSky = skyTileMap.get(aircurrent.getStartingSky().getId());
+            startingSky.getOutgoingAircurrents().add(aircurrent);
+            aircurrent.setOutgoingAircurrent(startingSky.getRawOutgoingAircurrents());
         });
+
+        skyTiles.forEach(skyTile -> {
+            skyTile.getRawOutgoingAircurrents().setStartingSky(skyTile);
+            skyTile.getRawIncommingAircurrents().setEndingSky(skyTile);
+            skyTile.getOutgoingAircurrents().forEach(aircurrent -> {
+                aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents());
+                aircurrent.setEndingSky(skyTileMap.get(aircurrent.getEndingSky().getId()));
+                aircurrent.setStartingSky(skyTileMap.get(aircurrent.getStartingSky().getId()));
+            });
+            skyTile.getIncommingAircurrents().forEach(aircurrent -> {
+                aircurrent.setIncommingAircurrent(skyTile.getRawIncommingAircurrents());
+                aircurrent.setEndingSky(skyTileMap.get(aircurrent.getEndingSky().getId()));
+                aircurrent.setStartingSky(skyTileMap.get(aircurrent.getStartingSky().getId()));
+            });
+        });
+
+//        incommingAircurrents.forEach(aircurrent -> {
+//            SkyTile startingSky = skyTileMap.get(aircurrent.getId());
+//            OutgoingAircurrent outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
+//            aircurrent.setOutgoingAircurrent(outgoingAircurrent);
+//            aircurrent.setStartingSky(startingSky);
+//
+//            outgoingAircurrent.getAircurrentList().stream()
+//                    .map(oac -> oac.getEndingSky().getId())
+//                    .map(skyTileMap::get)
+//                    .forEach(endingSky -> {
+//                        IncommingAircurrent incommingAircurrent = endingSky.getRawIncommingAircurrents();
+//                        aircurrent.setIncommingAircurrent(incommingAircurrent);
+//                        aircurrent.setEndingSky(endingSky);
+//                    });
+//        });
+
+//        } else {
+//            skyTiles.forEach(skyTile -> {
+//                Long id = skyTile.getId();
+//
+//                SkyTile startingSkytile = Optional.ofNullable(startingSkies.get(id)).orElseThrow();
+//                skyTile.setRawIncommingAircurrents(startingSkytile.getRawIncommingAircurrents());
+//
+//                SkyTile endingSkytile = Optional.ofNullable(endingSkies.get(id)).orElseThrow();
+//                skyTile.setRawOutgoingAircurrents(endingSkytile.getRawOutgoingAircurrents());
+//            });
+//
+//            incommingAircurrents.forEach(aircurrent -> {
+//                SkyTile startingSky = startingSkies.get(aircurrent.getId());
+//                OutgoingAircurrent outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
+//                aircurrent.setOutgoingAircurrent(outgoingAircurrent);
+//                aircurrent.setStartingSky(startingSky);
+//
+//                SkyTile endingSky = endingSkies.get(aircurrent.getId());
+//                IncommingAircurrent incommingAircurrent = endingSky.getRawIncommingAircurrents();
+//                aircurrent.setIncommingAircurrent(incommingAircurrent);
+//                aircurrent.setEndingSky(endingSky);
+//            });
+//    }
     }
 
-    private void saveCoordinates(World persistentWorld, World newWorld) {
+    private void saveCoordinates(World persistentWorld, World newWorld, boolean freshlyCreated) {
         log.info("Loading coordinates.");
-        adjustAndMergeAircurrents(persistentWorld);
+        if (freshlyCreated) {
+            adjustAndMergeAircurrents(persistentWorld, false, freshlyCreated);
+        } else {
+            adjustAndMergeAircurrents(persistentWorld, false, freshlyCreated);
+        }
 
         List<Coordinate> coordinates = persistentWorld.getCoordinates().stream()
                 .map(coordinate -> coordinate.createClone(newWorld))
@@ -222,7 +292,7 @@ public class SaveToDatabaseManager {
 
         newWorld.getCoordinates().addAll(coordinates);
         log.info("Adjusting aircurrents for merging");
-        adjustAndMergeAircurrents(newWorld);
+        adjustAndMergeAircurrents(newWorld, true, freshlyCreated);
         log.info("Aircurrents adjusted for merging");
 
         log.debug("Current coordinates in memory: " + coordinates.size() + " " + Arrays.toString(coordinates.stream().map(Coordinate::getId).toArray()) + ".");
@@ -611,6 +681,7 @@ public class SaveToDatabaseManager {
         public void setInformation() {
             outgoingAircurrent.setAircurrentList(aircurrents);
         }
+
     }
 
     private List<OutgoingAircurrentHolder> saveOutgoingAircurrents

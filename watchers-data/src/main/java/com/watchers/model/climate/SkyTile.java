@@ -1,6 +1,7 @@
 package com.watchers.model.climate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
 import lombok.Data;
@@ -23,11 +24,17 @@ public class SkyTile {
     @Column(name = "sky_id", nullable = false)
     private Long id;
 
+    @JsonProperty("airMoisture")
+    @Column(name = "airMoisture")
     @JsonView(Views.Public.class)
-    double airMoisture;
+    private double airMoisture;
+
+    public void setAirMoisture(double airMoisture) {
+        this.airMoisture = airMoisture;
+    }
 
     @Transient
-    double incommingMoisture;
+    private double incommingMoisture;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
@@ -40,11 +47,11 @@ public class SkyTile {
     private double airMoistureLossage;
 
     @JsonView(Views.Public.class)
-    @OneToOne(mappedBy = "startingSky", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @OneToOne(mappedBy = "startingSky", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private OutgoingAircurrent outgoingAircurrents = new OutgoingAircurrent(this);
 
     @JsonView(Views.Public.class)
-    @OneToOne(mappedBy = "endingSky", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @OneToOne(mappedBy = "endingSky", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private IncommingAircurrent incommingAircurrents = new IncommingAircurrent(this);
 
     public SkyTile(Climate climate) {
@@ -89,21 +96,21 @@ public class SkyTile {
     }
 
     public void addAirMoisture(double extraAirmoisture) {
-        if (extraAirmoisture > 0L) {
-            if (extraAirmoisture + this.airMoisture < 100L) {
-                this.airMoisture = this.airMoisture + extraAirmoisture;
+        if (extraAirmoisture > 0d) {
+            if (extraAirmoisture + this.getAirMoisture() < 100d) {
+                this.setAirMoisture(this.getAirMoisture() + extraAirmoisture);
             } else {
-                this.airMoisture = 100L;
+                this.setAirMoisture(100d);
             }
         }
     }
 
     public void reduceAirMoisture(double airmoistureReduction) {
-        if (airmoistureReduction > 0L) {
-            if (this.airMoisture - airmoistureReduction > 0L) {
-                this.airMoisture = this.airMoisture - airmoistureReduction;
+        if (airmoistureReduction > 0d) {
+            if (this.getAirMoisture() - airmoistureReduction > 0d) {
+                this.setAirMoisture(this.getAirMoisture() - airmoistureReduction);
             } else {
-                this.airMoisture = 0L;
+                this.setAirMoisture(0d);
             }
         }
     }
@@ -117,20 +124,24 @@ public class SkyTile {
         double diffider = outgoingAircurrents.stream()
                 .mapToInt(Aircurrent::getCurrentStrength)
                 .sum();
-        double transfer = airMoisture / diffider;
-        this.airMoisture = this.airMoisture - (transfer * diffider);
+        if (diffider != 0) {
+            double transfer = this.getAirMoisture() / diffider;
+            this.setAirMoisture(this.getAirMoisture() - (transfer * diffider));
 
-        outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transfer));
+            outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transfer));
+        }
     }
 
     public void addAirMoistureLossage(double heightAmount) {
         this.airMoistureLossage = this.airMoistureLossage + heightAmount;
     }
 
+    @JsonIgnore
     public OutgoingAircurrent getRawOutgoingAircurrents() {
         return this.outgoingAircurrents;
     }
 
+    @JsonIgnore
     public List<Aircurrent> getOutgoingAircurrents() {
         return this.outgoingAircurrents.getAircurrentList();
     }
@@ -139,10 +150,12 @@ public class SkyTile {
         this.outgoingAircurrents = outgoingAircurrent;
     }
 
+    @JsonIgnore
     public IncommingAircurrent getRawIncommingAircurrents() {
         return this.incommingAircurrents;
     }
 
+    @JsonIgnore
     public List<Aircurrent> getIncommingAircurrents() {
         return this.incommingAircurrents.getAircurrentList();
     }
@@ -175,6 +188,12 @@ public class SkyTile {
         getOutgoingAircurrents().forEach(aircurrent -> clone.getOutgoingAircurrents().add(aircurrent.createOutgoingClone(clone)));
         getIncommingAircurrents().forEach(aircurrent -> clone.getIncommingAircurrents().add(aircurrent.createIncommingClone(clone)));
 
+        return clone;
+    }
+
+    public SkyTile createBareboneClone() {
+        SkyTile clone = new SkyTile();
+        clone.setId(this.getId());
         return clone;
     }
 }
