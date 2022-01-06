@@ -2,7 +2,6 @@ package com.watchers.model.coordinate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.model.actors.Actor;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import lombok.Data;

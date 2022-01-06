@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.OptionalDouble;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -30,7 +29,7 @@ class SkyTileTest {
         SkyTile sky2 = CoordinateFactory.createCoordinate(2, 1, world, continent).getClimate().getSkyTile();
         SkyTile sky3 = CoordinateFactory.createCoordinate(1, 2, world, continent).getClimate().getSkyTile();
         SkyTile sky4 = CoordinateFactory.createCoordinate(2, 2, world, continent).getClimate().getSkyTile();
-        SkyHelper.calculateAirflows(world);
+        SkyHelper.calculateAndWeaveAirflows(world);
 
         List<SkyTile> skyTileList = Arrays.asList(
                 sky1, sky2, sky3, sky4
@@ -100,7 +99,7 @@ class SkyTileTest {
         SkyTile sky29 = CoordinateFactory.createCoordinate(4, 6, world, continent).getClimate().getSkyTile();
         SkyTile sky30 = CoordinateFactory.createCoordinate(5, 6, world, continent).getClimate().getSkyTile();
 
-        SkyHelper.calculateAirflows(world);
+        SkyHelper.calculateAndWeaveAirflows(world);
 
         List<SkyTile> skyTileList = Arrays.asList(
                 sky1, sky2, sky3, sky4, sky5,

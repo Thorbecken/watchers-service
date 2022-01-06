@@ -1,6 +1,7 @@
 package com.watchers.helper;
 
 import com.watchers.TestableWorld;
+import com.watchers.model.climate.Aircurrent;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
@@ -11,26 +12,158 @@ import com.watchers.model.world.World;
 import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SkyHelperTest {
+    private static final int LATITUDAL_STRENGTH = 99;
+    private static final int LONGITUDAL_STRENGTH = 99;
+    private static final boolean UPWARD = true;
+    private static final boolean DOWNWARD = false;
 
     @Test
-    void assertAssertionsTest(){
-        World world = TestableWorld.createWorld();
-        SkyHelper.calculateAirflows(world);
+    void addLongitudalAircurrentTest() {
+        World world = TestableWorld.createMediumWorld();
+        Coordinate startingCoordinate = world.getCoordinate(2L, 2L);
+        Coordinate downwardCoordinate = startingCoordinate.getDownNeighbour();
+        Coordinate upwardCoordinate = startingCoordinate.getUpNeighbour();
+
+        SkyTile startingSky = startingCoordinate.getClimate().getSkyTile();
+        SkyHelper.addLongitudalAircurrent(UPWARD, startingSky, LONGITUDAL_STRENGTH);
+
+        assertThat(startingSky.getOutgoingAircurrents(), hasSize(1));
+        assertThat(startingSky.getOutgoingAircurrents().get(0).getEndingSky().getClimate().getCoordinate(),
+                equalTo(upwardCoordinate));
+
+        SkyHelper.addLongitudalAircurrent(DOWNWARD, startingSky, LONGITUDAL_STRENGTH);
+        assertThat(startingSky.getOutgoingAircurrents(), hasSize(2));
+        assertThat(startingSky.getOutgoingAircurrents().get(0).getEndingSky().getClimate().getCoordinate(),
+                equalTo(upwardCoordinate));
+        assertThat(startingSky.getOutgoingAircurrents().get(1).getEndingSky().getClimate().getCoordinate(),
+                equalTo(downwardCoordinate));
+    }
+
+    @Test
+    void addLatitudalAircurrentTest() {
+        World world = TestableWorld.createMediumWorld();
+        List<SkyTile> twoSkytiles = world.getCoordinates().stream()
+                .limit(2)
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .collect(Collectors.toList());
+        SkyTile startingSky = twoSkytiles.get(0);
+        startingSky.setId(1L);
+        SkyTile endingSky = twoSkytiles.get(1);
+        endingSky.setId(2L);
+
+        SkyHelper.addLatitudalAircurrent(startingSky, endingSky, LATITUDAL_STRENGTH);
+
+        assertThat(endingSky.getIncommingLatitudalAirflow().getStartingSky(), equalTo(startingSky));
+        assertThat(startingSky.getOutgoingLatitudallAirflow().getEndingSky(), equalTo(endingSky));
+        assertThat(endingSky.getIncommingLatitudalAirflow().getCurrentStrength(), equalTo(LATITUDAL_STRENGTH));
+    }
+
+    @Test
+    void latitudalLengthTest() {
+        World world = TestableWorld.createMediumWorld();
+        SkyHelper.calculateAndWeaveAirflows(world);
+
+        for (long yCoordinate = 1; yCoordinate <= world.getYSize(); yCoordinate++) {
+            SkyTile startingSky = world.getCoordinate(1L, 1L).getClimate().getSkyTile();;
+            SkyTile currentSky = startingSky;
+            for (long xCoordinate = 1; xCoordinate <= world.getXSize(); xCoordinate++) {
+                if(xCoordinate == 1) {
+                    startingSky = world.getCoordinate(1L, yCoordinate).getClimate().getSkyTile();
+                    currentSky = startingSky;
+                }
+                assertThat(currentSky.getClimate().getCoordinate().getYCoord(), equalTo(yCoordinate));
+                currentSky = currentSky.getIncommingLatitudalAirflow()
+                        .getStartingSky();
+            }
+
+            assertThat(startingSky, equalTo(currentSky));
+        }
+    }
+
+    @Test
+    void generateAirflowsTest() {
+        World world = TestableWorld.createMediumWorld();
+        SkyHelper.AirFlows airFlows = SkyHelper.generateAirflows(world);
+
+        assertThat(airFlows.getRightwardCurrent().get(90D), equalTo(false));
+        assertThat(airFlows.getRightwardCurrent().get(60D), equalTo(true));
+        assertThat(airFlows.getRightwardCurrent().get(30D), equalTo(false));
+        assertThat(airFlows.getRightwardCurrent().get(0D), equalTo(false));
+        assertThat(airFlows.getRightwardCurrent().get(-30D), equalTo(true));
+        assertThat(airFlows.getRightwardCurrent().get(-60D), equalTo(false));
+
+        assertThat(airFlows.getUpwardcurrents().get(90D), equalTo(false));
+        assertThat(airFlows.getUpwardcurrents().get(60D), equalTo(true));
+        assertThat(airFlows.getUpwardcurrents().get(30D), equalTo(false));
+        assertThat(airFlows.getUpwardcurrents().get(0D), equalTo(true));
+        assertThat(airFlows.getUpwardcurrents().get(-30D), equalTo(false));
+        assertThat(airFlows.getUpwardcurrents().get(-60D), equalTo(true));
+    }
+
+    @Test
+    void calculateAircurrentsTest() {
+        World world = TestableWorld.createMediumWorld();
+        Set<Coordinate> coordinates = world.getCoordinates();
+
+        List<SkyHelper.LatitudalAirflow> latitudalAirflows = SkyHelper.calculateAircurrents(coordinates);
+        boolean latitudalAirflowsHaveTheSameYCoordinate = latitudalAirflows.stream()
+                .allMatch(latitudalAirflow -> {
+                    List<SkyTile> skyTiles = latitudalAirflow.getSkyTiles();
+                    long yCoordinate = skyTiles.get(0).getClimate().getCoordinate().getYCoord();
+                    return skyTiles.stream()
+                            .map(SkyTile::getClimate)
+                            .map(Climate::getCoordinate)
+                            .allMatch(coordinate -> coordinate.getYCoord() == yCoordinate);
+                });
+        boolean latitudalAirflowsContainAllXCoordiantes = latitudalAirflows.stream()
+                .allMatch(latitudalAirflow -> {
+                    List<Long> xCoordinates = latitudalAirflow.getSkyTiles().stream()
+                            .map(SkyTile::getClimate)
+                            .map(Climate::getCoordinate)
+                            .map(Coordinate::getXCoord)
+                            .collect(Collectors.toList());
+                    return xCoordinates.size() == 3
+                            && xCoordinates.contains(1L)
+                            && xCoordinates.contains(2L)
+                            && xCoordinates.contains(3L);
+                });
+
+        assertThat(latitudalAirflowsHaveTheSameYCoordinate, equalTo(true));
+        assertThat(latitudalAirflowsContainAllXCoordiantes, equalTo(true));
+    }
+
+    @Test
+    void assertQualityTest() {
+        World world = TestableWorld.createMediumWorld();
+        SkyHelper.calculateAndWeaveAirflows(world);
 
         boolean allSkytilesHaveTwoIncommingAircurrents = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
                 .map(SkyTile::getIncommingAircurrents)
                 .allMatch(incommingAircurrent -> incommingAircurrent.size() == 2);
+
+        boolean allSkytilesHasOneLongitudalAircurrent = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .map(SkyTile::getIncommingLongitudalAirflow)
+                .allMatch(Objects::nonNull);
+
+        boolean allSkytilesHasOneLatitudalAircurrent = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .map(Climate::getSkyTile)
+                .map(SkyTile::getIncommingLatitudalAirflow)
+                .allMatch(Objects::nonNull);
 
         Long outgoingAircurrents = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
@@ -47,7 +180,71 @@ class SkyHelperTest {
                 .sum();
 
         assertThat(allSkytilesHaveTwoIncommingAircurrents, equalTo(true));
+        assertThat(allSkytilesHasOneLongitudalAircurrent, equalTo(true));
+        assertThat(allSkytilesHasOneLatitudalAircurrent, equalTo(true));
         assertThat(outgoingAircurrents, equalTo(incommingAircurrents));
+
+        boolean latitudalFlowOneIsCorrect = world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getYCoord() == 1L)
+                .allMatch(coordinate -> {
+                    Aircurrent incommingLatitudalAirflow = coordinate.getClimate().getSkyTile()
+                            .getIncommingLatitudalAirflow();
+                    Coordinate startingCoordinate = incommingLatitudalAirflow.getStartingSky().getClimate().getCoordinate();
+                    Coordinate assumedStartingCoordinate = coordinate.getRightNeighbour();
+                    return startingCoordinate.equals(assumedStartingCoordinate);
+                });
+        boolean latitudalFlowTwoIsCorrect = world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getYCoord() == 2L)
+                .allMatch(coordinate -> {
+                    Aircurrent incommingLatitudalAirflow = coordinate.getClimate().getSkyTile()
+                            .getIncommingLatitudalAirflow();
+                    Coordinate startingCoordinate = incommingLatitudalAirflow.getStartingSky().getClimate().getCoordinate();
+                    Coordinate assumedStartingCoordinate = coordinate.getLeftNeighbour();
+                    return startingCoordinate.equals(assumedStartingCoordinate);
+                });
+        boolean latitudalFlowTreeIsCorrect = world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getYCoord() == 3L)
+                .allMatch(coordinate -> {
+                    Aircurrent incommingLatitudalAirflow = coordinate.getClimate().getSkyTile()
+                            .getIncommingLatitudalAirflow();
+                    Coordinate startingCoordinate = incommingLatitudalAirflow.getStartingSky().getClimate().getCoordinate();
+                    Coordinate assumedStartingCoordinate = coordinate.getRightNeighbour();
+                    return startingCoordinate.equals(assumedStartingCoordinate);
+                });
+        boolean latitudalFlowFourIsCorrect = world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getYCoord() == 4L)
+                .allMatch(coordinate -> {
+                    Aircurrent incommingLatitudalAirflow = coordinate.getClimate().getSkyTile()
+                            .getIncommingLatitudalAirflow();
+                    Coordinate startingCoordinate = incommingLatitudalAirflow.getStartingSky().getClimate().getCoordinate();
+                    Coordinate assumedStartingCoordinate = coordinate.getRightNeighbour();
+                    return startingCoordinate.equals(assumedStartingCoordinate);
+                });
+        boolean latitudalFlowFiveIsCorrect = world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getYCoord() == 5L)
+                .allMatch(coordinate -> {
+                    Aircurrent incommingLatitudalAirflow = coordinate.getClimate().getSkyTile()
+                            .getIncommingLatitudalAirflow();
+                    Coordinate startingCoordinate = incommingLatitudalAirflow.getStartingSky().getClimate().getCoordinate();
+                    Coordinate assumedStartingCoordinate = coordinate.getLeftNeighbour();
+                    return startingCoordinate.equals(assumedStartingCoordinate);
+                });
+        boolean latitudalFlowSixIsCorrect = world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getYCoord() == 6L)
+                .allMatch(coordinate -> {
+                    Aircurrent incommingLatitudalAirflow = coordinate.getClimate().getSkyTile()
+                            .getIncommingLatitudalAirflow();
+                    Coordinate startingCoordinate = incommingLatitudalAirflow.getStartingSky().getClimate().getCoordinate();
+                    Coordinate assumedStartingCoordinate = coordinate.getRightNeighbour();
+                    return startingCoordinate.equals(assumedStartingCoordinate);
+                });
+
+        assertThat(latitudalFlowOneIsCorrect, equalTo(true));
+        assertThat(latitudalFlowTwoIsCorrect, equalTo(true));
+        assertThat(latitudalFlowTreeIsCorrect, equalTo(true));
+        assertThat(latitudalFlowFourIsCorrect, equalTo(true));
+        assertThat(latitudalFlowFiveIsCorrect, equalTo(true));
+        assertThat(latitudalFlowSixIsCorrect, equalTo(true));
     }
 
     @Test
@@ -106,7 +303,7 @@ class SkyHelperTest {
             coordinates.get((int) i).setId(i + 1);
         }
 
-        SkyHelper.calculateAirflows(world);
+        SkyHelper.calculateAndWeaveAirflows(world);
 
         sky1.getOutgoingLatitudallAirflow().setId(1L);
         sky2.getOutgoingLatitudallAirflow().setId(2L);
@@ -190,83 +387,83 @@ class SkyHelperTest {
         assertEquals(60, aircurrentCount);
 
         // leftward -1
-        assertEquals(1L, sky2.getIncommingLatitudalAirflow().getId());
-        assertEquals(2L, sky3.getIncommingLatitudalAirflow().getId());
-        assertEquals(3L, sky4.getIncommingLatitudalAirflow().getId());
-        assertEquals(4L, sky5.getIncommingLatitudalAirflow().getId());
-        assertEquals(5L, sky1.getIncommingLatitudalAirflow().getId());
+        assertEquals(2L, sky1.getIncommingLatitudalAirflow().getId());
+        assertEquals(3L, sky2.getIncommingLatitudalAirflow().getId());
+        assertEquals(4L, sky3.getIncommingLatitudalAirflow().getId());
+        assertEquals(5L, sky4.getIncommingLatitudalAirflow().getId());
+        assertEquals(1L, sky5.getIncommingLatitudalAirflow().getId());
 
         // rightward +1
-        assertEquals(6L, sky10.getIncommingLatitudalAirflow().getId());
-        assertEquals(7L, sky6.getIncommingLatitudalAirflow().getId());
-        assertEquals(8L, sky7.getIncommingLatitudalAirflow().getId());
-        assertEquals(9L, sky8.getIncommingLatitudalAirflow().getId());
-        assertEquals(10L, sky9.getIncommingLatitudalAirflow().getId());
+        assertEquals(10L, sky6.getIncommingLatitudalAirflow().getId());
+        assertEquals(6L, sky7.getIncommingLatitudalAirflow().getId());
+        assertEquals(7L, sky8.getIncommingLatitudalAirflow().getId());
+        assertEquals(8L, sky9.getIncommingLatitudalAirflow().getId());
+        assertEquals(9L, sky10.getIncommingLatitudalAirflow().getId());
 
         // leftward -1
-        assertEquals(11L, sky12.getIncommingLatitudalAirflow().getId());
-        assertEquals(12L, sky13.getIncommingLatitudalAirflow().getId());
-        assertEquals(13L, sky14.getIncommingLatitudalAirflow().getId());
-        assertEquals(14L, sky15.getIncommingLatitudalAirflow().getId());
-        assertEquals(15L, sky11.getIncommingLatitudalAirflow().getId());
+        assertEquals(12L, sky11.getIncommingLatitudalAirflow().getId());
+        assertEquals(13L, sky12.getIncommingLatitudalAirflow().getId());
+        assertEquals(14L, sky13.getIncommingLatitudalAirflow().getId());
+        assertEquals(15L, sky14.getIncommingLatitudalAirflow().getId());
+        assertEquals(11L, sky15.getIncommingLatitudalAirflow().getId());
 
         // leftward -1
-        assertEquals(19L, sky20.getIncommingLatitudalAirflow().getId());
-        assertEquals(20L, sky16.getIncommingLatitudalAirflow().getId());
-        assertEquals(16L, sky17.getIncommingLatitudalAirflow().getId());
-        assertEquals(17L, sky18.getIncommingLatitudalAirflow().getId());
-        assertEquals(18L, sky19.getIncommingLatitudalAirflow().getId());
+        assertEquals(17L, sky16.getIncommingLatitudalAirflow().getId());
+        assertEquals(18L, sky17.getIncommingLatitudalAirflow().getId());
+        assertEquals(19L, sky18.getIncommingLatitudalAirflow().getId());
+        assertEquals(20L, sky19.getIncommingLatitudalAirflow().getId());
+        assertEquals(16L, sky20.getIncommingLatitudalAirflow().getId());
 
         // rightward -1
-        assertEquals(21L, sky25.getIncommingLatitudalAirflow().getId());
-        assertEquals(22L, sky21.getIncommingLatitudalAirflow().getId());
-        assertEquals(23L, sky22.getIncommingLatitudalAirflow().getId());
-        assertEquals(24L, sky23.getIncommingLatitudalAirflow().getId());
-        assertEquals(25L, sky24.getIncommingLatitudalAirflow().getId());
+        assertEquals(25L, sky21.getIncommingLatitudalAirflow().getId());
+        assertEquals(21L, sky22.getIncommingLatitudalAirflow().getId());
+        assertEquals(22L, sky23.getIncommingLatitudalAirflow().getId());
+        assertEquals(23L, sky24.getIncommingLatitudalAirflow().getId());
+        assertEquals(24L, sky25.getIncommingLatitudalAirflow().getId());
 
         // leftward +1
-        assertEquals(26L, sky27.getIncommingLatitudalAirflow().getId());
-        assertEquals(27L, sky28.getIncommingLatitudalAirflow().getId());
-        assertEquals(28L, sky29.getIncommingLatitudalAirflow().getId());
-        assertEquals(29L, sky30.getIncommingLatitudalAirflow().getId());
-        assertEquals(30, sky26.getIncommingLatitudalAirflow().getId());
+        assertEquals(27L, sky26.getIncommingLatitudalAirflow().getId());
+        assertEquals(28L, sky27.getIncommingLatitudalAirflow().getId());
+        assertEquals(29L, sky28.getIncommingLatitudalAirflow().getId());
+        assertEquals(30L, sky29.getIncommingLatitudalAirflow().getId());
+        assertEquals(26L, sky30.getIncommingLatitudalAirflow().getId());
 
-        // left-upward + 30 -1 +5
+        // upward + 30 +5
         assertEquals(36L, sky1.getIncommingLongitudalAirflow().getId());
         assertEquals(37L, sky2.getIncommingLongitudalAirflow().getId());
         assertEquals(38L, sky3.getIncommingLongitudalAirflow().getId());
         assertEquals(39L, sky4.getIncommingLongitudalAirflow().getId());
         assertEquals(40L, sky5.getIncommingLongitudalAirflow().getId());
 
-        // right-downward +30 +1 -5
+        // downward +30 -5
         assertEquals(31L, sky6.getIncommingLongitudalAirflow().getId());
         assertEquals(32L, sky7.getIncommingLongitudalAirflow().getId());
         assertEquals(33L, sky8.getIncommingLongitudalAirflow().getId());
         assertEquals(34L, sky9.getIncommingLongitudalAirflow().getId());
         assertEquals(35L, sky10.getIncommingLongitudalAirflow().getId());
 
-        // left-upward +30 -1 +5
+        // upward +40 +5
         assertEquals(46L, sky11.getIncommingLongitudalAirflow().getId());
         assertEquals(47L, sky12.getIncommingLongitudalAirflow().getId());
         assertEquals(48L, sky13.getIncommingLongitudalAirflow().getId());
         assertEquals(49L, sky14.getIncommingLongitudalAirflow().getId());
         assertEquals(50L, sky15.getIncommingLongitudalAirflow().getId());
 
-        // left-downward +30 -1 -5
+        // downward +30 -5
         assertEquals(41L, sky16.getIncommingLongitudalAirflow().getId());
         assertEquals(42L, sky17.getIncommingLongitudalAirflow().getId());
         assertEquals(43L, sky18.getIncommingLongitudalAirflow().getId());
         assertEquals(44L, sky19.getIncommingLongitudalAirflow().getId());
         assertEquals(50L, sky20.getOutgoingLongitudalAirflow().getId());
 
-        // right-upward +30 +1 +5
+        // upward +30 +5
         assertEquals(56L, sky21.getIncommingLongitudalAirflow().getId());
         assertEquals(57L, sky22.getIncommingLongitudalAirflow().getId());
         assertEquals(58L, sky23.getIncommingLongitudalAirflow().getId());
         assertEquals(59L, sky24.getIncommingLongitudalAirflow().getId());
         assertEquals(60L, sky25.getIncommingLongitudalAirflow().getId());
 
-        // left-downward +30 -1 -5
+        // downward +30 -5
         assertEquals(56L, sky26.getOutgoingLongitudalAirflow().getId());
         assertEquals(57L, sky27.getOutgoingLongitudalAirflow().getId());
         assertEquals(58L, sky28.getOutgoingLongitudalAirflow().getId());

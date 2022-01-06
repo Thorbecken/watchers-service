@@ -2,8 +2,10 @@ package com.watchers.model.dto;
 
 import com.watchers.model.world.WorldMetaData;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class WorldTaskDto {
 
     private Long worldId;

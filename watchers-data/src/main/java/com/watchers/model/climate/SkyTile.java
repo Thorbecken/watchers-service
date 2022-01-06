@@ -25,7 +25,7 @@ public class SkyTile {
     private Long id;
 
     @JsonProperty("airMoisture")
-    @Column(name = "airMoisture")
+    @Column(name = "air_moisture")
     @JsonView(Views.Public.class)
     private double airMoisture;
 

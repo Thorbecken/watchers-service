@@ -158,6 +158,7 @@ public class Tile {
         clone.setSurfaceType(this.surfaceType);
         clone.setCoordinate(newCoordinate);
         clone.setHeight(this.height);
+        //clone.setId(this.id);
         clone.setId(newCoordinate.getId());
         clone.setBiome(this.biome.createClone(clone));
         return clone;

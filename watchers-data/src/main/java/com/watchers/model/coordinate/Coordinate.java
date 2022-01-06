@@ -112,6 +112,30 @@ public abstract class Coordinate {
     }
 
     @JsonIgnore
+    public Coordinate getRightNeighbour(){
+        long rightCoordinate = getRightCoordinate();
+        return world.getCoordinate(rightCoordinate, this.getYCoord());
+    }
+
+    @JsonIgnore
+    public Coordinate getLeftNeighbour(){
+        long leftCoordinate = getLeftCoordinate();
+        return world.getCoordinate(leftCoordinate, this.getYCoord());
+    }
+
+    @JsonIgnore
+    public Coordinate getUpNeighbour(){
+        long upCoordinate = getUpCoordinate();
+        return world.getCoordinate(this.getXCoord(), upCoordinate);
+    }
+
+    @JsonIgnore
+    public Coordinate getDownNeighbour(){
+        long downCoordinate = getDownCoordinate();
+        return world.getCoordinate(this.getXCoord(), downCoordinate);
+    }
+
+    @JsonIgnore
     public long getLeftCoordinate() {
         return getAdjustedXCoordinate(CoordinateHelper.LEFT, this.xCoord);
     }

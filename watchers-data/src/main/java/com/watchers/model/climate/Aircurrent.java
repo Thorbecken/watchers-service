@@ -43,18 +43,14 @@ public class Aircurrent {
     @JsonView(Views.Public.class)
     private long heightDifference;
 
-    public Aircurrent(SkyTile endingSky, SkyTile startingSky, AircurrentType aircurrentType, int currentStrength) {
-        this(endingSky.getRawIncommingAircurrents(), startingSky.getRawOutgoingAircurrents(), aircurrentType, currentStrength);
-    }
-
-    public Aircurrent(IncommingAircurrent incommingAircurrents, OutgoingAircurrent outgoingAircurrent, AircurrentType aircurrentType, int currentStrength) {
-        this.incommingAircurrent = incommingAircurrents;
-        this.outgoingAircurrent = outgoingAircurrent;
+    public Aircurrent(SkyTile startingSky, SkyTile endingSky, AircurrentType aircurrentType, int currentStrength) {
+        this.incommingAircurrent = endingSky.getRawIncommingAircurrents();
+        this.outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
         this.aircurrentType = aircurrentType;
         this.currentStrength = currentStrength;
 
-        this.getStartingSky().getOutgoingAircurrents().add(this);
-        this.getEndingSky().getIncommingAircurrents().add(this);
+        this.getStartingSky().getRawOutgoingAircurrents().add(this);
+        this.getEndingSky().getRawIncommingAircurrents().add(this);
 
         recalculateHeigthDifference();
     }
@@ -102,21 +98,19 @@ public class Aircurrent {
     }
 
     public void recalculateHeigthDifference() {
-        IncommingAircurrent incommingAircurrent = this.incommingAircurrent;
-        SkyTile endingSky = incommingAircurrent.getEndingSky();
+        SkyTile endingSky = this.getEndingSky();
         Climate endingClimate = endingSky.getClimate();
         Coordinate endingCoordinate = endingClimate.getCoordinate();
         Tile endingTile = endingCoordinate.getTile();
-        long startingHeight = endingTile.getHeight();
+        long endingHeight = endingTile.getHeight();
 
-        OutgoingAircurrent outgoingAircurrent = this.outgoingAircurrent;
-        SkyTile startingSky = outgoingAircurrent.getStartingSky();
+        SkyTile startingSky = this.getStartingSky();
         Climate startingClimate = startingSky.getClimate();
         Coordinate startingCoordinate = startingClimate.getCoordinate();
         Tile startingTile = startingCoordinate.getTile();
-        long endingHeight = startingTile.getHeight();
+        long startingHeight = startingTile.getHeight();
 
-        this.heightDifference = startingHeight - endingHeight;
+        this.heightDifference = endingHeight - startingHeight;
     }
 
     @JsonIgnore
