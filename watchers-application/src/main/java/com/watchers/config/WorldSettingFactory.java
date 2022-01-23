@@ -111,8 +111,8 @@ public class WorldSettingFactory {
                 1,
                 0,
 
-                8,
-                2
+                9,
+                1
         );
     }
 }

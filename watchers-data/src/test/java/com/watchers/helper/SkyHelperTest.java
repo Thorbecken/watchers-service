@@ -12,16 +12,17 @@ import com.watchers.model.world.World;
 import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SkyHelperTest {
-    private static final int LATITUDAL_STRENGTH = 99;
     private static final int LONGITUDAL_STRENGTH = 99;
     private static final boolean UPWARD = true;
     private static final boolean DOWNWARD = false;
@@ -32,15 +33,14 @@ class SkyHelperTest {
         Coordinate startingCoordinate = world.getCoordinate(2L, 2L);
         Coordinate downwardCoordinate = startingCoordinate.getDownNeighbour();
         Coordinate upwardCoordinate = startingCoordinate.getUpNeighbour();
-
         SkyTile startingSky = startingCoordinate.getClimate().getSkyTile();
-        SkyHelper.addLongitudalAircurrent(UPWARD, startingSky, LONGITUDAL_STRENGTH);
 
+        SkyHelper.addLongitudalAircurrent(startingCoordinate, UPWARD, LONGITUDAL_STRENGTH);
         assertThat(startingSky.getOutgoingAircurrents(), hasSize(1));
         assertThat(startingSky.getOutgoingAircurrents().get(0).getEndingSky().getClimate().getCoordinate(),
                 equalTo(upwardCoordinate));
 
-        SkyHelper.addLongitudalAircurrent(DOWNWARD, startingSky, LONGITUDAL_STRENGTH);
+        SkyHelper.addLongitudalAircurrent(startingCoordinate, DOWNWARD, LONGITUDAL_STRENGTH);
         assertThat(startingSky.getOutgoingAircurrents(), hasSize(2));
         assertThat(startingSky.getOutgoingAircurrents().get(0).getEndingSky().getClimate().getCoordinate(),
                 equalTo(upwardCoordinate));
@@ -49,32 +49,12 @@ class SkyHelperTest {
     }
 
     @Test
-    void addLatitudalAircurrentTest() {
-        World world = TestableWorld.createMediumWorld();
-        List<SkyTile> twoSkytiles = world.getCoordinates().stream()
-                .limit(2)
-                .map(Coordinate::getClimate)
-                .map(Climate::getSkyTile)
-                .collect(Collectors.toList());
-        SkyTile startingSky = twoSkytiles.get(0);
-        startingSky.setId(1L);
-        SkyTile endingSky = twoSkytiles.get(1);
-        endingSky.setId(2L);
-
-        SkyHelper.addLatitudalAircurrent(startingSky, endingSky, LATITUDAL_STRENGTH);
-
-        assertThat(endingSky.getIncommingLatitudalAirflow().getStartingSky(), equalTo(startingSky));
-        assertThat(startingSky.getOutgoingLatitudallAirflow().getEndingSky(), equalTo(endingSky));
-        assertThat(endingSky.getIncommingLatitudalAirflow().getCurrentStrength(), equalTo(LATITUDAL_STRENGTH));
-    }
-
-    @Test
     void latitudalLengthTest() {
         World world = TestableWorld.createMediumWorld();
         SkyHelper.calculateAndWeaveAirflows(world);
 
         for (long yCoordinate = 1; yCoordinate <= world.getYSize(); yCoordinate++) {
-            SkyTile startingSky = world.getCoordinate(1L, 1L).getClimate().getSkyTile();;
+            SkyTile startingSky = world.getCoordinate(1L, 1L).getClimate().getSkyTile();
             SkyTile currentSky = startingSky;
             for (long xCoordinate = 1; xCoordinate <= world.getXSize(); xCoordinate++) {
                 if(xCoordinate == 1) {
@@ -88,58 +68,6 @@ class SkyHelperTest {
 
             assertThat(startingSky, equalTo(currentSky));
         }
-    }
-
-    @Test
-    void generateAirflowsTest() {
-        World world = TestableWorld.createMediumWorld();
-        SkyHelper.AirFlows airFlows = SkyHelper.generateAirflows(world);
-
-        assertThat(airFlows.getRightwardCurrent().get(90D), equalTo(false));
-        assertThat(airFlows.getRightwardCurrent().get(60D), equalTo(true));
-        assertThat(airFlows.getRightwardCurrent().get(30D), equalTo(false));
-        assertThat(airFlows.getRightwardCurrent().get(0D), equalTo(false));
-        assertThat(airFlows.getRightwardCurrent().get(-30D), equalTo(true));
-        assertThat(airFlows.getRightwardCurrent().get(-60D), equalTo(false));
-
-        assertThat(airFlows.getUpwardcurrents().get(90D), equalTo(false));
-        assertThat(airFlows.getUpwardcurrents().get(60D), equalTo(true));
-        assertThat(airFlows.getUpwardcurrents().get(30D), equalTo(false));
-        assertThat(airFlows.getUpwardcurrents().get(0D), equalTo(true));
-        assertThat(airFlows.getUpwardcurrents().get(-30D), equalTo(false));
-        assertThat(airFlows.getUpwardcurrents().get(-60D), equalTo(true));
-    }
-
-    @Test
-    void calculateAircurrentsTest() {
-        World world = TestableWorld.createMediumWorld();
-        Set<Coordinate> coordinates = world.getCoordinates();
-
-        List<SkyHelper.LatitudalAirflow> latitudalAirflows = SkyHelper.calculateAircurrents(coordinates);
-        boolean latitudalAirflowsHaveTheSameYCoordinate = latitudalAirflows.stream()
-                .allMatch(latitudalAirflow -> {
-                    List<SkyTile> skyTiles = latitudalAirflow.getSkyTiles();
-                    long yCoordinate = skyTiles.get(0).getClimate().getCoordinate().getYCoord();
-                    return skyTiles.stream()
-                            .map(SkyTile::getClimate)
-                            .map(Climate::getCoordinate)
-                            .allMatch(coordinate -> coordinate.getYCoord() == yCoordinate);
-                });
-        boolean latitudalAirflowsContainAllXCoordiantes = latitudalAirflows.stream()
-                .allMatch(latitudalAirflow -> {
-                    List<Long> xCoordinates = latitudalAirflow.getSkyTiles().stream()
-                            .map(SkyTile::getClimate)
-                            .map(Climate::getCoordinate)
-                            .map(Coordinate::getXCoord)
-                            .collect(Collectors.toList());
-                    return xCoordinates.size() == 3
-                            && xCoordinates.contains(1L)
-                            && xCoordinates.contains(2L)
-                            && xCoordinates.contains(3L);
-                });
-
-        assertThat(latitudalAirflowsHaveTheSameYCoordinate, equalTo(true));
-        assertThat(latitudalAirflowsContainAllXCoordiantes, equalTo(true));
     }
 
     @Test

@@ -65,7 +65,7 @@ class WorldFactory {
         tileDefined.assignStartingType(world);
 
         log.info("Sepperating the skies");
-        SkyHelper.calculateAirflows(world);
+        SkyHelper.calculateAndWeaveAirflows(world);
         log.info("Skies are sepperated");
 
         if(worldSettings.isLifePreSeeded()) {

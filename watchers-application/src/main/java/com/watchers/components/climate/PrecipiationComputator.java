@@ -50,7 +50,7 @@ public class PrecipiationComputator {
     }
 
     private void computeEvaporation(List<Climate> climates) {
-        climates.parallelStream()
+        climates.stream()
                 .filter(Climate::isWater)
                 .forEach(this::procesWaterClimate);
     }
@@ -63,7 +63,7 @@ public class PrecipiationComputator {
 
     @Transactional
     protected void moveCloudsAccordingToAirflow(List<Climate> climates, WorldSettings worldSettings) {
-        List<SkyTile> skyTiles = climates.parallelStream()
+        List<SkyTile> skyTiles = climates.stream()
                 .map(Climate::getSkyTile)
                 .collect(Collectors.toList());
 
@@ -77,10 +77,10 @@ public class PrecipiationComputator {
             aircurrent.setCurrentStrength(currentStrength);
         });
 
-        climates.parallelStream()
+        climates.stream()
                 .map(Climate::getSkyTile)
                 .forEach(SkyTile::moveClouds);
-        climates.parallelStream()
+        climates.stream()
                 .map(Climate::getSkyTile)
                 .forEach(SkyTile::processIncommingMoisture);
     }
@@ -92,7 +92,7 @@ public class PrecipiationComputator {
                 .forEach(landClimateProcessor::procesLandClimate);
     }
 
-    private class LandClimateProcessor {
+    private static class LandClimateProcessor {
         private final long WET_ZONE;
         private final long HUMID_ZONE;
         private final long SEMI_ARID_ZONE;

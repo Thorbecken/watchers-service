@@ -609,6 +609,7 @@ public class SaveToDatabaseManager {
         List<OutgoingAircurrentHolder> outgoingAircurrentHolderList = saveOutgoingAircurrents(outgoingAircurrents);
         outgoingAircurrentHolderList.forEach(OutgoingAircurrentHolder::setInformation);
 
+        aircurrents.forEach(Aircurrent::resetCoordinates);
         saveAircurrentMethod(aircurrents);
     }
 
