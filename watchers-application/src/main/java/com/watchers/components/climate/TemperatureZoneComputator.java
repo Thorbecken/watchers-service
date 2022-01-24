@@ -17,18 +17,18 @@ public class TemperatureZoneComputator {
     private final WorldRepository worldRepository;
 
     @Transactional
-    public void process(WorldTaskDto taskDto){
-        World world = worldRepository.getOne(taskDto.getWorldId());
-        world.getCoordinates()
-                .parallelStream()
-                .map(Coordinate::getClimate)
-                .forEach(climate -> climate.setTemperatureEnum(calculateTemperatureEnum(climate)));
-
+    public void processWithoutLoadingAndSaving(WorldTaskDto taskDto) {
+        World world = worldRepository.getById(taskDto.getWorldId());
+        this.process(world);
         worldRepository.save(world);
     }
 
     @Transactional
-    public void process(World world){
+    public void processWithoutLoadingAndSaving(World world) {
+        this.process(world);
+    }
+
+    private void process(World world) {
         world.getCoordinates()
                 .parallelStream()
                 .map(Coordinate::getClimate)
@@ -36,13 +36,13 @@ public class TemperatureZoneComputator {
     }
 
     private TemperatureEnum calculateTemperatureEnum(Climate climate) {
-        if(climate.getLatitude() <= -60){
+        if (climate.getLatitude() <= -60) {
             return TemperatureEnum.POLAR;
-        } else if(climate.getLatitude() <= -30){
+        } else if (climate.getLatitude() <= -30) {
             return TemperatureEnum.TEMPERATE;
-        } else if(climate.getLatitude() <= 30){
+        } else if (climate.getLatitude() <= 30) {
             return TemperatureEnum.TROPICAL;
-        } else if(climate.getLatitude() <= 60){
+        } else if (climate.getLatitude() <= 60) {
             return TemperatureEnum.TEMPERATE;
         } else {
             return TemperatureEnum.POLAR;

@@ -2,8 +2,6 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
-import com.watchers.config.SettingConfiguration;
-import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -19,7 +17,8 @@ import org.mockito.Mockito;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ContinentalDriftWorldAdjusterTest {
 
@@ -57,8 +56,8 @@ class ContinentalDriftWorldAdjusterTest {
                 .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
                 .map(ContinentalChangesDto::getMockTile)
                 .map(MockTile::getHeight)
-                .reduce((x,y) -> x+y)
-                .get();
+                .reduce(Long::sum)
+                .orElseThrow();
         startingHeight += world.getHeightDeficit();
 
         // testing
@@ -72,7 +71,7 @@ class ContinentalDriftWorldAdjusterTest {
         long endHeight = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .map(Tile::getHeight)
-                .reduce((x,y)-> x+y)
+                .reduce(Long::sum)
                 .orElse(0L);
         endHeight += world.getHeightDeficit();
 

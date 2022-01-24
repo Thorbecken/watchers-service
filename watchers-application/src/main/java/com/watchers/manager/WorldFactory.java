@@ -77,7 +77,7 @@ class WorldFactory {
             log.info("Pre seeded the world with life");
         }
 
-        temperatureZoneComputator.process(world);
+        temperatureZoneComputator.processWithoutLoadingAndSaving(world);
 
         return world;
     }

@@ -6,7 +6,6 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldMetaDataRepository;
 import com.watchers.repository.WorldRepository;
-import com.watchers.repository.WorldSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

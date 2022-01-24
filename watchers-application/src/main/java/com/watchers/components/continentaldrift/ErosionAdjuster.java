@@ -25,7 +25,8 @@ public class ErosionAdjuster {
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Map<Coordinate, Long> erosionMap = new HashMap<>();
 
-        CoordinateHelper.getAllPossibleCoordinates(world).forEach(coordinate -> erosionMap.put(coordinate, 0L));
+        CoordinateHelper.getAllPossibleCoordinates(world)
+                .forEach(coordinate -> erosionMap.put(coordinate, 0L));
 
         Set<Coordinate> coordinates = world.getCoordinates();
 

@@ -106,11 +106,6 @@ public class ContinentalDriftNewTileAssigner {
         return  tooMuckOceeanicContinents ? SurfaceType.PLAIN:SurfaceType.OCEAN;
     }
 
-    private int calculateMaximumCoordinates(World world) {
-        int totalCoordinates = world.getCoordinates().size();
-        return totalCoordinates/world.getWorldSettings().getMinimumContinents();
-    }
-
     private int createNewContinents(ContinentalDriftTaskDto taskDto, int currentContinents, int minimumContinents, List<List<Coordinate>> listOfConnectedCoordinates, World world) {
         int listOfCoordinatesProcessed = 0;
         if(currentContinents < minimumContinents) {

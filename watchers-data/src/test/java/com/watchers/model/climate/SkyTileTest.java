@@ -154,12 +154,6 @@ class SkyTileTest {
                 .mapToDouble(SkyTile::getAirMoisture)
                 .sum();
 
-        double expected1 = calculateExpectedIncommingAirmoisture(sky1);
-        double expected2 = calculateExpectedIncommingAirmoisture(sky2);
-        double expected3 = calculateExpectedIncommingAirmoisture(sky3);
-        double expected4 = calculateExpectedIncommingAirmoisture(sky4);
-        double expected5 = calculateExpectedIncommingAirmoisture(sky5);
-
         skyTileList.parallelStream().forEach(SkyTile::moveClouds);
         skyTileList.parallelStream().forEach(SkyTile::processIncommingMoisture);
 
@@ -168,19 +162,5 @@ class SkyTileTest {
                 .sum();
 
         assertThat(totalAirmoistureAfter, is(totalAirmoistureBefore));
-
-//        assertThat(sky1.getAirMoisture(), is(expected1)); // 6 -> 2  -4
-//        assertThat(sky2.getAirMoisture(), is(expected2)); // 3 -> 4  +1
-//        assertThat(sky3.getAirMoisture(), is(expected3)); // 5 -> 6  +1
-//        assertThat(sky4.getAirMoisture(), is(expected4)); // 7 -> 8  +1
-//        assertThat(sky5.getAirMoisture(), is(expected5)); // 9 -> 10 +1
-    }
-
-    private double calculateExpectedIncommingAirmoisture(SkyTile skyTile) {
-        return skyTile.getIncommingAircurrents().stream()
-                .map(Aircurrent::getStartingSky)
-                .mapToDouble(SkyTile::getAirMoisture)
-                .average()
-                .orElse(0);
     }
 }

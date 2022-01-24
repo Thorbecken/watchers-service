@@ -29,8 +29,14 @@ class ContinentalIntegretyAdjusterTest {
     void process() {
         World world = createWorld();
         world.setWorldSettings(TestableWorld.createWorldSettings());
-        Continent toBeSplitContinent = world.getContinents().stream().filter(continent -> continent.getId() == 1L).findFirst().get();
-        Continent fillerContinent = world.getContinents().stream().filter(continent -> continent.getId() == 2L).findFirst().get();
+        Continent toBeSplitContinent = world.getContinents().stream()
+                .filter(continent -> continent.getId() == 1L)
+                .findFirst()
+                .orElseThrow();
+        Continent fillerContinent = world.getContinents().stream()
+                .filter(continent -> continent.getId() == 2L)
+                .findFirst()
+                .orElseThrow();
         Assertions.assertEquals(2, toBeSplitContinent.getCoordinates().size());
         Assertions.assertEquals(13, fillerContinent.getCoordinates().size());
 

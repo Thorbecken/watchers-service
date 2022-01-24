@@ -24,7 +24,7 @@ public class ClimateManager {
             StopwatchTimer.stop("aircurrentRecalibrator");
 
             StopwatchTimer.start();
-            temperatureZoneComputator.process(taskDto);
+            temperatureZoneComputator.processWithoutLoadingAndSaving(taskDto);
             StopwatchTimer.stop("temperatureZoneComputator");
         }
         StopwatchTimer.start();

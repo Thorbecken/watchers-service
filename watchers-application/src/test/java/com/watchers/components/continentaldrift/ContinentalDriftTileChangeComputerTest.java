@@ -2,7 +2,6 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
-import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
@@ -26,7 +25,7 @@ class ContinentalDriftTileChangeComputerTest {
 
     private World world;
     private ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer;
-    private WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
+    private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
     private ContinentalDriftTaskDto taskDto;
 
 
@@ -51,15 +50,14 @@ class ContinentalDriftTileChangeComputerTest {
         long startingHeight = taskDto.getNewTileLayout().values().stream()
                 .reduce((List<Tile> x, List<Tile> y) ->
                 {
-                    List<Tile> list = new ArrayList();
+                    List<Tile> list = new ArrayList<>();
                     list.addAll(x);
                     list.addAll(y);
                     return list;
-                })
-                .get()
-                .stream()
+                }).stream()
+                .flatMap(x -> x.stream())
                 .map(Tile::getHeight)
-                .reduce((x, y) -> x + y)
+                .reduce(Long::sum)
                 .orElse(0L);
         // testing
 
@@ -73,8 +71,8 @@ class ContinentalDriftTileChangeComputerTest {
                 .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
                 .map(ContinentalChangesDto::getMockTile)
                 .map(MockTile::getHeight)
-                .reduce((x,y) -> x+y)
-                .get();
+                .reduce(Long::sum)
+                .orElseThrow();
         endHeight += world.getHeightDeficit();
 
         assertThat(endHeight, equalTo(startingHeight));

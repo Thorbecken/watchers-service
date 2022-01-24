@@ -37,7 +37,7 @@ public class PrecipiationComputator {
 
     @Transactional
     public void process(WorldTaskDto taskDto) {
-        World world = worldRepository.getOne(taskDto.getWorldId());
+        World world = worldRepository.getById(taskDto.getWorldId());
         List<Climate> climates = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .collect(Collectors.toList());
@@ -63,19 +63,14 @@ public class PrecipiationComputator {
 
     @Transactional
     protected void moveCloudsAccordingToAirflow(List<Climate> climates, WorldSettings worldSettings) {
-        List<SkyTile> skyTiles = climates.stream()
+        climates.stream()
                 .map(Climate::getSkyTile)
-                .collect(Collectors.toList());
-
-        List<Aircurrent> aircurrents = skyTiles.stream()
                 .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
-                .collect(Collectors.toList());
-
-        aircurrents.forEach(aircurrent -> {
-            AircurrentType aircurrentType = aircurrent.getAircurrentType();
-            int currentStrength = airCurrentStrengthSetter.get(aircurrentType).apply(worldSettings);
-            aircurrent.setCurrentStrength(currentStrength);
-        });
+                .forEach(aircurrent -> {
+                    AircurrentType aircurrentType = aircurrent.getAircurrentType();
+                    int currentStrength = airCurrentStrengthSetter.get(aircurrentType).apply(worldSettings);
+                    aircurrent.setCurrentStrength(currentStrength);
+                });
 
         climates.stream()
                 .map(Climate::getSkyTile)

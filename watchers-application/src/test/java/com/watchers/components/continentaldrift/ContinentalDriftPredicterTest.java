@@ -63,13 +63,12 @@ class ContinentalDriftPredicterTest {
         long endHeight = taskDto.getNewTileLayout().values().stream()
                 .reduce((List<Tile> x, List<Tile> y) ->
                 {
-                    List<Tile> list = new ArrayList();
+                    List<Tile> list = new ArrayList<>();
                     list.addAll(x);
                     list.addAll(y);
                     return list;
-                })
-                .get()
-                .stream()
+                }).stream()
+                .flatMap(x -> x.stream())
                 .map(Tile::getHeight)
                 .reduce(Long::sum)
                 .orElse(0L);
@@ -116,13 +115,12 @@ class ContinentalDriftPredicterTest {
         long endHeight = taskDto.getNewTileLayout().values().stream()
                 .reduce((List<Tile> x, List<Tile> y) ->
                 {
-                    List<Tile> list = new ArrayList();
+                    List<Tile> list = new ArrayList<>();
                     list.addAll(x);
                     list.addAll(y);
                     return list;
-                })
-                .get()
-                .stream()
+                }).stream()
+                .flatMap(x -> x.stream())
                 .map(Tile::getHeight)
                 .reduce(Long::sum)
                 .orElse(0L);

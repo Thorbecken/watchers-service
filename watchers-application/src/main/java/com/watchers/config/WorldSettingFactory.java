@@ -111,7 +111,7 @@ public class WorldSettingFactory {
                 1,
                 0,
 
-                9,
+                7,
                 1
         );
     }

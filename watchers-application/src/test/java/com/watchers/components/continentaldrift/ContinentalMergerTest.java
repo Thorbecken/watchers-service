@@ -1,7 +1,6 @@
 package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableWorld;
-import com.watchers.config.SettingConfiguration;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
@@ -18,13 +17,11 @@ import java.util.Optional;
 class ContinentalMergerTest {
 
     private World world;
-    private SettingConfiguration settingConfiguration;
     private WorldRepository worldRepository;
     private ContinentalMerger continentalMerger;
 
     @BeforeEach
     void setUp() {
-        settingConfiguration = Mockito.mock(SettingConfiguration.class);
         worldRepository = Mockito.mock(WorldRepository.class);
         continentalMerger = new ContinentalMerger(worldRepository);
 

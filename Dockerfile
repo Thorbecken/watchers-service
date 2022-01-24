@@ -17,7 +17,7 @@ RUN mvn -f /home/app/pom.xml install -DskipTests
 
 FROM openjdk:17-alpine
 VOLUME /tmp
-COPY --from=build home/app/watchers-application/target/watchers-application-0.0.2-SNAPSHOT.jar watchers.jar
+COPY --from=build home/app/watchers-application/target/watchers-application-0.0.2-WATCH-11-SNAPSHOT.jar watchers.jar
 ENV WATCHERS_SAVE_PATH=/tmp/
 RUN sh -c 'touch /watchers.jar'
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/watchers.jar"]
