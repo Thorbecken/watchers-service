@@ -1,6 +1,8 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
+import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
@@ -10,6 +12,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,6 +28,7 @@ class ContinentalDriftDirectionChangerTest {
     private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
     private long lastContinentalDrift;
     private Set<Continent> continents;
+    private ContinentalDriftTaskDto taskDto;
 
     @BeforeEach
     public void setup(){
@@ -31,6 +37,7 @@ class ContinentalDriftDirectionChangerTest {
 
         continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository);
 
+        taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
         lastContinentalDrift = world.getContinents().size()-1;
         methodObject = new ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject(false, lastContinentalDrift);
     }
@@ -46,6 +53,51 @@ class ContinentalDriftDirectionChangerTest {
     void changeContinentalDriftDirections() {
         methodObject.adjustContinentelDriftFlux(world, world.getContinents().size(), 1);
         assertThat(world.getLastContinentInFlux(), equalTo(lastContinentalDrift));
+    }
+
+    @Test
+    void callAdjustForDriftPressureTest() {
+        List<Continent> continents = new ArrayList<>(world.getContinents());
+        world.getWorldSettings().setDrifFlux(0);
+        assertThat(continents, hasSize(3));
+
+        assertThat(continents.get(0).getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continents.get(0).getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continents.get(1).getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continents.get(1).getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continents.get(2).getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continents.get(2).getDirection().getYDriftPressure(), equalTo(0L));
+
+        assertThat(continents.get(0).getDirection().getXVelocity(), equalTo(0));
+        assertThat(continents.get(0).getDirection().getYVelocity(), equalTo(-1));
+        assertThat(continents.get(1).getDirection().getXVelocity(), equalTo(1));
+        assertThat(continents.get(1).getDirection().getYVelocity(), equalTo(0));
+        assertThat(continents.get(2).getDirection().getXVelocity(), equalTo(0));
+        assertThat(continents.get(2).getDirection().getYVelocity(), equalTo(0));
+
+        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+        continentalDriftDirectionChanger.process(taskDto);
+
+        assertThat(continents.get(0).getDirection().getXVelocity(), equalTo(0));
+        assertThat(continents.get(0).getDirection().getYVelocity(), equalTo(-1));
+        assertThat(continents.get(1).getDirection().getXVelocity(), equalTo(1));
+        assertThat(continents.get(1).getDirection().getYVelocity(), equalTo(0));
+        assertThat(continents.get(2).getDirection().getXVelocity(), equalTo(0));
+        assertThat(continents.get(2).getDirection().getYVelocity(), equalTo(0));
+
+        continents.get(0).getDirection().setXDriftPressure(1);
+        continents.get(0).getDirection().setYDriftPressure(1);
+        continents.get(1).getDirection().setXDriftPressure(-1);
+        continents.get(1).getDirection().setYDriftPressure(-1);
+        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+        continentalDriftDirectionChanger.process(taskDto);
+
+        assertThat(continents.get(0).getDirection().getXVelocity(), equalTo(1));
+        assertThat(continents.get(0).getDirection().getYVelocity(), equalTo(0));
+        assertThat(continents.get(1).getDirection().getXVelocity(), equalTo(0));
+        assertThat(continents.get(1).getDirection().getYVelocity(), equalTo(-1));
+        assertThat(continents.get(2).getDirection().getXVelocity(), equalTo(0));
+        assertThat(continents.get(2).getDirection().getYVelocity(), equalTo(0));
     }
 
     @Test

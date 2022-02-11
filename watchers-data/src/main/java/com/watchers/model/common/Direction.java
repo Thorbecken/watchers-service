@@ -6,13 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Data
 @Entity
@@ -36,6 +30,49 @@ public class Direction {
     @JsonView(Views.Public.class)
     @Column(name = "y_velocity")
     private int yVelocity;
+
+    @JsonView(Views.Internal.class)
+    @Column(name = "x_drift_pressure")
+    private long xDriftPressure;
+
+    @JsonView(Views.Internal.class)
+    @Column(name = "y_drift_pressure")
+    private long yDriftPressure;
+
+    public void resetPressures(){
+        this.yDriftPressure = 0;
+        this.xDriftPressure = 0;
+    }
+
+    public void adjustPressureFromIncomingDirection(Direction incomingDirection){
+        long xDifference = incomingDirection.getXVelocity() - this.getXVelocity();
+        long yDifference = incomingDirection.getYVelocity() - this.getYVelocity();
+
+        this.setXDriftPressure(this.getXDriftPressure()+xDifference);
+        this.setYDriftPressure(this.getYDriftPressure()+yDifference);
+    }
+
+    public void setVelocityFromPressure(int maxDrift){
+        assert maxDrift >=0;
+        this.adjustXPressure(maxDrift);
+        this.adjustYPressure(maxDrift);
+    }
+
+    private void adjustXPressure(int maxDrift){
+        if(xDriftPressure<0 && xVelocity > -maxDrift){
+            this.xVelocity--;
+        } else if (xDriftPressure>0 && xVelocity < maxDrift){
+            this.xVelocity++;
+        }
+    }
+
+    private void adjustYPressure(int maxDrift){
+        if(yDriftPressure<0 && yVelocity > -maxDrift){
+            this.yVelocity--;
+        } else if (yDriftPressure>0 && yVelocity< maxDrift){
+            this.yVelocity++;
+        }
+    }
 
     public Direction(int xVelocity, int yVelocity){
         this.xVelocity = xVelocity;

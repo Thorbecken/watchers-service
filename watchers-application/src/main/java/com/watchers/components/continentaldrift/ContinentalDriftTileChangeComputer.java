@@ -2,6 +2,7 @@ package com.watchers.components.continentaldrift;
 
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.helper.RandomHelper;
+import com.watchers.model.common.Direction;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -66,12 +67,16 @@ public class ContinentalDriftTileChangeComputer {
         changes.put(coordinate, dto);
 
         Tile survivingTile = RandomHelper.getRandomHighestTile(tiles);
+        Direction survivingDirection = survivingTile.getCoordinate().getContinent().getDirection();
         MockTile mockTile = new MockTile(survivingTile);
         dto.setMockTile(mockTile);
         tiles.remove(survivingTile);
 
 
         for (Tile tile : tiles) {
+            Direction direction = tile.getCoordinate().getContinent().getDirection();
+            direction.adjustPressureFromIncomingDirection(survivingDirection);
+
             long addedHeight = tile.getHeight() / world.getWorldSettings().getHeigtDivider();
             long lostHeight = tile.getHeight() - addedHeight;
             taskDto.setHeightLoss(taskDto.getHeightLoss() + lostHeight);
