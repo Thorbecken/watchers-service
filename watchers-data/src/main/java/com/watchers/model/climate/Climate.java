@@ -1,6 +1,7 @@
 package com.watchers.model.climate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.helper.ClimateHelper;
@@ -61,6 +62,16 @@ public class Climate {
     @Column(name = "precipitationEnum")
     @Enumerated(value = EnumType.STRING)
     private PrecipitationEnum precipitationEnum;
+
+    @JsonView(Views.Public.class)
+    @JsonProperty("river")
+    @OneToOne(mappedBy = "climate")
+    private River river;
+
+    @JsonView(Views.Public.class)
+    @JsonIgnoreProperties({"world", "climates", "type" })
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Watershed watershed;
 
     public Climate(Coordinate coordinate){
         this.coordinate = coordinate;

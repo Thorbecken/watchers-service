@@ -9,7 +9,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -47,12 +48,12 @@ public class SkyTile {
     private double airMoistureLossage;
 
     @JsonView(Views.Public.class)
-    @OneToOne(mappedBy = "startingSky", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private OutgoingAircurrent outgoingAircurrents = new OutgoingAircurrent(this);
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "startingSky", cascade=CascadeType.ALL)
+    private Set<Aircurrent> outgoingAircurrents = new HashSet<>();
 
     @JsonView(Views.Public.class)
-    @OneToOne(mappedBy = "endingSky", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private IncommingAircurrent incommingAircurrents = new IncommingAircurrent(this);
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "endingSky", cascade=CascadeType.ALL)
+    private Set<Aircurrent> incommingAircurrents = new HashSet<>();
 
     public SkyTile(Climate climate) {
         this.climate = climate;
@@ -60,29 +61,25 @@ public class SkyTile {
 
     @JsonIgnore
     public Aircurrent getIncommingLongitudalAirflow() {
-        List<Aircurrent> incommingAircurrent = incommingAircurrents.getAircurrentList();
-        return incommingAircurrent.stream().filter(aircurrent -> AircurrentType
+        return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
     @JsonIgnore
     public Aircurrent getOutgoingLongitudalAirflow() {
-        List<Aircurrent> outgoingAircurrent = outgoingAircurrents.getAircurrentList();
-        return outgoingAircurrent.stream().filter(aircurrent -> AircurrentType
+        return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
     @JsonIgnore
     public Aircurrent getIncommingLatitudalAirflow() {
-        List<Aircurrent> incommingAircurrent = incommingAircurrents.getAircurrentList();
-        return incommingAircurrent.stream().filter(aircurrent -> AircurrentType
+        return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
     @JsonIgnore
     public Aircurrent getOutgoingLatitudallAirflow() {
-        List<Aircurrent> outgoingAircurrent = outgoingAircurrents.getAircurrentList();
-        return outgoingAircurrent.stream().filter(aircurrent -> AircurrentType
+        return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
                 .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
     }
 
@@ -120,8 +117,7 @@ public class SkyTile {
     }
 
     public void moveClouds() {
-        List<Aircurrent> outgoingAircurrents = this.outgoingAircurrents.getAircurrentList();
-        double diffider = outgoingAircurrents.stream()
+        double diffider = this.outgoingAircurrents.stream()
                 .mapToInt(Aircurrent::getCurrentStrength)
                 .sum();
         if (diffider != 0) {
@@ -134,34 +130,6 @@ public class SkyTile {
 
     public void addAirMoistureLossage(double heightAmount) {
         this.airMoistureLossage = this.airMoistureLossage + heightAmount;
-    }
-
-    @JsonIgnore
-    public OutgoingAircurrent getRawOutgoingAircurrents() {
-        return this.outgoingAircurrents;
-    }
-
-    @JsonIgnore
-    public List<Aircurrent> getOutgoingAircurrents() {
-        return this.outgoingAircurrents.getAircurrentList();
-    }
-
-    public void setRawOutgoingAircurrents(OutgoingAircurrent outgoingAircurrent) {
-        this.outgoingAircurrents = outgoingAircurrent;
-    }
-
-    @JsonIgnore
-    public IncommingAircurrent getRawIncommingAircurrents() {
-        return this.incommingAircurrents;
-    }
-
-    @JsonIgnore
-    public List<Aircurrent> getIncommingAircurrents() {
-        return this.incommingAircurrents.getAircurrentList();
-    }
-
-    public void setRawIncommingAircurrents(IncommingAircurrent incommingAircurrent) {
-        this.incommingAircurrents = incommingAircurrent;
     }
 
     @Override
@@ -181,10 +149,6 @@ public class SkyTile {
         clone.setAirMoisture(this.airMoisture);
         clone.setClimate(climeateClone);
         clone.setId(climeateClone.getId());
-        clone.getRawOutgoingAircurrents().setId(climeateClone.getId());
-        clone.getRawOutgoingAircurrents().setStartingSky(clone);
-        clone.getRawIncommingAircurrents().setId(climeateClone.getId());
-        clone.getRawIncommingAircurrents().setEndingSky(clone);
         getOutgoingAircurrents().forEach(aircurrent -> clone.getOutgoingAircurrents().add(aircurrent.createOutgoingClone(clone)));
         getIncommingAircurrents().forEach(aircurrent -> clone.getIncommingAircurrents().add(aircurrent.createIncommingClone(clone)));
 

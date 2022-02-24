@@ -37,14 +37,17 @@ class SkyHelperTest {
 
         SkyHelper.addLongitudalAircurrent(startingCoordinate, UPWARD, LONGITUDAL_STRENGTH);
         assertThat(startingSky.getOutgoingAircurrents(), hasSize(1));
-        assertThat(startingSky.getOutgoingAircurrents().get(0).getEndingSky().getClimate().getCoordinate(),
+        assertThat(new ArrayList<>(startingSky.getOutgoingAircurrents())
+                        .get(0).getEndingSky().getClimate().getCoordinate(),
                 equalTo(upwardCoordinate));
 
         SkyHelper.addLongitudalAircurrent(startingCoordinate, DOWNWARD, LONGITUDAL_STRENGTH);
         assertThat(startingSky.getOutgoingAircurrents(), hasSize(2));
-        assertThat(startingSky.getOutgoingAircurrents().get(0).getEndingSky().getClimate().getCoordinate(),
+        assertThat(new ArrayList<>(startingSky.getOutgoingAircurrents())
+                        .get(0).getEndingSky().getClimate().getCoordinate(),
                 equalTo(upwardCoordinate));
-        assertThat(startingSky.getOutgoingAircurrents().get(1).getEndingSky().getClimate().getCoordinate(),
+        assertThat(new ArrayList<>(startingSky.getOutgoingAircurrents())
+                        .get(1).getEndingSky().getClimate().getCoordinate(),
                 equalTo(downwardCoordinate));
     }
 
@@ -96,15 +99,13 @@ class SkyHelperTest {
         Long outgoingAircurrents = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
-                .map(SkyTile::getRawOutgoingAircurrents)
-                .mapToLong(outgoingAircurrent -> outgoingAircurrent.getAircurrentList().size())
+                .mapToLong(skyTile -> skyTile.getOutgoingAircurrents().size())
                 .sum();
 
         Long incommingAircurrents = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
-                .map(SkyTile::getRawIncommingAircurrents)
-                .mapToLong(incommingAircurrent -> incommingAircurrent.getAircurrentList().size())
+                .mapToLong(skyTile -> skyTile.getIncommingAircurrents().size())
                 .sum();
 
         assertThat(allSkytilesHaveTwoIncommingAircurrents, equalTo(true));

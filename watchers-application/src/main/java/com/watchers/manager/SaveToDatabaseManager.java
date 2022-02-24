@@ -68,7 +68,8 @@ public class SaveToDatabaseManager {
         List<Aircurrent> aircurrents = persistentWorld.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .map(Climate::getSkyTile)
-                .flatMap(skytile -> skytile.getIncommingAircurrents().stream())
+                .map(SkyTile::getIncommingAircurrents)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
         for (long i = 0; i < continents.size(); i++) {
@@ -92,8 +93,6 @@ public class SaveToDatabaseManager {
 
         coordinate.getClimate().setId(id);
         coordinate.getClimate().getSkyTile().setId(id);
-        coordinate.getClimate().getSkyTile().getRawOutgoingAircurrents().setId(id);
-        coordinate.getClimate().getSkyTile().getRawIncommingAircurrents().setId(id);
     }
 
     /**
@@ -156,7 +155,7 @@ public class SaveToDatabaseManager {
             if (freshlyCreated) {
                 Map<Long, List<Aircurrent>> outgoingAircurrentsOfStartingskiesFromIncommingAircurrents = skyTiles.stream()
                         .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
-                        .collect(Collectors.toMap(incommingAircurrent -> incommingAircurrent.getOutgoingAircurrent().getStartingSky().getId()
+                        .collect(Collectors.toMap(incommingAircurrent -> incommingAircurrent.getStartingSky().getId()
                                 , Collections::singletonList
                                 , (x, y) -> {
                                     List<Aircurrent> aircurrents = new ArrayList<>(x);
@@ -164,42 +163,27 @@ public class SaveToDatabaseManager {
                                     return aircurrents;
                                 }));
 
-                skyTiles.forEach(skyTile -> skyTile.setRawOutgoingAircurrents(
-                        outgoingAircurrentsOfStartingskiesFromIncommingAircurrents
-                                .get(skyTile.getId())
-                                .get(0)
-                                .getOutgoingAircurrent()));
                 skyTiles.forEach(skyTile -> {
-                    skyTile.getRawOutgoingAircurrents().clear();
-                    skyTile.getRawOutgoingAircurrents().addAll(outgoingAircurrentsOfStartingskiesFromIncommingAircurrents.get(skyTile.getId()));
-                    skyTile.getRawOutgoingAircurrents().getAircurrentList().forEach(aircurrent -> aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents()));
+                    skyTile.getOutgoingAircurrents().clear();
+                    skyTile.getOutgoingAircurrents().addAll(outgoingAircurrentsOfStartingskiesFromIncommingAircurrents.get(skyTile.getId()));
+                    skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingSky(skyTile));
                 });
 
                 return;
             } else {
                 skyTiles.forEach(skyTile -> {
-                    skyTile.getRawOutgoingAircurrents().setStartingSky(skyTile);
-                    skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents()));
-
-                    skyTile.getRawIncommingAircurrents().setEndingSky(skyTile);
-                    skyTile.getIncommingAircurrents().forEach(aircurrent -> aircurrent.setIncommingAircurrent(skyTile.getRawIncommingAircurrents()));
+                    skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingSky(skyTile));
+                    skyTile.getIncommingAircurrents().forEach(aircurrent -> aircurrent.setEndingSky(skyTile));
                 });
 
-                Map<Long, Aircurrent> incommingAircurrentIdForAircurrents = skyTiles.stream()
+                Map<Long, SkyTile> endingSkyIdForAircurrents = skyTiles.stream()
                         .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
-                        .collect(Collectors.toMap(Aircurrent::getId, aircurrent -> aircurrent));
-                Map<OutgoingAircurrent, List<Long>> outgoingAircurrents = skyTiles.stream()
-                        .map(SkyTile::getRawOutgoingAircurrents)
-                        .collect(Collectors.toMap(outgoingAircurrent -> outgoingAircurrent,
-                                outgoingAircurrent -> outgoingAircurrent.getAircurrentList().stream()
-                                        .map(Aircurrent::getId)
-                                        .collect(Collectors.toList())));
-                outgoingAircurrents.forEach((outgoingAircurrent, aircurrents) -> {
-                            outgoingAircurrent.clear();
-                            aircurrents.forEach(id -> outgoingAircurrent.add(incommingAircurrentIdForAircurrents.get(id)));
-                        }
-                );
-
+                        .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getEndingSky));
+                skyTiles.stream()
+                        .map(SkyTile::getOutgoingAircurrents)
+                        .flatMap(Collection::stream)
+                        .forEach(outgoingAircurrent -> outgoingAircurrent.setStartingSky(
+                                endingSkyIdForAircurrents.get(outgoingAircurrent.getStartingSky().getId())));
                 return;
             }
         }
@@ -212,69 +196,25 @@ public class SaveToDatabaseManager {
                 .collect(Collectors.toMap(SkyTile::getId, x -> x));
 
         skyTiles.forEach(skyTile -> {
-            skyTile.getRawOutgoingAircurrents().getAircurrentList().clear();
+            skyTile.getOutgoingAircurrents().clear();
         });
 
         incommingAircurrents.forEach(aircurrent -> {
             SkyTile startingSky = skyTileMap.get(aircurrent.getStartingSky().getId());
             startingSky.getOutgoingAircurrents().add(aircurrent);
-            aircurrent.setOutgoingAircurrent(startingSky.getRawOutgoingAircurrents());
+            aircurrent.setStartingSky(startingSky);
         });
 
         skyTiles.forEach(skyTile -> {
-            skyTile.getRawOutgoingAircurrents().setStartingSky(skyTile);
-            skyTile.getRawIncommingAircurrents().setEndingSky(skyTile);
             skyTile.getOutgoingAircurrents().forEach(aircurrent -> {
-                aircurrent.setOutgoingAircurrent(skyTile.getRawOutgoingAircurrents());
                 aircurrent.setEndingSky(skyTileMap.get(aircurrent.getEndingSky().getId()));
                 aircurrent.setStartingSky(skyTileMap.get(aircurrent.getStartingSky().getId()));
             });
             skyTile.getIncommingAircurrents().forEach(aircurrent -> {
-                aircurrent.setIncommingAircurrent(skyTile.getRawIncommingAircurrents());
                 aircurrent.setEndingSky(skyTileMap.get(aircurrent.getEndingSky().getId()));
                 aircurrent.setStartingSky(skyTileMap.get(aircurrent.getStartingSky().getId()));
             });
         });
-
-//        incommingAircurrents.forEach(aircurrent -> {
-//            SkyTile startingSky = skyTileMap.get(aircurrent.getId());
-//            OutgoingAircurrent outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
-//            aircurrent.setOutgoingAircurrent(outgoingAircurrent);
-//            aircurrent.setStartingSky(startingSky);
-//
-//            outgoingAircurrent.getAircurrentList().stream()
-//                    .map(oac -> oac.getEndingSky().getId())
-//                    .map(skyTileMap::get)
-//                    .forEach(endingSky -> {
-//                        IncommingAircurrent incommingAircurrent = endingSky.getRawIncommingAircurrents();
-//                        aircurrent.setIncommingAircurrent(incommingAircurrent);
-//                        aircurrent.setEndingSky(endingSky);
-//                    });
-//        });
-
-//        } else {
-//            skyTiles.forEach(skyTile -> {
-//                Long id = skyTile.getId();
-//
-//                SkyTile startingSkytile = Optional.ofNullable(startingSkies.get(id)).orElseThrow();
-//                skyTile.setRawIncommingAircurrents(startingSkytile.getRawIncommingAircurrents());
-//
-//                SkyTile endingSkytile = Optional.ofNullable(endingSkies.get(id)).orElseThrow();
-//                skyTile.setRawOutgoingAircurrents(endingSkytile.getRawOutgoingAircurrents());
-//            });
-//
-//            incommingAircurrents.forEach(aircurrent -> {
-//                SkyTile startingSky = startingSkies.get(aircurrent.getId());
-//                OutgoingAircurrent outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
-//                aircurrent.setOutgoingAircurrent(outgoingAircurrent);
-//                aircurrent.setStartingSky(startingSky);
-//
-//                SkyTile endingSky = endingSkies.get(aircurrent.getId());
-//                IncommingAircurrent incommingAircurrent = endingSky.getRawIncommingAircurrents();
-//                aircurrent.setIncommingAircurrent(incommingAircurrent);
-//                aircurrent.setEndingSky(endingSky);
-//            });
-//    }
     }
 
     private void saveCoordinates(World persistentWorld, World newWorld, boolean freshlyCreated) {
@@ -540,24 +480,24 @@ public class SaveToDatabaseManager {
     @Data
     private static class SkyTileHolder {
         private final SkyTile skyTile;
-        private final IncommingAircurrent incommingAircurrent;
-        private final OutgoingAircurrent outgoingAircurrent;
+        private final Set<Aircurrent> incommingAircurrent;
+        private final Set<Aircurrent> outgoingAircurrent;
 
         SkyTileHolder(SkyTile skyTile) {
             this.skyTile = skyTile;
-            this.incommingAircurrent = skyTile.getRawIncommingAircurrents();
-            this.outgoingAircurrent = skyTile.getRawOutgoingAircurrents();
+            this.incommingAircurrent = skyTile.getIncommingAircurrents();
+            this.outgoingAircurrent = skyTile.getOutgoingAircurrents();
         }
 
         void clearInformation() {
             skyTile.setId(null);
-            skyTile.setRawIncommingAircurrents(null);
-            skyTile.setRawOutgoingAircurrents(null);
+            skyTile.setOutgoingAircurrents(null);
+            skyTile.setIncommingAircurrents(null);
         }
 
         void setInformation() {
-            skyTile.setRawOutgoingAircurrents(outgoingAircurrent);
-            skyTile.setRawIncommingAircurrents(incommingAircurrent);
+            skyTile.setOutgoingAircurrents(outgoingAircurrent);
+            skyTile.setIncommingAircurrents(incommingAircurrent);
         }
     }
 
@@ -591,131 +531,14 @@ public class SaveToDatabaseManager {
         }
 
         skyTileHolderList.forEach(SkyTileHolder::setInformation);
-        List<IncommingAircurrent> incommingAircurrents = skyTileHolderList.stream()
-                .map(SkyTileHolder::getIncommingAircurrent)
-                .collect(Collectors.toList());
-        List<OutgoingAircurrent> outgoingAircurrents = skyTileHolderList.stream()
-                .map(SkyTileHolder::getOutgoingAircurrent)
-                .collect(Collectors.toList());
 
         List<Aircurrent> aircurrents = skyTileHolderList.stream()
                 .map(SkyTileHolder::getIncommingAircurrent)
-                .flatMap(incommingAircurrent -> incommingAircurrent.getAircurrentList().stream())
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-
-        List<IncomingAircurrentHolder> incomingAircurrentHolderList = saveIncommingAircurrents(incommingAircurrents);
-        incomingAircurrentHolderList.forEach(IncomingAircurrentHolder::setInformation);
-
-        List<OutgoingAircurrentHolder> outgoingAircurrentHolderList = saveOutgoingAircurrents(outgoingAircurrents);
-        outgoingAircurrentHolderList.forEach(OutgoingAircurrentHolder::setInformation);
 
         aircurrents.forEach(Aircurrent::resetCoordinates);
         saveAircurrentMethod(aircurrents);
-    }
-
-    private static class IncomingAircurrentHolder {
-        private final IncommingAircurrent incommingAircurrent;
-        private final List<Aircurrent> aircurrents;
-
-        IncomingAircurrentHolder(IncommingAircurrent incommingAircurrent) {
-            this.incommingAircurrent = incommingAircurrent;
-            this.aircurrents = incommingAircurrent.getAircurrentList();
-        }
-
-        void clearInformation() {
-            incommingAircurrent.setId(null);
-            incommingAircurrent.setAircurrentList(null);
-        }
-
-        void setInformation() {
-            incommingAircurrent.setAircurrentList(aircurrents);
-        }
-    }
-
-    private List<IncomingAircurrentHolder> saveIncommingAircurrents
-            (List<IncommingAircurrent> incommingAircurrents) {
-        incommingAircurrents.forEach(incommingAircurrent -> incommingAircurrent.getEndingSky().setRawIncommingAircurrents(incommingAircurrent));
-        List<IncomingAircurrentHolder> incomingAircurrentHolderList = incommingAircurrents.stream()
-                .map(IncomingAircurrentHolder::new)
-                .collect(Collectors.toList());
-        incomingAircurrentHolderList.forEach(IncomingAircurrentHolder::clearInformation);
-
-        SessionFactory sessionFactory = getCurrentSessionFromJPA();
-        try (Session session = sessionFactory.openSession()) {
-            Transaction tx = session.beginTransaction();
-
-            for (int i = 0; i < incommingAircurrents.size(); i++) {
-                IncommingAircurrent incommingAircurrent = incommingAircurrents.get(i);
-                session.save(incommingAircurrent);
-
-                if (i == 1000) {
-                    //flush a batch of inserts and release memory:
-                    session.flush();
-                    session.clear();
-
-                    log.info("processed " + (((double) i) / ((double) incommingAircurrents.size())) + " procent of incommingAircurrents.");
-                }
-            }
-
-            session.flush();
-            session.clear();
-            tx.commit();
-        }
-
-        return incomingAircurrentHolderList;
-    }
-
-    private static class OutgoingAircurrentHolder {
-        private final OutgoingAircurrent outgoingAircurrent;
-        private final List<Aircurrent> aircurrents;
-
-        OutgoingAircurrentHolder(OutgoingAircurrent outgoingAircurrent) {
-            this.outgoingAircurrent = outgoingAircurrent;
-            this.aircurrents = outgoingAircurrent.getAircurrentList();
-        }
-
-        void clearInformation() {
-            outgoingAircurrent.setId(null);
-            outgoingAircurrent.setAircurrentList(null);
-        }
-
-        public void setInformation() {
-            outgoingAircurrent.setAircurrentList(aircurrents);
-        }
-
-    }
-
-    private List<OutgoingAircurrentHolder> saveOutgoingAircurrents
-            (List<OutgoingAircurrent> outgoingAircurrents) {
-        outgoingAircurrents.forEach(outgoingAircurrent -> outgoingAircurrent.getStartingSky().setRawOutgoingAircurrents(outgoingAircurrent));
-        List<OutgoingAircurrentHolder> outgoingAircurrentHolderList = outgoingAircurrents.stream()
-                .map(OutgoingAircurrentHolder::new)
-                .collect(Collectors.toList());
-        outgoingAircurrentHolderList.forEach(OutgoingAircurrentHolder::clearInformation);
-
-        SessionFactory sessionFactory = getCurrentSessionFromJPA();
-        try (Session session = sessionFactory.openSession()) {
-            Transaction tx = session.beginTransaction();
-
-            for (int i = 0; i < outgoingAircurrents.size(); i++) {
-                OutgoingAircurrent outgoingAircurrent = outgoingAircurrents.get(i);
-                session.save(outgoingAircurrent);
-
-                if (i == 1000) {
-                    //flush a batch of inserts and release memory:
-                    session.flush();
-                    session.clear();
-
-                    log.info("processed " + (((double) i) / ((double) outgoingAircurrents.size())) + " procent of outgoingAircurrents.");
-                }
-            }
-
-            session.flush();
-            session.clear();
-            tx.commit();
-        }
-
-        return outgoingAircurrentHolderList;
     }
 
     private void saveContinentsMethod(List<Continent> objects) {

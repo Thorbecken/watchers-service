@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actors.Actor;
+import com.watchers.model.climate.Watershed;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
@@ -63,6 +64,11 @@ public class World {
     @JsonView(Views.Public.class)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Continent> continents = new HashSet<>();
+
+    @JsonProperty("watersheds")
+    @JsonView(Views.Public.class)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL)
+    private Set<Watershed> watersheds = new HashSet<>();
 
     @JsonProperty("lastContinentInFlux")
     @JsonView(Views.Internal.class)

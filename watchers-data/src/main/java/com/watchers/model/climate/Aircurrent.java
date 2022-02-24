@@ -43,14 +43,12 @@ public class Aircurrent {
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "incommingAircurrent_id", nullable = false)
-    private IncommingAircurrent incommingAircurrent;
+    private SkyTile endingSky;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "outgoingAircurrent_id", nullable = false)
-    private OutgoingAircurrent outgoingAircurrent;
+    private SkyTile startingSky;
 
     @JsonView(Views.Public.class)
     private int currentStrength;
@@ -62,13 +60,14 @@ public class Aircurrent {
     private long heightDifference;
 
     public Aircurrent(SkyTile startingSky, SkyTile endingSky, AircurrentType aircurrentType, int currentStrength) {
-        this.incommingAircurrent = endingSky.getRawIncommingAircurrents();
-        this.outgoingAircurrent = startingSky.getRawOutgoingAircurrents();
         this.aircurrentType = aircurrentType;
         this.currentStrength = currentStrength;
 
-        this.getStartingSky().getRawOutgoingAircurrents().add(this);
-        this.getEndingSky().getRawIncommingAircurrents().add(this);
+        this.startingSky = startingSky;
+        this.endingSky = endingSky;
+
+        startingSky.getOutgoingAircurrents().add(this);
+        endingSky.getIncommingAircurrents().add(this);
 
         recalculateHeigthDifference();
 
@@ -89,8 +88,8 @@ public class Aircurrent {
         double amount = amountPerStrength * currentStrength;
         double heightAmount = calculateHeightDifferenceEffect(amount);
 
-        incommingAircurrent.getEndingSky().addIncommingMoisture(amount);
-        outgoingAircurrent.getStartingSky().addAirMoistureLossage(heightAmount);
+        endingSky.addIncommingMoisture(amount);
+        startingSky.addAirMoistureLossage(heightAmount);
     }
 
     public double calculateHeightDifferenceEffect(double airMoisture) {
@@ -110,8 +109,8 @@ public class Aircurrent {
         clone.setId(this.getId());
         clone.setAircurrentType(this.aircurrentType);
         clone.setCurrentStrength(this.currentStrength);
-        clone.setOutgoingAircurrent(skyClone.getRawOutgoingAircurrents());
-        clone.setIncommingAircurrent(incommingAircurrent.createClone());
+        clone.setStartingSky(skyClone);
+        clone.setEndingSky(this.endingSky);
         clone.setHeightDifference(this.heightDifference);
         return clone;
     }
@@ -121,8 +120,8 @@ public class Aircurrent {
         clone.setId(this.getId());
         clone.setAircurrentType(this.aircurrentType);
         clone.setCurrentStrength(this.currentStrength);
-        clone.setOutgoingAircurrent(outgoingAircurrent.createClone());
-        clone.setIncommingAircurrent(skyClone.getRawIncommingAircurrents());
+        clone.setEndingSky(skyClone);
+        clone.setStartingSky(this.startingSky);
         clone.setHeightDifference(this.heightDifference);
         return clone;
     }
@@ -141,24 +140,6 @@ public class Aircurrent {
         long startingHeight = startingTile.getHeight();
 
         this.heightDifference = endingHeight - startingHeight;
-    }
-
-    @JsonIgnore
-    public SkyTile getEndingSky() {
-        return this.incommingAircurrent.getEndingSky();
-    }
-
-    public void setEndingSky(SkyTile endingSky) {
-        this.incommingAircurrent.setEndingSky(endingSky);
-    }
-
-    @JsonIgnore
-    public SkyTile getStartingSky() {
-        return this.outgoingAircurrent.getStartingSky();
-    }
-
-    public void setStartingSky(SkyTile startingSky) {
-        this.outgoingAircurrent.setStartingSky(startingSky);
     }
 
     @Override
