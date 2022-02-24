@@ -189,21 +189,23 @@ public class SaveToDatabaseManager {
         }
 
         List<Aircurrent> incommingAircurrents = skyTiles.stream()
-                .flatMap(x -> x.getIncommingAircurrents().stream())
+                .map(SkyTile::getIncommingAircurrents)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+        Map<Long, Aircurrent> outgoingAircurrentIdMap = skyTiles.stream()
+                .map(SkyTile::getOutgoingAircurrents)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Aircurrent::getId, aircurrent -> aircurrent));
+        skyTiles.forEach(skyTile -> skyTile.getOutgoingAircurrents().clear());
+        incommingAircurrents.forEach(incommingAircurrent -> {
+            Aircurrent outgoingAircurrent = outgoingAircurrentIdMap.get(incommingAircurrent.getId());
+            SkyTile startingSky = outgoingAircurrent.getStartingSky();
+            incommingAircurrent.setStartingSky(startingSky);
+            startingSky.getOutgoingAircurrents().add(incommingAircurrent);
+        });
 
         Map<Long, SkyTile> skyTileMap = skyTiles.stream()
                 .collect(Collectors.toMap(SkyTile::getId, x -> x));
-
-        skyTiles.forEach(skyTile -> {
-            skyTile.getOutgoingAircurrents().clear();
-        });
-
-        incommingAircurrents.forEach(aircurrent -> {
-            SkyTile startingSky = skyTileMap.get(aircurrent.getStartingSky().getId());
-            startingSky.getOutgoingAircurrents().add(aircurrent);
-            aircurrent.setStartingSky(startingSky);
-        });
 
         skyTiles.forEach(skyTile -> {
             skyTile.getOutgoingAircurrents().forEach(aircurrent -> {
