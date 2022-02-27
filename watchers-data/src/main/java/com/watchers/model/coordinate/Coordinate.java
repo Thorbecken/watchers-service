@@ -2,25 +2,29 @@ package com.watchers.model.coordinate;
 
 import com.fasterxml.jackson.annotation.*;
 import com.watchers.helper.CoordinateHelper;
+import com.watchers.model.actors.Actor;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.common.Views;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.world.World;
-import com.watchers.model.actors.Actor;
 import com.watchers.model.world.Continent;
+import com.watchers.model.world.World;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiPredicate;
 
 @Data
 @Entity
 @NoArgsConstructor
 @Table(name = "coordinate")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="coordinate_type", discriminatorType = DiscriminatorType.STRING)
-@SequenceGenerator(name="Coordinate_Gen", sequenceName="Coordinate_Seq", allocationSize = 1)
+@DiscriminatorColumn(name = "coordinate_type", discriminatorType = DiscriminatorType.STRING)
+@SequenceGenerator(name = "Coordinate_Gen", sequenceName = "Coordinate_Seq", allocationSize = 1)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -32,10 +36,12 @@ import java.util.*;
 })
 public abstract class Coordinate {
 
+    public static final BiPredicate<Coordinate, Coordinate> LOWER_OR_EQUAL_HEIGHT_PREDICATE = (x, y) -> y.getTile().getHeight() <= x.getTile().getHeight();
+
     @Id
     @JsonView(Views.Internal.class)
     @JsonProperty("coordinateId")
-    @GeneratedValue(generator="Coordinate_Gen", strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator = "Coordinate_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "coordinate_id", nullable = false)
     private Long id;
 
@@ -60,22 +66,22 @@ public abstract class Coordinate {
 
     @JsonProperty("tile")
     @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Tile tile;
 
     @JsonProperty("actors")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Actor> actors = new HashSet<>();
 
     @JsonView(Views.Public.class)
-    @JsonIgnoreProperties({"world", "coordinates", "type" })
+    @JsonIgnoreProperties({"world", "coordinates", "type"})
     @ManyToOne(fetch = FetchType.EAGER)
     private Continent continent;
 
     @JsonView(Views.Public.class)
     @JsonProperty("climate")
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Climate climate;
 
     protected Coordinate(long xCoord, long yCoord, CoordinateType coordinateType, World world, Continent continent) {
@@ -89,16 +95,12 @@ public abstract class Coordinate {
         this.climate = new Climate(this);
     }
 
-    private void setContinent(Continent continent){
-        this.continent = continent;
-    }
-
-    public void changeContinent(Continent newContinent){
-        if(continent != null) {
+    public void changeContinent(Continent newContinent) {
+        if (continent != null) {
             continent.removeCoordinate(this);
         }
         this.continent = newContinent;
-        if(newContinent != null){
+        if (newContinent != null) {
             newContinent.addCoordinate(this);
         }
     }
@@ -112,25 +114,25 @@ public abstract class Coordinate {
     }
 
     @JsonIgnore
-    public Coordinate getRightNeighbour(){
+    public Coordinate getRightNeighbour() {
         long rightCoordinate = getRightCoordinate();
         return world.getCoordinate(rightCoordinate, this.getYCoord());
     }
 
     @JsonIgnore
-    public Coordinate getLeftNeighbour(){
+    public Coordinate getLeftNeighbour() {
         long leftCoordinate = getLeftCoordinate();
         return world.getCoordinate(leftCoordinate, this.getYCoord());
     }
 
     @JsonIgnore
-    public Coordinate getUpNeighbour(){
+    public Coordinate getUpNeighbour() {
         long upCoordinate = getUpCoordinate();
         return world.getCoordinate(this.getXCoord(), upCoordinate);
     }
 
     @JsonIgnore
-    public Coordinate getDownNeighbour(){
+    public Coordinate getDownNeighbour() {
         long downCoordinate = getDownCoordinate();
         return world.getCoordinate(this.getXCoord(), downCoordinate);
     }
@@ -151,15 +153,15 @@ public abstract class Coordinate {
     }
 
     @JsonIgnore
-    public long getXCoordinateFromTile(long distance){
+    public long getXCoordinateFromTile(long distance) {
         return getXCoordinateFromTile(distance, this.getXCoord());
     }
 
     @JsonIgnore
-    protected long getXCoordinateFromTile(long distance, long startingCoordinate){
-        if(distance <= CoordinateHelper.LEFT){
+    protected long getXCoordinateFromTile(long distance, long startingCoordinate) {
+        if (distance <= CoordinateHelper.LEFT) {
             return getXCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedXCoordinate(CoordinateHelper.LEFT, startingCoordinate));
-        } else if(distance >= CoordinateHelper.RIGHT){
+        } else if (distance >= CoordinateHelper.RIGHT) {
             return getXCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedXCoordinate(CoordinateHelper.RIGHT, startingCoordinate));
         } else {
             return startingCoordinate;
@@ -167,15 +169,15 @@ public abstract class Coordinate {
     }
 
     @JsonIgnore
-    public long getYCoordinateFromTile(long distance){
+    public long getYCoordinateFromTile(long distance) {
         return getYCoordinateFromTile(distance, this.getYCoord());
     }
 
     @JsonIgnore
-    protected long getYCoordinateFromTile(long distance, long startingCoordinate){
-        if(distance <= CoordinateHelper.DOWN){
+    protected long getYCoordinateFromTile(long distance, long startingCoordinate) {
+        if (distance <= CoordinateHelper.DOWN) {
             return getYCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedYCoordinate(CoordinateHelper.DOWN, startingCoordinate));
-        } else if(distance >= CoordinateHelper.UP){
+        } else if (distance >= CoordinateHelper.UP) {
             return getYCoordinateFromTile(decreaseDistanceToZero(distance), getAdjustedYCoordinate(CoordinateHelper.UP, startingCoordinate));
         } else {
             return startingCoordinate;
@@ -189,71 +191,78 @@ public abstract class Coordinate {
         return world.getCoordinate(newX, newY);
     }
 
-    protected long decreaseDistanceToZero(long distance){
-        if(distance < 0){
-            return distance+CoordinateHelper.RIGHT;
-        } else if(distance > 0){
-            return distance+CoordinateHelper.LEFT;
+    protected long decreaseDistanceToZero(long distance) {
+        if (distance < 0) {
+            return distance + CoordinateHelper.RIGHT;
+        } else if (distance > 0) {
+            return distance + CoordinateHelper.LEFT;
         } else {
             return 0;
         }
     }
 
     @JsonIgnore
-    protected long getAdjustedXCoordinate(int adjustment, long startincCoordinate){
-        if(adjustment >= CoordinateHelper.RIGHT && startincCoordinate == this.world.getXSize()){
+    protected long getAdjustedXCoordinate(int adjustment, long startincCoordinate) {
+        if (adjustment >= CoordinateHelper.RIGHT && startincCoordinate == this.world.getXSize()) {
             return 1;
-        } else if(adjustment <= CoordinateHelper.LEFT && startincCoordinate == 1){
+        } else if (adjustment <= CoordinateHelper.LEFT && startincCoordinate == 1) {
             return this.world.getXSize();
         } else {
-            return startincCoordinate+adjustment;
+            return startincCoordinate + adjustment;
         }
     }
 
     @JsonIgnore
-    protected long getAdjustedYCoordinate(int adjustment, long startincCoordinate){
-        if(adjustment >= CoordinateHelper.UP && startincCoordinate == this.world.getYSize()){
+    protected long getAdjustedYCoordinate(int adjustment, long startincCoordinate) {
+        if (adjustment >= CoordinateHelper.UP && startincCoordinate == this.world.getYSize()) {
             return 1;
-        } else if(adjustment <= CoordinateHelper.DOWN && startincCoordinate == 1){
+        } else if (adjustment <= CoordinateHelper.DOWN && startincCoordinate == 1) {
             return this.world.getYSize();
         } else {
-            return startincCoordinate+adjustment;
+            return startincCoordinate + adjustment;
         }
     }
 
     @JsonIgnore
     @SuppressWarnings("unused")
-    public List<Coordinate> getCoordinatesWithinRange(int range) {
-        return getCoordinatesWithinRange(Collections.singletonList(this), range);
+    public Set<Coordinate> getCoordinatesWithinRange(int range) {
+        BiPredicate<Coordinate, Coordinate> predicate = (x, y) -> true;
+        Set<Coordinate> returnList = getCoordinatesWithinRangeWithQualifier(new HashSet<>(Collections.singletonList(this)), range, predicate);
+        returnList.remove(this);
+        return returnList;
     }
 
     @JsonIgnore
-    protected List<Coordinate> getCoordinatesWithinRange(List<Coordinate> coordinates, int range) {
-        if(range>=1) {
-            List<Coordinate> returnList = new ArrayList<>();
-            coordinates.forEach(
-                    coordinate -> returnList.addAll(coordinate.getNeighbours())
-            );
-
-            return getCoordinatesWithinRange(returnList, coordinates, range-1);
-        } else {
-            return coordinates;
-        }
+    @SuppressWarnings("unused")
+    public Set<Coordinate> getLowerOrEqualHeightCoordinatesWithinRange(int range) {
+        Set<Coordinate> returnList = getCoordinatesWithinRangeWithQualifier(new HashSet<>(Collections.singletonList(this)),
+                range, LOWER_OR_EQUAL_HEIGHT_PREDICATE);
+        returnList.remove(this);
+        return returnList;
     }
 
     @JsonIgnore
-    protected List<Coordinate> getCoordinatesWithinRange(List<Coordinate> coordinates, List<Coordinate> oldCoordinates, int range) {
-        if(range>=1) {
-            List<Coordinate> returnList = new ArrayList<>();
-            coordinates.forEach(
-                    coordinate -> {
-                        if(!oldCoordinates.contains(coordinate)){
-                            returnList.addAll(coordinate.getNeighbours());
-                        }
-                    }
-            );
+    protected Set<Coordinate> getCoordinatesWithinRangeWithQualifier(int range, BiPredicate<Coordinate, Coordinate> predicate) {
+        Set<Coordinate> returnList = getCoordinatesWithinRangeWithQualifier(new HashSet<>(Collections.singletonList(this)),
+                range, predicate);
+        returnList.remove(this);
+        return returnList;
+    }
 
-            return getCoordinatesWithinRange(returnList, coordinates, range-1);
+    @JsonIgnore
+    protected Set<Coordinate> getCoordinatesWithinRangeWithQualifier(Set<Coordinate> coordinates,
+                                                                     int range, BiPredicate<Coordinate, Coordinate> predicate) {
+        if (range >= 1) {
+            Set<Coordinate> returnList = new HashSet<>();
+            coordinates.stream()
+                    .flatMap(coordinate -> coordinate.getNeighbours()
+                            .stream()
+                            .filter(neighbour -> predicate.test(coordinate, neighbour)))
+                    .filter(neighbouringCoordinate -> !coordinates.contains(neighbouringCoordinate))
+                    .forEach(returnList::add);
+            returnList.addAll(coordinates);
+
+            return getCoordinatesWithinRangeWithQualifier(returnList, range - 1, predicate);
         } else {
             return coordinates;
         }
