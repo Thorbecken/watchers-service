@@ -23,6 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ContinentalDriftTileChangeComputerTest {
 
     private World world;
+    private Set<Continent> continents;
+    private Continent continentOne;
+    private Continent continentTwo;
+    private Continent continentThree;
     private ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer;
     private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
     private ContinentalDriftTaskDto taskDto;
@@ -31,6 +35,11 @@ class ContinentalDriftTileChangeComputerTest {
     @BeforeEach
     void setUp() {
         this.world = TestableWorld.createWorld();
+        continents = world.getContinents();
+        continentOne = continents.stream().filter(continent -> continent.getId() == 0L).findFirst().orElseThrow();
+        continentTwo = continents.stream().filter(continent -> continent.getId() == 1L).findFirst().orElseThrow();
+        continentThree = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
+
         this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
 
@@ -41,25 +50,24 @@ class ContinentalDriftTileChangeComputerTest {
 
     @Test
     void callAdjustPressureFromIncomingDirectionTest() {
-        List<Continent> continents = new ArrayList<>(world.getContinents());
         assertThat(continents, hasSize(3));
 
-        assertThat(continents.get(0).getDirection().getXDriftPressure(), equalTo(0L));
-        assertThat(continents.get(0).getDirection().getYDriftPressure(), equalTo(0L));
-        assertThat(continents.get(1).getDirection().getXDriftPressure(), equalTo(0L));
-        assertThat(continents.get(1).getDirection().getYDriftPressure(), equalTo(0L));
-        assertThat(continents.get(2).getDirection().getXDriftPressure(), equalTo(0L));
-        assertThat(continents.get(2).getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentTwo.getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continentTwo.getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentOne.getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continentOne.getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentThree.getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continentThree.getDirection().getYDriftPressure(), equalTo(0L));
 
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftTileChangeComputer.process(taskDto);
 
-        assertThat(continents.get(0).getDirection().getXDriftPressure(), equalTo(0L));
-        assertThat(continents.get(0).getDirection().getYDriftPressure(), equalTo(0L));
-        assertThat(continents.get(1).getDirection().getXDriftPressure(), equalTo(2L));
-        assertThat(continents.get(1).getDirection().getYDriftPressure(), equalTo(2L));
-        assertThat(continents.get(2).getDirection().getXDriftPressure(), equalTo(1L));
-        assertThat(continents.get(2).getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentOne.getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continentOne.getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentTwo.getDirection().getXDriftPressure(), equalTo(2L));
+        assertThat(continentTwo.getDirection().getYDriftPressure(), equalTo(2L));
+        assertThat(continentThree.getDirection().getXDriftPressure(), equalTo(1L));
+        assertThat(continentThree.getDirection().getYDriftPressure(), equalTo(0L));
 
     }
 
