@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -23,6 +24,9 @@ import static org.hamcrest.Matchers.*;
 class ContinentalDriftDirectionChangerTest {
 
     private World world;
+    private Continent continentOne;
+    private Continent continentTwo;
+    private Continent continentThree;
     private ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject methodObject;
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
@@ -34,6 +38,9 @@ class ContinentalDriftDirectionChangerTest {
     public void setup(){
         world = TestableWorld.createWorld();
         continents = world.getContinents();
+        continentOne = continents.stream().filter(continent -> continent.getId() == 0L).findFirst().orElseThrow();
+        continentTwo = continents.stream().filter(continent -> continent.getId() == 1L).findFirst().orElseThrow();
+        continentThree = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
 
         continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository);
 
@@ -57,47 +64,46 @@ class ContinentalDriftDirectionChangerTest {
 
     @Test
     void callAdjustForDriftPressureTest() {
-        List<Continent> continents = new ArrayList<>(world.getContinents());
         world.getWorldSettings().setDrifFlux(0);
         assertThat(continents, hasSize(3));
 
-        assertThat(continents.get(0).getDirection().getXDriftPressure(), equalTo(0L));
-        assertThat(continents.get(0).getDirection().getYDriftPressure(), equalTo(0L));
-        assertThat(continents.get(1).getDirection().getXDriftPressure(), equalTo(0L));
-        assertThat(continents.get(1).getDirection().getYDriftPressure(), equalTo(0L));
-        assertThat(continents.get(2).getDirection().getXDriftPressure(), equalTo(0L));
-        assertThat(continents.get(2).getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentOne.getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continentOne.getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentTwo.getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continentTwo.getDirection().getYDriftPressure(), equalTo(0L));
+        assertThat(continentThree.getDirection().getXDriftPressure(), equalTo(0L));
+        assertThat(continentThree.getDirection().getYDriftPressure(), equalTo(0L));
 
-        assertThat(continents.get(0).getDirection().getXVelocity(), equalTo(0));
-        assertThat(continents.get(0).getDirection().getYVelocity(), equalTo(-1));
-        assertThat(continents.get(1).getDirection().getXVelocity(), equalTo(1));
-        assertThat(continents.get(1).getDirection().getYVelocity(), equalTo(0));
-        assertThat(continents.get(2).getDirection().getXVelocity(), equalTo(0));
-        assertThat(continents.get(2).getDirection().getYVelocity(), equalTo(0));
+        assertThat(continentOne.getDirection().getXVelocity(), equalTo(1));
+        assertThat(continentOne.getDirection().getYVelocity(), equalTo(0));
+        assertThat(continentTwo.getDirection().getXVelocity(), equalTo(0));
+        assertThat(continentTwo.getDirection().getYVelocity(), equalTo(-1));
+        assertThat(continentThree.getDirection().getXVelocity(), equalTo(0));
+        assertThat(continentThree.getDirection().getYVelocity(), equalTo(0));
 
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftDirectionChanger.process(taskDto);
 
-        assertThat(continents.get(0).getDirection().getXVelocity(), equalTo(0));
-        assertThat(continents.get(0).getDirection().getYVelocity(), equalTo(-1));
-        assertThat(continents.get(1).getDirection().getXVelocity(), equalTo(1));
-        assertThat(continents.get(1).getDirection().getYVelocity(), equalTo(0));
-        assertThat(continents.get(2).getDirection().getXVelocity(), equalTo(0));
-        assertThat(continents.get(2).getDirection().getYVelocity(), equalTo(0));
+        assertThat(continentOne.getDirection().getXVelocity(), equalTo(1));
+        assertThat(continentOne.getDirection().getYVelocity(), equalTo(0));
+        assertThat(continentTwo.getDirection().getXVelocity(), equalTo(0));
+        assertThat(continentTwo.getDirection().getYVelocity(), equalTo(-1));
+        assertThat(continentThree.getDirection().getXVelocity(), equalTo(0));
+        assertThat(continentThree.getDirection().getYVelocity(), equalTo(0));
 
-        continents.get(0).getDirection().setXDriftPressure(1);
-        continents.get(0).getDirection().setYDriftPressure(1);
-        continents.get(1).getDirection().setXDriftPressure(-1);
-        continents.get(1).getDirection().setYDriftPressure(-1);
+        continentOne.getDirection().setXDriftPressure(-1);
+        continentOne.getDirection().setYDriftPressure(-1);
+        continentTwo.getDirection().setXDriftPressure(1);
+        continentTwo.getDirection().setYDriftPressure(1);
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftDirectionChanger.process(taskDto);
 
-        assertThat(continents.get(0).getDirection().getXVelocity(), equalTo(1));
-        assertThat(continents.get(0).getDirection().getYVelocity(), equalTo(0));
-        assertThat(continents.get(1).getDirection().getXVelocity(), equalTo(0));
-        assertThat(continents.get(1).getDirection().getYVelocity(), equalTo(-1));
-        assertThat(continents.get(2).getDirection().getXVelocity(), equalTo(0));
-        assertThat(continents.get(2).getDirection().getYVelocity(), equalTo(0));
+        assertThat(continentOne.getDirection().getXVelocity(), equalTo(0));
+        assertThat(continentOne.getDirection().getYVelocity(), equalTo(-1));
+        assertThat(continentTwo.getDirection().getXVelocity(), equalTo(1));
+        assertThat(continentTwo.getDirection().getYVelocity(), equalTo(0));
+        assertThat(continentThree.getDirection().getXVelocity(), equalTo(0));
+        assertThat(continentThree.getDirection().getYVelocity(), equalTo(0));
     }
 
     @Test
