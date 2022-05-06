@@ -2,6 +2,7 @@ package com.watchers.model.dto;
 
 
 import com.watchers.model.actors.Actor;
+import com.watchers.model.environment.River;
 import com.watchers.model.world.Continent;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
@@ -14,6 +15,7 @@ import java.util.Set;
 public class MockTile {
     private long height;
     private Continent continent;
+    private River river;
     private Set<Actor> actorSet = new HashSet<>();
     private SurfaceType surfaceType;
     private float food;
@@ -24,5 +26,6 @@ public class MockTile {
         this.actorSet.addAll(tile.getCoordinate().getActors());
         this.surfaceType = tile.getSurfaceType();
         this.food = tile.getBiome().getCurrentFood();
+        this.river = tile.getRiver();
     }
 }

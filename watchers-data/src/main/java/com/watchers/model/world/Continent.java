@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @Entity
 @JsonSerialize
 @Table(name = "continent")
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class Continent {
 
     @Id

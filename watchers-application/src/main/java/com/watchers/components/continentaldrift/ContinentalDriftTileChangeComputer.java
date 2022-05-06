@@ -85,6 +85,9 @@ public class ContinentalDriftTileChangeComputer {
             tile.transferData(mockTile);
         }
 
+        survivingTile.checkIntegrity();
+        survivingTile.getNeighbours().forEach(Tile::checkIntegrity);
+
         world.setHeightDeficit(world.getHeightDeficit() + taskDto.getHeightLoss());
         taskDto.setHeightLoss(0);
 

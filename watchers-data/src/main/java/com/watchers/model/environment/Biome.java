@@ -1,6 +1,7 @@
 package com.watchers.model.environment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
@@ -16,6 +17,7 @@ import javax.persistence.*;
 @Table(name = "biome")
 @NoArgsConstructor
 @SequenceGenerator(name="Biome_Gen", sequenceName="Biome_Seq", allocationSize = 1)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class Biome implements ParallelTask {
 
     @Id

@@ -1,5 +1,6 @@
 package com.watchers.model.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -13,6 +14,7 @@ import javax.persistence.*;
 @JsonSerialize
 @NoArgsConstructor
 @Table(name = "directions")
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class Direction {
 
     @Id

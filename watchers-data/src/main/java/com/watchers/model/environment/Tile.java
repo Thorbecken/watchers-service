@@ -15,6 +15,7 @@ import java.util.*;
 @Entity
 @Table(name = "tile")
 @SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class Tile {
 
     @Id
@@ -33,6 +34,21 @@ public class Tile {
     @Column(name = "height")
     @JsonView(Views.Public.class)
     private long height;
+
+    @JsonProperty("landMoisture")
+    @Column(name = "land_moisture")
+    @JsonView(Views.Public.class)
+    private double landMoisture;
+
+    @JsonView(Views.Public.class)
+    @JsonProperty("river")
+    @OneToOne(mappedBy = "tile", cascade = CascadeType.ALL)
+    private River river;
+
+    @JsonView(Views.Public.class)
+    @JsonIgnoreProperties({"world", "watershedTiles", "riverFlow" })
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    private Watershed watershed;
 
     @JsonProperty("biome")
     @JsonView(Views.Public.class)
@@ -100,6 +116,38 @@ public class Tile {
         }
     }
 
+    @JsonIgnore
+    public boolean isWater(){
+        return  surfaceType.equals(SurfaceType.OCEAN)
+                || surfaceType.equals(SurfaceType.SEA)
+                || surfaceType.equals(SurfaceType.COASTAL)
+                || surfaceType.equals(SurfaceType.LAKE);
+    }
+
+    @JsonIgnore
+    public boolean isLand(){
+        return !isWater();
+    }
+
+    public void setRiver(River river) {
+        this.river = river;
+        if(river != null) {
+            river.setTile(this);
+        }
+    }
+
+    @JsonIgnore
+    public boolean riverIsConnected(){
+        if(this.river == null){
+            return false;
+        } else {
+            return this.getNeighbours()
+                    .stream()
+                    .anyMatch(tile -> tile.getRiver() != null
+                            || tile.isWater());
+        }
+    }
+
     public boolean coordinateEquals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Tile)) return false;
@@ -114,6 +162,9 @@ public class Tile {
 
     public void transferData(MockTile mockTile){
         this.biome.transferData(mockTile);
+        if(this.river != null && mockTile.getRiver() != null) {
+            this.river.mergeRivers(this.river, mockTile.getRiver());
+        }
         mockTile.getActorSet().addAll(this.coordinate.getActors());
     }
 
@@ -127,6 +178,13 @@ public class Tile {
 
         this.coordinate.getActors().addAll(mockTile.getActorSet());
         this.coordinate.getActors().forEach(actor -> actor.setCoordinate(coordinate));
+    }
+
+    public void changeWatershed(Watershed newWatershed) {
+        this.watershed = newWatershed;
+        if(this.river != null){
+            this.river.setWatershed(newWatershed);
+        }
     }
 
     @Override
@@ -161,16 +219,23 @@ public class Tile {
         //clone.setId(this.id);
         clone.setId(newCoordinate.getId());
         clone.setBiome(this.biome.createClone(clone));
+        if(watershed != null) {
+            Watershed newWatershed = newCoordinate.getWorld().getWatersheds().stream()
+                    .filter(oldWatershed -> oldWatershed.getId().equals(watershed.getId()))
+                    .findFirst().get();
+            newWatershed.addTile(clone);
+            if(this.river != null) {
+                clone.setRiver(this.river.createClone(clone));
+                clone.getRiver().setWatershed(newWatershed);
+                newWatershed.addRiver(clone.getRiver());
+            }
+        }
         return clone;
     }
 
-    public Tile createBasicClone(Coordinate newCoordinate) {
-        Tile clone = new Tile();
-        clone.setSurfaceType(this.surfaceType);
-        clone.setCoordinate(newCoordinate);
-        clone.setHeight(this.height);
-        clone.setId(this.id);
-        clone.setBiome(this.biome.createClone(clone));
-        return clone;
+    public void checkIntegrity() {
+        if(this.river != null) {
+            this.river.checkIntegrity();
+        }
     }
 }

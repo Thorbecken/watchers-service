@@ -1,6 +1,7 @@
 package com.watchers.model.climate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
@@ -16,6 +17,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Table(name = "aircurrent")
 @SequenceGenerator(name = "AC_Gen", sequenceName = "AC_Seq", allocationSize = 1)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class Aircurrent {
 
     @Id

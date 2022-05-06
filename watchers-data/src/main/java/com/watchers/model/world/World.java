@@ -1,11 +1,12 @@
 package com.watchers.model.world;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.climate.Watershed;
+import com.watchers.model.environment.Watershed;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @Entity
 @JsonSerialize
 @Table(name = "world")
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class World {
 
     @Id

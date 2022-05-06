@@ -1,7 +1,7 @@
 package com.watchers.model.environment;
 
 public enum BiomeTypeEnum {
-    OCEAN, SEA, COASTAL,
+    OCEAN, SEA, COASTAL, LAKE,
 
     POLAR_MOUNTAIN_DESERT, POLAR_MOUNTAIN_TUNDRA, POLAR_MOUNTAIN_TAIGA,
     POLAR_HILL_DESERT, POLAR_HILL_TUNDRA, POLAR_HILL_TAIGA,

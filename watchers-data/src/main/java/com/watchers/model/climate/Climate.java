@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.helper.ClimateHelper;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.enums.SurfaceType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +17,7 @@ import javax.persistence.*;
 @Table(name = "climate")
 @NoArgsConstructor
 @SequenceGenerator(name="Climate_Gen", sequenceName="Climate_Seq", allocationSize = 1)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class Climate {
 
     @Id
@@ -63,16 +63,6 @@ public class Climate {
     @Enumerated(value = EnumType.STRING)
     private PrecipitationEnum precipitationEnum;
 
-    @JsonView(Views.Public.class)
-    @JsonProperty("river")
-    @OneToOne(mappedBy = "climate")
-    private River river;
-
-    @JsonView(Views.Public.class)
-    @JsonIgnoreProperties({"world", "climates", "type" })
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Watershed watershed;
-
     public Climate(Coordinate coordinate){
         this.coordinate = coordinate;
         double wx = coordinate.getWorld().getXSize();
@@ -88,8 +78,7 @@ public class Climate {
 
     @JsonIgnore
     public boolean isWater(){
-        SurfaceType surfaceType = coordinate.getTile().getSurfaceType();
-        return  surfaceType.equals(SurfaceType.OCEAN) || surfaceType.equals(SurfaceType.SEA) || surfaceType.equals(SurfaceType.COASTAL);
+        return coordinate.getTile().isWater();
     }
 
     @JsonIgnore

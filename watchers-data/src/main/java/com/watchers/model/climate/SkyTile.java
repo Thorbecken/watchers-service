@@ -1,6 +1,7 @@
 package com.watchers.model.climate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
@@ -17,6 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "sky")
 @SequenceGenerator(name = "Sky_Gen", sequenceName = "Sky_Seq", allocationSize = 1)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class SkyTile {
 
     @Id
@@ -105,8 +107,10 @@ public class SkyTile {
     public void reduceAirMoisture(double airmoistureReduction) {
         if (airmoistureReduction > 0d) {
             if (this.getAirMoisture() - airmoistureReduction > 0d) {
+                this.getClimate().getCoordinate().getTile().setLandMoisture(airmoistureReduction);
                 this.setAirMoisture(this.getAirMoisture() - airmoistureReduction);
             } else {
+                this.getClimate().getCoordinate().getTile().setLandMoisture(this.getAirMoisture());
                 this.setAirMoisture(0d);
             }
         }

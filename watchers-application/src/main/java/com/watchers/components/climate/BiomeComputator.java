@@ -68,6 +68,21 @@ public class BiomeComputator {
         coastalMap.put(ClimateEnum.TROPICAL_HUMID, BiomeTypeEnum.COASTAL);
         coastalMap.put(ClimateEnum.TROPICAL_WET, BiomeTypeEnum.COASTAL);
 
+        Map<ClimateEnum, BiomeTypeEnum> lakeMap = new HashMap<>();
+        coastalMap.put(ClimateEnum.LAKE, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.POLAR_ARID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.POLAR_SEMI_ARID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.POLAR_HUMID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.POLAR_WET, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TEMPERATE_ARID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TEMPERATE_SEMI_ARID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TEMPERATE_HUMID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TEMPERATE_WET, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TROPICAL_ARID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TROPICAL_SEMI_ARID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TROPICAL_HUMID, BiomeTypeEnum.LAKE);
+        coastalMap.put(ClimateEnum.TROPICAL_WET, BiomeTypeEnum.LAKE);
+
         Map<ClimateEnum, BiomeTypeEnum> plainMap = new HashMap<>();
         plainMap.put(ClimateEnum.POLAR_ARID, BiomeTypeEnum.POLAR_PLAIN_DESERT);
         plainMap.put(ClimateEnum.POLAR_SEMI_ARID, BiomeTypeEnum.POLAR_PLAIN_TUNDRA);
@@ -113,6 +128,7 @@ public class BiomeComputator {
         biomeTypes.put(SurfaceType.OCEAN, oceanMap);
         biomeTypes.put(SurfaceType.SEA, seaMap);
         biomeTypes.put(SurfaceType.COASTAL, coastalMap);
+        biomeTypes.put(SurfaceType.LAKE, lakeMap);
         biomeTypes.put(SurfaceType.PLAIN, plainMap);
         biomeTypes.put(SurfaceType.HILL, hillMap);
         biomeTypes.put(SurfaceType.MOUNTAIN, mountainMap);
@@ -125,11 +141,11 @@ public class BiomeComputator {
                 .parallelStream()
                 .forEach(
                         coordinate -> {
-                            SurfaceType surfaceType = coordinate.getTile().getSurfaceType();
-                            ClimateEnum climateEnum = coordinate.getClimate().getClimateEnum();
+                            Map<ClimateEnum, BiomeTypeEnum> biomeMap = biomeTypes.get(coordinate.getTile().getSurfaceType());
+                            BiomeTypeEnum biomeTypeEnum = biomeMap.get(coordinate.getClimate().getClimateEnum());
                             coordinate.getTile()
                                     .getBiome()
-                                    .setBiomeTypeEnum(biomeTypes.get(surfaceType).get(climateEnum));
+                                    .setBiomeTypeEnum(biomeTypeEnum);
                         });
 
         worldRepository.save(world);

@@ -25,6 +25,7 @@ import java.util.function.BiPredicate;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "coordinate_type", discriminatorType = DiscriminatorType.STRING)
 @SequenceGenerator(name = "Coordinate_Gen", sequenceName = "Coordinate_Seq", allocationSize = 1)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
