@@ -1,7 +1,7 @@
 // https://www.youtube.com/watch?v=HaGeSq-SB9E
 
 pipeline {
-    enviroment {
+    environment  {
         JAVA_TOOL_OPTIONS = "-Duser.home=/var/maven"
     }
 
