@@ -6,11 +6,13 @@ pipeline {
     }
 
     agent {
-        // same as in dockerfile
-        image "maven:3.8.4-openjdk-17-slim"
-        label "docker"
-        // change /tmp/maven to the directory you want or create it with the following command: mkdir -p /tmp/maven
-        args "-v /tmp/maven:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
+        docker {
+            // same as in dockerfile
+            image "maven:3.8.4-openjdk-17-slim"
+            label "docker"
+            // change /tmp/maven to the directory you want or create it with the following command: mkdir -p /tmp/maven
+            args "-v /tmp/maven:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
+        }
     }
 
     stages {
