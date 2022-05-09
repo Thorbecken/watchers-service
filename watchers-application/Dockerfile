@@ -3,8 +3,8 @@
 # in local cmd
 # docker build -t watchers-service .
 
-# to runmvn mvn
-# docker run -d -p 8080:8080 --name=watchers-service watchers-service
+# to run
+# docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-SNAPSHOT
 
 FROM maven:3.8.4-openjdk-17-slim AS build
 WORKDIR /home/app

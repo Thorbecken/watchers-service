@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+  # docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-SNAPSHOT
+  watchers-service:
+    container_name: watchers-service
+    image: watchers-service:0.0.3
+    restart: never
+    ports:
+      - 8080:8080
+    networks:
+      - watchers
+  # docker run -d -p 4200:4200 --env WATCHERS_SERVICE_HOST=https://watchers-service
+  # --name=watchers-portal --link watchers-service watchers-portal:0.0.3-SNAPSHOT
+  watchers-portal:
+    container_name: watchers-portal
+    image: watchers-portal:0.0.3-SNAPSHOT
+    restart: never
+    ports:
+      - 4200:4200
+    environment:
+      - WATCHERS_SERVICE_HOST=https://watchers-service
+    depends_on:
+      - watchers-service
+    links:
+      - watchers-service watchers-portal
+    networks:
+      - watchers
+
+networks:
+  watchers:

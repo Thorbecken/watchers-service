@@ -3,8 +3,8 @@
 # in local cmd
 # docker build -t watchers-service .
 
-# to runmvn mvn
-# docker run -d -p 8080:8080 --name=watchers-service watchers-service
+# to run
+# docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-SNAPSHOT
 
 FROM maven:3.8.4-openjdk-17-slim AS build
 WORKDIR /home/app
@@ -17,7 +17,7 @@ RUN mvn -f /home/app/pom.xml install -DskipTests
 
 FROM openjdk:17-alpine
 VOLUME /tmp
-COPY --from=build home/app/watchers-application/target/watchers-application-0.0.3-SNAPSHOT.jar watchers.jar
+COPY --from=build home/app/watchers-application/target/watchers-application-0.0.3-WATCH-14-SNAPSHOT.jar watchers.jar
 ENV WATCHERS_SAVE_PATH=/tmp/
 RUN sh -c 'touch /watchers.jar'
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/watchers.jar"]
