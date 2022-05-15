@@ -37,24 +37,26 @@ pipeline {
 //                 sh "mvn clean install"
 //             }
 //         }
+
+        // sh doesn't work on windows and bat is the alternative
         stage('Run unit tests'){
             steps{
-                sh "mvn test"
+                bat "mvn test"
             }
         }
         stage('Build jar'){
             steps{
-                sh "mvn install -DskipTests"
+                bat "mvn install -DskipTests"
             }
         }
         stage('Build Docker image'){
             steps{
-                sh "docker build -t watchers-service:0.0.3-WATCH-14 ."
+                bat "docker build -t watchers-service:0.0.3-WATCH-14 ."
             }
         }
         stage('Run Docker image'){
             steps{
-                sh "docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-WATCH-14"
+                bat "docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-WATCH-14"
             }
         }
     }
