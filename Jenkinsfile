@@ -6,12 +6,18 @@ pipeline {
     }
 
     agent {
+        // https://devopscube.com/docker-containers-as-build-slaves-jenkins/
+        // needs Docker plugin, Docker Pipeline and Pipeline Maven Integration
+        // docker desktop uses tcp://localhost:2375 instead of the standard 2376
+        // add docker in global configuration of Jenkins in http://localhost:8081/configureClouds/
+        // add docker in tool configuration of Jenkins in http://localhost:8081/configureTools/
+        // change git to C:\Program Files\Git\bin\git.exe in http://localhost:8081/configureTools/
         docker {
             // same as in dockerfile
             image "maven:3.8.4-openjdk-17-slim"
             label "docker"
             // change /tmp/maven to the directory you want or create it with the following command: mkdir -p /tmp/maven
-            args "-v /tmp/maven:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
+            args "-v C:\\temp\\mvn:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
         }
     }
 
@@ -47,6 +53,7 @@ pipeline {
 
     post {
         always {
+            // workspace cleanup plugin in Jenkins store
             cleanWs()
         }
     }
