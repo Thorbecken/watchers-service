@@ -12,16 +12,22 @@ pipeline {
         // add docker in global configuration of Jenkins in http://localhost:8081/configureClouds/
         // add docker in tool configuration of Jenkins in http://localhost:8081/configureTools/
         // change git to C:\Program Files\Git\bin\git.exe in http://localhost:8081/configureTools/
-    agent {
-            docker {
-                // same as in dockerfile
-                image "maven:3.8.4-openjdk-17-slim"
-                label "docker"
-                // change /tmp/maven to the directory you want or create it with the following command: mkdir -p /tmp/maven
-//                 args "-v ~/workspace/temp/maven:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
-                args "-v ~/workspace/temp/maven:/root/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
-                }
-            }
+//     agent {
+//             docker {
+//                 // same as in dockerfile
+//                 image "maven:3.8.4-openjdk-17-slim"
+//                 label "docker"
+//                 // change /tmp/maven to the directory you want or create it with the following command: mkdir -p /tmp/maven
+// //                 args "-v ~/workspace/temp/maven:/var/maven/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
+//                 args "-v ~/workspace/temp/maven:/root/.m2 -e MAVEN_CONFIG=/var/maven/.m2"
+//                 }
+//             }
+        agent any
+
+        tools {
+            maven "3.8.3"
+        }
+
 
     stages {
 
