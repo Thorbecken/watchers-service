@@ -1,3 +1,10 @@
+// Jenkins pipeline for Windows needs:
+// java 17 JDK
+// maven 3.8.3
+// git
+// jenkins
+// docker
+
 // https://www.youtube.com/watch?v=HaGeSq-SB9E
 
 pipeline {
@@ -31,6 +38,7 @@ pipeline {
 
     stages {
 
+        // sh doesn't work on windows and bat is the alternative
         stage('Run unit tests'){
             steps{
                 bat "mvn test"

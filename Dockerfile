@@ -6,7 +6,7 @@
 # to run
 # docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-SNAPSHOT
 
-FROM maven:3.8.4-openjdk-17-slim AS build
+FROM maven:3.8.5-openjdk-18-slim AS build
 WORKDIR /home/app
 COPY . /home/app/
 #RUN mvn -f /home/app/watchers-data/pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:go-offline

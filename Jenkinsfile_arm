@@ -1,0 +1,48 @@
+// Jenkins pipeline for Raspberry Pi 4B needs:
+// java 17 JDK
+// maven 3.8.3
+// git
+// jenkins
+// docker
+
+pipeline {
+        agent any
+
+        tools {
+            maven "3.8.3"
+        }
+
+
+    stages {
+
+        stage('Run unit tests'){
+            steps{
+                sh "mvn test"
+            }
+        }
+        stage('Build jar'){
+            steps{
+                sh "mvn install -DskipTests"
+            }
+        }
+        stage('Build Docker image'){
+            steps{
+                sh "docker build -t watchers-service:0.0.3-WATCH-14 -build-arg docker_base=maven:3.8.4-openjdk-17-slim ."
+            }
+        }
+        stage('Run Docker image'){
+            steps{
+                sh "docker stop watchers-service"
+                sh "docker rm watchers-service"
+                sh "docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-WATCH-14"
+            }
+        }
+    }
+
+    post {
+        always {
+            // workspace cleanup plugin in Jenkins store
+            cleanWs()
+        }
+    }
+}
