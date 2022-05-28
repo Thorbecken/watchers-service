@@ -43,14 +43,14 @@ pipeline {
         }
         stage('Build Docker image'){
             steps{
-                bat "docker build -t watchers-service:0.0.3-WATCH-14 ."
+                bat "docker build -t watchers-service:0.0.3-SNAPSHOT ."
             }
         }
         stage('Run Docker image'){
             steps{
                 bat "docker stop watchers-service"
                 bat "docker rm watchers-service"
-                bat "docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-WATCH-14"
+                bat "docker run -d -p 8080:8080 --name=watchers-service watchers-service:0.0.3-SNAPSHOT"
             }
         }
     }
