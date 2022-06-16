@@ -1,6 +1,5 @@
 package com.watchers.manager;
 
-import com.watchers.components.climate.TemperatureZoneComputator;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.helper.SkyHelper;
 import com.watchers.model.coordinate.Coordinate;
@@ -29,7 +28,6 @@ import java.util.List;
 class WorldFactory {
 
     private final TileDefined tileDefined;
-    private final TemperatureZoneComputator temperatureZoneComputator;
 
     World generateWorld(WorldSettings worldSettings, WorldMetaData worldMetaData){
         World world = new World(worldSettings.getXSize(), worldSettings.getYSize());
@@ -76,8 +74,6 @@ class WorldFactory {
 
             log.info("Pre seeded the world with life");
         }
-
-        temperatureZoneComputator.processWithoutLoadingAndSaving(world);
 
         return world;
     }

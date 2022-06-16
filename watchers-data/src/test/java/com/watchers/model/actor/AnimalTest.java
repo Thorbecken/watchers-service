@@ -1,9 +1,10 @@
 package com.watchers.model.actor;
 
+import com.watchers.model.actors.Animal;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.actors.animals.Rabbit;
+import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.StateType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.*;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnimalTest {
     private World rabbitWorld;
     private Tile startingTile;
-    private Rabbit rabbit;
+    private Animal rabbit;
 
     @BeforeEach
     @SuppressWarnings("all")
@@ -28,14 +29,14 @@ class AnimalTest {
         for (int x = 1; x <= 3; x++) {
             for (int y = 1; y <= 3; y++) {
                 Coordinate coordinate = CoordinateFactory.createCoordinate(x, y, rabbitWorld, rabbitContinent);
-                coordinate.getTile().setBiome(new Biome(2f, 3f, 1f, coordinate.getTile()));
+                coordinate.getTile().setBiome(new Biome(coordinate.getTile()));
                 rabbitWorld.getCoordinates().add(coordinate);
             }
         }
 
         startingTile = rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).findFirst().get();
 
-        rabbit = new Rabbit(startingTile.getCoordinate(), 1f);
+        rabbit = new Animal(startingTile.getCoordinate(), AnimalType.RABBIT, 1f);
         startingTile.getCoordinate().getActors().add(rabbit);
     }
 

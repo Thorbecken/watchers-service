@@ -3,7 +3,7 @@ package com.watchers.manager;
 import com.watchers.components.life.ActorProcessor;
 import com.watchers.components.life.BiomeProcessor;
 import com.watchers.helper.StopwatchTimer;
-import com.watchers.model.actors.animals.AnimalFactory;
+import com.watchers.model.actors.Animal;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.AnimalType;
@@ -40,14 +40,14 @@ public class LifeManager {
         World world = worldRepository.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Tile seedingTile = world.getCoordinate(xCoord, yCoord).getTile();
         AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
-        seedingTile.getCoordinate().getActors().add(AnimalFactory.generateNewAnimal(animalType, seedingTile.getCoordinate()));
+        seedingTile.getCoordinate().getActors().add(new Animal(seedingTile.getCoordinate(), animalType, 2f));
         worldRepository.save(world);
         Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
     }
 
     public static void seedLife(Coordinate coordinate) {
         AnimalType animalType = selectAnimalSeed(coordinate.getTile().getSurfaceType());
-        coordinate.getActors().add(AnimalFactory.generateNewAnimal(animalType, coordinate));
+        coordinate.getActors().add(new Animal(coordinate, animalType, 2f));
     }
 
     private static AnimalType selectAnimalSeed(SurfaceType type) {

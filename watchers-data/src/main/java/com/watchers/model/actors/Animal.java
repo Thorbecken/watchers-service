@@ -3,36 +3,25 @@ package com.watchers.model.actors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.watchers.model.coordinate.Coordinate;
 import com.fasterxml.jackson.annotation.*;
-import com.watchers.model.actors.animals.Rabbit;
-import com.watchers.model.actors.animals.Whale;
 import com.watchers.model.common.Views;
 import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.StateType;
+import com.watchers.model.environment.Biome;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Optional;
 
 @Data
 @Slf4j
 @Entity
 @Table(name = "animal")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="animal_type",
-        discriminatorType = DiscriminatorType.STRING)
 @EqualsAndHashCode(callSuper=true)
 @SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = Rabbit.class, name = "rabbit"),
-        @JsonSubTypes.Type(value = Whale.class, name = "whale")
-})
-public abstract class Animal extends Actor {
+public class Animal extends Actor {
 
     @Id
     @JsonView(Views.Internal.class)
@@ -51,47 +40,32 @@ public abstract class Animal extends Actor {
     private float foodReserve;
 
     @JsonView(Views.Public.class)
-    @Column(name = "max_food")
-    private float maxFoodReserve;
-
-    @JsonView(Views.Public.class)
-    @Column(name = "foraging")
-    private float foraging;
-
-    @JsonView(Views.Public.class)
-    @Column(name = "metabolism")
-    private float metabolisme;
-
-    @JsonView(Views.Public.class)
-    @Column(name = "reproduction_rate")
-    private float reproductionRate;
-
-    @JsonView(Views.Public.class)
-    @Column(name = "movement")
-    private int movement;
-
-    @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)
     @Column(name = "animal_type")
     private AnimalType animalType;
 
-    public abstract void generateOffspring(Coordinate coordinate, float foodPassed);
+    private Animal() {
+    }
+
+    public void generateOffspring(Coordinate coordinate, float foodPassed){
+        coordinate.getActors().add(new Animal(coordinate, this.animalType, foodPassed));
+    }
 
     private void metabolize(){
-        if(metabolisme > foodReserve){
+        if(animalType.getMetabolisme() > foodReserve){
             setStateType(StateType.DEAD);
         } else {
-            foodReserve = foodReserve - metabolisme;
+            foodReserve = foodReserve - animalType.getMetabolisme();
         }
     }
 
     private void move(){
-        float localFood = getCoordinate().getTile().getBiome().getCurrentFood();
-        if (localFood < foraging) {
+        double localFood = getCoordinate().getTile().getBiome().getCurrentFood();
+        if (localFood < animalType.getForaging()) {
             getCoordinate().getNeighbours().stream()
                     .filter(coordinate -> this.getNaturalHabitat().movableSurfaces
                             .contains(coordinate.getTile().getSurfaceType()))
-                    .max((coordinate1, coordinate2) -> Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood()))
+                    .max((coordinate1, coordinate2) -> Math.toIntExact(Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood())))
                     .ifPresent(this::moveToTile);
         }
     }
@@ -103,15 +77,16 @@ public abstract class Animal extends Actor {
     }
 
     private void eat(){
-        float localFood = getCoordinate().getTile().getBiome().getCurrentFood();
-        if(localFood >= foraging){
-            foodReserve = foodReserve + foraging;
-            getCoordinate().getTile().getBiome().setCurrentFood(localFood - foraging);
+        Biome biome = getCoordinate().getTile().getBiome();
+        double localFood = biome.getCurrentFood();
+        if(localFood >= animalType.getForaging()){
+            foodReserve = foodReserve + animalType.getForaging();
+            biome.forage(animalType.getForaging());
         }
     }
 
     private void reproduce(){
-        if(reproductionRate <= (foodReserve / maxFoodReserve)){
+        if(animalType.getReproductionRate() <= (foodReserve / animalType.getMaxFoodReserve())){
             generateOffspring(getCoordinate(), foodReserve/2);
             foodReserve = foodReserve/2;
         }
@@ -133,7 +108,7 @@ public abstract class Animal extends Actor {
     public void handleContinentalMovement(){
         Optional<Coordinate> optionalCoordinate = getCoordinate().getNeighbours().stream()
                 .filter(this::isCorrectLandType)
-                .max((coordinate1, coordinate2) -> Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood()));
+                .max((coordinate1, coordinate2) -> Math.toIntExact(Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood())));
         if (optionalCoordinate.isPresent()){
             moveToTile(optionalCoordinate.get());
         } else {
@@ -141,29 +116,22 @@ public abstract class Animal extends Actor {
         }
     }
 
-    private void setSuperId(Long id){
-        super.setId(id);
+    @Override
+    public Actor createClone(Coordinate newCoordinate) {
+        return new Animal(newCoordinate, this.animalType, this.foodReserve);
     }
+    public Animal(Coordinate coordinate, AnimalType animalType, float StartingFood){
+        super.setActorType(ActorType.ANIMAL);
+        super.setNaturalHabitat(animalType.getNaturalHabitat());
 
-    public Animal cloneBasis(Animal clone, Coordinate newCoordinate){
-        clone.setId(this.getId());
-        clone.setSuperId(this.getId());
-        clone.setCoordinate(newCoordinate);
-        clone.setStateType(this.getStateType());
-        clone.setNaturalHabitat(this.getNaturalHabitat());
+        setFoodReserve(StartingFood);
+        setAnimalType(animalType);
+        setStateType(StateType.ALIVE);
+        setCoordinate(coordinate);
 
-        clone.setFoodReserve(this.getFoodReserve());
-        clone.setFoodReserve(this.getMaxFoodReserve());
-        clone.setForaging(this.getForaging());
-        clone.setMetabolisme(this.getMetabolisme());
-        clone.setReproductionRate(this.getReproductionRate());
-        clone.setMovement(this.getMovement());
-        clone.setAnimalType(this.getAnimalType());
-
-        return clone;
-    }
-
-    public Animal(){
-        this.setActorType(ActorType.ANIMAL);
+        List<Actor> newActors = getCoordinate().getWorld().getNewActors();
+        if(newActors != null){
+            newActors.add(this);
+        }
     }
 }

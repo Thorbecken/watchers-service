@@ -294,4 +294,9 @@ public abstract class Coordinate {
                 ", actors=" + actors.size() +
                 '}';
     }
+
+    @JsonIgnore
+    public boolean isWater() {
+        return tile.isWater();
+    }
 }

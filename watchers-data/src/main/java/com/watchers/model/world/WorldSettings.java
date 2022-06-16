@@ -57,17 +57,6 @@ public class WorldSettings {
     private int maxErosion;
 
     // Climate configuration
-    private long wetZone = 60;
-    private long humidZone = 40;
-    private long semiAridZone = 20;
-    private long aridZone = 0;
-
-    private long wetPrecipitation;
-    private long humidPrecipitation;
-    private long semiAridPrecipitation;
-    private long aridPrecipitation;
-    private long noPrecipitation;
-
     private int latitudinalStrength;
     private int longitudinalStrength;
 
@@ -101,17 +90,6 @@ public class WorldSettings {
         clone.maxErosion = this.maxErosion;
 
         // Climate configuration
-        clone.wetZone = this.wetZone;
-        clone.humidZone = this.humidZone;
-        clone.semiAridZone = this.semiAridZone;
-        clone.aridZone = this.aridZone;
-
-        clone.wetPrecipitation = this. wetPrecipitation;
-        clone.humidPrecipitation = this.humidPrecipitation;
-        clone.semiAridPrecipitation = this.semiAridPrecipitation;
-        clone.aridPrecipitation = this.aridPrecipitation;
-        clone.noPrecipitation = this.noPrecipitation;
-
         clone.latitudinalStrength = this.latitudinalStrength;
         clone.longitudinalStrength = this.longitudinalStrength;
 

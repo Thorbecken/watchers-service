@@ -18,7 +18,7 @@
 
     <groupId>com</groupId>
     <artifactId>watchers-service</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3-WATCH-15-SNAPSHOT</version>
     <name>watchers-service</name>
     <description>Interactive generated world viewer</description>
 

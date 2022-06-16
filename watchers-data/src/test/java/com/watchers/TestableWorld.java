@@ -191,17 +191,6 @@ public class TestableWorld {
                 10,
 
                 // Climate settings
-                60,
-                40,
-                20,
-                0,
-
-                10,
-                5,
-                2,
-                1,
-                0,
-
                 7,
                 1);
     }

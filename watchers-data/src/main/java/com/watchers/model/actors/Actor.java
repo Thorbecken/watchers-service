@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.watchers.model.actors.animals.Rabbit;
-import com.watchers.model.actors.animals.Whale;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.NaturalHabitat;
@@ -42,7 +40,6 @@ public abstract class Actor implements SerialTask {
     @EqualsAndHashCode.Exclude
     @ManyToOne
     private Coordinate coordinate;
-
 
     @JsonView(Views.Public.class)
     @Enumerated(value = EnumType.STRING)

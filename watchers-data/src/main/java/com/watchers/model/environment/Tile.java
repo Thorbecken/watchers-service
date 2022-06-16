@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.*;
 import com.watchers.model.common.Views;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.enums.RockType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -62,10 +64,16 @@ public class Tile {
     @Enumerated(value = EnumType.STRING)
     private SurfaceType surfaceType;
 
+    @JsonProperty("rockType")
+    @Column(name = "rock_type")
+    @JsonView(Views.Public.class)
+    @Enumerated(value = EnumType.STRING)
+    private RockType rockType;
+
     public Tile(Coordinate coordinate, Continent continent){
         this.coordinate = coordinate;
         this.surfaceType = continent.getType();
-        this.biome = new Biome(2, 10, 0.25f, this);
+        this.biome = new Biome(this);
     }
 
     @JsonCreator
@@ -172,7 +180,10 @@ public class Tile {
         this.coordinate.changeContinent(mockTile.getContinent());
         this.coordinate.getContinent().getCoordinates().add(this.coordinate);
 
-        this.biome.addCurrentFood(mockTile.getFood());
+        this.biome.addGrassBiomass(mockTile.getGrassBiomass());
+        this.biome.setGrassFlora(mockTile.getGrassFlora());
+        this.biome.addTreeBiomass(mockTile.getTreeBiomass());
+        this.biome.setTreeFlora(mockTile.getTreeFlora());
         this.height = mockTile.getHeight();
         this.surfaceType = mockTile.getSurfaceType();
 
@@ -237,5 +248,9 @@ public class Tile {
         if(this.river != null) {
             this.river.checkIntegrity();
         }
+    }
+
+    public void reduceLandMoisture(double moistureReduction) {
+        this.landMoisture = this.landMoisture - moistureReduction;
     }
 }

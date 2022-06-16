@@ -1,27 +1,19 @@
 package com.watchers.manager;
 
 import com.watchers.TestableWorld;
-import com.watchers.components.climate.TemperatureZoneComputator;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
 import com.watchers.model.world.WorldSettings;
 import com.watchers.model.world.WorldTypeEnum;
-import com.watchers.repository.WorldMetaDataRepository;
-import com.watchers.repository.WorldRepository;
-import com.watchers.repository.WorldSettingsRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 class WorldFactoryTest {
-
-    private final TemperatureZoneComputator temperatureZoneComputator = Mockito.mock(TemperatureZoneComputator.class);
 
     @ParameterizedTest
     @CsvSource({"12,13,2", "52,28,3"})
@@ -33,7 +25,7 @@ class WorldFactoryTest {
         TileDefined tileDefined = new TileDefined(10, 20, 30, 40, 50, 60);
         WorldMetaData worldMetaData = new WorldMetaData();
         worldMetaData.setWorldTypeEnum(WorldTypeEnum.NON_EUCLIDEAN);
-        World world = new WorldFactory(tileDefined, temperatureZoneComputator)
+        World world = new WorldFactory(tileDefined)
                 .generateWorld(worldSettings, worldMetaData);
         world.setWorldMetaData(new WorldMetaData());
         world.getWorldMetaData().setWorldTypeEnum(WorldTypeEnum.NON_EUCLIDEAN);

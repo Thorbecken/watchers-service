@@ -5,7 +5,7 @@
     <parent>
         <artifactId>watchers-service</artifactId>
         <groupId>com</groupId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.3-WATCH-15-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

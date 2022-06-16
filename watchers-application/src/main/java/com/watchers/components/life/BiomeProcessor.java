@@ -21,25 +21,16 @@ public class BiomeProcessor {
     @Transactional
     public void process(WorldTaskDto taskDto){
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
-        log.debug("There is currently " + world.getCoordinates().stream()
-                .map(Coordinate::getTile)
-                .map(Tile::getBiome)
-                .map(Biome::getCurrentFood)
-                .reduce(0f, (tile1, tile2) -> tile1 + tile2)
-                + "food in the world"
-        );
-        log.debug("The total fertility in the world amounts to " + world.getCoordinates().parallelStream()
-                .map(Coordinate::getTile)
-                .map(Tile::getBiome)
-                .map(Biome::getFertility)
-                .reduce(0f,
-                        (tile1, tile2) -> tile1 + tile2,
-                        (tile1, tile2) -> tile1 + tile2)
-                + "food");
+
         world.getCoordinates().parallelStream()
                 .map(Coordinate::getTile)
                 .map(Tile::getBiome)
                 .forEach(Biome::processParallelTask);
+
+        world.getCoordinates().stream()
+                .map(Coordinate::getTile)
+                .map(Tile::getBiome)
+                .forEach(Biome::spread);
 
         worldRepository.save(world);
     }

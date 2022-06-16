@@ -6,6 +6,7 @@ import com.watchers.helper.RandomHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.common.Direction;
 import com.watchers.model.common.Views;
+import com.watchers.model.enums.RockType;
 import com.watchers.model.enums.SurfaceType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,6 +48,12 @@ public class Continent {
     @Enumerated(value = EnumType.STRING)
     private SurfaceType type;
 
+    @JsonProperty("basicRockType")
+    @Column(name = "basic_rock_type")
+    @JsonView(Views.Public.class)
+    @Enumerated(value = EnumType.STRING)
+    private RockType basicRockType;
+
     @JsonProperty("direction")
     @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, optional = false)
@@ -56,6 +63,7 @@ public class Continent {
         this.world = world;
         this.world.getContinents().add(this);
         this.type = surfaceType;
+        this.basicRockType = RockType.getRandomRockType();
         this.assignNewDriftDirection(1, world);
     }
 
@@ -66,10 +74,8 @@ public class Continent {
 
     /**
      * @param driftVelocity the speed at which the new directions of the continent can be
-     * @return the continent which direction has been changed on the x and y axis.
-     * These can be possitive or negative (left, right, up down).
      */
-    public Continent assignNewDriftDirection(int driftVelocity, World world) {
+    public void assignNewDriftDirection(int driftVelocity, World world) {
         if (this.direction == null) {
             int xVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
             int yVelocity = RandomHelper.getRandomWithNegativeNumbers(driftVelocity);
@@ -82,8 +88,6 @@ public class Continent {
             log.warn("setting last continent in flux to " + this.getId() + " from continent");
             world.setLastContinentInFlux(this.getId());
         }
-
-        return this;
     }
 
     public void addCoordinate(Coordinate coordinate) {
@@ -115,6 +119,7 @@ public class Continent {
         Continent clone = new Continent();
         clone.setId(this.id);
         clone.setType(this.type);
+        clone.setBasicRockType(this.basicRockType);
         clone.setWorld(newWorld);
         clone.setDirection(this.direction.createClone());
         return clone;
