@@ -40,7 +40,7 @@ public class LifeManager {
         World world = worldRepository.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Tile seedingTile = world.getCoordinate(xCoord, yCoord).getTile();
         AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
-        seedingTile.getCoordinate().getActors().add(new Animal(seedingTile.getCoordinate(), animalType, 2f));
+        seedingTile.getCoordinate().getActors().add(new Animal(seedingTile.getCoordinate(), animalType, animalType.getMaxFoodReserve()));
         worldRepository.save(world);
         Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
     }

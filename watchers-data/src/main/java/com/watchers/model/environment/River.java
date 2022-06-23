@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.world.World;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,7 @@ public class River {
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
+//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "watershed_id", nullable = false)
     private Watershed watershed;
 
@@ -103,14 +105,17 @@ public class River {
     public void makeRiverFlowTillEnd(List<Coordinate> coordinates) {
         Tile currentTile = this.getTile();
         Coordinate currentCoordinate = currentTile.getCoordinate();
+        if (coordinates.contains(currentCoordinate)){
+            log.warn("Loop detected while making the river flow till the end!");
+            this.createLakeEnding(currentTile);
+        }
         coordinates.add(currentCoordinate);
-        Set<Coordinate> lowerOrEqualHeightCoordinates = currentCoordinate.getLowerOrEqualHeightCoordinatesWithinRange(1);
+        Set<Coordinate> lowerOrEqualHeightCoordinates = currentCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1);
         coordinates.forEach(lowerOrEqualHeightCoordinates::remove);
 
         if (lowerOrEqualHeightCoordinates.size() == 0) {
-            this.setRiverEnd(true);
-            currentTile.setSurfaceType(SurfaceType.LAKE);
-            this.createNewWatershed(this);
+            log.warn("River had nowhere to go!");
+            this.createLakeEnding(currentTile);
         } else {
             Tile lowestTile = lowerOrEqualHeightCoordinates.stream()
                     .map(Coordinate::getTile)
@@ -137,8 +142,15 @@ public class River {
         }
     }
 
+    private void createLakeEnding(Tile currentTile) {
+        this.setRiverEnd(true);
+        currentTile.setSurfaceType(SurfaceType.LAKE);
+        this.createNewWatershed(this);
+    }
+
     private void createNewWatershed(River river) {
-        Watershed watershed = new Watershed(river.getTile().getCoordinate().getWorld());
+        World world = river.getTile().getCoordinate().getWorld();
+        Watershed watershed = new Watershed(world);
         river.setWatershed(watershed);
         river.getUpCurrentRivers()
                 .forEach(upstreamRiver -> upstreamRiver.changeWatershedUpstream(watershed));

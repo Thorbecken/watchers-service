@@ -1,9 +1,8 @@
 package com.watchers.components.climate;
 
+import com.watchers.model.climate.Climate;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.climate.Climate;
-import com.watchers.model.climate.TemperatureEnum;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
@@ -17,36 +16,45 @@ public class TemperatureZoneComputator {
     private final WorldRepository worldRepository;
 
     @Transactional
-    public void processWithoutLoadingAndSaving(WorldTaskDto taskDto) {
+    public void process(WorldTaskDto taskDto) {
         World world = worldRepository.getById(taskDto.getWorldId());
-        this.process(world);
+
+        restoreBaseTemperature(world);
         worldRepository.save(world);
-    }
+        for (int i = 0; i < 3; i++) {
+            // waterflow transfer
+            transferWaterTemperature(world);
+            // airflow transfer
+            transferAirTemperature(world);
+            // proces transfer
+            processTemperatureTransfer(world);
 
-    @Transactional
-    public void processWithoutLoadingAndSaving(World world) {
-        this.process(world);
-    }
-
-    private void process(World world) {
-        world.getCoordinates()
-                .parallelStream()
-                .map(Coordinate::getClimate)
-                .forEach(climate -> climate.setTemperatureEnum(calculateTemperatureEnum(climate)));
-    }
-
-    private TemperatureEnum calculateTemperatureEnum(Climate climate) {
-        if (climate.getLatitude() <= -60) {
-            return TemperatureEnum.POLAR;
-        } else if (climate.getLatitude() <= -30) {
-            return TemperatureEnum.TEMPERATE;
-        } else if (climate.getLatitude() <= 30) {
-            return TemperatureEnum.TROPICAL;
-        } else if (climate.getLatitude() <= 60) {
-            return TemperatureEnum.TEMPERATE;
-        } else {
-            return TemperatureEnum.POLAR;
+            worldRepository.save(world);
         }
     }
 
+    private void restoreBaseTemperature(World world) {
+        world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .forEach(Climate::restoreBaseTemperature);
+    }
+
+    private void processTemperatureTransfer(World world) {
+        world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .forEach(Climate::processHeatChange);
+    }
+
+    private void transferWaterTemperature(World world) {
+        world.getCoordinates().stream()
+                .filter(Coordinate::isWater)
+                .map(Coordinate::getClimate)
+                .forEach(Climate::transferWaterTemperature);
+    }
+
+    private void transferAirTemperature(World world) {
+        world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .forEach(Climate::transferAirTemperature);
+    }
 }

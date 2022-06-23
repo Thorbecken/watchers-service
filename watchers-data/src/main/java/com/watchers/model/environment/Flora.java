@@ -93,4 +93,13 @@ public enum Flora {
     private double growthRate;
     private double maxBiomass;
 
+    static public Flora getTreeFlora(double maxTemperature){
+        if(maxTemperature < PINE_TREE.getMaxTemperature())
+            return PINE_TREE;
+        if(maxTemperature < LEAF_TREE.getMaxTemperature())
+            return LEAF_TREE;
+        if (maxTemperature < PALM_TREE.getMaxTemperature())
+            return PALM_TREE;
+        return null;
+    }
     }

@@ -52,6 +52,13 @@ public class WorldMetaData {
     @Column(name = "needs_continental_shift")
     private boolean needsContinentalShift;
 
+    // save
+    private long epoch;
+    // continentaldrift
+    private long era;
+    // turn
+    private long age;
+
     public WorldMetaData createClone(World world) {
         WorldMetaData clone = new WorldMetaData();
         clone.id = world.getId();

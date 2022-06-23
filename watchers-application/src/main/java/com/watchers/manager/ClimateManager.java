@@ -13,8 +13,6 @@ public class ClimateManager {
 
     private final TemperatureZoneComputator temperatureZoneComputator;
     private final PrecipiationComputator precipiationComputator;
-    private final BiomeComputator biomeComputator;
-    private final ClimateComputator climateComputator;
     private final AircurrentRecalibrator aircurrentRecalibrator;
     private final WatershedComputator watershedComputator;
     private final RiverComputator riverComputator;
@@ -26,7 +24,7 @@ public class ClimateManager {
             StopwatchTimer.stop("aircurrentRecalibrator");
 
             StopwatchTimer.start();
-            temperatureZoneComputator.processWithoutLoadingAndSaving(taskDto);
+            temperatureZoneComputator.process(taskDto);
             StopwatchTimer.stop("temperatureZoneComputator");
         }
         StopwatchTimer.start();
@@ -38,11 +36,5 @@ public class ClimateManager {
         StopwatchTimer.start();
         riverComputator.process(taskDto);
         StopwatchTimer.stop("riverComputator");
-        StopwatchTimer.start();
-        climateComputator.process(taskDto);
-        StopwatchTimer.stop("climateComputator");
-        StopwatchTimer.start();
-        biomeComputator.process(taskDto);
-        StopwatchTimer.stop("biomeComputator");
     }
 }

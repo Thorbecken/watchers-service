@@ -92,7 +92,7 @@ public class WorldSettingManager {
     }
 
     public WorldMetaData createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, WorldTypeEnum worldTypeEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift) {
-        return new WorldMetaData(worldId, null, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift);
+        return new WorldMetaData(worldId, null, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift,1,1,1);
     }
 
     @Transactional
@@ -103,5 +103,14 @@ public class WorldSettingManager {
             worldMetaData.setNeedsSaving(newValue);
             worldMetaDataRepository.saveAndFlush(worldMetaData);
         }
+    }
+
+    public void saveTime(WorldMetaData data) {
+        worldMetaDataRepository.findById(data.getId()).ifPresent(worldMetaData -> {
+            worldMetaData.setEpoch(data.getEpoch());
+            worldMetaData.setEra(data.getEra());
+            worldMetaData.setAge(data.getAge());
+            worldMetaDataRepository.saveAndFlush(worldMetaData);
+        });
     }
 }

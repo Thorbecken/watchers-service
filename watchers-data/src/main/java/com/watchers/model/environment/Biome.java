@@ -54,20 +54,24 @@ public class Biome implements ParallelTask {
     private Tile tile;
 
     public void setGrassFlora(Flora grassFlora) {
-        if(FloraTypeEnum.GRASS.equals(grassFlora.getType())) {
-            this.grassFlora = grassFlora;
-            this.grassBiomass = 1;
-        } else {
-            throw new UnsupportedOperationException("GrassFlora needs to be of type Grass");
+        if(grassFlora != null) {
+            if (FloraTypeEnum.GRASS.equals(grassFlora.getType())) {
+                this.grassFlora = grassFlora;
+                this.grassBiomass = 1;
+            } else {
+                throw new UnsupportedOperationException("GrassFlora needs to be of type Grass");
+            }
         }
     }
 
     public void setTreeFlora(Flora treeFlora) {
-        if(FloraTypeEnum.TREE.equals(treeFlora.getType())) {
-            this.treeFlora = treeFlora;
-            this.treeBiomass = 1;
-        } else {
-            throw new UnsupportedOperationException("TreeFlora needs to be of type Tree");
+        if(treeFlora != null) {
+            if (FloraTypeEnum.TREE.equals(treeFlora.getType())) {
+                this.treeFlora = treeFlora;
+                this.treeBiomass = 1;
+            } else {
+                throw new UnsupportedOperationException("TreeFlora needs to be of type Tree");
+            }
         }
     }
 
@@ -82,14 +86,16 @@ public class Biome implements ParallelTask {
 
     private void fillOpenFloraSpots(Flora neigbouringGrassFlora, Flora neighbouringTreeFlora){
         double temperature = this.getTile().getCoordinate().getClimate().getMeanTemperature();
-        if(this.grassFlora == null
+        if(neigbouringGrassFlora != null
+                && this.grassFlora == null
                 && neigbouringGrassFlora.getNaturalHabitat().movableSurfaces.contains(tile.getSurfaceType())
                 && neigbouringGrassFlora.getMinTemperature() <= temperature
                 && neigbouringGrassFlora.getMaxTemperature() >= temperature){
             setGrassFlora(neigbouringGrassFlora);
             grow(grassFlora);
         }
-        if(this.treeFlora == null
+        if(neighbouringTreeFlora != null
+                && this.treeFlora == null
                 && neighbouringTreeFlora.getNaturalHabitat().movableSurfaces.contains(tile.getSurfaceType())
                 && neighbouringTreeFlora.getMinTemperature() <= temperature
                 && neighbouringTreeFlora.getMaxTemperature() >= temperature){
@@ -186,18 +192,22 @@ public class Biome implements ParallelTask {
     }
 
     public void addGrassBiomass(double grassBiomass) {
-        if(grassBiomass + this.grassBiomass > this.grassFlora.getMaxBiomass()){
-            this.grassBiomass = this.grassFlora.getMaxBiomass();
-        } else {
-            this.grassBiomass += grassBiomass;
+        if(grassFlora != null) {
+            if (grassBiomass + this.grassBiomass > this.grassFlora.getMaxBiomass()) {
+                this.grassBiomass = this.grassFlora.getMaxBiomass();
+            } else {
+                this.grassBiomass += grassBiomass;
+            }
         }
     }
 
     public void addTreeBiomass(double treeBiomass) {
-        if(treeBiomass + this.treeBiomass > this.treeFlora.getMaxBiomass()){
-            this.treeBiomass = this.treeFlora.getMaxBiomass();
-        } else {
-            this.treeBiomass += treeBiomass;
+        if (treeFlora != null) {
+            if (treeBiomass + this.treeBiomass > this.treeFlora.getMaxBiomass()) {
+                this.treeBiomass = this.treeFlora.getMaxBiomass();
+            } else {
+                this.treeBiomass += treeBiomass;
+            }
         }
     }
 

@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @Entity
@@ -45,23 +46,18 @@ public class Climate {
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "climate", cascade=CascadeType.ALL, orphanRemoval = true)
     private SkyTile skyTile;
 
-    @JsonProperty("climateEnum")
-    @Column(name = "climateEnum")
+    @JsonProperty("meanTemperature")
+    @Column(name = "meanTemperature")
     @JsonView(Views.Public.class)
-    @Enumerated(value = EnumType.STRING)
-    private ClimateEnum climateEnum;
+    private double meanTemperature;
 
+    @JsonProperty("baseMeanTemperature")
+    @Column(name = "baseMeanTemperature")
     @JsonView(Views.Public.class)
-    @JsonProperty("temperatureEnum")
-    @Column(name = "temperatureEnum")
-    @Enumerated(value = EnumType.STRING)
-    private TemperatureEnum temperatureEnum;
+    private double baseMeanTemperature;
 
-    @JsonView(Views.Public.class)
-    @JsonProperty("precipitationEnum")
-    @Column(name = "precipitationEnum")
-    @Enumerated(value = EnumType.STRING)
-    private PrecipitationEnum precipitationEnum;
+    @Transient
+    private double heatChange;
 
     public Climate(Coordinate coordinate){
         this.coordinate = coordinate;
@@ -72,8 +68,18 @@ public class Climate {
 
         this.latitude = ClimateHelper.transformToLatitude(y, wy);
         this.longitude = ClimateHelper.transformToLongitude(x, wx);
+        this.baseMeanTemperature = calculateBaseMeanTemperature(this.latitude);
+        this.meanTemperature = baseMeanTemperature;
 
         this.skyTile = new SkyTile(this);
+    }
+
+    // celcius
+    // 29(max mean temperature Earth) - -23 (min mean temperature Earth) = 52 (max difference in mean temperature on Earth)
+    // 52 - 90 = 0.58 (Assumed difference in mean temperature per degree of latitude)
+    // baseTemp = 29 - 0.58*latitude
+    protected double calculateBaseMeanTemperature(double latitude){
+        return 29d - (0.58d * latitude);
     }
 
     @JsonIgnore
@@ -92,9 +98,6 @@ public class Climate {
                 "id=" + id +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
-                ", climateEnum=" + climateEnum +
-                ", temperatureEnum=" + temperatureEnum +
-                ", precipitationEnum=" + precipitationEnum +
                 '}';
     }
 
@@ -124,13 +127,40 @@ public class Climate {
         Climate clone = new Climate();
         clone.setId(coordinateClone.getId());
         clone.setSkyTile(skyTile.createClone(clone));
-        clone.setPrecipitationEnum(precipitationEnum);
-        clone.setClimateEnum(climateEnum);
-        clone.setTemperatureEnum(temperatureEnum);
         clone.setCoordinate(coordinateClone);
         clone.setLatitude(latitude);
         clone.setLongitude(longitude);
-        clone.setPrecipitationEnum(precipitationEnum);
+        clone.setBaseMeanTemperature(baseMeanTemperature);
+        clone.setMeanTemperature(meanTemperature);
         return clone;
+    }
+
+    public void restoreBaseTemperature() {
+        this.meanTemperature = this.baseMeanTemperature;
+    }
+
+    public void processHeatChange(){
+        this.meanTemperature += this.heatChange;
+    }
+
+    public void transferWaterTemperature() {
+        coordinate.getNeighbours().stream()
+                .filter(Coordinate::isWater)
+                .map(Coordinate::getClimate)
+                .forEach(this::transferTemperatureThroughWater);
+    }
+
+    private void transferTemperatureThroughWater(Climate neighbouringClimate){
+        double averageTemperature = (neighbouringClimate.meanTemperature + this.meanTemperature) / 2d;
+        this.heatChange = (averageTemperature - this.meanTemperature) / 4d; // 4 is possible neighbours;
+    }
+
+    public void transferAirTemperature() {
+        Set<Aircurrent> aircurrents = skyTile.getIncommingAircurrents();
+        int incommingAirPressure = aircurrents.stream().mapToInt(Aircurrent::getCurrentStrength).sum();
+        double averageTemperatureDifference = aircurrents.stream()
+                .mapToDouble(aircurrent -> aircurrent.getHeatTransfer(this, incommingAirPressure))
+                .sum();
+        this.heatChange = averageTemperatureDifference / 2d; // 2 is a arbitrary number to deminish the transfer from air.
     }
 }

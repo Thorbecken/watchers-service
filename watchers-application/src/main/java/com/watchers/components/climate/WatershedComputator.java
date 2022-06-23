@@ -9,6 +9,7 @@ import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +26,13 @@ public class WatershedComputator {
     @Transactional
     public void process(WorldTaskDto taskDto) {
         World world = worldRepository.getById(taskDto.getWorldId());
+        Hibernate.initialize(world.getWatersheds());
         this.process(world);
         worldRepository.save(world);
     }
 
     protected void process(World world) {
+        Hibernate.initialize(world.getWatersheds());
         List<Tile> tilesWithPrecipitationAndNoWatershed = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .filter(tile -> tile.getWatershed() == null)
@@ -71,7 +74,7 @@ public class WatershedComputator {
     }
 
     private Optional<Watershed> getClosestWatershed(Tile tile, int distance) {
-        return tile.getCoordinate().getLowerOrEqualHeightCoordinatesWithinRange(distance).stream()
+        return tile.getCoordinate().getLowerOrEqualHeightLandCoordinatesWithinRange(distance).stream()
                 .map(Coordinate::getTile)
                 .map(TileWatershedHolder::new)
                 .filter(TileWatershedHolder::hasWatershed)

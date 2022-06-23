@@ -11,6 +11,7 @@ import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class ContinentalDriftTileChangeComputer {
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory."));
+        Hibernate.initialize(world.getWatersheds());
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 

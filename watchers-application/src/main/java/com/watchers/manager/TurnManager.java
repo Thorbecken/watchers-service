@@ -35,14 +35,22 @@ public class TurnManager {
     }
 
     private String generateLogMessage(WorldMetaData worldMetaData, StopWatch stopWatch) {
-        String  logMessage ="Processing a turn ";
+        String logMessage = "Epoch: " + worldMetaData.getEpoch() + ", Era: " + worldMetaData.getEra() + ", Age: " + worldMetaData.getAge() + ".";
+        logMessage = logMessage +" Processing a turn ";
+        worldMetaData.setAge(worldMetaData.getAge() +1);
         if(worldMetaData.isNeedsContinentalShift()){
             logMessage = logMessage + "and continentalshifting ";
+            worldMetaData.setAge(1);
+            worldMetaData.setEra(worldMetaData.getEra() +1);
         }
         if(worldMetaData.isNeedsSaving()){
             logMessage = logMessage + "and saving ";
+            worldMetaData.setAge(1);
+            worldMetaData.setEra(1);
+            worldMetaData.setEpoch(worldMetaData.getEpoch() +1);
         }
 
+        worldSettingManager.saveTime(worldMetaData);
         stopWatch.stop();
         logMessage = logMessage + "for world " + worldMetaData.getId() + ", and took " + stopWatch.getTotalTimeSeconds() + " seconds.";
         return logMessage;

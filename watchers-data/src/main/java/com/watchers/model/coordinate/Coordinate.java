@@ -235,9 +235,10 @@ public abstract class Coordinate {
 
     @JsonIgnore
     @SuppressWarnings("unused")
-    public Set<Coordinate> getLowerOrEqualHeightCoordinatesWithinRange(int range) {
+    public Set<Coordinate> getLowerOrEqualHeightLandCoordinatesWithinRange(int range) {
         Set<Coordinate> returnList = getCoordinatesWithinRangeWithQualifier(new HashSet<>(Collections.singletonList(this)),
                 range, LOWER_OR_EQUAL_HEIGHT_PREDICATE);
+        returnList.removeIf(Coordinate::isWater);
         returnList.remove(this);
         return returnList;
     }

@@ -10,6 +10,7 @@ import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class RiverComputator {
     @Transactional
     public void process(WorldTaskDto taskDto) {
         World world = worldRepository.getById(taskDto.getWorldId());
+        Hibernate.initialize(world.getWatersheds());
         this.process(world);
         worldRepository.save(world);
     }
@@ -57,7 +59,7 @@ public class RiverComputator {
             riverTilesUnconnected.remove(theChosenTile);
 
             Optional<Tile> flowDestination = theChosenTile.getCoordinate()
-                    .getLowerOrEqualHeightCoordinatesWithinRange(1)
+                    .getLowerOrEqualHeightLandCoordinatesWithinRange(1)
                     .stream()
                     .map(Coordinate::getTile)
                     .filter(neighbour -> noUpstreamTile(theChosenTile, neighbour))

@@ -153,4 +153,10 @@ public class Aircurrent {
                 ", heightDifference=" + heightDifference +
                 '}';
     }
+
+    public double getHeatTransfer(Climate climate, int incommingAirPressure) {
+        double averageTemperature = (climate.getMeanTemperature() + this.startingSky.getClimate().getMeanTemperature()) / 2d;
+        double heatChange = (averageTemperature - climate.getMeanTemperature());
+        return heatChange / incommingAirPressure * currentStrength;
+    }
 }

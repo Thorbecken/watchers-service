@@ -6,7 +6,6 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
@@ -136,11 +135,11 @@ class CoordinateTest {
         world.getCoordinate(3L, 2L).getTile().setHeight(10);
         world.getCoordinate(3L, 3L).getTile().setHeight(10);
         Coordinate startCoordinate = world.getCoordinate(2L, 2L);
-        Set<Coordinate> coordinatesInRange = startCoordinate.getLowerOrEqualHeightCoordinatesWithinRange(1);
+        Set<Coordinate> coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1);
         assertThat(coordinatesInRange, hasSize(4));
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
 
-        coordinatesInRange = startCoordinate.getLowerOrEqualHeightCoordinatesWithinRange(2);
+        coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(2);
         assertThat(coordinatesInRange, hasSize(8));
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
 
@@ -151,11 +150,11 @@ class CoordinateTest {
         world.getCoordinate(3L, 1L).getTile().setHeight(60);
         world.getCoordinate(3L, 2L).getTile().setHeight(60);
 
-        coordinatesInRange = startCoordinate.getLowerOrEqualHeightCoordinatesWithinRange(1);
+        coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1);
         assertThat(coordinatesInRange, hasSize(1));
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
 
-        coordinatesInRange = startCoordinate.getLowerOrEqualHeightCoordinatesWithinRange(2);
+        coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(2);
         assertThat(coordinatesInRange, hasSize(2));
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
     }

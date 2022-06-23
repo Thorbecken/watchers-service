@@ -396,32 +396,34 @@ public class SaveToDatabaseManager {
         }
 
     }
+
     @Data
     private static class WatershedHolder {
         private final Watershed watershed;
         private List<River> riverFlow;
         private List<Tile> watershedTiles;
 
-        WatershedHolder (Watershed watershed){
+        WatershedHolder(Watershed watershed) {
             this.watershed = watershed;
-            if(watershed != null) {
+            if (watershed != null) {
                 riverFlow = watershed.getRiverFlow();
                 watershedTiles = watershed.getWatershedTiles();
             }
         }
 
         void clearInformation() {
-            if(watershed != null) {
+            if (watershed != null) {
                 watershed.clearInformation();
             }
         }
 
-        void setInformation(){
-            if(watershed != null) {
+        void setInformation() {
+            if (watershed != null) {
                 watershed.setInformation(riverFlow, watershedTiles);
             }
         }
     }
+
     @Data
     private static class TileHolder {
         private final Tile tile;
@@ -443,7 +445,7 @@ public class SaveToDatabaseManager {
             watershedHolder.clearInformation();
         }
 
-        void setInformation(){
+        void setInformation() {
             watershedHolder.setInformation();
         }
     }
@@ -530,9 +532,10 @@ public class SaveToDatabaseManager {
 
             for (int i = 0; i < rivers.size(); i++) {
                 River river = rivers.get(i);
+                session.saveOrUpdate(river.getWatershed());
                 session.save(river);
 
-                if (i == 1000) {
+                if (i == 500) {
                     //flush a batch of inserts and release memory:
                     session.flush();
                     session.clear();
@@ -689,8 +692,8 @@ public class SaveToDatabaseManager {
 
     private void saveWatershedsMethod(List<Watershed> objects) {
         objects.sort(Comparator.comparing(Watershed::getId));
-        objects.forEach(watershed -> watershed.getWatershedTiles().clear());
-        objects.forEach(watershed -> watershed.getRiverFlow().clear());
+        objects.forEach(watershed -> watershed.clearWatershedTiles());
+        objects.forEach(watershed -> watershed.clearRiverFlow());
         SessionFactory sessionFactory = getCurrentSessionFromJPA();
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();

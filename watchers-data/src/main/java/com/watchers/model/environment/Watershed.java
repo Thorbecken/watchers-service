@@ -12,7 +12,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -51,13 +50,16 @@ public class Watershed {
     private List<River> riverFlow = new ArrayList<>();
 
     public Watershed(World world){
-        Hibernate.initialize(world.getWatersheds());
         world.getWatersheds().add(this);
         this.world = world;
     }
 
     public List<Tile> getWatershedTiles() {
         return new ArrayList<>(watershedTiles);
+    }
+
+    public void clearWatershedTiles() {
+        watershedTiles.clear();
     }
 
     private void setWatershedTiles(List<Tile> watershedTiles) {
@@ -82,6 +84,10 @@ public class Watershed {
 
     private void setRiverFlow(List<River> riverFlow) {
         this.riverFlow = riverFlow;
+    }
+
+    public void clearRiverFlow() {
+        riverFlow.clear();
     }
 
     public void clearInformation(){
