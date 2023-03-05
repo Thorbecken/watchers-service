@@ -136,8 +136,14 @@ class CoordinateTest {
         world.getCoordinate(3L, 3L).getTile().setHeight(10);
         Coordinate startCoordinate = world.getCoordinate(2L, 2L);
         Set<Coordinate> coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1);
-        assertThat(coordinatesInRange, hasSize(4));
+        assertThat(coordinatesInRange, hasSize(2));
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
+
+        world.getCoordinates().stream()
+                .map(Coordinate::getTile)
+                .forEach(tile -> tile.setSurfaceType(SurfaceType.PLAIN));
+        coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1);
+        assertThat(coordinatesInRange, hasSize(4));
 
         coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(2);
         assertThat(coordinatesInRange, hasSize(8));

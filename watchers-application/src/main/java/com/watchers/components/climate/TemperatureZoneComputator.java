@@ -20,7 +20,7 @@ public class TemperatureZoneComputator {
         World world = worldRepository.getById(taskDto.getWorldId());
 
         restoreBaseTemperature(world);
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
         for (int i = 0; i < 3; i++) {
             // waterflow transfer
             transferWaterTemperature(world);
@@ -29,7 +29,7 @@ public class TemperatureZoneComputator {
             // proces transfer
             processTemperatureTransfer(world);
 
-            worldRepository.save(world);
+            worldRepository.saveAndFlush(world);
         }
     }
 

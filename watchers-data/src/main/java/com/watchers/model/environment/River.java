@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.*;
@@ -42,8 +44,7 @@ public class River {
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @ManyToOne(fetch = FetchType.LAZY)
-//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "watershed_id", nullable = false)
     private Watershed watershed;
 
@@ -148,6 +149,7 @@ public class River {
         this.createNewWatershed(this);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     private void createNewWatershed(River river) {
         World world = river.getTile().getCoordinate().getWorld();
         Watershed watershed = new Watershed(world);
@@ -158,6 +160,7 @@ public class River {
 
     private void changeWatershedUpstream(Watershed watershed) {
         List<River> riversNeedingToChangeWatershed = new ArrayList<>();
+        List<River> riversChanged = new ArrayList<>();
         riversNeedingToChangeWatershed.add(this);
 
         int safetyToken = 0;
@@ -166,11 +169,16 @@ public class River {
             if (safetyToken > 2000) {
                 log.warn("ChangeWatershedUpstream in loop for " + safetyToken + " loops");
             }
+
             River riverToBeChanged = riversNeedingToChangeWatershed.get(0);
             riversNeedingToChangeWatershed.remove(riverToBeChanged);
+            riversChanged.add(riverToBeChanged);
 
             riverToBeChanged.setWatershed(watershed);
-            riversNeedingToChangeWatershed.addAll(this.getUpCurrentRivers());
+
+            Set<River> upCurrentRivers = this.getUpCurrentRivers();
+            riversChanged.forEach(upCurrentRivers::remove);
+            riversNeedingToChangeWatershed.addAll(upCurrentRivers);
         }
     }
 

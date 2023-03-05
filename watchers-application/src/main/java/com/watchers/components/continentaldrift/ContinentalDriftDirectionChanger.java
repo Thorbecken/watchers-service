@@ -35,7 +35,7 @@ public class ContinentalDriftDirectionChanger {
         new ContinentalDriftDirectionMethodObject(false, world.getLastContinentInFlux())
                 .adjustContinentelDriftFlux(world, world.getWorldSettings().getDrifFlux(), world.getWorldSettings().getDriftVelocity());
         adjustForDriftPressure(world);
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 
     private void adjustForDriftPressure(World world) {

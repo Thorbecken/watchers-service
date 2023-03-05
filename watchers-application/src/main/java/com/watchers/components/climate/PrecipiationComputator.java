@@ -40,7 +40,7 @@ public class PrecipiationComputator {
         moveCloudsAccordingToAirflow(climates, world.getWorldSettings());
         computePrecipitation(climates);
 
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 
     private void computeEvaporation(List<Climate> climates) {

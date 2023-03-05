@@ -44,31 +44,33 @@ class AnimalTest {
 
 
     @Test
-    void processTurn(){
+    void processTurnTillReproduction(){
+        assertEquals(1, rabbitWorld.getActorList().size());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().setGrassFlora(Flora.GRASS));
         assertEquals(1f, rabbit.getFoodReserve());
         rabbit.processSerialTask();
-        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         assertEquals(1.5f, rabbit.getFoodReserve());
-        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
         assertEquals(2.0f, rabbit.getFoodReserve());
-        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
         assertEquals(2.5f, rabbit.getFoodReserve());
-        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
         assertEquals(3.0f, rabbit.getFoodReserve());
-        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
         assertEquals(3.5f, rabbit.getFoodReserve());
-        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
+        assertEquals(1, rabbitWorld.getActorList().size());
         rabbit.processSerialTask();
         assertEquals(2.0f, rabbit.getFoodReserve());
-        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().processParallelTask());
-        assertEquals(2, startingTile.getCoordinate().getActors().size());
+        rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
+        assertEquals(2, rabbitWorld.getNewActors().size());
         startingTile.getCoordinate().getActors().forEach(Actor::processSerialTask);
         startingTile.getCoordinate().getActors().forEach(Actor::processSerialTask);
-        assertEquals(1, startingTile.getCoordinate().getActors().size());
     }
 
     @Test

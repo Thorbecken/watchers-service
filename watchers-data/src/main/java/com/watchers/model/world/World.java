@@ -11,10 +11,25 @@ import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +84,7 @@ public class World {
 
     @JsonProperty("watersheds")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
     private Set<Watershed> watersheds = new HashSet<>();
 
     @JsonProperty("lastContinentInFlux")
@@ -160,6 +175,20 @@ public class World {
                 .collect(Collectors.toList());
     }
 
+    public Set<Watershed> getWatersheds(){
+        return Collections.unmodifiableSet(watersheds);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void addWatershed(Watershed watershed){
+        watershed.setWorld(this);
+        watersheds.add(watershed);
+    }
+
+    public void addAllWatersheds(List<Watershed> watersheds) {
+    watersheds.forEach(this::addWatershed);
+    }
+
     public World createBasicClone(){
         World newWorld = new World(this.xSize, this.ySize);
         newWorld.setId(this.id);
@@ -194,7 +223,7 @@ public class World {
         World world = (World) o;
 
         return id != null && world.getId() != null ?
-                (id == null || world.getId() == null || id.equals(world.getId())) :
+                id.equals(world.getId()) :
                 ySize.equals(world.ySize) && xSize.equals(world.xSize);
     }
 

@@ -692,8 +692,8 @@ public class SaveToDatabaseManager {
 
     private void saveWatershedsMethod(List<Watershed> objects) {
         objects.sort(Comparator.comparing(Watershed::getId));
-        objects.forEach(watershed -> watershed.clearWatershedTiles());
-        objects.forEach(watershed -> watershed.clearRiverFlow());
+        objects.forEach(Watershed::clearWatershedTiles);
+        objects.forEach(Watershed::clearRiverFlow);
         SessionFactory sessionFactory = getCurrentSessionFromJPA();
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
@@ -804,7 +804,7 @@ public class SaveToDatabaseManager {
         List<Watershed> watersheds = persistentWorld.getWatersheds().stream()
                 .map(watershed -> watershed.createClone(newWorld))
                 .collect(Collectors.toList());
-        newWorld.getWatersheds().addAll(watersheds);
+        newWorld.addAllWatersheds(watersheds);
         log.debug("Current watersheds in memory: " + watersheds.size() + " " + Arrays.toString(watersheds.stream().map(Watershed::getId).toArray()));
         watersheds.sort(Comparator.comparing(Watershed::getId));
         saveWatershedsMethod(watersheds);

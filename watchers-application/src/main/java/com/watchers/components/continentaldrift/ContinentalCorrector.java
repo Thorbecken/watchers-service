@@ -51,7 +51,7 @@ public class ContinentalCorrector {
                 }
         );
 
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 
     public static <T> T mostCommon(List<T> list) {

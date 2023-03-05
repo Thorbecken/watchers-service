@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class Watershed {
     private Long id;
 
     @ManyToOne
+//    @ManyToOne(cascade = CascadeType.PERSIST)
     @JsonIgnore
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
@@ -50,8 +52,8 @@ public class Watershed {
     private List<River> riverFlow = new ArrayList<>();
 
     public Watershed(World world){
-        world.getWatersheds().add(this);
-        this.world = world;
+        world.addWatershed(this);
+        Assert.notNull(world, "The world can't be null.");
     }
 
     public List<Tile> getWatershedTiles() {

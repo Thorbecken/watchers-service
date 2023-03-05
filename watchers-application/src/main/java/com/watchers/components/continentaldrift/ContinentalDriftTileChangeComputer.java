@@ -27,7 +27,7 @@ public class ContinentalDriftTileChangeComputer {
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory."));
-        Hibernate.initialize(world.getWatersheds());
+        Hibernate.initialize(world);
         Map<Coordinate, ContinentalChangesDto> changes = taskDto.getChanges();
         Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
 
@@ -47,7 +47,7 @@ public class ContinentalDriftTileChangeComputer {
         );
 
         taskDto.setChanges(changes);
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 
     private void processAbsentTile(Coordinate coordinate, Map<Coordinate, ContinentalChangesDto> changes) {

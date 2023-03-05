@@ -41,7 +41,7 @@ public class LifeManager {
         Tile seedingTile = world.getCoordinate(xCoord, yCoord).getTile();
         AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
         seedingTile.getCoordinate().getActors().add(new Animal(seedingTile.getCoordinate(), animalType, animalType.getMaxFoodReserve()));
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
         Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
     }
 

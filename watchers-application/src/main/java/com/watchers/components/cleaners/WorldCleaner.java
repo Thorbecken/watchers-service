@@ -56,7 +56,7 @@ public class WorldCleaner {
                 log.trace("deleting continents: " + Arrays.toString(zeroContinents.stream().map(Continent::getId).toArray()));
                 world.getContinents().removeAll(zeroContinents);
 
-                worldRepository.save(world);
+                worldRepository.saveAndFlush(world);
 
                 world = worldRepository.findById(world.getId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
                 continentRepository.deleteAll(zeroContinents);
@@ -65,6 +65,6 @@ public class WorldCleaner {
             }
         }
 
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 }

@@ -24,6 +24,6 @@ public class AnimalCleaner {
                 .filter(Actor::isNotOnCorrectLand)
                 .forEach(Actor::handleContinentalMovement);
 
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 }

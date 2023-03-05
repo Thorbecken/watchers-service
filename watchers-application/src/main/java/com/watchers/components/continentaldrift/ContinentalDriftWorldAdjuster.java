@@ -39,7 +39,7 @@ public class ContinentalDriftWorldAdjuster {
                 }
         );
 
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 
     private long calculateNewHeight(World world, Map<Coordinate, ContinentalChangesDto> changes) {

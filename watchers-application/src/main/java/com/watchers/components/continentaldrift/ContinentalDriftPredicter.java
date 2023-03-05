@@ -26,7 +26,7 @@ public class ContinentalDriftPredicter {
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         createButtomLayer(taskDto, world);
         world.getContinents().forEach(continent -> predictContinentalMovement(continent, taskDto.getNewTileLayout()));
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 
     private void predictContinentalMovement(Continent continent, Map<Coordinate, List<Tile>> newTileLayout){

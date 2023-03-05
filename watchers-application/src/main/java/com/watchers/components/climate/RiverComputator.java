@@ -29,7 +29,7 @@ public class RiverComputator {
         World world = worldRepository.getById(taskDto.getWorldId());
         Hibernate.initialize(world.getWatersheds());
         this.process(world);
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 
     protected void process(World world) {

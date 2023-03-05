@@ -51,6 +51,6 @@ public class ActorProcessor {
             currentActors.forEach(Actor::processSerialTask);
         }
 
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
     }
 }

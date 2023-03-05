@@ -45,7 +45,7 @@ public class ContinentalDriftNewTileAssigner {
         int newContinentsCreated = createNewContinents(taskDto, currentNumberOfContinents, minimumContinents, listOfConnectedCoordinates, world);
         addEmptytilesToExistingContinents(newContinentsCreated, listOfConnectedCoordinates, taskDto, world);
 
-        worldRepository.save(world);
+        worldRepository.saveAndFlush(world);
 
     }
 
