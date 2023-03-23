@@ -26,6 +26,11 @@ public class TestableWorld {
 
         WorldMetaData worldMetaData = new WorldMetaData();
         worldMetaData.setWorldTypeEnum(worldTypeEnum);
+        worldMetaData.setWorld(world);
+        worldMetaData.setXSize(world.getXSize());
+        worldMetaData.setYSize(world.getYSize());
+        worldMetaData.setId(world.getId());
+        world.setWorldMetaData(worldMetaData);
 
         Continent continent1 = new Continent(world, SurfaceType.PLAIN);
         continent1.setId(0L);
@@ -90,6 +95,12 @@ public class TestableWorld {
 
         WorldMetaData worldMetaData = new WorldMetaData();
         worldMetaData.setWorldTypeEnum(worldTypeEnum);
+        worldMetaData.setWorld(world);
+        worldMetaData.setXSize(world.getXSize());
+        worldMetaData.setYSize(world.getYSize());
+        worldMetaData.setId(world.getId());
+
+        world.setWorldMetaData(worldMetaData);
 
         Continent continent1 = new Continent(world, SurfaceType.PLAIN);
         continent1.setId(0L);

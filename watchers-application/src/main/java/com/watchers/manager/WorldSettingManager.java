@@ -92,7 +92,7 @@ public class WorldSettingManager {
     }
 
     public WorldMetaData createNewWorldSetting(long worldId, WorldStatusEnum worldStatusEnum, WorldTypeEnum worldTypeEnum, boolean needsProcessing, boolean needsSaving, boolean needsContinentalshift) {
-        return new WorldMetaData(worldId, null, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift,1,1,1);
+        return new WorldMetaData(worldId, null, null,null, worldStatusEnum, worldTypeEnum, needsProcessing, needsSaving, needsContinentalshift,1,1,1);
     }
 
     @Transactional

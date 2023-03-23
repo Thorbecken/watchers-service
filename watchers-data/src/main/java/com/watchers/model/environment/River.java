@@ -106,7 +106,7 @@ public class River {
     public void makeRiverFlowTillEnd(List<Coordinate> coordinates) {
         Tile currentTile = this.getTile();
         Coordinate currentCoordinate = currentTile.getCoordinate();
-        if (coordinates.contains(currentCoordinate)){
+        if (coordinates.contains(currentCoordinate)) {
             log.warn("Loop detected while making the river flow till the end!");
             this.createLakeEnding(currentTile);
         }
@@ -224,5 +224,20 @@ public class River {
             clone.setUpCurrentRivers(new HashSet<>(this.upCurrentRivers));
         }
         return clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        River river = (River) o;
+        return Objects.equals(id, river.id)
+                && Objects.equals(tile, river.tile)
+                && watershed.equals(river.watershed);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, tile, watershed);
     }
 }

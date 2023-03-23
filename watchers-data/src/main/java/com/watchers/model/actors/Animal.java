@@ -1,33 +1,33 @@
 package com.watchers.model.actors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.watchers.model.coordinate.Coordinate;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.StateType;
 import com.watchers.model.environment.Biome;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Data
 @Slf4j
 @Entity
 @Table(name = "animal")
-@EqualsAndHashCode(callSuper=true)
-@SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
+@SequenceGenerator(name = "Animal_Gen", sequenceName = "Animal_Seq", allocationSize = 1)
 public class Animal extends Actor {
 
     @Id
     @JsonView(Views.Internal.class)
     @JsonProperty("animalId")
-    @SequenceGenerator(name="Animal_Gen", sequenceName="Animal_Seq", allocationSize = 1)
-    @GeneratedValue(generator="Animal_Gen", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "Animal_Gen", sequenceName = "Animal_Seq", allocationSize = 1)
+    @GeneratedValue(generator = "Animal_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "animal_id")
     private Long id;
 
@@ -44,22 +44,23 @@ public class Animal extends Actor {
     @Column(name = "animal_type")
     private AnimalType animalType;
 
+    @SuppressWarnings("unused")
     private Animal() {
     }
 
-    public void generateOffspring(Coordinate coordinate, float foodPassed){
+    public void generateOffspring(Coordinate coordinate, float foodPassed) {
         coordinate.getActors().add(new Animal(coordinate, this.animalType, foodPassed));
     }
 
-    private void metabolize(){
-        if(animalType.getMetabolisme() > foodReserve){
+    private void metabolize() {
+        if (animalType.getMetabolisme() > foodReserve) {
             setStateType(StateType.DEAD);
         } else {
             foodReserve = foodReserve - animalType.getMetabolisme();
         }
     }
 
-    private void move(){
+    private void move() {
         double localFood = getCoordinate().getTile().getBiome().getCurrentFood();
         if (localFood < animalType.getForaging()) {
             getCoordinate().getNeighbours().stream()
@@ -79,26 +80,26 @@ public class Animal extends Actor {
     private void eat(){
         Biome biome = getCoordinate().getTile().getBiome();
         double localFood = biome.getCurrentFood();
-        if(localFood >= animalType.getForaging()){
+        if (localFood >= animalType.getForaging()) {
             foodReserve = foodReserve + animalType.getForaging();
             biome.forage(animalType.getForaging());
         }
     }
 
-    private void reproduce(){
-        if(animalType.getReproductionRate() <= (foodReserve / animalType.getMaxFoodReserve())){
-            generateOffspring(getCoordinate(), foodReserve/2);
-            foodReserve = foodReserve/2;
+    private void reproduce() {
+        if (animalType.getReproductionRate() <= (foodReserve / animalType.getMaxFoodReserve())) {
+            generateOffspring(getCoordinate(), foodReserve / 2);
+            foodReserve = foodReserve / 2;
         }
     }
 
     @Override
     public void processSerialTask() {
-        if(StateType.DEAD.equals(getStateType())){
+        if (StateType.DEAD.equals(getStateType())) {
             log.trace("Animal with ID " + id + " is dead but still walking the world");
         }
         this.metabolize();
-        if(getStateType() != StateType.DEAD) {
+        if (getStateType() != StateType.DEAD) {
             this.move();
             this.eat();
             this.reproduce();
@@ -120,7 +121,8 @@ public class Animal extends Actor {
     public Actor createClone(Coordinate newCoordinate) {
         return new Animal(newCoordinate, this.animalType, this.foodReserve);
     }
-    public Animal(Coordinate coordinate, AnimalType animalType, float StartingFood){
+
+    public Animal(Coordinate coordinate, AnimalType animalType, float StartingFood) {
         super.setActorType(ActorType.ANIMAL);
         super.setNaturalHabitat(animalType.getNaturalHabitat());
 
@@ -130,8 +132,24 @@ public class Animal extends Actor {
         setCoordinate(coordinate);
 
         List<Actor> newActors = getCoordinate().getWorld().getNewActors();
-        if(newActors != null){
+        if (newActors != null) {
             newActors.add(this);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Animal)) return false;
+        if (!super.equals(o)) return false;
+        Animal animal = (Animal) o;
+        return Objects.equals(id, animal.id)
+                && animalType == animal.animalType
+                && Float.compare(animal.foodReserve, foodReserve) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), id, foodReserve, animalType);
     }
 }

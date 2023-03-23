@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.watchers.config.SettingConfiguration;
 import com.watchers.helper.StopwatchTimer;
 import com.watchers.model.common.Views;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -33,6 +36,11 @@ public class FileSaveManager {
         save(world);
         worldSettingManager.changeSaveSetting(taskDto.getWorldId(), false);
         StopwatchTimer.stop("saveWorld");
+        log.info("Saved " + world.getCoordinates().size() + " coordinates");
+        log.info("Saved " + world.getContinents().size() + " continents");
+        log.info("Saved " + world.getActorList().size() + " actors");
+        log.info("Saved " + world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getWatershed).filter(Objects::nonNull).distinct().count() + " watersheds");
+        log.info("Saved " + world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getRiver).filter(Objects::nonNull).distinct().count() + " rivers");
     }
     public void saveWorld(World world){
         save(world);

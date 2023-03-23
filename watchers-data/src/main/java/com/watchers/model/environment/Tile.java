@@ -2,28 +2,29 @@ package com.watchers.model.environment;
 
 import com.fasterxml.jackson.annotation.*;
 import com.watchers.model.common.Views;
-import com.watchers.model.dto.MockTile;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.dto.MockTile;
 import com.watchers.model.enums.RockType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity
 @Table(name = "tile")
-@SequenceGenerator(name="Tile_Gen", sequenceName="Tile_Seq", allocationSize = 1)
+@SequenceGenerator(name = "Tile_Gen", sequenceName = "Tile_Seq", allocationSize = 1)
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
 public class Tile {
 
     @Id
     @JsonProperty("tileId")
     @JsonView(Views.Internal.class)
-    @GeneratedValue(generator="Tile_Gen", strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator = "Tile_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "tile_id", nullable = false)
     private Long id;
 
@@ -48,13 +49,13 @@ public class Tile {
     private River river;
 
     @JsonView(Views.Public.class)
-    @JsonIgnoreProperties({"world", "watershedTiles", "riverFlow" })
-    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @JsonIgnoreProperties({"world", "watershedTiles", "riverFlow"})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Watershed watershed;
 
     @JsonProperty("biome")
     @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade = CascadeType.ALL, orphanRemoval = true)
     private Biome biome;
 
 
@@ -70,7 +71,7 @@ public class Tile {
     @Enumerated(value = EnumType.STRING)
     private RockType rockType;
 
-    public Tile(Coordinate coordinate, Continent continent){
+    public Tile(Coordinate coordinate, Continent continent) {
         this.coordinate = coordinate;
         this.surfaceType = continent.getType();
         this.biome = new Biome(this);
@@ -78,18 +79,19 @@ public class Tile {
 
     @JsonCreator
     @SuppressWarnings("unused")
-    private Tile(){}
+    private Tile() {
+    }
 
     @JsonIgnore
     @SuppressWarnings("unused")
     public List<Tile> getNeighboursWithinRange(List<Tile> tiles, int range) {
-        if(range>=1) {
+        if (range >= 1) {
             List<Tile> returnList = new ArrayList<>();
             tiles.forEach(
                     tile -> returnList.addAll(tile.getNeighbours())
             );
 
-            return getNeighboursWithinRange(returnList, tiles, range-1);
+            return getNeighboursWithinRange(returnList, tiles, range - 1);
         } else {
             return tiles;
         }
@@ -108,45 +110,52 @@ public class Tile {
 
     @JsonIgnore
     private List<Tile> getNeighboursWithinRange(List<Tile> tiles, List<Tile> oldTiles, int range) {
-        if(range>=1) {
+        if (range >= 1) {
             List<Tile> returnList = new ArrayList<>();
             tiles.forEach(
                     tile -> {
-                        if(!oldTiles.contains(tile)){
+                        if (!oldTiles.contains(tile)) {
                             returnList.addAll(tile.getNeighbours());
                         }
                     }
             );
 
-            return getNeighboursWithinRange(returnList, tiles, range-1);
+            return getNeighboursWithinRange(returnList, tiles, range - 1);
         } else {
             return tiles;
         }
     }
 
     @JsonIgnore
-    public boolean isWater(){
-        return  surfaceType.equals(SurfaceType.OCEAN)
+    public boolean isWater() {
+        return surfaceType.equals(SurfaceType.OCEAN)
                 || surfaceType.equals(SurfaceType.SEA)
                 || surfaceType.equals(SurfaceType.COASTAL)
                 || surfaceType.equals(SurfaceType.LAKE);
     }
 
     @JsonIgnore
-    public boolean isLand(){
+    public boolean isSea() {
+        return surfaceType.equals(SurfaceType.OCEAN)
+                || surfaceType.equals(SurfaceType.SEA)
+                || surfaceType.equals(SurfaceType.COASTAL);
+    }
+
+    @JsonIgnore
+    public boolean isLand() {
         return !isWater();
     }
 
     public void setRiver(River river) {
         this.river = river;
-        if(river != null) {
+        if (river != null) {
             river.setTile(this);
         }
     }
 
     @JsonIgnore
-    public boolean riverIsConnected(){
-        if(this.river == null){
+    public boolean riverIsConnected() {
+        if (this.river == null) {
             return false;
         } else {
             return this.getNeighbours()
@@ -162,22 +171,30 @@ public class Tile {
         return coordinate.equals(((Tile) o).getCoordinate());
     }
 
-    public void clear(){
+    public void clear() {
         this.coordinate.getContinent().getCoordinates().remove(this.coordinate);
         this.height = 0;
         this.biome.clear();
     }
 
-    public void transferData(MockTile mockTile){
+    public void transferData(MockTile mockTile, Coordinate survivingCoordinate) {
         this.biome.transferData(mockTile);
-        if(this.river != null && mockTile.getRiver() != null) {
-            this.river.mergeRivers(this.river, mockTile.getRiver());
+        if (this.river != null && survivingCoordinate.getTile().getRiver() != null) {
+            this.river.mergeRivers(this.river, survivingCoordinate.getTile().getRiver());
         }
-        mockTile.getActorSet().addAll(this.coordinate.getActors());
+        survivingCoordinate.getActors().addAll(this.coordinate.getActors());
     }
 
-    public void setData(MockTile mockTile) {
-        this.coordinate.changeContinent(mockTile.getContinent());
+    public void setData(MockTile mockTile, Coordinate deletedTileCoordinate) {
+        Continent continent;
+        if (this.getCoordinate().getContinent().getId().equals(mockTile.getMockContinentObject().getId())) {
+            continent = this.coordinate.getContinent();
+        } else {
+            continent = this.getCoordinate().getWorld().getContinents().stream()
+                    .filter(continent1 -> continent1.getId().equals(mockTile.getMockContinentObject().getId()))
+                    .findFirst().orElseThrow();
+        }
+        this.coordinate.changeContinent(continent);
         this.coordinate.getContinent().getCoordinates().add(this.coordinate);
 
         this.biome.addGrassBiomass(mockTile.getGrassBiomass());
@@ -187,13 +204,13 @@ public class Tile {
         this.height = mockTile.getHeight();
         this.surfaceType = mockTile.getSurfaceType();
 
-        this.coordinate.getActors().addAll(mockTile.getActorSet());
+        this.coordinate.getActors().addAll(deletedTileCoordinate.getActors());
         this.coordinate.getActors().forEach(actor -> actor.setCoordinate(coordinate));
     }
 
     public void changeWatershed(Watershed newWatershed) {
         this.watershed = newWatershed;
-        if(this.river != null){
+        if (this.river != null) {
             this.river.setWatershed(newWatershed);
         }
     }
@@ -203,8 +220,8 @@ public class Tile {
         if (this == o) return true;
         if (!(o instanceof Tile)) return false;
         Tile tile = (Tile) o;
-        return id != null && tile.getId() != null?
-                id.equals(tile.id):
+        return id != null && tile.getId() != null ?
+                id.equals(tile.id) :
                 Objects.equals(coordinate, tile.coordinate);
     }
 
@@ -227,15 +244,15 @@ public class Tile {
         clone.setSurfaceType(this.surfaceType);
         clone.setCoordinate(newCoordinate);
         clone.setHeight(this.height);
-        //clone.setId(this.id);
         clone.setId(newCoordinate.getId());
         clone.setBiome(this.biome.createClone(clone));
-        if(watershed != null) {
+        if (watershed != null) {
             Watershed newWatershed = newCoordinate.getWorld().getWatersheds().stream()
                     .filter(oldWatershed -> oldWatershed.getId().equals(watershed.getId()))
-                    .findFirst().get();
+                    .findFirst()
+                    .orElseThrow();
             newWatershed.addTile(clone);
-            if(this.river != null) {
+            if (this.river != null) {
                 clone.setRiver(this.river.createClone(clone));
                 clone.getRiver().setWatershed(newWatershed);
                 newWatershed.addRiver(clone.getRiver());
@@ -245,7 +262,7 @@ public class Tile {
     }
 
     public void checkIntegrity() {
-        if(this.river != null) {
+        if (this.river != null) {
             this.river.checkIntegrity();
         }
     }

@@ -14,7 +14,7 @@ public class StopwatchTimer {
 
     public static void stop(String message){
         stopWatch.stop();
-        log.debug("Processed " + message + " in " + stopWatch.getTotalTimeSeconds() + " seconds.");
+        log.info("Processed " + message + " in " + stopWatch.getTotalTimeSeconds() + " seconds.");
     }
 
 }

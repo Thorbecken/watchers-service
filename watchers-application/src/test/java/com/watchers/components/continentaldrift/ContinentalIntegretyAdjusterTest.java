@@ -6,6 +6,7 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldMetaData;
 import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +43,7 @@ class ContinentalIntegretyAdjusterTest {
 
         Mockito.when(worldRepository.findById(1L)).thenReturn(Optional.of(world));
 
-        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false);
+        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
         world.getWorldSettings().setHeigtDivider(1);
         world.getWorldSettings().setMinimumContinents(1);
         continentalIntegretyAdjuster.process(continentalDriftTaskDto);
@@ -57,6 +58,14 @@ class ContinentalIntegretyAdjusterTest {
         World world = new World();
         world.setXSize(3L);
         world.setYSize(5L);
+
+        WorldMetaData worldMetaData = new WorldMetaData();
+        worldMetaData.setId(1L);
+        worldMetaData.setWorld(world);
+        worldMetaData.setXSize(world.getXSize());
+        worldMetaData.setYSize(world.getYSize());
+        world.setWorldMetaData(worldMetaData);
+
         Continent toBeSplitContinent = new Continent(world, SurfaceType.OCEAN);
         toBeSplitContinent.setId(1L);
         Continent fillerContinent = new Continent(world, SurfaceType.OCEAN);

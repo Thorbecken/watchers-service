@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -163,5 +164,19 @@ public class SkyTile {
         SkyTile clone = new SkyTile();
         clone.setId(this.getId());
         return clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SkyTile skyTile = (SkyTile) o;
+        return Objects.equals(id, skyTile.id)
+                && climate.equals(skyTile.climate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, climate);
     }
 }

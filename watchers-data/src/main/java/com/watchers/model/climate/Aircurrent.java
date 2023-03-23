@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -68,15 +69,15 @@ public class Aircurrent {
         this.startingSky = startingSky;
         this.endingSky = endingSky;
 
-        startingSky.getOutgoingAircurrents().add(this);
-        endingSky.getIncommingAircurrents().add(this);
-
-        recalculateHeigthDifference();
-
         this.startingXCoordinate = startingSky.getClimate().getCoordinate().getXCoord();
         this.endingXCoordinate = endingSky.getClimate().getCoordinate().getXCoord();
         this.startingYCoordinate = startingSky.getClimate().getCoordinate().getYCoord();
         this.endingYCoordinate = endingSky.getClimate().getCoordinate().getYCoord();
+
+        startingSky.getOutgoingAircurrents().add(this);
+        endingSky.getIncommingAircurrents().add(this);
+
+        recalculateHeigthDifference();
     }
 
     public void resetCoordinates(){
@@ -158,5 +159,22 @@ public class Aircurrent {
         double averageTemperature = (climate.getMeanTemperature() + this.startingSky.getClimate().getMeanTemperature()) / 2d;
         double heatChange = (averageTemperature - climate.getMeanTemperature());
         return heatChange / incommingAirPressure * currentStrength;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Aircurrent that = (Aircurrent) o;
+        return Objects.equals(id, that.id)
+                && startingXCoordinate.equals(that.startingXCoordinate)
+                && endingXCoordinate.equals(that.endingXCoordinate)
+                && startingYCoordinate.equals(that.startingYCoordinate)
+                && endingYCoordinate.equals(that.endingYCoordinate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, startingXCoordinate, endingXCoordinate, startingYCoordinate, endingYCoordinate);
     }
 }

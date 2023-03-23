@@ -12,12 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class SurfaceTypeComputator {
 
-    private WorldRepository worldRepository;
-    private long seaHight;
-    private long coastalHight;
-    private long plainsHight;
-    private long hillHight;
-    private long mountainHight;
+    private final WorldRepository worldRepository;
+    private final long seaHight;
+    private final long coastalHight;
+    private final long plainsHight;
+    private final long hillHight;
+    private final long mountainHight;
 
     public SurfaceTypeComputator(
                        @Value("${watch.seaHight}") long seaHight,

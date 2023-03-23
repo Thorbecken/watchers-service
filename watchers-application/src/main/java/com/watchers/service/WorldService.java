@@ -6,6 +6,7 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.environment.Watershed;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
 import com.watchers.repository.WorldRepository;
@@ -109,9 +110,11 @@ public class WorldService {
     private void saveToMemory(World persistentWorld) {
         saveToDatabaseManager.complexSaveToMemory(persistentWorld);
 
-        World newWorld = worldRepository.findById(persistentWorld.getId()).orElseThrow(() -> new RuntimeException("The world was lost in perstistence."));
-        log.info("current coordinates from memory are: " + newWorld.getCoordinates().size());
-        log.info("current coordinates from memory are: " + persistentWorld.getCoordinates().size());
+        log.info("Loaded " + persistentWorld.getCoordinates().size() + " coordinates");
+        log.info("Loaded " + persistentWorld.getContinents().size() + " continents");
+        log.info("Loaded " + persistentWorld.getActorList().size() + " actors");
+        log.info("Loaded " + persistentWorld.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getWatershed).distinct().count() + " watersheds");
+        log.info("Loaded " + persistentWorld.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getRiver).count() + " rivers");
     }
 
     private Boolean addActiveWorldFromMemory(WorldMetaData worldMetaData) {

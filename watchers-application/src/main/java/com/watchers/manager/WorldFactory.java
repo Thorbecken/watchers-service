@@ -37,6 +37,8 @@ class WorldFactory {
         world.setWorldSettings(worldSettings);
         worldSettings.setWorld(world);
         worldMetaData.setWorld(world);
+        worldMetaData.setXSize(world.getXSize());
+        worldMetaData.setYSize(world.getYSize());
 
         int continental = 0;
         int oceeanic = 0;
@@ -110,7 +112,7 @@ class WorldFactory {
         WorldFactoryDTO dto = new WorldFactoryDTO(world);
         List<MockContinent> mockContinents = new ArrayList<>();
         world.getContinents().forEach(
-                continent -> mockContinents.add(new MockContinent(continent, world))
+                continent -> mockContinents.add(new MockContinent(continent))
         );
 
         long numberOfCoordinateToSplit = world.getXSize() * world.getYSize();
@@ -136,7 +138,7 @@ class WorldFactory {
         world.getCoordinates().clear();
         world.getContinents().removeIf(continent -> continent.getType() == null);
 
-        mockContinents.forEach(MockContinent::generateContinent);
+        mockContinents.forEach(mockContinent -> mockContinent.generateContinent(world));
     }
 
     private Coordinate generateStartingCoordinate(World world, Continent continent) {

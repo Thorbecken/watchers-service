@@ -10,7 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -43,7 +46,7 @@ public class ContinentalCorrector {
                                 .filter(continent -> continent.getId().equals(mostCommonContinent))
                                 .findFirst();
 
-                        chosenContinent.ifPresent( continent -> {
+                        chosenContinent.ifPresent(continent -> {
                             coordinate.changeContinent(continent);
                             coordinate.getContinent().getCoordinates().add(coordinate);
                         });

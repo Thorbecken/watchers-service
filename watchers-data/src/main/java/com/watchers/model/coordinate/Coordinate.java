@@ -3,6 +3,7 @@ package com.watchers.model.coordinate;
 import com.fasterxml.jackson.annotation.*;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.actors.Actor;
+import com.watchers.model.actors.Animal;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.common.Views;
 import com.watchers.model.environment.Tile;
@@ -10,6 +11,7 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.Collections;

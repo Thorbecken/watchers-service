@@ -19,7 +19,9 @@ public class CleansingManager {
     private WorldCleaner worldCleanser;
 
     public void process(WorldTaskDto taskDto){
+        StopwatchTimer.start();
         worldCleanser.proces(taskDto);
+        StopwatchTimer.stop("worldCleanser");
         if(taskDto instanceof ContinentalDriftTaskDto) {
             StopwatchTimer.start();
             continentAfterCleaner.process((ContinentalDriftTaskDto) taskDto);
@@ -27,6 +29,9 @@ public class CleansingManager {
             StopwatchTimer.start();
             animalCleaner.process((ContinentalDriftTaskDto) taskDto);
             StopwatchTimer.stop("animalCleaner");
+            StopwatchTimer.start();
+            worldCleanser.proces(taskDto);
+            StopwatchTimer.stop("worldCleanser");
         }
     }
 

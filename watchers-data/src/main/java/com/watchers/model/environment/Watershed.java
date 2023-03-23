@@ -17,6 +17,7 @@ import org.springframework.util.Assert;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Slf4j
@@ -36,7 +37,6 @@ public class Watershed {
     private Long id;
 
     @ManyToOne
-//    @ManyToOne(cascade = CascadeType.PERSIST)
     @JsonIgnore
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
@@ -119,5 +119,20 @@ public class Watershed {
         clone.setId(this.id);
         clone.setWorld(newWorld);
         return clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Watershed watershed = (Watershed) o;
+        return Objects.equals(id, watershed.id)
+                && world.equals(watershed.world)
+                && watershedTiles.equals(watershed.watershedTiles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, world, watershedTiles);
     }
 }

@@ -32,6 +32,16 @@ public class WorldMetaData {
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
 
+    @JsonProperty("xSize")
+    @Column(name = "x_size")
+    @JsonView(Views.Public.class)
+    private Long xSize;
+
+    @JsonProperty("ySize")
+    @Column(name = "y_size")
+    @JsonView(Views.Public.class)
+    private Long ySize;
+
     @JsonProperty("worldStatus")
     @Column(name = "world_status")
     private WorldStatusEnum worldStatusEnum;
@@ -63,6 +73,8 @@ public class WorldMetaData {
         WorldMetaData clone = new WorldMetaData();
         clone.id = world.getId();
         clone.world = world;
+        clone.xSize = world.getXSize();
+        clone.ySize = world.getYSize();
 
         clone.worldStatusEnum = this.worldStatusEnum;
         clone.worldTypeEnum = this.worldTypeEnum;

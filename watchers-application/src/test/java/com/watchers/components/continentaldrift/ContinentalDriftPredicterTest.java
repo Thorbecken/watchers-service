@@ -4,9 +4,12 @@ import com.watchers.TestableContinentalDriftTaskDto;
 import com.watchers.TestableWorld;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.world.Continent;
+import com.watchers.model.dto.MockCoordinate;
+import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.repository.ContinentRepository;
 import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +20,9 @@ import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ContinentalDriftPredicterTest {
 
@@ -25,15 +30,19 @@ class ContinentalDriftPredicterTest {
     private ContinentalDriftPredicter continentalDriftPredicter;
     private ContinentalDriftTaskDto taskDto;
     private WorldRepository worldRepository;
+    private ContinentRepository continentRepository;
 
 
     @BeforeEach
     void setUp() {
         world = TestableWorld.createWorld();
-        worldRepository = Mockito.mock(WorldRepository.class);
-        continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
+        worldRepository = mock(WorldRepository.class);
+        continentRepository = mock(ContinentRepository.class);
+        continentalDriftPredicter = new ContinentalDriftPredicter(continentRepository);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
+        when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
+
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
     }
 
@@ -46,12 +55,10 @@ class ContinentalDriftPredicterTest {
                 .reduce(Long::sum)
                 .orElse(0L);
 
-        taskDto.setNewTileLayout(new HashMap<>());
-
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
 
-        Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
+        Map<MockCoordinate, List<MockTile>> newTileLayout = taskDto.getNewTileLayout();
 
         assertThat("New continentalLayout was still empty", !newTileLayout.isEmpty(), is(true));
         int count = taskDto.getNewTileLayout().values().stream()
@@ -61,15 +68,15 @@ class ContinentalDriftPredicterTest {
         Assertions.assertEquals(9, count);
 
         long endHeight = taskDto.getNewTileLayout().values().stream()
-                .reduce((List<Tile> x, List<Tile> y) ->
+                .reduce((List<MockTile> x, List<MockTile> y) ->
                 {
-                    List<Tile> list = new ArrayList<>();
+                    List<MockTile> list = new ArrayList<>();
                     list.addAll(x);
                     list.addAll(y);
                     return list;
                 }).stream()
-                .flatMap(x -> x.stream())
-                .map(Tile::getHeight)
+                .flatMap(Collection::stream)
+                .map(MockTile::getHeight)
                 .reduce(Long::sum)
                 .orElse(0L);
         Assertions.assertEquals(startingHeight, endHeight);
@@ -98,12 +105,10 @@ class ContinentalDriftPredicterTest {
                 .reduce(Long::sum)
                 .orElse(0L);
 
-        taskDto.setNewTileLayout(new HashMap<>());
-
         Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
 
-        Map<Coordinate, List<Tile>> newTileLayout = taskDto.getNewTileLayout();
+        Map<MockCoordinate, List<MockTile>> newTileLayout = taskDto.getNewTileLayout();
 
         assertThat("New continentalLayout was still empty", !newTileLayout.isEmpty(), is(true));
         int count = taskDto.getNewTileLayout().values().stream()
@@ -113,15 +118,8 @@ class ContinentalDriftPredicterTest {
         Assertions.assertEquals(9, count);
 
         long endHeight = taskDto.getNewTileLayout().values().stream()
-                .reduce((List<Tile> x, List<Tile> y) ->
-                {
-                    List<Tile> list = new ArrayList<>();
-                    list.addAll(x);
-                    list.addAll(y);
-                    return list;
-                }).stream()
-                .flatMap(x -> x.stream())
-                .map(Tile::getHeight)
+                .flatMap(Collection::stream)
+                .map(MockTile::getHeight)
                 .reduce(Long::sum)
                 .orElse(0L);
         Assertions.assertEquals(startingHeight, endHeight);

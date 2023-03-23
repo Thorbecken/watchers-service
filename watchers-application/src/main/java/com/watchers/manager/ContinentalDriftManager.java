@@ -64,6 +64,7 @@ public class ContinentalDriftManager {
         StopwatchTimer.stop("surfaceTypeComputator");
 
         worldSettingManager.changeContinentalSetting(taskDto.getWorldId(), false);
+        taskDto.clearContinentalData();
         log.trace("Proccesed a continentaldrift for world id: " + taskDto.getWorldId());
     }
 

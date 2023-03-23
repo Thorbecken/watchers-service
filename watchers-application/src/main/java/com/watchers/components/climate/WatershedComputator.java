@@ -13,6 +13,7 @@ import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,7 +27,6 @@ public class WatershedComputator {
     @Transactional
     public void process(WorldTaskDto taskDto) {
         World world = worldRepository.getById(taskDto.getWorldId());
-        Hibernate.initialize(world);
         this.process(world);
         worldRepository.saveAndFlush(world);
     }
@@ -78,12 +78,8 @@ public class WatershedComputator {
                 .map(Coordinate::getTile)
                 .map(TileWatershedHolder::new)
                 .filter(TileWatershedHolder::hasWatershed)
-                .reduce((TileWatershedHolder x, TileWatershedHolder y) -> {
-                    if (x.getTile().getHeight() < y.getTile().getHeight()) {
-                        return x;
-                    }
-                    return y;
-                }).map(TileWatershedHolder::getWatershed);
+                .min(Comparator.comparing(tileWatershedHolder -> tileWatershedHolder.getTile().getHeight()))
+                .map(TileWatershedHolder::getWatershed);
     }
 
     @Getter

@@ -8,6 +8,8 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldMetaData;
+import com.watchers.repository.ContinentRepository;
 import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,13 +35,23 @@ class ContinentalDriftWorldAdjusterTest {
     void setUp() {
         this.world = TestableWorld.createWorld();
         world.getWorldSettings().setContinentalContinentWeight(1);
+
+        WorldMetaData worldMetaData = new WorldMetaData();
+        worldMetaData.setId(1L);
+        worldMetaData.setWorld(world);
+        worldMetaData.setXSize(world.getXSize());
+        worldMetaData.setYSize(world.getYSize());
+        world.setWorldMetaData(worldMetaData);
+
         WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
+        ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
         this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(worldRepository);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(worldRepository);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(continentRepository);
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
         ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, null);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
+        Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
 
         continentalDriftPredicter.process(taskDto);
@@ -46,11 +60,17 @@ class ContinentalDriftWorldAdjusterTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"1","2","3","4","5","6","7"})
+    @CsvSource({"1", "2", "3", "4", "5", "6", "7"})
     void processChanges(int deficit) {
+        // altering the heightDeficit because this is calculated in the ContinentalDriftTileChangeComputer,
+        // but it is used here
         deficit += world.getHeightDeficit();
         world.setHeightDeficit(deficit);
-        long numberOfNewTilesNeeded = world.getCoordinates().size()-taskDto.getNewTileLayout().values().stream().filter(tiles ->  tiles.size() > 0).count();
+
+        // coordinates that have no incoming tiles
+        long numberOfNewTilesNeeded = taskDto.getNewTileLayout().values().stream()
+                .filter(Collection::isEmpty)
+                .count();
 
         long startingHeight = taskDto.getChanges().values().stream()
                 .filter(continentalChangesDto -> !continentalChangesDto.isEmpty())
@@ -64,9 +84,16 @@ class ContinentalDriftWorldAdjusterTest {
 
         continentalDriftWorldAdjuster.process(taskDto);
 
-        // assertions
-        assertEquals(9, world.getCoordinates().stream().filter(coordinate -> coordinate.getTile() != null).count());
-        assertTrue(world.getCoordinates().stream().map(Coordinate::getTile).noneMatch(tile -> tile.getHeight() == 0L));
+//        controlChecks();
+        // assertions that all coordinates have a tile
+        assertEquals(9, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getTile() != null)
+                .count());
+        // assertion that all new tiles have at least some height
+        // the height varies with the added heightDefecit
+        assertTrue(world.getCoordinates().stream()
+                .map(Coordinate::getTile)
+                .noneMatch(tile -> tile.getHeight() == 0L));
 
         long endHeight = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
@@ -77,7 +104,7 @@ class ContinentalDriftWorldAdjusterTest {
 
         Assertions.assertEquals(startingHeight, endHeight);
 
-        long expectedHeightDeficit = deficit%numberOfNewTilesNeeded;
+        long expectedHeightDeficit = deficit % numberOfNewTilesNeeded;
         assertEquals(expectedHeightDeficit, world.getHeightDeficit());
     }
 }

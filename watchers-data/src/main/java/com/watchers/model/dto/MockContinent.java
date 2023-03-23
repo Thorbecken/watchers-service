@@ -1,6 +1,5 @@
 package com.watchers.model.dto;
 
-import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
@@ -12,32 +11,20 @@ import java.util.stream.Collectors;
 
 @Data
 public class MockContinent {
-    private World world;
     private List<Coordinate> coordinates = new ArrayList<>();
     private List<Coordinate> possibleCoordinates = new ArrayList<>();
     private Continent continent;
 
-    public MockContinent(Continent continent, World world){
+    public MockContinent(Continent continent) {
         this.continent = continent;
-        this.world = world;
 
         this.coordinates.addAll(continent.getCoordinates());
         this.coordinates.forEach(coordinate -> this.possibleCoordinates.addAll(coordinate.getNeighbours())
         );
     }
 
-    public MockContinent(List<Coordinate> coordinates, World world){
-        this.coordinates = new ArrayList<>();
-        this.possibleCoordinates = new ArrayList<>();
-        this.world = world;
-
-        this.coordinates.addAll(coordinates);
-
-        this.possibleCoordinates = CoordinateHelper.getAllOutersideCoordinates(this.coordinates);
-       }
-
     public void addRandomCoordinate(WorldFactoryDTO dto) {
-        if(possibleCoordinates.isEmpty()){
+        if (possibleCoordinates.isEmpty()) {
             return;
         }
         List<Coordinate> openTiles = dto.getOpenCoordinates();
@@ -47,7 +34,7 @@ public class MockContinent {
         Coordinate newCoordinate = possibleCoordinates.get(getInt);
         Optional<Coordinate> openCoordinate = findOpenTile(openTiles, newCoordinate);
 
-        if(openCoordinate.isPresent()){
+        if (openCoordinate.isPresent()) {
             takeOpenTile(openTiles, takenTiles, newCoordinate, openCoordinate.get());
         } else {
             possibleCoordinates.remove(newCoordinate);
@@ -73,7 +60,7 @@ public class MockContinent {
                 )).collect(Collectors.toList());
     }
 
-    public Continent generateContinent(){
+    public void generateContinent(World world) {
         Assert.isTrue(this.continent != null, "continent was null");
         continent.getCoordinates().addAll(coordinates);
         world.getCoordinates().addAll(coordinates);
@@ -85,6 +72,5 @@ public class MockContinent {
                 }
         );
 
-        return continent;
     }
 }

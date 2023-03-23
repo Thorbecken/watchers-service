@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -87,5 +88,18 @@ public class Direction {
         clone.setXVelocity(this.xVelocity);
         clone.setYVelocity(this.yVelocity);
         return  clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Direction direction = (Direction) o;
+        return xVelocity == direction.xVelocity && yVelocity == direction.yVelocity && xDriftPressure == direction.xDriftPressure && yDriftPressure == direction.yDriftPressure && Objects.equals(id, direction.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, xVelocity, yVelocity, xDriftPressure, yDriftPressure);
     }
 }

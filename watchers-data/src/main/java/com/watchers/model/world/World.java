@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actors.Actor;
+import com.watchers.model.dto.MockCoordinate;
 import com.watchers.model.environment.Watershed;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
@@ -64,27 +65,27 @@ public class World {
 
     @JsonProperty("worldMetaData")
     @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
     private WorldMetaData worldMetaData;
 
     @JsonProperty("worldSettings")
     @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
     private WorldSettings worldSettings;
 
     @JsonProperty("coordinates")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL)
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("continents")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade = CascadeType.ALL)
     private Set<Continent> continents = new HashSet<>();
 
     @JsonProperty("watersheds")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL)
     private Set<Watershed> watersheds = new HashSet<>();
 
     @JsonProperty("lastContinentInFlux")
@@ -116,14 +117,32 @@ public class World {
     }
 
     @SuppressWarnings("unused")
-    public World(){}
+    public World() {
+    }
 
     @JsonIgnore
     public Coordinate getCoordinate(long xCoordinate, long yCoordinate) {
-        if(coordinateMap == null || coordinateMap.isEmpty()){
-                setCoordinateMap();
+        if (coordinateMap == null || coordinateMap.isEmpty()) {
+            setCoordinateMap();
         }
         return coordinateMap.get(xCoordinate).get(yCoordinate);
+    }
+
+
+    @JsonIgnore
+    public Coordinate getCoordinate(MockCoordinate mockCoordinate) {
+        if (coordinateMap == null || coordinateMap.isEmpty()) {
+            setCoordinateMap();
+        }
+        return coordinateMap.get(mockCoordinate.getXCoord())
+                .get(mockCoordinate.getYCoord());
+    }
+
+    public Continent getContinentFromId(Long id) {
+        return continents.stream()
+                .filter(continent -> id.equals(continent.getId()))
+                .findFirst()
+                .orElseThrow();
     }
 
     @JsonIgnore
@@ -135,7 +154,7 @@ public class World {
         return actorList;
     }
 
-    private void setCoordinateMap(){
+    private void setCoordinateMap() {
         coordinateMap = new HashMap<>();
 
         for (int i = 1; i <= xSize; i++) {
@@ -175,21 +194,25 @@ public class World {
                 .collect(Collectors.toList());
     }
 
-    public Set<Watershed> getWatersheds(){
+    public Set<Watershed> getWatersheds() {
         return Collections.unmodifiableSet(watersheds);
     }
 
+    public void removeWatershed(Watershed watershed){
+        watersheds.remove(watershed);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
-    public void addWatershed(Watershed watershed){
+    public void addWatershed(Watershed watershed) {
         watershed.setWorld(this);
         watersheds.add(watershed);
     }
 
     public void addAllWatersheds(List<Watershed> watersheds) {
-    watersheds.forEach(this::addWatershed);
+        watersheds.forEach(this::addWatershed);
     }
 
-    public World createBasicClone(){
+    public World createBasicClone() {
         World newWorld = new World(this.xSize, this.ySize);
         newWorld.setId(this.id);
         newWorld.setHeightDeficit(this.heightDeficit);

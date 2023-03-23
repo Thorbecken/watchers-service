@@ -4,6 +4,7 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.world.World;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,14 +21,7 @@ public class CoordinateHelper {
 
     public static List<Coordinate> getAllOutersideCoordinates(List<Coordinate> coordinates){
         List<Coordinate> possibleCoordinates = coordinates.stream().map(Coordinate::getNeighbours)
-                .reduce((List<Coordinate> x, List<Coordinate> y) ->
-                {
-                    List<Coordinate> list = new ArrayList();
-                    list.addAll(x);
-                    list.addAll(y);
-                    return list;
-                })
-                .get().stream()
+                .flatMap(Collection::stream)
                 .distinct()
                 .collect(Collectors.toList());
         possibleCoordinates.removeAll(coordinates);

@@ -24,9 +24,11 @@ class WatershedComputatorTest {
     void setUp(){
         worldRepository = Mockito.mock(WorldRepository.class);
         watershedComputator = new WatershedComputator(worldRepository);
-        continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false);
 
         world = TestableWorld.createMediumWorld();
+        continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
+        continentalDriftTaskDto.setWorldId(world.getId());
+
         world.getCoordinates().forEach(coordinate -> {
             coordinate.getTile().setHeight(50);
             coordinate.getTile().setSurfaceType(SurfaceType.HILL);
@@ -57,7 +59,9 @@ class WatershedComputatorTest {
                 .map(Coordinate::getTile)
                 .allMatch(tile -> tile.getWatershed() == null);
         assertThat(allTilesHaveNoWatershed, equalTo(false));
+//      is now filled with a watershed because of moisture
         assertThat(coordinate_start.getTile().getWatershed(), notNullValue());
+//      these watersheds still have no watershed because they received no moisture
         assertThat(coordinate_lower_height.getTile().getWatershed(), nullValue());
         assertThat(coordinate_higher.getTile().getWatershed(), nullValue());
         assertThat(coordinate_same_height.getTile().getWatershed(), nullValue());
@@ -72,7 +76,8 @@ class WatershedComputatorTest {
         assertThat(coordinate_lower_height.getTile().getWatershed(), notNullValue());
         assertThat(coordinate_higher.getTile().getWatershed(), nullValue());
         assertThat(coordinate_same_height.getTile().getWatershed(), nullValue());
-        assertThat(coordinate_lower_height.getTile().getWatershed(), equalTo(coordinate_start.getTile().getWatershed()));
+        // these tiles should not have the same watershed as the watershed that is above it.
+//        assertThat(coordinate_lower_height.getTile().getWatershed(), equalTo(coordinate_start.getTile().getWatershed()));
 
         coordinate_higher.getTile().setLandMoisture(1);
         watershedComputator.process(continentalDriftTaskDto);
@@ -84,6 +89,7 @@ class WatershedComputatorTest {
         assertThat(coordinate_lower_height.getTile().getWatershed(), notNullValue());
         assertThat(coordinate_higher.getTile().getWatershed(), notNullValue());
         assertThat(coordinate_same_height.getTile().getWatershed(), nullValue());
+        // this watershed should have the same watershed as the watershed that is below it.
         assertThat(coordinate_higher.getTile().getWatershed(), equalTo(coordinate_start.getTile().getWatershed()));
 
         coordinate_same_height.getTile().setLandMoisture(1);

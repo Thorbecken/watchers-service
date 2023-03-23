@@ -8,14 +8,14 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class RandomHelper {
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
-    public static int getRandom(int highestValue){
+    public static int getRandom(int highestValue) {
         return random.nextInt(highestValue);
     }
 
-    public static int getRandomWithNegativeNumbers(int max){
-        int range = max*2;
+    public static int getRandomWithNegativeNumbers(int max) {
+        int range = max * 2;
         int randomNumber = random.nextInt(range);
         return randomNumber - max;
     }
@@ -27,9 +27,5 @@ public class RandomHelper {
                 .filter(tile -> tile.getHeight() == maxHeight)
                 .collect(Collectors.toList());
         return maxTiles.get(RandomHelper.getRandom(maxTiles.size()));
-    }
-
-    public static <T> T getRandomObject(List<T> list){
-        return list.get(getRandom(list.size()-1));
     }
 }

@@ -6,6 +6,7 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldMetaData;
 import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,14 @@ class ContinentalMergerTest {
         world.setYSize(5L);
         world.setXSize(3L);
         world.setWorldSettings(TestableWorld.createWorldSettings());
+
+        WorldMetaData worldMetaData = new WorldMetaData();
+        worldMetaData.setId(1L);
+        worldMetaData.setWorld(world);
+        worldMetaData.setXSize(world.getXSize());
+        worldMetaData.setYSize(world.getYSize());
+        world.setWorldMetaData(worldMetaData);
+
         Continent continent1 = new Continent(world, SurfaceType.OCEAN);
         continent1.setId(1L);
         Continent continent2 = new Continent(world, SurfaceType.OCEAN);
@@ -72,7 +81,7 @@ class ContinentalMergerTest {
         Assertions.assertTrue(world.getContinents().stream().anyMatch(continent -> continent.getId().equals(2L)));
         Assertions.assertTrue(world.getContinents().stream().anyMatch(continent -> continent.getId().equals(3L)));
 
-        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(1L, false, false);
+        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
         continentalMerger.process(continentalDriftTaskDto);
 
         Assertions.assertEquals(2, world.getContinents().size());

@@ -139,4 +139,22 @@ public class Continent {
 
         return mostConnectedNeighbouringContinent.orElseGet(this::getId);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Continent continent = (Continent) o;
+        return Objects.equals(id, continent.id)
+                && world.equals(continent.world)
+                && coordinates.equals(continent.coordinates)
+                && type == continent.type
+                && basicRockType == continent.basicRockType
+                && direction.equals(continent.direction);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, world, coordinates, type, basicRockType, direction);
+    }
 }
