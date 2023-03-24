@@ -29,13 +29,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -80,12 +74,12 @@ public class World {
 
     @JsonProperty("continents")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Continent> continents = new HashSet<>();
 
     @JsonProperty("watersheds")
     @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Watershed> watersheds = new HashSet<>();
 
     @JsonProperty("lastContinentInFlux")
@@ -241,20 +235,13 @@ public class World {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof World)) return false;
-
+        if (o == null || getClass() != o.getClass()) return false;
         World world = (World) o;
-
-        return id != null && world.getId() != null ?
-                id.equals(world.getId()) :
-                ySize.equals(world.ySize) && xSize.equals(world.xSize);
+        return Objects.equals(id, world.id);
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + xSize.hashCode();
-        result = 31 * result + ySize.hashCode();
-        return result;
+        return Objects.hash(id);
     }
 }

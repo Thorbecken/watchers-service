@@ -12,11 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -30,7 +27,7 @@ class ContinentalDriftDirectionChangerTest {
     private ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject methodObject;
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
-    private long lastContinentalDrift;
+    private Long lastContinentalDrift;
     private Set<Continent> continents;
     private ContinentalDriftTaskDto taskDto;
 
@@ -38,14 +35,14 @@ class ContinentalDriftDirectionChangerTest {
     public void setup(){
         world = TestableWorld.createWorld();
         continents = world.getContinents();
-        continentOne = continents.stream().filter(continent -> continent.getId() == 0L).findFirst().orElseThrow();
-        continentTwo = continents.stream().filter(continent -> continent.getId() == 1L).findFirst().orElseThrow();
-        continentThree = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
+        continentOne = continents.stream().filter(continent -> continent.getId() == 1L).findFirst().orElseThrow();
+        continentTwo = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
+        continentThree = continents.stream().filter(continent -> continent.getId() == 3L).findFirst().orElseThrow();
 
         continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        lastContinentalDrift = world.getContinents().size()-1;
+        lastContinentalDrift = (long) world.getContinents().size();
         methodObject = new ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject(false, lastContinentalDrift);
     }
 
@@ -53,7 +50,7 @@ class ContinentalDriftDirectionChangerTest {
     @CsvSource({"1,1", "2, 2"})
     void changeContinentalDriftDirections(int driftFlux, int driftVelocity) {
         methodObject.adjustContinentelDriftFlux(world, driftFlux, driftVelocity);
-        assertThat(world.getLastContinentInFlux(), equalTo(driftFlux-1L));
+        assertThat(world.getLastContinentInFlux(), equalTo((long)driftFlux));
     }
 
     @Test

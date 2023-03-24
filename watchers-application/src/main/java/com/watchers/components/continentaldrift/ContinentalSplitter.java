@@ -34,7 +34,7 @@ public class ContinentalSplitter {
                 .forEach(this::checkWidthLenght);
 
 
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 
     private void checkWidthLenght(Continent continent) {

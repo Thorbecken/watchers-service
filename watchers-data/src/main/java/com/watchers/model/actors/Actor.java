@@ -87,11 +87,11 @@ public abstract class Actor implements SerialTask {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Actor actor = (Actor) o;
-        return Objects.equals(id, actor.id) && naturalHabitat == actor.naturalHabitat && actorType == actor.actorType;
+        return Objects.equals(id, actor.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, naturalHabitat, actorType);
+        return Objects.hash(id);
     }
 }

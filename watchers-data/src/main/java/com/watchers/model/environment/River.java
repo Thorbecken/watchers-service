@@ -38,19 +38,16 @@ public class River {
     private Long id;
 
     @JsonIgnore
-    @EqualsAndHashCode.Exclude
     @OneToOne(fetch = FetchType.LAZY)
     private Tile tile;
 
     @JsonIgnore
-    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "watershed_id", nullable = false)
     private Watershed watershed;
 
     //self join
     @JsonIgnore
-    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "downCurrentRiver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<River> upCurrentRivers = new HashSet<>();
 
@@ -231,13 +228,11 @@ public class River {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         River river = (River) o;
-        return Objects.equals(id, river.id)
-                && Objects.equals(tile, river.tile)
-                && watershed.equals(river.watershed);
+        return Objects.equals(id, river.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, tile, watershed);
+        return Objects.hash(id);
     }
 }

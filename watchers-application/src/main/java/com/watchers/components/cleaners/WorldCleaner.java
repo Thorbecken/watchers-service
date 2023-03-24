@@ -59,7 +59,7 @@ public class WorldCleaner {
                 log.trace("deleting continents: " + Arrays.toString(zeroContinents.stream().map(Continent::getId).toArray()));
                 zeroContinents.forEach(world.getContinents()::remove);
 
-                worldRepository.saveAndFlush(world);
+                worldRepository.save(world);
 
                 world = worldRepository.findById(world.getId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
                 continentRepository.deleteAll(zeroContinents);
@@ -93,6 +93,12 @@ public class WorldCleaner {
                         }
                     });
 
+            world.getCoordinates().stream()
+                    .map(Coordinate::getTile)
+                    .filter(Tile::isSea)
+                    .filter(tile -> tile.getWatershed() != null)
+                    .forEach(tile -> tile.getWatershed().removeTile(tile));
+
             final World finalWorld = world;
             watersheds.stream()
                     .filter(watershed -> watershed.getWatershedTiles().isEmpty())
@@ -105,6 +111,6 @@ public class WorldCleaner {
                 .filter(tile -> tile.getWatershed() == null)
                 .forEach(tile -> tile.setRiver(null));
 
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 }

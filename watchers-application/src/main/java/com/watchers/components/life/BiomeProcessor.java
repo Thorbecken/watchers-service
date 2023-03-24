@@ -32,6 +32,6 @@ public class BiomeProcessor {
                 .map(Tile::getBiome)
                 .forEach(Biome::spread);
 
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 }

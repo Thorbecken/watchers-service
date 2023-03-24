@@ -126,13 +126,11 @@ public class Watershed {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Watershed watershed = (Watershed) o;
-        return Objects.equals(id, watershed.id)
-                && world.equals(watershed.world)
-                && watershedTiles.equals(watershed.watershedTiles);
+        return Objects.equals(id, watershed.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, world, watershedTiles);
+        return Objects.hash(id);
     }
 }

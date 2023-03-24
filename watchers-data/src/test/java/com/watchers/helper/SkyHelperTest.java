@@ -40,6 +40,7 @@ class SkyHelperTest {
         assertThat(new ArrayList<>(startingSky.getOutgoingAircurrents())
                         .get(0).getEndingSky().getClimate().getCoordinate(),
                 equalTo(upwardCoordinate));
+        startingSky.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setId(1L));
 
         SkyHelper.addLongitudalAircurrent(startingCoordinate, DOWNWARD, LONGITUDAL_STRENGTH);
         assertThat(startingSky.getOutgoingAircurrents(), hasSize(2));

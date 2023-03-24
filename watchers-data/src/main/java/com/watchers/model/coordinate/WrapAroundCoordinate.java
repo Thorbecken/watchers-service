@@ -78,4 +78,16 @@ public class WrapAroundCoordinate extends Coordinate {
 
         return clone;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WrapAroundCoordinate)) return false;
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

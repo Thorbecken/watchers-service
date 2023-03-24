@@ -28,7 +28,7 @@ public class AircurrentRecalibrator {
                     .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
                     .forEach(Aircurrent::recalculateHeigthDifference);
 
-            worldRepository.saveAndFlush(world);
+            worldRepository.save(world);
         }
     }
 }

@@ -229,16 +229,11 @@ public class Biome implements ParallelTask {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Biome biome = (Biome) o;
-        return Double.compare(biome.grassBiomass, grassBiomass) == 0
-                && Double.compare(biome.treeBiomass, treeBiomass) == 0
-                && Objects.equals(id, biome.id)
-                && grassFlora == biome.grassFlora
-                && treeFlora == biome.treeFlora
-                && tile.equals(biome.tile);
+        return Objects.equals(id, biome.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, grassBiomass, grassFlora, treeBiomass, treeFlora, tile);
+        return Objects.hash(id);
     }
 }

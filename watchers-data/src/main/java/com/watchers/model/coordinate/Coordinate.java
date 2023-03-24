@@ -3,7 +3,6 @@ package com.watchers.model.coordinate;
 import com.fasterxml.jackson.annotation.*;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.actors.Animal;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.common.Views;
 import com.watchers.model.environment.Tile;
@@ -11,13 +10,9 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 @Data
@@ -275,21 +270,6 @@ public abstract class Coordinate {
     public abstract Coordinate createClone(World newWorld);
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Coordinate)) return false;
-        Coordinate that = (Coordinate) o;
-        return xCoord == that.xCoord &&
-                yCoord == that.yCoord;
-    }
-
-    @Override
-    public int hashCode() {
-        String string = xCoord + "," + yCoord;
-        return string.hashCode();
-    }
-
-    @Override
     public String toString() {
         return "Coordinate{" +
                 "xCoord=" + xCoord +
@@ -301,5 +281,19 @@ public abstract class Coordinate {
     @JsonIgnore
     public boolean isWater() {
         return tile.isWater();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coordinate that = (Coordinate) o;
+        return xCoord == that.xCoord
+                && yCoord == that.yCoord;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(xCoord, yCoord);
     }
 }

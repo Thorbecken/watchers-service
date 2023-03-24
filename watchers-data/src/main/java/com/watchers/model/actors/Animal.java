@@ -143,13 +143,11 @@ public class Animal extends Actor {
         if (!(o instanceof Animal)) return false;
         if (!super.equals(o)) return false;
         Animal animal = (Animal) o;
-        return Objects.equals(id, animal.id)
-                && animalType == animal.animalType
-                && Float.compare(animal.foodReserve, foodReserve) == 0;
+        return Objects.equals(id, animal.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id, foodReserve, animalType);
+        return Objects.hash(id);
     }
 }

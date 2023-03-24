@@ -55,6 +55,6 @@ public class SurfaceTypeComputator {
             }
         });
 
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 }

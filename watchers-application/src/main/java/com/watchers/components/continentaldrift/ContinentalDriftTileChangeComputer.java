@@ -44,7 +44,7 @@ public class ContinentalDriftTileChangeComputer {
                 }
         );
 
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 
     private void processAbsentTile(Coordinate coordinate, ContinentalDriftTaskDto taskDto) {

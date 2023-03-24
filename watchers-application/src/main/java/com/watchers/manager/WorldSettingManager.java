@@ -25,7 +25,7 @@ public class WorldSettingManager {
         if (optionalWorldSetting.isPresent()) {
             WorldMetaData worldMetaData = optionalWorldSetting.get();
             worldMetaData.setNeedsContinentalShift(newValue);
-            worldMetaDataRepository.saveAndFlush(worldMetaData);
+            worldMetaDataRepository.save(worldMetaData);
         }
     }
 
@@ -101,7 +101,7 @@ public class WorldSettingManager {
         if (optionalWorldSetting.isPresent()) {
             WorldMetaData worldMetaData = optionalWorldSetting.get();
             worldMetaData.setNeedsSaving(newValue);
-            worldMetaDataRepository.saveAndFlush(worldMetaData);
+            worldMetaDataRepository.save(worldMetaData);
         }
     }
 
@@ -110,7 +110,7 @@ public class WorldSettingManager {
             worldMetaData.setEpoch(data.getEpoch());
             worldMetaData.setEra(data.getEra());
             worldMetaData.setAge(data.getAge());
-            worldMetaDataRepository.saveAndFlush(worldMetaData);
+            worldMetaDataRepository.save(worldMetaData);
         });
     }
 }

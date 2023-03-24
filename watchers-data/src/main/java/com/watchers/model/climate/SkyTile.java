@@ -171,12 +171,11 @@ public class SkyTile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SkyTile skyTile = (SkyTile) o;
-        return Objects.equals(id, skyTile.id)
-                && climate.equals(skyTile.climate);
+        return Objects.equals(id, skyTile.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, climate);
+        return Objects.hash(id);
     }
 }

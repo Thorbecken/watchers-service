@@ -55,6 +55,6 @@ public class ErosionAdjuster {
                 }
         );
 
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 }

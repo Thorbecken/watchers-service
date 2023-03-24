@@ -30,7 +30,7 @@ public class ContinentAfterCleaner {
                 world.setLastContinentInFlux(newLastContinentInFlux);
             }
 
-            worldRepository.saveAndFlush(world);
+            worldRepository.save(world);
         }
     }
 }

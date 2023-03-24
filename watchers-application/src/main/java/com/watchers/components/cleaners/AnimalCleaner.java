@@ -39,7 +39,7 @@ public class AnimalCleaner {
 
         world.getActorList().removeAll(deadActorsByContinentalDrifting);
 
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 
 //    old code
@@ -52,7 +52,7 @@ public class AnimalCleaner {
 //                .filter(Actor::isNotOnCorrectLand)
 //                .forEach(Actor::handleContinentalMovement);
 //
-//        worldRepository.saveAndFlush(world);
+//        worldRepository.save(world);
 //    }
 
 }

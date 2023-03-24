@@ -1,6 +1,7 @@
 package com.watchers;
 
 import com.watchers.model.common.Direction;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.*;
@@ -20,11 +21,13 @@ public class TestableWorld {
         world.setLastContinentInFlux(0L);
 
         WorldSettings worldSettings = TestableWorld.createWorldSettings();
+        worldSettings.setId(1L);
         worldSettings.setHeigtDivider(2);
         worldSettings.setMinimumContinents(5);
         world.setWorldSettings(worldSettings);
 
         WorldMetaData worldMetaData = new WorldMetaData();
+        worldMetaData.setId(1L);
         worldMetaData.setWorldTypeEnum(worldTypeEnum);
         worldMetaData.setWorld(world);
         worldMetaData.setXSize(world.getXSize());
@@ -33,8 +36,9 @@ public class TestableWorld {
         world.setWorldMetaData(worldMetaData);
 
         Continent continent1 = new Continent(world, SurfaceType.PLAIN);
-        continent1.setId(0L);
+        continent1.setId(1L);
         continent1.setDirection(new Direction(1, 0));
+        continent1.getDirection().setId(1L);
         continent1.getCoordinates().addAll(Arrays.asList(
                 CoordinateFactory.createCoordinate(1, 1, world, continent1),
                 CoordinateFactory.createCoordinate(1, 2, world, continent1),
@@ -42,8 +46,9 @@ public class TestableWorld {
         ));
 
         Continent continent2 = new Continent(world, SurfaceType.COASTAL);
-        continent2.setId(1L);
+        continent2.setId(2L);
         continent2.setDirection(new Direction(0, -1));
+        continent2.getDirection().setId(2L);
         continent2.getCoordinates().addAll(Arrays.asList(
                 CoordinateFactory.createCoordinate(2, 2, world, continent2),
                 CoordinateFactory.createCoordinate(3, 2, world, continent2),
@@ -51,8 +56,9 @@ public class TestableWorld {
         ));
 
         Continent continent3 = new Continent(world, SurfaceType.OCEAN);
-        continent3.setId(2L);
+        continent3.setId(3L);
         continent3.setDirection(new Direction(0, 0));
+        continent3.getDirection().setId(3L);
         continent3.getCoordinates().addAll(Arrays.asList(
                 CoordinateFactory.createCoordinate(3, 3, world, continent3),
                 CoordinateFactory.createCoordinate(3, 1, world, continent3),
@@ -65,16 +71,20 @@ public class TestableWorld {
         world.getCoordinates().addAll(continent2.getCoordinates());
         world.getCoordinates().addAll(continent3.getCoordinates());
 
-        world.getCoordinates().forEach(coordinate -> {
-                    coordinate.setWorld(coordinate.getWorld());
-                    if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
-                        coordinate.getTile().setHeight(40);
-                    } else {
-                        coordinate.getTile().setHeight(20);
-                    }
-                }
-        );
-
+        long idNumber = 1L;
+        for (Coordinate coordinate: world.getCoordinates()) {
+            coordinate.setWorld(coordinate.getWorld());
+            coordinate.getTile().setId(idNumber);
+            coordinate.getTile().getBiome().setId(idNumber);
+            coordinate.getClimate().setId(idNumber);
+            coordinate.getClimate().getSkyTile().setId(idNumber);
+            coordinate.setId(idNumber++);
+            if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
+                coordinate.getTile().setHeight(40);
+            } else {
+                coordinate.getTile().setHeight(20);
+            }
+        }
 
         return world;
     }
@@ -89,11 +99,13 @@ public class TestableWorld {
         world.setLastContinentInFlux(0L);
 
         WorldSettings worldSettings = TestableWorld.createWorldSettings();
+        worldSettings.setId(1L);
         worldSettings.setHeigtDivider(2);
         worldSettings.setMinimumContinents(5);
         world.setWorldSettings(worldSettings);
 
         WorldMetaData worldMetaData = new WorldMetaData();
+        worldMetaData.setId(1L);
         worldMetaData.setWorldTypeEnum(worldTypeEnum);
         worldMetaData.setWorld(world);
         worldMetaData.setXSize(world.getXSize());
@@ -103,8 +115,9 @@ public class TestableWorld {
         world.setWorldMetaData(worldMetaData);
 
         Continent continent1 = new Continent(world, SurfaceType.PLAIN);
-        continent1.setId(0L);
+        continent1.setId(1L);
         continent1.setDirection(new Direction(1, 0));
+        continent1.getDirection().setId(1L);
         continent1.getCoordinates().addAll(Arrays.asList(
                 CoordinateFactory.createCoordinate(1, 1, world, continent1),
                 CoordinateFactory.createCoordinate(1, 2, world, continent1),
@@ -112,8 +125,9 @@ public class TestableWorld {
         ));
 
         Continent continent2 = new Continent(world, SurfaceType.COASTAL);
-        continent2.setId(1L);
+        continent2.setId(2L);
         continent2.setDirection(new Direction(0, -1));
+        continent2.getDirection().setId(2L);
         continent2.getCoordinates().addAll(Arrays.asList(
                 CoordinateFactory.createCoordinate(2, 2, world, continent2),
                 CoordinateFactory.createCoordinate(3, 2, world, continent2),
@@ -121,8 +135,9 @@ public class TestableWorld {
         ));
 
         Continent continent3 = new Continent(world, SurfaceType.OCEAN);
-        continent3.setId(2L);
+        continent3.setId(3L);
         continent3.setDirection(new Direction(0, 0));
+        continent3.getDirection().setId(3L);
         continent3.getCoordinates().addAll(Arrays.asList(
                 CoordinateFactory.createCoordinate(3, 3, world, continent3),
                 CoordinateFactory.createCoordinate(3, 1, world, continent3),
@@ -130,30 +145,32 @@ public class TestableWorld {
         ));
 
         Continent continent4 = new Continent(world, SurfaceType.PLAIN);
-        continent1.setId(3L);
-        continent1.setDirection(new Direction(1, 0));
-        continent1.getCoordinates().addAll(Arrays.asList(
-                CoordinateFactory.createCoordinate(1, 4, world, continent1),
-                CoordinateFactory.createCoordinate(1, 5, world, continent1),
-                CoordinateFactory.createCoordinate(2, 4, world, continent1)
+        continent4.setId(4L);
+        continent4.setDirection(new Direction(1, 0));
+        continent4.getCoordinates().addAll(Arrays.asList(
+                CoordinateFactory.createCoordinate(1, 4, world, continent4),
+                CoordinateFactory.createCoordinate(1, 5, world, continent4),
+                CoordinateFactory.createCoordinate(2, 4, world, continent4)
         ));
 
         Continent continent5 = new Continent(world, SurfaceType.COASTAL);
-        continent2.setId(4L);
-        continent2.setDirection(new Direction(0, -1));
-        continent2.getCoordinates().addAll(Arrays.asList(
-                CoordinateFactory.createCoordinate(2, 5, world, continent2),
-                CoordinateFactory.createCoordinate(3, 5, world, continent2),
-                CoordinateFactory.createCoordinate(1, 6, world, continent2)
+        continent5.setId(5L);
+        continent5.setDirection(new Direction(0, -1));
+        continent5.getDirection().setId(5L);
+        continent5.getCoordinates().addAll(Arrays.asList(
+                CoordinateFactory.createCoordinate(2, 5, world, continent5),
+                CoordinateFactory.createCoordinate(3, 5, world, continent5),
+                CoordinateFactory.createCoordinate(1, 6, world, continent5)
         ));
 
         Continent continent6 = new Continent(world, SurfaceType.OCEAN);
-        continent3.setId(5L);
-        continent3.setDirection(new Direction(0, 0));
-        continent3.getCoordinates().addAll(Arrays.asList(
-                CoordinateFactory.createCoordinate(3, 6, world, continent3),
-                CoordinateFactory.createCoordinate(3, 4, world, continent3),
-                CoordinateFactory.createCoordinate(2, 6, world, continent3)
+        continent6.setId(6L);
+        continent6.setDirection(new Direction(0, 0));
+        continent6.getDirection().setId(6L);
+        continent6.getCoordinates().addAll(Arrays.asList(
+                CoordinateFactory.createCoordinate(3, 6, world, continent6),
+                CoordinateFactory.createCoordinate(3, 4, world, continent6),
+                CoordinateFactory.createCoordinate(2, 6, world, continent6)
         ));
 
         world.setContinents(new HashSet<>(Arrays.asList(continent1, continent2, continent3, continent4, continent5,
@@ -166,15 +183,20 @@ public class TestableWorld {
         world.getCoordinates().addAll(continent5.getCoordinates());
         world.getCoordinates().addAll(continent6.getCoordinates());
 
-        world.getCoordinates().forEach(coordinate -> {
-                    coordinate.setWorld(coordinate.getWorld());
-                    if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
-                        coordinate.getTile().setHeight(40);
-                    } else {
-                        coordinate.getTile().setHeight(20);
-                    }
-                }
-        );
+        long idNumber = 1L;
+        for (Coordinate coordinate: world.getCoordinates()) {
+            coordinate.setWorld(coordinate.getWorld());
+            coordinate.getTile().setId(idNumber);
+            coordinate.getTile().getBiome().setId(idNumber);
+            coordinate.getClimate().setId(idNumber);
+            coordinate.getClimate().getSkyTile().setId(idNumber);
+            coordinate.setId(idNumber++);
+            if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
+                coordinate.getTile().setHeight(40);
+            } else {
+                coordinate.getTile().setHeight(20);
+            }
+        }
 
         return world;
     }

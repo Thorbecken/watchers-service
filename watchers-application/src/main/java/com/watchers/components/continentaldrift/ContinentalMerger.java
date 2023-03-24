@@ -30,7 +30,7 @@ public class ContinentalMerger {
             continents.remove(smallestContinent);
             world.getContinents().removeIf(continent -> smallestContinent.getId().equals(continent.getId()));
         }
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 
     private void mergeWithNeighbour(World world, Continent continent) {

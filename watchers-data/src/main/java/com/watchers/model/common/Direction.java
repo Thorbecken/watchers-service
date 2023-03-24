@@ -95,11 +95,11 @@ public class Direction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Direction direction = (Direction) o;
-        return xVelocity == direction.xVelocity && yVelocity == direction.yVelocity && xDriftPressure == direction.xDriftPressure && yDriftPressure == direction.yDriftPressure && Objects.equals(id, direction.id);
+        return Objects.equals(id, direction.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, xVelocity, yVelocity, xDriftPressure, yDriftPressure);
+        return Objects.hash(id);
     }
 }

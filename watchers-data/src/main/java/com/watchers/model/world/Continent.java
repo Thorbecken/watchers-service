@@ -146,15 +146,11 @@ public class Continent {
         if (o == null || getClass() != o.getClass()) return false;
         Continent continent = (Continent) o;
         return Objects.equals(id, continent.id)
-                && world.equals(continent.world)
-                && coordinates.equals(continent.coordinates)
-                && type == continent.type
-                && basicRockType == continent.basicRockType
-                && direction.equals(continent.direction);
+                && coordinates.equals(continent.coordinates);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, world, coordinates, type, basicRockType, direction);
+        return Objects.hash(id, coordinates);
     }
 }

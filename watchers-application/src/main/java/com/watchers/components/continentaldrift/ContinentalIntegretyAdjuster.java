@@ -27,7 +27,7 @@ public class ContinentalIntegretyAdjuster {
         World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
         Set<Continent> continents = new HashSet<>(world.getContinents());
         continents.forEach(this::checkIntegrity);
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 
     private void checkIntegrity(Continent continent){

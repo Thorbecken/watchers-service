@@ -38,9 +38,9 @@ class ContinentalDriftTileChangeComputerTest {
     void setUp() {
         this.world = TestableWorld.createWorld();
         continents = world.getContinents();
-        continentOne = continents.stream().filter(continent -> continent.getId() == 0L).findFirst().orElseThrow();
-        continentTwo = continents.stream().filter(continent -> continent.getId() == 1L).findFirst().orElseThrow();
-        continentThree = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
+        continentOne = continents.stream().filter(continent -> continent.getId() == 1L).findFirst().orElseThrow();
+        continentTwo = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
+        continentThree = continents.stream().filter(continent -> continent.getId() == 3L).findFirst().orElseThrow();
 
         this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
         Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));

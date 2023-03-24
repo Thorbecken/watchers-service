@@ -167,14 +167,11 @@ public class Aircurrent {
         if (o == null || getClass() != o.getClass()) return false;
         Aircurrent that = (Aircurrent) o;
         return Objects.equals(id, that.id)
-                && startingXCoordinate.equals(that.startingXCoordinate)
-                && endingXCoordinate.equals(that.endingXCoordinate)
-                && startingYCoordinate.equals(that.startingYCoordinate)
-                && endingYCoordinate.equals(that.endingYCoordinate);
+                && aircurrentType.equals(that.aircurrentType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startingXCoordinate, endingXCoordinate, startingYCoordinate, endingYCoordinate);
+        return Objects.hash(id, aircurrentType);
     }
 }

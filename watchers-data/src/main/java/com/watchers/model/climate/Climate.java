@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -101,28 +102,6 @@ public class Climate {
                 '}';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Climate)) return false;
-
-        Climate climate = (Climate) o;
-
-        if (Double.compare(climate.longitude, longitude) != 0) return false;
-        return Double.compare(climate.latitude, latitude) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-        int result;
-        long temp;
-        temp = Double.doubleToLongBits(longitude);
-        result = (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(latitude);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        return result;
-    }
-
     public Climate createClone(Coordinate coordinateClone) {
         Climate clone = new Climate();
         clone.setId(coordinateClone.getId());
@@ -162,5 +141,18 @@ public class Climate {
                 .mapToDouble(aircurrent -> aircurrent.getHeatTransfer(this, incommingAirPressure))
                 .sum();
         this.heatChange = averageTemperatureDifference / 2d; // 2 is a arbitrary number to deminish the transfer from air.
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Climate climate = (Climate) o;
+        return Objects.equals(id, climate.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

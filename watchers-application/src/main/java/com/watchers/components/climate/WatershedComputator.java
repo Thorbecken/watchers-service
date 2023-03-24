@@ -28,7 +28,7 @@ public class WatershedComputator {
     public void process(WorldTaskDto taskDto) {
         World world = worldRepository.getById(taskDto.getWorldId());
         this.process(world);
-        worldRepository.saveAndFlush(world);
+        worldRepository.save(world);
     }
 
     protected void process(World world) {

@@ -220,14 +220,12 @@ public class Tile {
         if (this == o) return true;
         if (!(o instanceof Tile)) return false;
         Tile tile = (Tile) o;
-        return id != null && tile.getId() != null ?
-                id.equals(tile.id) :
-                Objects.equals(coordinate, tile.coordinate);
+        return Objects.equals(id, tile.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(coordinate);
+        return Objects.hash(id);
     }
 
     @Override
