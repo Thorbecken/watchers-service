@@ -42,7 +42,7 @@ public class River {
     private Tile tile;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "watershed_id", nullable = false)
     private Watershed watershed;
 

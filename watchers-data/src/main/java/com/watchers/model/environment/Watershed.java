@@ -48,7 +48,7 @@ public class Watershed {
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "watershed", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "watershed", cascade=CascadeType.ALL, orphanRemoval = true)
     private List<River> riverFlow = new ArrayList<>();
 
     public Watershed(World world){

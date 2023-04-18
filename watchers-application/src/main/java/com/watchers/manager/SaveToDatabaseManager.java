@@ -816,6 +816,7 @@ public class SaveToDatabaseManager {
         log.info("Loading the barren world.");
         World memoryWorld = persistentWorld.createBasicClone();
 
+
         saveWorldMethod(memoryWorld);
 
         log.info("Barren world loaded.");

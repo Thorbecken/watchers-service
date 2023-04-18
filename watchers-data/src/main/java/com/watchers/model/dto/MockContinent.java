@@ -49,6 +49,7 @@ public class MockContinent {
     }
 
     private void takeOpenTile(List<Coordinate> openCoordinates, List<Coordinate> takenCoordinates, Coordinate newCoordinate, Coordinate openCoordinate) {
+        newCoordinate.getTile().setRockType(continent.getBasicRockType());
         this.coordinates.add(newCoordinate);
         takenCoordinates.add(newCoordinate);
         openCoordinates.remove(openCoordinate);

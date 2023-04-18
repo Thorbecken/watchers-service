@@ -83,6 +83,10 @@ public class WorldMetaData {
         clone.needsSaving = this.needsSaving;
         clone.needsContinentalShift = this.needsContinentalShift;
 
+        clone.epoch = this.epoch;
+        clone.age = this.age;
+        clone.era = this.era;
+
         return clone;
     }
 

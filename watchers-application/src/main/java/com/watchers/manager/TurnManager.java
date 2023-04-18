@@ -40,13 +40,10 @@ public class TurnManager {
         worldMetaData.setAge(worldMetaData.getAge() +1);
         if(worldMetaData.isNeedsContinentalShift()){
             logMessage = logMessage + "and continentalshifting ";
-            worldMetaData.setAge(1);
             worldMetaData.setEra(worldMetaData.getEra() +1);
         }
         if(worldMetaData.isNeedsSaving()){
             logMessage = logMessage + "and saving ";
-            worldMetaData.setAge(1);
-            worldMetaData.setEra(1);
             worldMetaData.setEpoch(worldMetaData.getEpoch() +1);
         }
 

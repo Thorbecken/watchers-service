@@ -74,6 +74,7 @@ public class Tile {
     public Tile(Coordinate coordinate, Continent continent) {
         this.coordinate = coordinate;
         this.surfaceType = continent.getType();
+        this.rockType = continent.getBasicRockType();
         this.biome = new Biome(this);
     }
 
@@ -240,6 +241,7 @@ public class Tile {
     public Tile createClone(Coordinate newCoordinate) {
         Tile clone = new Tile();
         clone.setSurfaceType(this.surfaceType);
+        clone.setRockType(rockType);
         clone.setCoordinate(newCoordinate);
         clone.setHeight(this.height);
         clone.setId(newCoordinate.getId());

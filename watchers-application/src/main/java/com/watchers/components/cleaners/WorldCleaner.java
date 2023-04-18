@@ -5,6 +5,7 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.StateType;
+import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.River;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.environment.Watershed;
@@ -97,13 +98,44 @@ public class WorldCleaner {
                     .map(Coordinate::getTile)
                     .filter(Tile::isSea)
                     .filter(tile -> tile.getWatershed() != null)
-                    .forEach(tile -> tile.getWatershed().removeTile(tile));
+                    .forEach(tile -> {
+                        River river = tile.getRiver();
+                        if (river != null) {
+                            log.info("Hier 3");
+                            river.getUpCurrentRivers().forEach(upcurrentRiver -> upcurrentRiver.setDownCurrentRiver(null));
+                            river.getUpCurrentRivers().remove(river);
+                            if (river.getDownCurrentRiver() != null
+                                    && river.getDownCurrentRiver().getUpCurrentRivers() != null) {
+                                river.getDownCurrentRiver().getUpCurrentRivers().remove(river);
+                            }
+                            river.setDownCurrentRiver(null);
+                            river.getTile().setRiver(null);
 
-            final World finalWorld = world;
-            watersheds.stream()
-                    .filter(watershed -> watershed.getWatershedTiles().isEmpty())
-                    .forEach(finalWorld::removeWatershed);
+                        }
+                        tile.getWatershed().removeTile(tile);
+                    });
 
+            world.getCoordinates().stream()
+                    .map(Coordinate::getTile)
+                    .filter(Tile::isWater)
+                    .map(Tile::getBiome)
+                    .filter(biome -> biome.getGrassFlora() != null
+                            || biome.getTreeFlora() != null)
+                    .forEach(Biome::removeFlore);
+
+            world.getCoordinates().stream()
+                    .map(Coordinate::getTile)
+                    .map(Tile::getBiome)
+                    .filter(biome -> biome.getGrassFlora() != null
+                            && biome.getGrassBiomass() <= 0)
+                    .forEach(biome -> biome.setGrassFlora(null));
+
+            world.getCoordinates().stream()
+                    .map(Coordinate::getTile)
+                    .map(Tile::getBiome)
+                    .filter(biome -> biome.getTreeFlora() != null
+                            && biome.getTreeBiomass() <= 0)
+                    .forEach(biome -> biome.setTreeFlora(null));
         }
 
         world.getCoordinates().stream()

@@ -30,23 +30,23 @@ public class Biome implements ParallelTask {
     private Long id;
 
     @JsonView(Views.Public.class)
-    @Column(name = "grassBiomass")
-    @JsonProperty("grass_biomass")
+    @Column(name = "grass_biomass")
+    @JsonProperty("grassBiomass")
     private double grassBiomass;
 
     @JsonView(Views.Public.class)
-    @Column(name = "grassFlora")
-    @JsonProperty("grass_flora")
+    @Column(name = "grass_flora")
+    @JsonProperty("grassFlora")
     private Flora grassFlora;
 
     @JsonView(Views.Public.class)
-    @Column(name = "treeBiomass")
-    @JsonProperty("tree_Biomass")
+    @Column(name = "tree_biomass")
+    @JsonProperty("treeBiomass")
     private double treeBiomass;
 
     @JsonView(Views.Public.class)
-    @Column(name = "treeFlora")
-    @JsonProperty("tree_flora")
+    @Column(name = "tree_flora")
+    @JsonProperty("treeFlora")
     private Flora treeFlora;
 
     @OneToOne
@@ -235,5 +235,13 @@ public class Biome implements ParallelTask {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public void removeFlore() {
+        this.grassBiomass = 0;
+        this.grassFlora = null;
+
+        this.treeBiomass = 0;
+        this.treeFlora = null;
     }
 }
