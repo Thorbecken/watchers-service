@@ -31,11 +31,10 @@ public class ContinentalDriftDirectionChanger {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = taskDto.getWorld();
         new ContinentalDriftDirectionMethodObject(false, world.getLastContinentInFlux())
                 .adjustContinentelDriftFlux(world, world.getWorldSettings().getDrifFlux(), world.getWorldSettings().getDriftVelocity());
         adjustForDriftPressure(world);
-        worldRepository.save(world);
     }
 
     private void adjustForDriftPressure(World world) {

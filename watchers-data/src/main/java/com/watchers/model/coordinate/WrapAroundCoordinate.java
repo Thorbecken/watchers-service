@@ -90,4 +90,9 @@ public class WrapAroundCoordinate extends Coordinate {
     public int hashCode() {
         return super.hashCode();
     }
+
+    @Override
+    public double getDistance(Coordinate coordinate) {
+        throw new RuntimeException("not implemented");
+    }
 }

@@ -8,6 +8,7 @@ public class TestableContinentalDriftTaskDto {
 
     public static ContinentalDriftTaskDto createContinentalDriftTaskDto(World world){
         ContinentalDriftTaskDto  taskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
+        taskDto.setWorld(world);
         taskDto.setContinentalshift(true);
         taskDto.setSaving(false);
 

@@ -26,15 +26,12 @@ public class ContinentalSplitter {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto){
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
+        World world = taskDto.getWorld();
         Set<Continent> continents =  new HashSet<>(world.getContinents());
 
         continents.stream()
                 .filter(continent -> !continent.getCoordinates().isEmpty())
                 .forEach(this::checkWidthLenght);
-
-
-        worldRepository.save(world);
     }
 
     private void checkWidthLenght(Continent continent) {

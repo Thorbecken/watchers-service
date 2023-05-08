@@ -6,18 +6,20 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.Watershed;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,9 +37,9 @@ public class WorldService {
     private final ArrayList<Long> activeWorldIds;
     private final WorldSettingFactory worldSettingFactory;
 
-    public void saveWorld(World memoryWorld){
+    public void saveWorld(World memoryWorld) {
         boolean exists = fileSaveManager.exist(memoryWorld.getId());
-        if (!exists){
+        if (!exists) {
             fileSaveManager.saveWorld(memoryWorld);
             log.warn("The missing world is now saved to persistence.");
         } else {
@@ -46,9 +48,16 @@ public class WorldService {
         }
     }
 
-    public void processTurn(WorldTaskDto worldTaskDto){
-        log.trace(getTotalHeight(worldTaskDto.getWorldId()));
-        if(worldTaskDto instanceof ContinentalDriftTaskDto) {
+    @Transactional
+    public void processTurn(WorldTaskDto worldTaskDto) {
+        World world = worldRepository.getReferenceById(worldTaskDto.getWorldId());
+        Hibernate.initialize(world);
+        Hibernate.initialize(world.getCoordinates());
+        Hibernate.initialize(world.getContinents());
+        Hibernate.initialize(world.getActorList());
+        worldTaskDto.setWorld(world);
+        log.trace(getTotalHeight(world));
+        if (worldTaskDto instanceof ContinentalDriftTaskDto) {
             continentalDriftManager.process((ContinentalDriftTaskDto) worldTaskDto);
             climateManager.proces(worldTaskDto);
             cleansingManager.process(worldTaskDto);
@@ -59,29 +68,29 @@ public class WorldService {
         lifeManager.process(worldTaskDto);
         cleansingManager.process(worldTaskDto);
 
-        if(worldTaskDto.isSaving()){
+        if (worldTaskDto.isSaving()) {
             fileSaveManager.saveWorld(worldTaskDto);
         }
+        worldRepository.save(world);
     }
 
     @Transactional
-    private String getTotalHeight(@NonNull Long worldId) {
-        World world = worldRepository.findById(worldId).get();
+    private String getTotalHeight(@NonNull World world) {
         long currentHeight = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .mapToLong(Tile::getHeight)
                 .sum();
         long totalHeight = currentHeight + world.getHeightDeficit();
-        return "Current height is: " +  totalHeight + ".";
+        return "Current height is: " + totalHeight + ".";
     }
 
     /**
-     * @param worldMetaData the worldsettings of the world
+     * @param worldMetaData        the worldsettings of the world
      * @param startFromPersistents boolean value for the use of the persistent database
      * @return Boolean: true means added, null means already added false means not present in memory
      */
     public Boolean addActiveWorld(WorldMetaData worldMetaData, boolean startFromPersistents) {
-        if (startFromPersistents){
+        if (startFromPersistents) {
             return addActiveWorldFromPersistence(worldMetaData);
         } else {
             return addActiveWorldFromMemory(worldMetaData);
@@ -90,7 +99,7 @@ public class WorldService {
 
     private Boolean addActiveWorldFromPersistence(WorldMetaData worldMetaData) {
         Optional<World> optionalWorld = fileSaveManager.findById(worldMetaData.getId());
-        if(optionalWorld.isPresent()) {
+        if (optionalWorld.isPresent()) {
             World world = optionalWorld.get();
             saveToMemory(world);
             if (!activeWorldIds.contains(worldMetaData.getId())) {
@@ -113,8 +122,6 @@ public class WorldService {
         log.info("Loaded " + persistentWorld.getCoordinates().size() + " coordinates");
         log.info("Loaded " + persistentWorld.getContinents().size() + " continents");
         log.info("Loaded " + persistentWorld.getActorList().size() + " actors");
-        log.info("Loaded " + persistentWorld.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getWatershed).distinct().count() + " watersheds");
-        log.info("Loaded " + persistentWorld.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getRiver).count() + " rivers");
     }
 
     private Boolean addActiveWorldFromMemory(WorldMetaData worldMetaData) {

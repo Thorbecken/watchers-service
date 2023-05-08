@@ -17,8 +17,6 @@ import java.util.Optional;
 
 class ContinentalSplitterTest {
 
-
-
     private World world;
     private WorldRepository worldRepository;
     private ContinentalSplitter continentalSplitter;
@@ -27,7 +25,6 @@ class ContinentalSplitterTest {
     void setUp() {
         worldRepository = Mockito.mock(WorldRepository.class);
         continentalSplitter = new ContinentalSplitter(worldRepository);
-
 
         world = new World();
         world.setWorldSettings(TestableWorld.createWorldSettings());
@@ -93,6 +90,7 @@ class ContinentalSplitterTest {
         Assertions.assertEquals(4, world.getContinents().size());
 
         ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
+        continentalDriftTaskDto.setWorld(world);
         continentalSplitter.process(continentalDriftTaskDto);
 
         Assertions.assertEquals(8, world.getCoordinates().stream()

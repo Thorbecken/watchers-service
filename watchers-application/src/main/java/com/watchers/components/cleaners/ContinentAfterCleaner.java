@@ -19,7 +19,7 @@ public class ContinentAfterCleaner {
     @Transactional
     public void process(ContinentalDriftTaskDto dto) {
         if (dto.getGetRemovedContinents().size() > 0) {
-            World world = worldRepository.findById(dto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory"));
+            World world = dto.getWorld();
 
             Long lastId = world.getLastContinentInFlux();
 
@@ -29,8 +29,6 @@ public class ContinentAfterCleaner {
                 log.warn("setting last continent in flux to " + newLastContinentInFlux + " from continent cleaner");
                 world.setLastContinentInFlux(newLastContinentInFlux);
             }
-
-            worldRepository.save(world);
         }
     }
 }

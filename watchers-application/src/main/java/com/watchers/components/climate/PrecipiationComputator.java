@@ -31,7 +31,7 @@ public class PrecipiationComputator {
 
     @Transactional
     public void process(WorldTaskDto taskDto) {
-        World world = worldRepository.getById(taskDto.getWorldId());
+        World world = taskDto.getWorld();
         List<Climate> climates = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .collect(Collectors.toList());
@@ -39,8 +39,6 @@ public class PrecipiationComputator {
         computeEvaporation(climates);
         moveCloudsAccordingToAirflow(climates, world.getWorldSettings());
         computePrecipitation(climates);
-
-        worldRepository.save(world);
     }
 
     private void computeEvaporation(List<Climate> climates) {

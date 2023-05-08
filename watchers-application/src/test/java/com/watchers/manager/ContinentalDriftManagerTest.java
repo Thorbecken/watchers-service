@@ -36,7 +36,7 @@ class ContinentalDriftManagerTest {
         WorldSettingManager worldSettingManager = new WorldSettingManager(worldMetaDataRepository);
         ContinentalIntegretyAdjuster continentalIntegretyAdjuster = new ContinentalIntegretyAdjuster(worldRepository);
         ContinentalSplitter continentalSplitter = new ContinentalSplitter(worldRepository);
-        ContinentalMerger continentalMerger = new ContinentalMerger(worldRepository);
+        ContinentalMerger continentalMerger = new ContinentalMerger(worldRepository, null, continentRepository);
 
         Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
         Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
@@ -47,6 +47,7 @@ class ContinentalDriftManagerTest {
     void process() {
         ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
         continentalDriftTaskDto.setContinentalshift(true);
+        continentalDriftTaskDto.setWorld(world);
         continentalDriftManager.process(continentalDriftTaskDto);
     }
 }

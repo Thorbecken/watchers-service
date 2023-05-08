@@ -77,7 +77,7 @@ public class Animal extends Actor {
         getCoordinate().getActors().add(this);
     }
 
-    private void eat(){
+    private void eat() {
         Biome biome = getCoordinate().getTile().getBiome();
         double localFood = biome.getCurrentFood();
         if (localFood >= animalType.getForaging()) {
@@ -106,11 +106,11 @@ public class Animal extends Actor {
         }
     }
 
-    public void handleContinentalMovement(){
+    public void handleContinentalMovement() {
         Optional<Coordinate> optionalCoordinate = getCoordinate().getNeighbours().stream()
                 .filter(this::isCorrectLandType)
                 .max((coordinate1, coordinate2) -> Math.toIntExact(Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood())));
-        if (optionalCoordinate.isPresent()){
+        if (optionalCoordinate.isPresent()) {
             moveToTile(optionalCoordinate.get());
         } else {
             setStateType(StateType.DEAD);
@@ -133,6 +133,19 @@ public class Animal extends Actor {
 
         List<Actor> newActors = getCoordinate().getWorld().getNewActors();
         if (newActors != null) {
+            long id;
+            if (newActors.isEmpty()) {
+                id = coordinate.getWorld().getActorList().stream()
+                        .mapToLong(Actor::getId)
+                        .max()
+                        .orElse(0L);
+            } else {
+                id = newActors.stream()
+                        .mapToLong(Actor::getId)
+                        .max()
+                        .orElseThrow();
+            }
+            setId(id + 1L);
             newActors.add(this);
         }
     }

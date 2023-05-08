@@ -25,7 +25,7 @@ public class ContinentalDriftTileChangeComputer {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("World was lost in memory."));
+        World world = taskDto.getWorld();
 
         taskDto.getNewTileLayout().keySet().forEach(mockCoordinate -> {
                     Coordinate coordinate = world.getCoordinate(mockCoordinate);
@@ -43,8 +43,6 @@ public class ContinentalDriftTileChangeComputer {
                     }
                 }
         );
-
-        worldRepository.save(world);
     }
 
     private void processAbsentTile(Coordinate coordinate, ContinentalDriftTaskDto taskDto) {

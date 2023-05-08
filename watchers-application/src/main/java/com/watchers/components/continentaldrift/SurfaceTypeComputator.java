@@ -36,7 +36,7 @@ public class SurfaceTypeComputator {
 
     @Transactional
     public void process(WorldTaskDto worldTaskDto) {
-        World world = worldRepository.findById(worldTaskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = worldTaskDto.getWorld();
 
         world.getCoordinates().parallelStream().map(Coordinate::getTile).forEach(tile -> {
             long height = tile.getHeight();
@@ -54,7 +54,5 @@ public class SurfaceTypeComputator {
                 tile.setSurfaceType(SurfaceType.OCEAN);
             }
         });
-
-        worldRepository.save(world);
     }
 }

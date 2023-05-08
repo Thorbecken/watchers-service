@@ -24,8 +24,7 @@ public class ContinentalCorrector {
 
     @Transactional
     public void process(ContinentalDriftTaskDto driftTaskDto) {
-        World world = worldRepository.findById(driftTaskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
-        Assert.notNull(world, "World is not found!");
+        World world = driftTaskDto.getWorld();
 
         world.getCoordinates().forEach(
                 coordinate -> {
@@ -53,8 +52,6 @@ public class ContinentalCorrector {
                     }
                 }
         );
-
-        worldRepository.save(world);
     }
 
     public static <T> T mostCommon(List<T> list) {

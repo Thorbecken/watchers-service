@@ -78,7 +78,6 @@ class ContinentalDriftDirectionChangerTest {
         assertThat(continentThree.getDirection().getXVelocity(), equalTo(0));
         assertThat(continentThree.getDirection().getYVelocity(), equalTo(0));
 
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftDirectionChanger.process(taskDto);
 
         assertThat(continentOne.getDirection().getXVelocity(), equalTo(1));
@@ -92,7 +91,7 @@ class ContinentalDriftDirectionChangerTest {
         continentOne.getDirection().setYDriftPressure(-1);
         continentTwo.getDirection().setXDriftPressure(1);
         continentTwo.getDirection().setYDriftPressure(1);
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
+
         continentalDriftDirectionChanger.process(taskDto);
 
         assertThat(continentOne.getDirection().getXVelocity(), equalTo(0));

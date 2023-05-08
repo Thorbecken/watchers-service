@@ -17,10 +17,9 @@ public class TemperatureZoneComputator {
 
     @Transactional
     public void process(WorldTaskDto taskDto) {
-        World world = worldRepository.getById(taskDto.getWorldId());
+        World world = taskDto.getWorld();
 
         restoreBaseTemperature(world);
-        worldRepository.save(world);
         for (int i = 0; i < 3; i++) {
             // waterflow transfer
             transferWaterTemperature(world);
@@ -28,8 +27,6 @@ public class TemperatureZoneComputator {
             transferAirTemperature(world);
             // proces transfer
             processTemperatureTransfer(world);
-
-            worldRepository.save(world);
         }
     }
 

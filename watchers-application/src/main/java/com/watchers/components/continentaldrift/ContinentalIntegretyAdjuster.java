@@ -23,52 +23,52 @@ public class ContinentalIntegretyAdjuster {
     private WorldRepository worldRepository;
 
     @Transactional
-    public void process(ContinentalDriftTaskDto taskDto){
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
+    public void process(ContinentalDriftTaskDto taskDto) {
+        World world = taskDto.getWorld();
         Set<Continent> continents = new HashSet<>(world.getContinents());
-        continents.forEach(this::checkIntegrity);
-        worldRepository.save(world);
+        continents.forEach(this::checkContinent);
     }
 
-    private void checkIntegrity(Continent continent){
-        List<List<Coordinate>> listOfConnectedCoordinates = generateEmptyTileClusters(continent);
-        if(listOfConnectedCoordinates.size()>1){
-            log.debug("Continent " + continent.getId() + " was split into " + listOfConnectedCoordinates.size() + " parts");
-            for (int i = 1; i < listOfConnectedCoordinates.size(); i++) {
-                World world = continent.getWorld();
-                createNewContinent(listOfConnectedCoordinates.get(i), world, continent.getType());
+    private void checkContinent(Continent continent) {
+        Map<Coordinate, Set<Coordinate>> checkedCoordinates = new HashMap<>();
+        List<Coordinate> continentCoordinates = new ArrayList<>(continent.getCoordinates());
+        while (!continentCoordinates.isEmpty()) {
+            Coordinate currentRandomCoordinate = continentCoordinates.get(0);
+            Set<Coordinate> adjacendCoordinates = new HashSet<>();
+            adjacendCoordinates.add(currentRandomCoordinate);
+
+            boolean noMoreExtraAdjacentCoordinatesFound = false;
+            while (!noMoreExtraAdjacentCoordinatesFound) {
+                Set<Coordinate> newAdjacentContinentCoordinates = adjacendCoordinates.stream()
+                        .flatMap(coordinate -> coordinate.getNeighbours().stream())
+                        .filter(coordinate -> continent.getId().equals(coordinate.getContinent().getId()))
+                        .filter(coordinate -> !adjacendCoordinates.contains(coordinate))
+                        .collect(Collectors.toSet());
+                adjacendCoordinates.addAll(newAdjacentContinentCoordinates);
+                adjacendCoordinates.forEach(continentCoordinates::remove);
+                if(newAdjacentContinentCoordinates.isEmpty()){
+                    noMoreExtraAdjacentCoordinatesFound = true;
+                }
+            }
+
+            checkedCoordinates.put(currentRandomCoordinate, adjacendCoordinates);
+        }
+
+        List<Set<Coordinate>> checkedCoordinatesList = new ArrayList<>(checkedCoordinates.values());
+        if(checkedCoordinatesList.size() > 1){
+            log.info("Continent " + continent.getId() + " was split into " + checkedCoordinates.size() + " parts");
+            World world = continent.getWorld();
+            for (int i = 0; i < checkedCoordinatesList.size(); i++) {
+                if(i != 0){
+                    createNewContinent(checkedCoordinatesList.get(i), world, continent.getType());
+                }
             }
         }
+
     }
 
-    private void createNewContinent(List<Coordinate> coordinates, World world, SurfaceType type) {
+    private void createNewContinent(Collection<Coordinate> coordinates, World world, SurfaceType type) {
         Continent newContinent = new Continent(world, type);
         coordinates.forEach(coordinate -> coordinate.changeContinent(newContinent));
     }
-
-    private List<List<Coordinate>> generateEmptyTileClusters(Continent continent) {
-        List<List<Coordinate>> listOfConnectedCoordinates = new ArrayList<>();
-
-        List<Coordinate> emptyCoordinates = new ArrayList<>(continent.getCoordinates());
-
-        while(emptyCoordinates.size() != 0){
-            List<Coordinate> coordinates = new ArrayList<>();
-            coordinates.add(emptyCoordinates.get(0));
-            emptyCoordinates.remove(emptyCoordinates.get(0));
-            boolean stillProcessing = true;
-            while(stillProcessing) {
-                List<Coordinate> neighbouringCoordinates = CoordinateHelper.getAllOutersideCoordinates(coordinates);
-                List<Coordinate> newCoordinates = neighbouringCoordinates.stream().filter(emptyCoordinates::contains).collect(Collectors.toList());
-
-                coordinates.addAll(newCoordinates);
-                emptyCoordinates.removeAll(newCoordinates);
-                stillProcessing = newCoordinates.size() != 0;
-            }
-            listOfConnectedCoordinates.add(coordinates);
-        }
-
-        listOfConnectedCoordinates.sort(Comparator.comparing(List::size));
-        return listOfConnectedCoordinates;
-    }
-
 }

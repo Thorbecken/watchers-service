@@ -22,7 +22,7 @@ public class ErosionAdjuster {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = taskDto.getWorld();
         Map<Coordinate, Long> erosionMap = new HashMap<>();
 
         CoordinateHelper.getAllPossibleCoordinates(world)
@@ -54,7 +54,5 @@ public class ErosionAdjuster {
                     world.getCoordinate(coordiante.getXCoord(), coordiante.getYCoord()).getTile().setHeight(currentHeight + aLong);
                 }
         );
-
-        worldRepository.save(world);
     }
 }

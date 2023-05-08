@@ -21,14 +21,12 @@ public class AircurrentRecalibrator {
     // Hibernate can't handle that this method uses parallel streams
     public void process(WorldTaskDto taskDto) {
         if (taskDto instanceof ContinentalDriftTaskDto) {
-            World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow();
+            World world = taskDto.getWorld();
             world.getCoordinates().stream()
                     .map(Coordinate::getClimate)
                     .map(Climate::getSkyTile)
                     .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
                     .forEach(Aircurrent::recalculateHeigthDifference);
-
-            worldRepository.save(world);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.watchers.model.dto;
 
+import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,8 @@ public class WorldTaskDto {
     private Long worldId;
     boolean saving;
     boolean continentalshift;
+
+    World world;
 
     public WorldTaskDto(WorldMetaData worldMetaData){
         this(worldMetaData.getId(), worldMetaData.isNeedsSaving(), worldMetaData.isNeedsContinentalShift());

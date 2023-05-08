@@ -7,6 +7,7 @@ import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
+import com.watchers.repository.ContinentRepository;
 import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,16 +16,20 @@ import org.mockito.Mockito;
 
 import java.util.Optional;
 
+import static org.mockito.Mockito.mock;
+
 class ContinentalMergerTest {
 
     private World world;
     private WorldRepository worldRepository;
+    private ContinentRepository continentRepository;
     private ContinentalMerger continentalMerger;
 
     @BeforeEach
     void setUp() {
-        worldRepository = Mockito.mock(WorldRepository.class);
-        continentalMerger = new ContinentalMerger(worldRepository);
+        worldRepository = mock(WorldRepository.class);
+        continentRepository = mock(ContinentRepository.class);
+        continentalMerger = new ContinentalMerger(worldRepository, null, continentRepository);
 
         world = new World();
         world.setYSize(5L);
@@ -82,6 +87,7 @@ class ContinentalMergerTest {
         Assertions.assertTrue(world.getContinents().stream().anyMatch(continent -> continent.getId().equals(3L)));
 
         ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
+        continentalDriftTaskDto.setWorld(world);
         continentalMerger.process(continentalDriftTaskDto);
 
         Assertions.assertEquals(2, world.getContinents().size());

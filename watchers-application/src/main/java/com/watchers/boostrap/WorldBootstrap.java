@@ -6,6 +6,7 @@ import com.watchers.manager.FileSaveManager;
 import com.watchers.manager.MapManager;
 import com.watchers.manager.SaveToDatabaseManager;
 import com.watchers.manager.WorldSettingManager;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.WorldStatusEnum;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
@@ -16,6 +17,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component

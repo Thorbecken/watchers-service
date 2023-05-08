@@ -14,8 +14,7 @@ public class ClimateManager {
     private final TemperatureZoneComputator temperatureZoneComputator;
     private final PrecipiationComputator precipiationComputator;
     private final AircurrentRecalibrator aircurrentRecalibrator;
-    private final WatershedComputator watershedComputator;
-    private final RiverComputator riverComputator;
+    private final WaterflowComputator waterflowComputator;
 
     public void proces(WorldTaskDto taskDto){
         if(taskDto instanceof ContinentalDriftTaskDto) {
@@ -31,10 +30,7 @@ public class ClimateManager {
         precipiationComputator.process(taskDto);
         StopwatchTimer.stop("precipiationComputator");
         StopwatchTimer.start();
-        watershedComputator.process(taskDto);
-        StopwatchTimer.stop("watershedComputator");
-        StopwatchTimer.start();
-        riverComputator.process(taskDto);
-        StopwatchTimer.stop("riverComputator");
+        waterflowComputator.process(taskDto);
+        StopwatchTimer.stop("waterflowComputator");
     }
 }

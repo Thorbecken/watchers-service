@@ -39,7 +39,7 @@ public class Continent {
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "continent", cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "continent")
     private Set<Coordinate> coordinates = new HashSet<>();
 
     @JsonProperty("surfaceType")
@@ -61,6 +61,8 @@ public class Continent {
 
     public Continent(World world, SurfaceType surfaceType) {
         this.world = world;
+        // adding id for equals method to be able to use in hashsets
+        this.id = world.getContinents().size() + 1L;
         this.world.getContinents().add(this);
         this.type = surfaceType;
         this.basicRockType = RockType.getRandomRockType();
@@ -131,7 +133,8 @@ public class Continent {
                 .map(Coordinate::getNeighbours)
                 .flatMap(Collection::stream)
                 .map(Coordinate::getContinent)
-                .filter(continent -> !this.id.equals(continent.getId()))
+                .filter(continent -> continent.getId() != null
+                        && !this.id.equals(continent.getId()))
                 .collect(Collectors.groupingBy(Continent::getId));
 
         Optional<Long> mostConnectedNeighbouringContinent = list.keySet().stream()
@@ -145,12 +148,11 @@ public class Continent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Continent continent = (Continent) o;
-        return Objects.equals(id, continent.id)
-                && coordinates.equals(continent.coordinates);
+        return Objects.equals(id, continent.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, coordinates);
+        return Objects.hash(id);
     }
 }

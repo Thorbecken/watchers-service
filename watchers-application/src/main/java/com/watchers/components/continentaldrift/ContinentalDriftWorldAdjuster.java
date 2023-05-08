@@ -23,7 +23,7 @@ public class ContinentalDriftWorldAdjuster {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = taskDto.getWorld();
 
         long newHeight = calculateNewHeight(world, taskDto.getChanges());
 
@@ -36,8 +36,6 @@ public class ContinentalDriftWorldAdjuster {
                     }
                 }
         );
-
-        worldRepository.save(world);
     }
 
     private long calculateNewHeight(World world, Map<MockCoordinate, ContinentalChangesDto> changes) {

@@ -4,22 +4,23 @@ import com.fasterxml.jackson.annotation.*;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.MockTile;
+import com.watchers.model.enums.DirectionEnum;
 import com.watchers.model.enums.RockType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
+import com.watchers.pathfinding.GraphNode;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
 @Table(name = "tile")
 @SequenceGenerator(name = "Tile_Gen", sequenceName = "Tile_Seq", allocationSize = 1)
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
-public class Tile {
+public class Tile implements GraphNode {
 
     @Id
     @JsonProperty("tileId")
@@ -43,15 +44,74 @@ public class Tile {
     @JsonView(Views.Public.class)
     private double landMoisture;
 
+    @Column(name = "lake")
     @JsonView(Views.Public.class)
-    @JsonProperty("river")
-    @OneToOne(mappedBy = "tile", cascade = CascadeType.ALL)
-    private River river;
+    private boolean isLakeTile;
 
+    @Column(name = "river")
     @JsonView(Views.Public.class)
-    @JsonIgnoreProperties({"world", "watershedTiles", "riverFlow"})
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Watershed watershed;
+    private boolean isRiver;
+
+    @Column(name = "large_river")
+    @JsonView(Views.Public.class)
+    private boolean isLargeRiver;
+
+    @Column(name = "coastal_land")
+    @JsonView(Views.Public.class)
+    private boolean isCoastalLand;
+
+    @Transient
+    private Lake lake;
+
+    @Transient
+    @JsonIgnore
+    private Tile downWardTile;
+
+    public void setDownWardTile(Tile downWardTile) {
+        this.downWardTile = downWardTile;
+        downWardTile.getUpwardTiles().add(this);
+        long yDifference = this.downWardTile.getCoordinate().getYCoord() - this.coordinate.getYCoord();
+        long xDifference = this.downWardTile.getCoordinate().getXCoord() - this.coordinate.getXCoord();
+        if (yDifference > 0L) {
+            this.flowDirection = DirectionEnum.DOWN;
+        } else if (yDifference < 0L) {
+            this.flowDirection = DirectionEnum.UP;
+        } else if (xDifference > 0L) {
+            this.flowDirection = DirectionEnum.RIGHT;
+        } else {
+            this.flowDirection = DirectionEnum.LEFT;
+        }
+    }
+
+    @Column(name = "down_flow_Amount")
+    @JsonView(Views.Public.class)
+    private double downFlowAmount;
+
+    @Column(name = "flow_direction")
+    @JsonView(Views.Public.class)
+    private DirectionEnum flowDirection;
+
+    @Transient
+    @JsonIgnore
+    private List<Tile> upwardTiles = new ArrayList<>();
+
+    public void resetDownflowValues() {
+        upwardTiles.clear();
+        downWardTile = null;
+        downFlowAmount = 0d;
+        isRiver = false;
+        isLakeTile = false;
+        isLargeRiver = false;
+        flowDirection = null;
+    }
+
+    @JsonIgnore
+    public boolean readyToFlow() {
+        return downFlowAmount == 0d
+                && !upwardTiles.isEmpty()
+                && upwardTiles.stream()
+                .allMatch(tile -> tile.downFlowAmount != 0d);
+    }
 
     @JsonProperty("biome")
     @JsonView(Views.Public.class)
@@ -73,6 +133,12 @@ public class Tile {
 
     public Tile(Coordinate coordinate, Continent continent) {
         this.coordinate = coordinate;
+        this.id = coordinate.getWorld().getCoordinates().stream()
+                .map(Coordinate::getTile)
+                .mapToLong(Tile::getId)
+                .max()
+                .orElse(0); // the zero is to let the first id be one
+        this.id = this.id + 1;
         this.surfaceType = continent.getType();
         this.rockType = continent.getBasicRockType();
         this.biome = new Biome(this);
@@ -147,25 +213,6 @@ public class Tile {
         return !isWater();
     }
 
-    public void setRiver(River river) {
-        this.river = river;
-        if (river != null) {
-            river.setTile(this);
-        }
-    }
-
-    @JsonIgnore
-    public boolean riverIsConnected() {
-        if (this.river == null) {
-            return false;
-        } else {
-            return this.getNeighbours()
-                    .stream()
-                    .anyMatch(tile -> tile.getRiver() != null
-                            || tile.isWater());
-        }
-    }
-
     public boolean coordinateEquals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Tile)) return false;
@@ -180,9 +227,6 @@ public class Tile {
 
     public void transferData(MockTile mockTile, Coordinate survivingCoordinate) {
         this.biome.transferData(mockTile);
-        if (this.river != null && survivingCoordinate.getTile().getRiver() != null) {
-            this.river.mergeRivers(this.river, survivingCoordinate.getTile().getRiver());
-        }
         survivingCoordinate.getActors().addAll(this.coordinate.getActors());
     }
 
@@ -207,13 +251,6 @@ public class Tile {
 
         this.coordinate.getActors().addAll(deletedTileCoordinate.getActors());
         this.coordinate.getActors().forEach(actor -> actor.setCoordinate(coordinate));
-    }
-
-    public void changeWatershed(Watershed newWatershed) {
-        this.watershed = newWatershed;
-        if (this.river != null) {
-            this.river.setWatershed(newWatershed);
-        }
     }
 
     @Override
@@ -246,28 +283,67 @@ public class Tile {
         clone.setHeight(this.height);
         clone.setId(newCoordinate.getId());
         clone.setBiome(this.biome.createClone(clone));
-        if (watershed != null) {
-            Watershed newWatershed = newCoordinate.getWorld().getWatersheds().stream()
-                    .filter(oldWatershed -> oldWatershed.getId().equals(watershed.getId()))
-                    .findFirst()
-                    .orElseThrow();
-            newWatershed.addTile(clone);
-            if (this.river != null) {
-                clone.setRiver(this.river.createClone(clone));
-                clone.getRiver().setWatershed(newWatershed);
-                newWatershed.addRiver(clone.getRiver());
-            }
-        }
         return clone;
     }
 
     public void checkIntegrity() {
-        if (this.river != null) {
-            this.river.checkIntegrity();
-        }
     }
 
     public void reduceLandMoisture(double moistureReduction) {
         this.landMoisture = this.landMoisture - moistureReduction;
+    }
+
+    @JsonIgnore
+    public double getDistance(Tile to) {
+        return this.coordinate.getDistance(to.coordinate);
+    }
+
+
+    @JsonIgnore
+    public List<Tile> getLowerHeightTilesOrderedByHeightDescending() {
+        return coordinate.getLowerHeightCoordinatesNeighbours().stream()
+                .map(Coordinate::getTile)
+                .filter(tile -> tile != this)
+                .sorted(Comparator.comparing(Tile::getHeight).reversed())
+                .collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public Set<Long> getLowerOrEqualHeightLandTileIds() {
+        return coordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1).stream()
+                .map(Coordinate::getTile)
+                .map(Tile::getId)
+                .collect(Collectors.toSet());
+    }
+
+    @JsonIgnore
+    public Set<Long> getNeighbourIds() {
+        return this.getNeighbours().stream()
+                .map(Tile::getId)
+                .collect(Collectors.toSet());
+    }
+
+    @JsonIgnore
+    public boolean isNeighbour(Tile tile) {
+        return this.coordinate.isNeigbour(tile.getCoordinate());
+    }
+
+    @JsonIgnore
+    public boolean isLowestPoint() {
+        return this.getNeighbours().stream()
+                .noneMatch(neighbour -> neighbour.getHeight() <= this.height);
+    }
+
+    @JsonIgnore
+    public boolean hasLowerHeightNeighbour() {
+        return this.getNeighbours().stream()
+                .anyMatch(neighbour -> neighbour.getHeight() < this.height);
+    }
+
+    @JsonIgnore
+    public List<Tile> getSameHeightNeigbours() {
+        return this.getNeighbours().stream()
+                .filter(neighbour -> neighbour.getHeight() == this.height)
+                .collect(Collectors.toList());
     }
 }

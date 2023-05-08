@@ -30,7 +30,7 @@ public class ContinentalDriftNewTileAssigner {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = taskDto.getWorld();
         int currentNumberOfContinents = world.getContinents().size();
         Long newestContinent = world.getContinents().stream()
                 .max(Comparator.comparing(Continent::getId))
@@ -45,9 +45,6 @@ public class ContinentalDriftNewTileAssigner {
 
         int newContinentsCreated = createNewContinents(taskDto, currentNumberOfContinents, minimumContinents, listOfConnectedCoordinates, world);
         addEmptytilesToExistingContinents(newContinentsCreated, listOfConnectedCoordinates, taskDto, world);
-
-        worldRepository.save(world);
-
     }
 
     private void addEmptytilesToExistingContinents(int listOfCoordinatesProcessed, List<List<Coordinate>> listOfConnectedCoordinates, ContinentalDriftTaskDto taskDto, World world) {

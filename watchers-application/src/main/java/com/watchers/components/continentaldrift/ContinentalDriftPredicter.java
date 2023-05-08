@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -20,7 +22,7 @@ public class ContinentalDriftPredicter {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        List<Continent> continents = continentRepository.findAll();
+        List<Continent> continents = new ArrayList<>(taskDto.getWorld().getContinents());
         continents.forEach(continent -> predictContinentalMovement(continent, taskDto));
     }
 

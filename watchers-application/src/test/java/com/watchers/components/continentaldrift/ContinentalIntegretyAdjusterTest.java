@@ -1,6 +1,7 @@
 package com.watchers.components.continentaldrift;
 
 import com.watchers.TestableWorld;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 class ContinentalIntegretyAdjusterTest {
@@ -41,9 +44,8 @@ class ContinentalIntegretyAdjusterTest {
         Assertions.assertEquals(2, toBeSplitContinent.getCoordinates().size());
         Assertions.assertEquals(13, fillerContinent.getCoordinates().size());
 
-        Mockito.when(worldRepository.findById(1L)).thenReturn(Optional.of(world));
-
         ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
+        continentalDriftTaskDto.setWorld(world);
         world.getWorldSettings().setHeigtDivider(1);
         world.getWorldSettings().setMinimumContinents(1);
         continentalIntegretyAdjuster.process(continentalDriftTaskDto);
@@ -91,6 +93,11 @@ class ContinentalIntegretyAdjusterTest {
 
         world.getCoordinates().addAll(fillerContinent.getCoordinates());
         world.getCoordinates().addAll(toBeSplitContinent.getCoordinates());
+
+        List<Coordinate> coordinateList = new ArrayList<>(world.getCoordinates());
+        for (int i = 0; i < coordinateList.size(); i++) {
+            coordinateList.get(i).setId((long) i);
+        }
 
         return world;
     }

@@ -3,7 +3,6 @@ package com.watchers.components.cleaners;
 import com.watchers.model.actors.Actor;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.StateType;
-import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
@@ -11,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +22,10 @@ public class AnimalCleaner {
 
     @Transactional
     public void process(ContinentalDriftTaskDto continentalDriftTaskDto) {
-        World world = worldRepository.findById(continentalDriftTaskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        World world = continentalDriftTaskDto.getWorld();
 
         List<Actor> deadActorsByContinentalDrifting = world.getActorList().stream()
+                .filter(actor -> !StateType.DEAD.equals(actor.getStateType()))
                 .filter(Actor::isNotOnCorrectLand)
                 .collect(Collectors.toList());
         log.debug(deadActorsByContinentalDrifting.size() + " Actors died because of continental movement");
@@ -35,11 +34,10 @@ public class AnimalCleaner {
                 deadActor.getCoordinate().getActors().remove(deadActor);
             }
             deadActor.setCoordinate(null);
+            deadActor.setStateType(StateType.DEAD);
         });
 
         world.getActorList().removeAll(deadActorsByContinentalDrifting);
-
-        worldRepository.save(world);
     }
 
 //    old code

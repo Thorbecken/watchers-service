@@ -6,29 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.dto.MockCoordinate;
-import com.watchers.model.environment.Watershed;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.dto.MockCoordinate;
 import com.watchers.model.environment.Tile;
 import lombok.Data;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
+import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -76,11 +60,6 @@ public class World {
     @JsonView(Views.Public.class)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Continent> continents = new HashSet<>();
-
-    @JsonProperty("watersheds")
-    @JsonView(Views.Public.class)
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "world", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Watershed> watersheds = new HashSet<>();
 
     @JsonProperty("lastContinentInFlux")
     @JsonView(Views.Internal.class)
@@ -188,22 +167,14 @@ public class World {
                 .collect(Collectors.toList());
     }
 
-    public Set<Watershed> getWatersheds() {
-        return Collections.unmodifiableSet(watersheds);
-    }
 
-    public void removeWatershed(Watershed watershed){
-        watersheds.remove(watershed);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void addWatershed(Watershed watershed) {
-        watershed.setWorld(this);
-        watersheds.add(watershed);
-    }
-
-    public void addAllWatersheds(List<Watershed> watersheds) {
-        watersheds.forEach(this::addWatershed);
+    @JsonIgnore
+    public Long getWorldHeight(){
+        return coordinates.stream()
+                .map(Coordinate::getTile)
+                .mapToLong(Tile::getHeight)
+                .sum()
+                + heightDeficit;
     }
 
     public World createBasicClone() {

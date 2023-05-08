@@ -27,7 +27,7 @@ public class ActorProcessor {
 
     @Transactional
     public void process(WorldTaskDto taskDto){
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(()-> new RuntimeException("The world was lost in memory."));
+        World world = taskDto.getWorld();
 
         log.debug(world.getActorList().size() + " Actors at the start of this turn");
         log.debug(world.getActorList().stream()
@@ -50,7 +50,5 @@ public class ActorProcessor {
         } else {
             currentActors.forEach(Actor::processSerialTask);
         }
-
-        worldRepository.save(world);
     }
 }

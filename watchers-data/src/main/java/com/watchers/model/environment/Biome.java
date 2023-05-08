@@ -78,6 +78,7 @@ public class Biome implements ParallelTask {
 
     public Biome(Tile tile){
         this.tile = tile;
+        this.id = tile.getId();
     }
 
     @JsonIgnore

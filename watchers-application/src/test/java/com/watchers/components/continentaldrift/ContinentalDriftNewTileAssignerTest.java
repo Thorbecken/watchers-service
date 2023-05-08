@@ -177,7 +177,7 @@ class ContinentalDriftNewTileAssignerTest {
                 .filter(distinctByKey(MockContinentDto::getContinentId))
                 .count();
 
-        int expectedContinents = minimumContinents < 5 ? minimumContinents : 4;
+        int expectedContinents = minimumContinents<6?minimumContinents:5;
         assertEquals(expectedContinents, world.getContinents().size() + newContinents);
     }
 

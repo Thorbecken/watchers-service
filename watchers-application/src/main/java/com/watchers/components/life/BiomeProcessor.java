@@ -20,7 +20,7 @@ public class BiomeProcessor {
 
     @Transactional
     public void process(WorldTaskDto taskDto){
-        World world = worldRepository.findById(taskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in time."));
+        World world = taskDto.getWorld();
 
         world.getCoordinates().parallelStream()
                 .map(Coordinate::getTile)
@@ -31,7 +31,5 @@ public class BiomeProcessor {
                 .map(Coordinate::getTile)
                 .map(Tile::getBiome)
                 .forEach(Biome::spread);
-
-        worldRepository.save(world);
     }
 }

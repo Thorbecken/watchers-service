@@ -1,12 +1,12 @@
 package com.watchers.manager;
 
 import com.watchers.model.actors.Actor;
-import com.watchers.model.climate.*;
+import com.watchers.model.climate.Aircurrent;
+import com.watchers.model.climate.Climate;
+import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Biome;
-import com.watchers.model.environment.River;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.environment.Watershed;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
@@ -42,12 +42,10 @@ public class SaveToDatabaseManager {
             assignId(persistentWorld);
         }
         adjustAndMergeContinents(persistentWorld);
-        adjustAndMergeWatersheds(persistentWorld);
         adjustAndMergeActors(persistentWorld);
 
         World newWorld = saveBasicWorld(persistentWorld);
         saveContinents(persistentWorld, newWorld);
-        saveWatersheds(persistentWorld, newWorld);
         saveCoordinates(persistentWorld, newWorld, freshlyCreated);
         log.info("World " + persistentWorld.getId() + " is loaded from persistence into memory.");
     }
@@ -61,23 +59,12 @@ public class SaveToDatabaseManager {
                 .filter(continent -> continent.getId() == null)
                 .collect(Collectors.toList());
 
-        List<Watershed> watersheds = persistentWorld.getWatersheds().stream()
-                .filter(continent -> continent.getId() == null)
-                .collect(Collectors.toList());
-
         List<Coordinate> coordinates = persistentWorld.getCoordinates().stream()
                 .filter(coordinate -> coordinate.getId() == null)
                 .collect(Collectors.toList());
 
         List<Actor> actors = persistentWorld.getActorList().stream()
                 .filter(actor -> actor.getId() == null)
-                .collect(Collectors.toList());
-
-        List<River> rivers = persistentWorld.getCoordinates().stream()
-                .map(Coordinate::getTile)
-                .map(Tile::getRiver)
-                .filter(Objects::nonNull)
-                .filter(river -> river.getId() == null)
                 .collect(Collectors.toList());
 
         List<Aircurrent> aircurrents = persistentWorld.getCoordinates().stream()
@@ -90,14 +77,8 @@ public class SaveToDatabaseManager {
         for (long i = 0; i < continents.size(); i++) {
             continents.get((int) i).setId(i + 1);
         }
-        for (long i = 0; i < watersheds.size(); i++) {
-            watersheds.get((int) i).setId(i + 1);
-        }
         for (long i = 0; i < actors.size(); i++) {
             actors.get((int) i).setId(i + 1);
-        }
-        for (long i = 0; i < rivers.size(); i++) {
-            rivers.get((int) i).setId(i + 1);
         }
         for (long i = 0; i < aircurrents.size(); i++) {
             aircurrents.get((int) i).setId(i + 1);
@@ -156,32 +137,6 @@ public class SaveToDatabaseManager {
         if (continentMapping.containsKey(persistentWorld.getLastContinentInFlux())) {
             persistentWorld.setLastContinentInFlux(continentMapping.get(persistentWorld.getLastContinentInFlux()).getId());
         }
-    }
-
-    /**
-     * This method is needed so that the watersheds in the World object are linked with the watersheds in the Coordinate object.
-     * Also this methode adjusts the Id's and orders them accordingly.
-     * Otherwise Hibernate will persist a Continent with a generated Id that is not in accordince with its given Id.
-     * By inserting them in order of their new Id's, Hibernate will not accidentily merge a Watershed with an already
-     * persisted Continent.
-     *
-     * @param persistentWorld the world that is provided from a persistent source
-     */
-    private void adjustAndMergeWatersheds(World persistentWorld) {
-        Set<Watershed> watershedSet = persistentWorld.getWatersheds();
-        List<Watershed> watersheds = new ArrayList<>(watershedSet);
-        Map<Long, Watershed> watershedHashMap = new HashMap<>();
-        for (int i = 1; i <= watersheds.size(); i++) {
-            watershedHashMap.put(watersheds.get(i - 1).getId(), watersheds.get(i - 1));
-            watersheds.get(i - 1).setId((long) i);
-        }
-
-        persistentWorld.getCoordinates().stream()
-                .map(Coordinate::getTile)
-                .filter(tile -> tile.getWatershed() != null)
-                .forEach(
-                        tile -> tile.changeWatershed(watershedHashMap.get(tile.getWatershed().getId()))
-                );
     }
 
     /**
@@ -398,55 +353,21 @@ public class SaveToDatabaseManager {
     }
 
     @Data
-    private static class WatershedHolder {
-        private final Watershed watershed;
-        private List<River> riverFlow;
-        private List<Tile> watershedTiles;
-
-        WatershedHolder(Watershed watershed) {
-            this.watershed = watershed;
-            if (watershed != null) {
-                riverFlow = watershed.getRiverFlow();
-                watershedTiles = watershed.getWatershedTiles();
-            }
-        }
-
-        void clearInformation() {
-            if (watershed != null) {
-                watershed.clearInformation();
-            }
-        }
-
-        void setInformation() {
-            if (watershed != null) {
-                watershed.setInformation(riverFlow, watershedTiles);
-            }
-        }
-    }
-
-    @Data
     private static class TileHolder {
         private final Tile tile;
         private final Biome biome;
-        private final River river;
-        private final WatershedHolder watershedHolder;
 
         TileHolder(Tile tile) {
             this.tile = tile;
             this.biome = tile.getBiome();
-            this.river = tile.getRiver();
-            this.watershedHolder = new WatershedHolder(tile.getWatershed());
         }
 
         void clearInformation() {
             tile.setId(null);
             tile.setBiome(null);
-            tile.setRiver(null);
-            watershedHolder.clearInformation();
         }
 
         void setInformation() {
-            watershedHolder.setInformation();
         }
     }
 
@@ -484,13 +405,6 @@ public class SaveToDatabaseManager {
 
             saveBiomes(biomes);
 
-            List<River> rivers = tileHolderList.stream()
-                    .map(TileHolder::getRiver)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            saveRivers(rivers);
-
             tileHolderList.forEach(TileHolder::setInformation);
         }
     }
@@ -513,34 +427,6 @@ public class SaveToDatabaseManager {
                     session.clear();
 
                     log.info("processed " + (((double) i) / ((double) biomes.size())) + " procent of biomes.");
-                }
-            }
-
-            session.flush();
-            session.clear();
-            tx.commit();
-        }
-    }
-
-    private void saveRivers(List<River> rivers) {
-        rivers.forEach(river -> river.getTile().setRiver(river));
-        rivers.forEach(river -> river.setId(null));
-
-        SessionFactory sessionFactory = getCurrentSessionFromJPA();
-        try (Session session = sessionFactory.openSession()) {
-            Transaction tx = session.beginTransaction();
-
-            for (int i = 0; i < rivers.size(); i++) {
-                River river = rivers.get(i);
-                session.saveOrUpdate(river.getWatershed());
-                session.save(river);
-
-                if (i == 500) {
-                    //flush a batch of inserts and release memory:
-                    session.flush();
-                    session.clear();
-
-                    log.info("processed " + (((double) i) / ((double) rivers.size())) + " procent of rivers.");
                 }
             }
 
@@ -690,32 +576,6 @@ public class SaveToDatabaseManager {
         }
     }
 
-    private void saveWatershedsMethod(List<Watershed> objects) {
-        objects.sort(Comparator.comparing(Watershed::getId));
-        objects.forEach(Watershed::clearWatershedTiles);
-        objects.forEach(Watershed::clearRiverFlow);
-        SessionFactory sessionFactory = getCurrentSessionFromJPA();
-        try (Session session = sessionFactory.openSession()) {
-            Transaction tx = session.beginTransaction();
-
-            for (int i = 0; i < objects.size(); i++) {
-                Watershed watershed = objects.get(i);
-                session.save(watershed);
-                if (i % 500 == 0) {
-                    //flush a batch of inserts and release memory:
-                    session.flush();
-                    session.clear();
-                }
-            }
-
-            log.info("commiting watersheds");
-
-            tx.commit();
-
-            log.info("watersheds commited");
-        }
-    }
-
     private void saveAircurrentMethod(List<Aircurrent> aircurrents) {
         aircurrents.sort(Comparator.comparing(Aircurrent::getId));
         aircurrents.forEach(aircurrent -> aircurrent.setId(null));
@@ -797,19 +657,6 @@ public class SaveToDatabaseManager {
 
         //Assert.isTrue(persistentWorld.getContinents().size() == continentRepository.count(), "Expected " + persistentWorld.getContinents().size() + " but was " + continentRepository.count());
         log.info("Continents loaded.");
-    }
-
-    private void saveWatersheds(World persistentWorld, World newWorld) {
-        log.info("Loading watersheds.");
-        List<Watershed> watersheds = persistentWorld.getWatersheds().stream()
-                .map(watershed -> watershed.createClone(newWorld))
-                .collect(Collectors.toList());
-        newWorld.addAllWatersheds(watersheds);
-        log.debug("Current watersheds in memory: " + watersheds.size() + " " + Arrays.toString(watersheds.stream().map(Watershed::getId).toArray()));
-        watersheds.sort(Comparator.comparing(Watershed::getId));
-        saveWatershedsMethod(watersheds);
-
-        log.info("Watersheds loaded.");
     }
 
     private World saveBasicWorld(World persistentWorld) {

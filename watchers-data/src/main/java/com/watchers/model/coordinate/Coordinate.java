@@ -35,6 +35,7 @@ import java.util.function.BiPredicate;
 public abstract class Coordinate {
 
     public static final BiPredicate<Coordinate, Coordinate> LOWER_OR_EQUAL_HEIGHT_PREDICATE = (x, y) -> y.getTile().getHeight() <= x.getTile().getHeight();
+    public static final BiPredicate<Coordinate, Coordinate> LOWER_HEIGHT_PREDICATE = (x, y) -> y.getTile().getHeight() < x.getTile().getHeight();
 
     @Id
     @JsonView(Views.Internal.class)
@@ -74,7 +75,7 @@ public abstract class Coordinate {
 
     @JsonView(Views.Public.class)
     @JsonIgnoreProperties({"world", "coordinates", "type"})
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Continent continent;
 
     @JsonView(Views.Public.class)
@@ -231,13 +232,18 @@ public abstract class Coordinate {
     }
 
     @JsonIgnore
-    @SuppressWarnings("unused")
     public Set<Coordinate> getLowerOrEqualHeightLandCoordinatesWithinRange(int range) {
         Set<Coordinate> returnList = getCoordinatesWithinRangeWithQualifier(new HashSet<>(Collections.singletonList(this)),
                 range, LOWER_OR_EQUAL_HEIGHT_PREDICATE);
         returnList.removeIf(Coordinate::isWater);
         returnList.remove(this);
         return returnList;
+    }
+
+    @JsonIgnore
+    public Set<Coordinate> getLowerHeightCoordinatesNeighbours() {
+        return getCoordinatesWithinRangeWithQualifier(new HashSet<>(Collections.singletonList(this)),
+                1, LOWER_HEIGHT_PREDICATE);
     }
 
     @JsonIgnore
@@ -295,5 +301,12 @@ public abstract class Coordinate {
     @Override
     public int hashCode() {
         return Objects.hash(xCoord, yCoord);
+    }
+
+    public abstract double getDistance(Coordinate coordinate);
+
+    @JsonIgnore
+    public boolean isNeigbour(Coordinate coordinate) {
+        return (Math.abs(this.xCoord - coordinate.getXCoord()) + Math.abs(this.yCoord - coordinate.getYCoord())) == 1;
     }
 }
