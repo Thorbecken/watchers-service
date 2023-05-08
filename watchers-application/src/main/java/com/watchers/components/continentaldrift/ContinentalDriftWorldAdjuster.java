@@ -8,7 +8,6 @@ import com.watchers.model.environment.Tile;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldSettings;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +17,6 @@ import java.util.Map;
 @Component
 @AllArgsConstructor
 public class ContinentalDriftWorldAdjuster {
-
-    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {

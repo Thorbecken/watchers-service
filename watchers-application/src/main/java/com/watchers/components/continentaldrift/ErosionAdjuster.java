@@ -5,12 +5,14 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -18,7 +20,6 @@ import java.util.stream.Collectors;
 public class ErosionAdjuster {
 
     private final int NUMBER_OF_NEIGHBOURS = 4;
-    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {

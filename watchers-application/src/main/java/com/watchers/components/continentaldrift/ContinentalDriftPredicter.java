@@ -5,20 +5,16 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockCoordinate;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.world.Continent;
-import com.watchers.repository.ContinentRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
 public class ContinentalDriftPredicter {
-
-    private ContinentRepository continentRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {

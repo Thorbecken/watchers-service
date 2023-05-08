@@ -4,7 +4,6 @@ import com.watchers.model.actors.Actor;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.StateType;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,6 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class AnimalCleaner {
-
-    private WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto continentalDriftTaskDto) {

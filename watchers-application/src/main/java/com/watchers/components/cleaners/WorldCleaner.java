@@ -9,8 +9,6 @@ import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.ContinentRepository;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,9 +23,6 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class WorldCleaner {
-
-    private WorldRepository worldRepository;
-    private ContinentRepository continentRepository;
 
     @Transactional
     public void proces(WorldTaskDto dto) {

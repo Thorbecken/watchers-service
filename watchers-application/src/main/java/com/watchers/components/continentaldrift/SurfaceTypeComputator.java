@@ -4,7 +4,6 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class SurfaceTypeComputator {
 
-    private final WorldRepository worldRepository;
     private final long seaHight;
     private final long coastalHight;
     private final long plainsHight;
@@ -24,14 +22,12 @@ public class SurfaceTypeComputator {
                        @Value("${watch.coastalHight}") long coastalHight,
                        @Value("${watch.plainsHight}") long plainsHight,
                        @Value("${watch.hillHight}") long hillHight,
-                       @Value("${watch.mountainHight}") long mountainHight,
-                       WorldRepository worldRepository){
+                       @Value("${watch.mountainHight}") long mountainHight){
         this.seaHight = seaHight;
         this.coastalHight = coastalHight;
         this.plainsHight = plainsHight;
         this.hillHight = hillHight;
         this.mountainHight = mountainHight;
-        this.worldRepository = worldRepository;
     }
 
     @Transactional

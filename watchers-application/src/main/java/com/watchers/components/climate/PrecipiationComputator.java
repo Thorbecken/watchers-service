@@ -1,17 +1,20 @@
 package com.watchers.components.climate;
 
-import com.watchers.model.climate.*;
+import com.watchers.model.climate.AircurrentType;
+import com.watchers.model.climate.Climate;
+import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldSettings;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,8 +29,6 @@ public class PrecipiationComputator {
         airCurrentStrengthSetter.put(AircurrentType.LATITUDAL, WorldSettings::getLatitudinalStrength);
         airCurrentStrengthSetter.put(AircurrentType.LONGITUDAL, WorldSettings::getLongitudinalStrength);
     }
-
-    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(WorldTaskDto taskDto) {

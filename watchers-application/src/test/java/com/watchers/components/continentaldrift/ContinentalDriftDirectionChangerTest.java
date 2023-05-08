@@ -5,14 +5,11 @@ import com.watchers.TestableWorld;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mockito;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,7 +23,6 @@ class ContinentalDriftDirectionChangerTest {
     private Continent continentThree;
     private ContinentalDriftDirectionChanger.ContinentalDriftDirectionMethodObject methodObject;
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
-    private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
     private Long lastContinentalDrift;
     private Set<Continent> continents;
     private ContinentalDriftTaskDto taskDto;
@@ -39,7 +35,7 @@ class ContinentalDriftDirectionChangerTest {
         continentTwo = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
         continentThree = continents.stream().filter(continent -> continent.getId() == 3L).findFirst().orElseThrow();
 
-        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository);
+        continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
         lastContinentalDrift = (long) world.getContinents().size();

@@ -3,7 +3,6 @@ package com.watchers.components.continentaldrift;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,8 +17,6 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class ContinentalDriftDirectionChanger {
-
-    private final WorldRepository worldRepository;
 
     public void assignFirstOrNewDriftDirections(World world) {
         world.getContinents().forEach(continent -> continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world));

@@ -6,7 +6,6 @@ import com.watchers.model.dto.*;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,7 +22,6 @@ import static com.watchers.model.enums.SurfaceType.*;
 @RequiredArgsConstructor
 public class ContinentalDriftNewTileAssigner {
 
-    private final WorldRepository worldRepository;
     private final ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
     long nextContinentalId = 0;
 

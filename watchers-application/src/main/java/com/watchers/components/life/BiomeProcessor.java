@@ -5,7 +5,6 @@ import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,10 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class BiomeProcessor {
 
-    private WorldRepository worldRepository;
-
     @Transactional
-    public void process(WorldTaskDto taskDto){
+    public void process(WorldTaskDto taskDto) {
         World world = taskDto.getWorld();
 
         world.getCoordinates().parallelStream()

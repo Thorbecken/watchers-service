@@ -4,7 +4,6 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,8 +20,6 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class ContinentalSplitter {
-
-    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto){

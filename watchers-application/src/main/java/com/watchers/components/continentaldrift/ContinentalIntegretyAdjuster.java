@@ -1,12 +1,10 @@
 package com.watchers.components.continentaldrift;
 
-import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,8 +17,6 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class ContinentalIntegretyAdjuster {
-
-    private WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -46,7 +42,7 @@ public class ContinentalIntegretyAdjuster {
                         .collect(Collectors.toSet());
                 adjacendCoordinates.addAll(newAdjacentContinentCoordinates);
                 adjacendCoordinates.forEach(continentCoordinates::remove);
-                if(newAdjacentContinentCoordinates.isEmpty()){
+                if (newAdjacentContinentCoordinates.isEmpty()) {
                     noMoreExtraAdjacentCoordinatesFound = true;
                 }
             }
@@ -55,11 +51,11 @@ public class ContinentalIntegretyAdjuster {
         }
 
         List<Set<Coordinate>> checkedCoordinatesList = new ArrayList<>(checkedCoordinates.values());
-        if(checkedCoordinatesList.size() > 1){
+        if (checkedCoordinatesList.size() > 1) {
             log.info("Continent " + continent.getId() + " was split into " + checkedCoordinates.size() + " parts");
             World world = continent.getWorld();
             for (int i = 0; i < checkedCoordinatesList.size(); i++) {
-                if(i != 0){
+                if (i != 0) {
                     createNewContinent(checkedCoordinatesList.get(i), world, continent.getType());
                 }
             }

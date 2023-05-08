@@ -7,24 +7,18 @@ import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
-import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import java.util.Optional;
 
 class ContinentalSplitterTest {
 
     private World world;
-    private WorldRepository worldRepository;
     private ContinentalSplitter continentalSplitter;
 
     @BeforeEach
     void setUp() {
-        worldRepository = Mockito.mock(WorldRepository.class);
-        continentalSplitter = new ContinentalSplitter(worldRepository);
+        continentalSplitter = new ContinentalSplitter();
 
         world = new World();
         world.setWorldSettings(TestableWorld.createWorldSettings());
@@ -47,23 +41,23 @@ class ContinentalSplitterTest {
         Continent continent4 = new Continent(world, SurfaceType.OCEAN);
         continent4.setId(4L);
 
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1,1, world, continent1));
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1,2, world, continent1));
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1,3, world, continent1));
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1,4, world, continent1));
-        continent4.getCoordinates().add(CoordinateFactory.createCoordinate(1,5, world, continent4));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1, 1, world, continent1));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1, 2, world, continent1));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1, 3, world, continent1));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(1, 4, world, continent1));
+        continent4.getCoordinates().add(CoordinateFactory.createCoordinate(1, 5, world, continent4));
 
-        continent2.getCoordinates().add(CoordinateFactory.createCoordinate(2,1, world, continent2));
-        continent2.getCoordinates().add(CoordinateFactory.createCoordinate(2,2, world, continent2));
-        continent2.getCoordinates().add(CoordinateFactory.createCoordinate(2,3, world, continent2));
-        continent3.getCoordinates().add(CoordinateFactory.createCoordinate(2,4, world, continent3));
-        continent4.getCoordinates().add(CoordinateFactory.createCoordinate(2,5, world, continent4));
+        continent2.getCoordinates().add(CoordinateFactory.createCoordinate(2, 1, world, continent2));
+        continent2.getCoordinates().add(CoordinateFactory.createCoordinate(2, 2, world, continent2));
+        continent2.getCoordinates().add(CoordinateFactory.createCoordinate(2, 3, world, continent2));
+        continent3.getCoordinates().add(CoordinateFactory.createCoordinate(2, 4, world, continent3));
+        continent4.getCoordinates().add(CoordinateFactory.createCoordinate(2, 5, world, continent4));
 
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3,1, world, continent1));
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3,2, world, continent1));
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3,3, world, continent1));
-        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3,4, world, continent1));
-        continent4.getCoordinates().add(CoordinateFactory.createCoordinate(3,5, world, continent4));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3, 1, world, continent1));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3, 2, world, continent1));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3, 3, world, continent1));
+        continent1.getCoordinates().add(CoordinateFactory.createCoordinate(3, 4, world, continent1));
+        continent4.getCoordinates().add(CoordinateFactory.createCoordinate(3, 5, world, continent4));
 
         world.getCoordinates().addAll(continent1.getCoordinates());
         world.getCoordinates().addAll(continent2.getCoordinates());
@@ -76,8 +70,6 @@ class ContinentalSplitterTest {
         world.getWorldSettings().setMaxWidthLenghtBalance(2);
         world.getWorldSettings().setHeigtDivider(1);
         world.getWorldSettings().setMinimumContinents(1);
-
-        Mockito.when(worldRepository.findById(1L)).thenReturn(Optional.of(world));
 
         Assertions.assertEquals(8, world.getCoordinates().stream()
                 .filter(coordinate -> coordinate.getContinent().getId().equals(1L)).count());

@@ -9,17 +9,12 @@ import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
-import com.watchers.repository.ContinentRepository;
-import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,15 +38,11 @@ class ContinentalDriftWorldAdjusterTest {
         worldMetaData.setYSize(world.getYSize());
         world.setWorldMetaData(worldMetaData);
 
-        WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
-        ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
-        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster(worldRepository);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(continentRepository);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
-        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, null);
+        this.continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster();
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter();
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer();
+        ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(null);
 
-        Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
-        Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
 
         continentalDriftPredicter.process(taskDto);

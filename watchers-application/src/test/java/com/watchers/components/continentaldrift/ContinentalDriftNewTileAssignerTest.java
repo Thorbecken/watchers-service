@@ -28,22 +28,20 @@ class ContinentalDriftNewTileAssignerTest {
 
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
     private ContinentalDriftTaskDto taskDto;
-    private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
     private final ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
 
 
     @BeforeEach
     void setUp() {
-        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger(worldRepository);
-        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(worldRepository, continentalDriftDirectionChanger);
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(continentRepository);
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
+        ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger();
+        this.continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter();
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer();
 
         World world = TestableWorld.createWorld();
         world.getWorldSettings().setMinimumContinents(1);
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
         continentalDriftPredicter.process(taskDto);
         continentalDriftTileChangeComputer.process(taskDto);
@@ -93,7 +91,7 @@ class ContinentalDriftNewTileAssignerTest {
         );
 
         List<ContinentalChangesDto> changesDtos = new ArrayList<>(taskDto.getChanges().values());
-        
+
         //Checks that the test is beginning with only five open coordinates
         assertEquals(5, changesDtos.stream()
                 .filter(ContinentalChangesDto::isEmpty)
@@ -145,11 +143,10 @@ class ContinentalDriftNewTileAssignerTest {
         taskDto.setWorldId(1L);
         world.getWorldSettings().setMinimumContinents(minimumContinents);
 
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(continentRepository);
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter();
         continentalDriftPredicter.process(taskDto);
 
-        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
+        ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer();
         continentalDriftTileChangeComputer.process(taskDto);
 
         List<ContinentalChangesDto> changesDtos = new ArrayList<>(taskDto.getChanges().values());
@@ -177,7 +174,7 @@ class ContinentalDriftNewTileAssignerTest {
                 .filter(distinctByKey(MockContinentDto::getContinentId))
                 .count();
 
-        int expectedContinents = minimumContinents<6?minimumContinents:5;
+        int expectedContinents = minimumContinents < 6 ? minimumContinents : 5;
         assertEquals(expectedContinents, world.getContinents().size() + newContinents);
     }
 

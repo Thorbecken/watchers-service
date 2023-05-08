@@ -5,13 +5,11 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.repository.ContinentRepository;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,8 +19,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class ContinentalMerger {
 
-    private final WorldRepository worldRepository;
-    private final EntityManager entityManager;
     private final ContinentRepository continentRepository;
 
     @Transactional
@@ -37,7 +33,7 @@ public class ContinentalMerger {
         int mergeCounter = 0;
         while (continents.size() > maxContinents) {
             mergeCounter++;
-            Continent smallestContinent = continents.stream().min(Comparator.comparingInt((Continent continent) -> continent.getCoordinates().size())).get();
+            Continent smallestContinent = continents.stream().min(Comparator.comparingInt((Continent continent) -> continent.getCoordinates().size())).orElseThrow();
             mergeWithNeighbour(world, smallestContinent);
             taskDto.getGetRemovedContinents().add(smallestContinent.getId());
             continents.remove(smallestContinent);

@@ -9,7 +9,6 @@ import com.watchers.model.dto.MockCoordinate;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +19,6 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class ContinentalDriftTileChangeComputer {
-
-    private WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {

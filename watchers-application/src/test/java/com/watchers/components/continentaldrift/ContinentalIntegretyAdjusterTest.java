@@ -8,26 +8,15 @@ import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
-import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 class ContinentalIntegretyAdjusterTest {
 
-    private ContinentalIntegretyAdjuster continentalIntegretyAdjuster;
-    private WorldRepository worldRepository;
-
-    @BeforeEach
-    public void setup(){
-        worldRepository = Mockito.mock(WorldRepository.class);
-        continentalIntegretyAdjuster = new ContinentalIntegretyAdjuster(worldRepository);
-    }
+    private final ContinentalIntegretyAdjuster continentalIntegretyAdjuster = new ContinentalIntegretyAdjuster();
 
     @Test
     void process() {
@@ -73,23 +62,23 @@ class ContinentalIntegretyAdjusterTest {
         Continent fillerContinent = new Continent(world, SurfaceType.OCEAN);
         fillerContinent.setId(2L);
 
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1,1, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1,2, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1,3, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1,4, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1,5, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1, 1, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1, 2, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1, 3, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1, 4, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(1, 5, world, fillerContinent));
 
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2,1, world, fillerContinent));
-        toBeSplitContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2,2, world, toBeSplitContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2,3, world, fillerContinent));
-        toBeSplitContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2,4, world, toBeSplitContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2,5, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2, 1, world, fillerContinent));
+        toBeSplitContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2, 2, world, toBeSplitContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2, 3, world, fillerContinent));
+        toBeSplitContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2, 4, world, toBeSplitContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(2, 5, world, fillerContinent));
 
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3,1, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3,2, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3,3, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3,4, world, fillerContinent));
-        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3,5, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3, 1, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3, 2, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3, 3, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3, 4, world, fillerContinent));
+        fillerContinent.getCoordinates().add(CoordinateFactory.createCoordinate(3, 5, world, fillerContinent));
 
         world.getCoordinates().addAll(fillerContinent.getCoordinates());
         world.getCoordinates().addAll(toBeSplitContinent.getCoordinates());

@@ -9,39 +9,30 @@ import com.watchers.model.dto.MockTile;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.ContinentRepository;
-import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class ContinentalDriftPredicterTest {
 
     private World world;
     private ContinentalDriftPredicter continentalDriftPredicter;
     private ContinentalDriftTaskDto taskDto;
-    private WorldRepository worldRepository;
-    private ContinentRepository continentRepository;
 
 
     @BeforeEach
     void setUp() {
         world = TestableWorld.createWorld();
-        worldRepository = mock(WorldRepository.class);
-        continentRepository = mock(ContinentRepository.class);
-        continentalDriftPredicter = new ContinentalDriftPredicter(continentRepository);
-
-        Mockito.when(worldRepository.findById(world.getId())).thenReturn(Optional.of(world));
-        when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
+        continentalDriftPredicter = new ContinentalDriftPredicter();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
     }
@@ -55,7 +46,6 @@ class ContinentalDriftPredicterTest {
                 .reduce(Long::sum)
                 .orElse(0L);
 
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
 
         Map<MockCoordinate, List<MockTile>> newTileLayout = taskDto.getNewTileLayout();
@@ -105,7 +95,6 @@ class ContinentalDriftPredicterTest {
                 .reduce(Long::sum)
                 .orElse(0L);
 
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
 
         Map<MockCoordinate, List<MockTile>> newTileLayout = taskDto.getNewTileLayout();

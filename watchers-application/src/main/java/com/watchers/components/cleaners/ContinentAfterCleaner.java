@@ -3,7 +3,6 @@ package com.watchers.components.cleaners;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @AllArgsConstructor
 public class ContinentAfterCleaner {
-
-    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(ContinentalDriftTaskDto dto) {

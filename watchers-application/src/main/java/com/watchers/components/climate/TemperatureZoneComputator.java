@@ -4,7 +4,6 @@ import com.watchers.model.climate.Climate;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @AllArgsConstructor
 public class TemperatureZoneComputator {
-
-    private final WorldRepository worldRepository;
 
     @Transactional
     public void process(WorldTaskDto taskDto) {

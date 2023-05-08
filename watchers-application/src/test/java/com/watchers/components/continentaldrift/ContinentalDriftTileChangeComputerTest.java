@@ -8,13 +8,13 @@ import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import com.watchers.repository.ContinentRepository;
-import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -29,8 +29,6 @@ class ContinentalDriftTileChangeComputerTest {
     private Continent continentTwo;
     private Continent continentThree;
     private ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer;
-    private final WorldRepository worldRepository = Mockito.mock(WorldRepository.class);
-    private final ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
     private ContinentalDriftTaskDto taskDto;
 
 
@@ -42,12 +40,10 @@ class ContinentalDriftTileChangeComputerTest {
         continentTwo = continents.stream().filter(continent -> continent.getId() == 2L).findFirst().orElseThrow();
         continentThree = continents.stream().filter(continent -> continent.getId() == 3L).findFirst().orElseThrow();
 
-        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer(worldRepository);
-        Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
-        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter(continentRepository);
+        this.continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer();
+        ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter();
 
         taskDto = TestableContinentalDriftTaskDto.createContinentalDriftTaskDto(world);
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftPredicter.process(taskDto);
     }
 
@@ -66,7 +62,6 @@ class ContinentalDriftTileChangeComputerTest {
         assertThat(directionThree.getXDriftPressure(), equalTo(0L));
         assertThat(directionThree.getYDriftPressure(), equalTo(0L));
 
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftTileChangeComputer.process(taskDto);
 
         assertThat(directionOne.getXDriftPressure(), equalTo(0L));
@@ -91,7 +86,6 @@ class ContinentalDriftTileChangeComputerTest {
                 .orElse(0L);
         // testing
 
-        Mockito.when(worldRepository.findById(taskDto.getWorldId())).thenReturn(Optional.of(world));
         continentalDriftTileChangeComputer.process(taskDto);
 
         // assertions
