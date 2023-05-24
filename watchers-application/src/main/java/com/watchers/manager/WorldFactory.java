@@ -85,6 +85,12 @@ class WorldFactory {
                         biome.setTreeFlora(Flora.getTreeFlora(biome.getTile().getCoordinate().getClimate().getMeanTemperature()));
                     });
 
+            world.getCoordinates().stream()
+                    .map(Coordinate::getTile)
+                    .filter(Tile::isWater)
+                    .map(Tile::getBiome)
+                    .forEach(biome -> biome.setTreeFlora(Flora.getSeawaterFlora(biome.getTile().getCoordinate().getClimate().getMeanTemperature())));
+
             log.info("Pre seeded the world with life");
         }
 

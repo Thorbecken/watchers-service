@@ -89,4 +89,14 @@ public class SquareCoordinate extends Coordinate {
     public double getDistance(Coordinate coordinate) {
         throw new RuntimeException("not implemented");
     }
+
+    @Override
+    public long getAdjustedXDistance(Coordinate coordinate) {
+        return 0;
+    }
+
+    @Override
+    public long getAdjustedYDistance(Coordinate coordinate) {
+        return 0;
+    }
 }

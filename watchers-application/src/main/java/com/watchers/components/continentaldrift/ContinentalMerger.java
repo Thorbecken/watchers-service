@@ -26,6 +26,7 @@ public class ContinentalMerger {
         World world = taskDto.getWorld();
         int maxContinents = world.getWorldSettings().getMaximumContinents();
         Set<Continent> continents = world.getContinents();
+        world.getContinents().removeIf(continent -> continent.getCoordinates().isEmpty());
         continents.stream()
                 .filter(continent -> continent.getId() == null)
                 .forEach(continentRepository::save);
@@ -33,7 +34,8 @@ public class ContinentalMerger {
         int mergeCounter = 0;
         while (continents.size() > maxContinents) {
             mergeCounter++;
-            Continent smallestContinent = continents.stream().min(Comparator.comparingInt((Continent continent) -> continent.getCoordinates().size())).orElseThrow();
+            Continent smallestContinent = continents.stream()
+                    .min(Comparator.comparingInt((Continent continent) -> continent.getCoordinates().size())).orElseThrow();
             mergeWithNeighbour(world, smallestContinent);
             taskDto.getGetRemovedContinents().add(smallestContinent.getId());
             continents.remove(smallestContinent);

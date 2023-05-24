@@ -85,7 +85,7 @@ class ContinentalSplitterTest {
         continentalDriftTaskDto.setWorld(world);
         continentalSplitter.process(continentalDriftTaskDto);
 
-        Assertions.assertEquals(8, world.getCoordinates().stream()
+        Assertions.assertEquals(5, world.getCoordinates().stream()
                 .filter(coordinate -> coordinate.getContinent() != null && coordinate.getContinent().getId() != null)
                 .filter(coordinate -> coordinate.getContinent().getId().equals(1L)).count());
         Assertions.assertNotEquals(3, world.getCoordinates().stream()
@@ -97,6 +97,6 @@ class ContinentalSplitterTest {
         Assertions.assertNotEquals(3, world.getCoordinates().stream()
                 .filter(coordinate -> coordinate.getContinent() != null && coordinate.getContinent().getId() != null)
                 .filter(coordinate -> coordinate.getContinent().getId().equals(4L)).count());
-        Assertions.assertEquals(6, world.getContinents().size());
+        Assertions.assertEquals(7, world.getContinents().size());
     }
 }

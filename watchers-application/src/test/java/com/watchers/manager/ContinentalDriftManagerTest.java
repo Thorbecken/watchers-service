@@ -22,12 +22,14 @@ class ContinentalDriftManagerTest {
         world = TestableWorld.createWorld();
         ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
         WorldMetaDataRepository worldMetaDataRepository = Mockito.mock(WorldMetaDataRepository.class);
+        ContinentalMantelPlumeProcessor continentalMantelPlumeProcessor = new ContinentalMantelPlumeProcessor();
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter();
         ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger();
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer();
         ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster();
         ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger);
         SurfaceTypeComputator surfaceTypeComputator = new SurfaceTypeComputator(20, 30, 40, 50, 60);
+        ContinentalHotSpotProcessor continentalHotSpotProcessor = new ContinentalHotSpotProcessor();
         ErosionAdjuster erosionAdjuster = new ErosionAdjuster();
         ContinentalCorrector continentalCorrector = new ContinentalCorrector();
         WorldSettingManager worldSettingManager = new WorldSettingManager(worldMetaDataRepository);
@@ -36,7 +38,7 @@ class ContinentalDriftManagerTest {
         ContinentalMerger continentalMerger = new ContinentalMerger(continentRepository);
 
         Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
-        continentalDriftManager = new ContinentalDriftManager(continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputator, erosionAdjuster, worldSettingManager, continentalIntegretyAdjuster, continentalSplitter, continentalMerger);
+        continentalDriftManager = new ContinentalDriftManager(continentalMantelPlumeProcessor, continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputator, continentalHotSpotProcessor, erosionAdjuster, worldSettingManager, continentalIntegretyAdjuster, continentalSplitter, continentalMerger);
     }
 
     @Test

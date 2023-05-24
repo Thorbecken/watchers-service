@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class ContinentalDriftManager {
 
+    private ContinentalMantelPlumeProcessor continentalMantelPlumeProcessor;
     private ContinentalDriftPredicter continentalDriftPredicter;
     private ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer;
     private ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
@@ -21,6 +22,7 @@ public class ContinentalDriftManager {
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
     private ContinentalCorrector continentalCorrector;
     private SurfaceTypeComputator surfaceTypeComputator;
+    private ContinentalHotSpotProcessor continentalHotSpotProcessor;
     private ErosionAdjuster erosionAdjuster;
     private WorldSettingManager worldSettingManager;
     private ContinentalIntegretyAdjuster continentalIntegretyAdjuster;
@@ -31,7 +33,9 @@ public class ContinentalDriftManager {
     public void process(ContinentalDriftTaskDto taskDto) {
         Long worldHeight = taskDto.getWorld().getWorldHeight();
         World world = taskDto.getWorld();
-
+        StopwatchTimer.start();
+        continentalMantelPlumeProcessor.process(taskDto);
+        StopwatchTimer.stop("continentalMantelPlumeProcessor");
         StopwatchTimer.start();
         continentalDriftDirectionChanger.process(taskDto);
         StopwatchTimer.stop("continentalDriftDirectionChanger");
@@ -43,13 +47,9 @@ public class ContinentalDriftManager {
         StopwatchTimer.start();
         continentalDriftTileChangeComputer.process(taskDto);
         StopwatchTimer.stop("continentalDriftTileChangeComputer");
-        // this one has added height because of changes that have not been processed
-//        worldHeight = checkWorldHeight("continentalDriftTileChangeComputer",worldHeight, world);
         StopwatchTimer.start();
         continentalDriftNewTileAssigner.process(taskDto);
         StopwatchTimer.stop("continentalDriftNewTileAssigner");
-        // this one has added height because of changes that have not been processed
-//        worldHeight = checkWorldHeight("continentalDriftNewTileAssigner",worldHeight, world);
         StopwatchTimer.start();
         continentalDriftWorldAdjuster.process(taskDto);
         StopwatchTimer.stop("continentalDriftWorldAdjuster");
@@ -75,6 +75,10 @@ public class ContinentalDriftManager {
         StopwatchTimer.stop("erosionAdjuster");
         worldHeight = checkWorldHeight("erosionAdjuster",worldHeight, world);
         StopwatchTimer.start();
+        continentalHotSpotProcessor.process(taskDto);
+        StopwatchTimer.stop("continentalHotSpotProcessor");
+        worldHeight = checkWorldHeight("continentalHotSpotProcessor",worldHeight, world);
+        StopwatchTimer.start();
         erosionAdjuster.process(taskDto);
         StopwatchTimer.stop("erosionAdjuster");
         worldHeight = checkWorldHeight("erosionAdjuster",worldHeight, world);
@@ -90,6 +94,7 @@ public class ContinentalDriftManager {
 
     private Long checkWorldHeight(String processor, Long currentHeight, World world){
         Long newHeight = world.getWorldHeight();
+        log.info("HeightDeficit: " + world.getHeightDeficit() + " @" + processor);
         if(newHeight > currentHeight){
             log.error("-----------------------------------------------------");
             log.error("-----------------------------------------------------");

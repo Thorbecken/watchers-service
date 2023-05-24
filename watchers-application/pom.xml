@@ -23,6 +23,12 @@
             </properties>
         </profile>
         <profile>
+            <id>desktop</id>
+            <properties>
+                <spring.profiles.active>desktop</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
             <id>pro</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

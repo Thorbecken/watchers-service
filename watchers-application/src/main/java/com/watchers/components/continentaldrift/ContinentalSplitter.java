@@ -32,14 +32,16 @@ public class ContinentalSplitter {
     }
 
     private void checkWidthLenght(Continent continent) {
-        Long width = continent.getCoordinates().stream().map(Coordinate::getXCoord).distinct().count();
-        Long lenght = continent.getCoordinates().stream().map(Coordinate::getYCoord).distinct().count();
+        long maxWidth = continent.getWorld().getXSize()/2;
+        long width = continent.getCoordinates().stream().map(Coordinate::getXCoord).distinct().count();
+        long maxlength = continent.getWorld().getYSize()/2;
+        long length = continent.getCoordinates().stream().map(Coordinate::getYCoord).distinct().count();
 
-        if(width/lenght>continent.getWorld().getWorldSettings().getMaxWidthLenghtBalance()){
+        if(maxWidth < width) {
             Coordinate leftBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getXCoord)).get();
             Coordinate rightBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getXCoord)).get();
             divideContinentInTwo(continent, leftBound, rightBound);
-        } else if(lenght/width>continent.getWorld().getWorldSettings().getMaxWidthLenghtBalance()) {
+        } else if(maxlength < length) {
             Coordinate upBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getYCoord)).get();
             Coordinate downBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getYCoord)).get();
             divideContinentInTwo(continent, upBound, downBound);
@@ -59,12 +61,18 @@ public class ContinentalSplitter {
         parentCoordinates.add(parentCoordinate);
         childCoordinates.add(childCoordinate);
 
+        int currentCoordinates = coordinates.size();
         while (!coordinates.isEmpty()){
             addAllNeighbouringCoordinatesToSet(coordinates, parentCoordinates);
             coordinates.removeIf(parentCoordinates::contains);
 
             addAllNeighbouringCoordinatesToSet(coordinates, childCoordinates);
             coordinates.removeIf(childCoordinates::contains);
+            if(currentCoordinates == coordinates.size()){
+                parentCoordinates.addAll(coordinates);
+            } else {
+                currentCoordinates = coordinates.size();
+            }
         }
 
 

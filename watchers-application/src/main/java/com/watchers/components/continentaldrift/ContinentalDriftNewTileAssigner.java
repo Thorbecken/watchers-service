@@ -23,8 +23,6 @@ import static com.watchers.model.enums.SurfaceType.*;
 public class ContinentalDriftNewTileAssigner {
 
     private final ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
-    long nextContinentalId = 0;
-
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -35,7 +33,6 @@ public class ContinentalDriftNewTileAssigner {
                 .map(Continent::getId)
                 .orElse(null);
         Assert.notNull(newestContinent, "There was no continent found on the world with an id number!");
-        nextContinentalId = newestContinent + 1;
 
         int minimumContinents = world.getWorldSettings().getMinimumContinents();
 
@@ -60,7 +57,7 @@ public class ContinentalDriftNewTileAssigner {
 
                 Continent chosenContinent = getChosenContinent(taskDto, existingCoordinates, world);
 
-                MockContinentDto mockContinentDto = new MockContinentDto(chosenContinent.getId(), null, connectedCoordinates);
+                MockContinentDto mockContinentDto = new MockContinentDto(chosenContinent.getId(), chosenContinent.getType(), connectedCoordinates);
                 connectedCoordinates.forEach(coordinate ->
                         taskDto.getChanges().get(new MockCoordinate(coordinate)).setMockContinentDto(mockContinentDto)
                 );
@@ -75,7 +72,6 @@ public class ContinentalDriftNewTileAssigner {
 
         if (chosenContinent == null) {
             chosenContinent = new Continent(world, getSurfaceType(world, taskDto));
-            chosenContinent.setId(nextContinentalId++);
             continentalDriftDirectionChanger.assignFirstDriftDirrecion(chosenContinent, world);
         }
 
@@ -133,7 +129,7 @@ public class ContinentalDriftNewTileAssigner {
                 List<Coordinate> connectedCoordinates = listOfConnectedCoordinates.get(i);
 
                 SurfaceType surfaceType = getSurfaceType(world, taskDto);
-                MockContinentDto mockContinentDto = new MockContinentDto(nextContinentalId++, surfaceType, connectedCoordinates);
+                MockContinentDto mockContinentDto = new MockContinentDto(null, surfaceType, connectedCoordinates);
                 connectedCoordinates.stream()
                         .map(MockCoordinate::new)
                         .map(mockCoordinate -> taskDto.getChanges().get((mockCoordinate)))

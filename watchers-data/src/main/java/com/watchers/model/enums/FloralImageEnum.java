@@ -2,5 +2,6 @@ package com.watchers.model.enums;
 
 public enum FloralImageEnum {
     PINE,LEAF,PALM,SAKURA,WISTERIA,JACARANDA,
-    GRASS
+    GRASS,
+    KELP, CORAL
 }

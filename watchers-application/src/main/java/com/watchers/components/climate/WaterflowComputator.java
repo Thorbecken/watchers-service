@@ -192,12 +192,12 @@ public class WaterflowComputator {
                 });
 
         worldTiles.stream()
-                .filter(tile -> tile.getDownFlowAmount() >= 10d
-                        && tile.getDownFlowAmount() < 50d)
+                .filter(tile -> tile.getDownFlowAmount() >= 50d
+                        && tile.getDownFlowAmount() < 100d)
                 .forEach(tile -> tile.setRiver(true));
 
         worldTiles.stream()
-                .filter(tile -> tile.getDownFlowAmount() >= 50d)
+                .filter(tile -> tile.getDownFlowAmount() >= 100d)
                 .forEach(tile -> {
                     tile.setRiver(true);
                     tile.setLargeRiver(true);

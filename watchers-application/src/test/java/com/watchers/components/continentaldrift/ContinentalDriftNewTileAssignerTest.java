@@ -9,7 +9,6 @@ import com.watchers.model.dto.*;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.*;
 import com.watchers.repository.ContinentRepository;
-import com.watchers.repository.WorldRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -171,7 +170,7 @@ class ContinentalDriftNewTileAssignerTest {
                 .filter(Objects::nonNull)
                 .filter(mockContinentDto -> world.getContinents().stream()
                         .noneMatch(continent -> continent.getId().equals(mockContinentDto.getContinentId())))
-                .filter(distinctByKey(MockContinentDto::getContinentId))
+                .filter(distinctByKey(MockContinentDto::getCoordinateList))
                 .count();
 
         int expectedContinents = minimumContinents < 6 ? minimumContinents : 5;

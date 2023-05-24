@@ -18,7 +18,7 @@ public enum Flora {
             , FloralImageEnum.GRASS
             , ClimateZoneEnum.ARCTIC.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 0.5
+            , 0.25
             , 3
             , 10),
     PINE_TREE(2L
@@ -28,7 +28,7 @@ public enum Flora {
             , FloralImageEnum.PINE
             , ClimateZoneEnum.ARCTIC.getMinTemperature()
             , ClimateZoneEnum.ARCTIC.getMaxTemperature()
-            , 1
+            , 0.5
             , 0.5
             , 30),
     LEAF_TREE(3L
@@ -38,7 +38,7 @@ public enum Flora {
             , FloralImageEnum.LEAF
             , ClimateZoneEnum.TEMPERATE.getMinTemperature()
             , ClimateZoneEnum.TEMPERATE.getMaxTemperature()
-            , 1
+            , 0.5
             , 1.5
             , 30),
     PALM_TREE(4L
@@ -48,7 +48,7 @@ public enum Flora {
             , FloralImageEnum.PALM
             , ClimateZoneEnum.TROPICAL.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 1
+            , 0.5
             , 1.5
             , 30),
     SAKURA_TREE(5L
@@ -58,7 +58,7 @@ public enum Flora {
             , FloralImageEnum.SAKURA
             , ClimateZoneEnum.TEMPERATE.getMinTemperature()
             , ClimateZoneEnum.TEMPERATE.getMaxTemperature()
-            , 1
+            , 0.5
             , 1.5
             , 30),
     WISTERIA_TREE(6L
@@ -68,7 +68,7 @@ public enum Flora {
             , FloralImageEnum.WISTERIA
             , ClimateZoneEnum.TROPICAL.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 1
+            , 0.5
             , 1.5
             , 30),
     JACARANDA_TREE(7L
@@ -78,28 +78,58 @@ public enum Flora {
             , FloralImageEnum.JACARANDA
             , ClimateZoneEnum.TROPICAL.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 1
+            , 0.5
             , 1.5
-            , 30);
+            , 30),
 
-    private Long id;
-    private String name;
-    private NaturalHabitat naturalHabitat;
-    private FloraTypeEnum type;
-    private FloralImageEnum image;
-    private double minTemperature;
-    private double maxTemperature;
-    private double waterIntake;
-    private double growthRate;
-    private double maxBiomass;
+    KELP(8L
+            , "Kelp"
+            , NaturalHabitat.SALT_WATER
+            , FloraTypeEnum.TREE
+            , FloralImageEnum.KELP
+            , ClimateZoneEnum.ARCTIC.getMinTemperature()
+            , ClimateZoneEnum.TEMPERATE.getMaxTemperature()
+            , 0
+            , 3
+            , 10),
 
-    static public Flora getTreeFlora(double maxTemperature){
-        if(maxTemperature < PINE_TREE.getMaxTemperature())
+    CORAL(8L
+            , "Coral"
+            , NaturalHabitat.SALT_WATER
+            , FloraTypeEnum.TREE
+            , FloralImageEnum.CORAL
+            , ClimateZoneEnum.TROPICAL.getMinTemperature()
+            , ClimateZoneEnum.TROPICAL.getMaxTemperature()
+            , 0
+            , 3
+            , 10);
+
+    private final Long id;
+    private final String name;
+    private final NaturalHabitat naturalHabitat;
+    private final FloraTypeEnum type;
+    private final FloralImageEnum image;
+    private final double minTemperature;
+    private final double maxTemperature;
+    private final double waterIntake;
+    private final double growthRate;
+    private final double maxBiomass;
+
+    static public Flora getTreeFlora(double maxTemperature) {
+        if (maxTemperature < PINE_TREE.getMaxTemperature())
             return PINE_TREE;
-        if(maxTemperature < LEAF_TREE.getMaxTemperature())
+        if (maxTemperature < LEAF_TREE.getMaxTemperature())
             return LEAF_TREE;
         if (maxTemperature < PALM_TREE.getMaxTemperature())
             return PALM_TREE;
         return null;
     }
+
+    static public Flora getSeawaterFlora(double maxTemperature) {
+        if(maxTemperature < KELP.getMaxTemperature()){
+            return CORAL;
+        } else {
+            return KELP;
+        }
     }
+}

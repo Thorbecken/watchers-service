@@ -47,6 +47,7 @@ public class WorldSettings {
     // Continentalshift configuration
     private int driftVelocity;
     private int drifFlux;
+    private int numberOfMantlePlumes;
     private long heigtDivider;
     private int minimumContinents;
     private int maximumContinents;
@@ -80,6 +81,7 @@ public class WorldSettings {
         // Continentalshift configuration
         clone.driftVelocity = this.driftVelocity;
         clone.drifFlux = this.drifFlux;
+        clone.numberOfMantlePlumes = this.numberOfMantlePlumes;
         clone.heigtDivider = this.heigtDivider;
         clone.minimumContinents = this.minimumContinents;
         clone.maximumContinents = this.maximumContinents;

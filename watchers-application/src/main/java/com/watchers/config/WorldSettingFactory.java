@@ -20,6 +20,7 @@ public class WorldSettingFactory {
     // Continentalshift configuration
     private final int driftVelocity;
     private final int drifFlux;
+    private final int numberOfMantlePlumes;
     private final long heigtDivider;
     private final int minimumContinents;
     private final int maximumContinents;
@@ -40,6 +41,7 @@ public class WorldSettingFactory {
 
             @Value("${watch.continentalshift.driftVelocity}") int driftVelocity,
             @Value("${watch.continentalshift.driftFlux}") int drifFlux,
+            @Value("${watch.continentalshift.numberOfMantlePlumes}") int numberOfMantlePlumes,
             @Value("${watch.continentalshift.heightdivider}") long heigtDivider,
             @Value("${watch.continentalshift.minContinents}") int minimumContinents,
             @Value("${watch.continentalshift.maximumContinents:30}") int maximumContinents,
@@ -62,6 +64,7 @@ public class WorldSettingFactory {
 
         this.driftVelocity = driftVelocity;
         this.drifFlux = drifFlux;
+        this.numberOfMantlePlumes = numberOfMantlePlumes;
         this.heigtDivider = heigtDivider;
         this.maxContinentSize = maxContinentSize;
         this.continentalToOcceanicRatio = continentalToOcceanicRatio;
@@ -89,6 +92,7 @@ public class WorldSettingFactory {
                 // Continental settings
                 driftVelocity,
                 drifFlux,
+                numberOfMantlePlumes,
                 heigtDivider,
                 minimumContinents,
                 maximumContinents,

@@ -6,6 +6,7 @@ import com.watchers.model.actors.Actor;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.common.Views;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.special.base.PointOfInterest;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import lombok.Data;
@@ -28,9 +29,7 @@ import java.util.function.BiPredicate;
         include = JsonTypeInfo.As.PROPERTY,
         property = "type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = GlobeCoordinate.class, name = "GlobeCoordinate"),
-        @JsonSubTypes.Type(value = NonEuclideanCoordinate.class, name = "NonEuclideanCoordinate"),
-        @JsonSubTypes.Type(value = WrapAroundCoordinate.class, name = "WrapAroundCoordinate")
+        @JsonSubTypes.Type(value = NonEuclideanCoordinate.class, name = "NonEuclideanCoordinate")
 })
 public abstract class Coordinate {
 
@@ -67,6 +66,11 @@ public abstract class Coordinate {
     @JsonView(Views.Public.class)
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Tile tile;
+
+    @JsonProperty("pointOfInterest")
+    @JsonView(Views.Public.class)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PointOfInterest pointOfInterest;
 
     @JsonProperty("actors")
     @JsonView(Views.Public.class)
@@ -304,6 +308,9 @@ public abstract class Coordinate {
     }
 
     public abstract double getDistance(Coordinate coordinate);
+
+    public abstract long getAdjustedXDistance(Coordinate coordinate);
+    public abstract long getAdjustedYDistance(Coordinate coordinate);
 
     @JsonIgnore
     public boolean isNeigbour(Coordinate coordinate) {

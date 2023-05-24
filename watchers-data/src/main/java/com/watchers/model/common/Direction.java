@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.special.TectonicCrystal;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,8 +23,8 @@ public class Direction {
     @Id
     @JsonView(Views.Internal.class)
     @JsonProperty("directionId")
-    @SequenceGenerator(name="Direction_Gen", sequenceName="Direction_Seq", allocationSize = 1)
-    @GeneratedValue(generator="Direction_Gen", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "Direction_Gen", sequenceName = "Direction_Seq", allocationSize = 1)
+    @GeneratedValue(generator = "Direction_Gen", strategy = GenerationType.SEQUENCE)
     @Column(name = "direction_id")
     private Long id;
 
@@ -42,42 +44,42 @@ public class Direction {
     @Column(name = "y_drift_pressure")
     private long yDriftPressure;
 
-    public void resetPressures(){
+    public void resetPressures() {
         this.yDriftPressure = 0;
         this.xDriftPressure = 0;
     }
 
-    public void adjustPressureFromIncomingDirection(Direction incomingDirection){
+    public void adjustPressureFromIncomingDirection(Direction incomingDirection) {
         long xDifference = incomingDirection.getXVelocity() - this.getXVelocity();
         long yDifference = incomingDirection.getYVelocity() - this.getYVelocity();
 
-        this.setXDriftPressure(this.getXDriftPressure()+xDifference);
-        this.setYDriftPressure(this.getYDriftPressure()+yDifference);
+        this.setXDriftPressure(this.getXDriftPressure() + xDifference);
+        this.setYDriftPressure(this.getYDriftPressure() + yDifference);
     }
 
-    public void setVelocityFromPressure(int maxDrift){
-        assert maxDrift >=0;
+    public void setVelocityFromPressure(int maxDrift) {
+        assert maxDrift >= 0;
         this.adjustXPressure(maxDrift);
         this.adjustYPressure(maxDrift);
     }
 
-    private void adjustXPressure(int maxDrift){
-        if(xDriftPressure<0 && xVelocity > -maxDrift){
+    private void adjustXPressure(int maxDrift) {
+        if (xDriftPressure < 0 && xVelocity > -maxDrift) {
             this.xVelocity--;
-        } else if (xDriftPressure>0 && xVelocity < maxDrift){
+        } else if (xDriftPressure > 0 && xVelocity < maxDrift) {
             this.xVelocity++;
         }
     }
 
-    private void adjustYPressure(int maxDrift){
-        if(yDriftPressure<0 && yVelocity > -maxDrift){
+    private void adjustYPressure(int maxDrift) {
+        if (yDriftPressure < 0 && yVelocity > -maxDrift) {
             this.yVelocity--;
-        } else if (yDriftPressure>0 && yVelocity< maxDrift){
+        } else if (yDriftPressure > 0 && yVelocity < maxDrift) {
             this.yVelocity++;
         }
     }
 
-    public Direction(int xVelocity, int yVelocity){
+    public Direction(int xVelocity, int yVelocity) {
         this.xVelocity = xVelocity;
         this.yVelocity = yVelocity;
     }
@@ -87,7 +89,7 @@ public class Direction {
         clone.setId(this.id);
         clone.setXVelocity(this.xVelocity);
         clone.setYVelocity(this.yVelocity);
-        return  clone;
+        return clone;
     }
 
     @Override
@@ -101,5 +103,24 @@ public class Direction {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public void addPressure(TectonicCrystal tectonicCrystal, Coordinate coordinate, int maxDrift) {
+        long adjustedXDifference = coordinate.getAdjustedXDistance(tectonicCrystal.getCoordinate());
+        long adjustedYDifference = coordinate.getAdjustedYDistance(tectonicCrystal.getCoordinate());
+
+        if (Math.abs(adjustedXDifference) < Math.abs(adjustedYDifference)) {
+            if (adjustedXDifference > 0 && xVelocity < maxDrift) {
+                this.xVelocity++;
+            } else if (xVelocity > -maxDrift) {
+                this.xVelocity--;
+            }
+        } else {
+            if (adjustedYDifference > 0 && yVelocity < -maxDrift) {
+                this.yVelocity++;
+            } else if (yVelocity > -maxDrift){
+                this.yVelocity--;
+            }
+        }
     }
 }

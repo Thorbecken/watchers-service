@@ -65,8 +65,8 @@ class BiomeTest {
         biome.setGrassFlora(Flora.GRASS);
         biome.processParallelTask();
         assertThat(biome.getGrassFlora(), notNullValue());
-        assertThat(biome.getGrassBiomass(), equalTo(0.5d));
-        assertThat(biome.getCurrentFood(), equalTo(0.5d));
+        assertThat(biome.getGrassBiomass(), equalTo(1d));
+        assertThat(biome.getCurrentFood(), equalTo(1d));
     }
 
     @Test
@@ -75,8 +75,8 @@ class BiomeTest {
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
         assertThat(biome.getTreeFlora(), notNullValue());
-        assertThat(biome.getTreeBiomass(), equalTo(0.5d));
-        assertThat(biome.getCurrentFood(), equalTo(0.5d));
+        assertThat(biome.getTreeBiomass(), equalTo(1d));
+        assertThat(biome.getCurrentFood(), equalTo(1d));
     }
 
     @Test

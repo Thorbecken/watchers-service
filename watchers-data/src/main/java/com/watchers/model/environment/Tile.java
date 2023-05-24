@@ -7,6 +7,7 @@ import com.watchers.model.dto.MockTile;
 import com.watchers.model.enums.DirectionEnum;
 import com.watchers.model.enums.RockType;
 import com.watchers.model.enums.SurfaceType;
+import com.watchers.model.special.base.PointOfInterest;
 import com.watchers.model.world.Continent;
 import com.watchers.pathfinding.GraphNode;
 import lombok.Data;
@@ -33,6 +34,11 @@ public class Tile implements GraphNode {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coordinate_id", nullable = false)
     private Coordinate coordinate;
+
+    @JsonProperty("pointOfInterest")
+    @JsonView(Views.Public.class)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PointOfInterest pointOfInterest;
 
     @JsonProperty("height")
     @Column(name = "height")

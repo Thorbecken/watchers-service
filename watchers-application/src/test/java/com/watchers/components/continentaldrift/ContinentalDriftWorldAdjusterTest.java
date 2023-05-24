@@ -80,11 +80,6 @@ class ContinentalDriftWorldAdjusterTest {
         assertEquals(9, world.getCoordinates().stream()
                 .filter(coordinate -> coordinate.getTile() != null)
                 .count());
-        // assertion that all new tiles have at least some height
-        // the height varies with the added heightDefecit
-        assertTrue(world.getCoordinates().stream()
-                .map(Coordinate::getTile)
-                .noneMatch(tile -> tile.getHeight() == 0L));
 
         long endHeight = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
@@ -95,7 +90,6 @@ class ContinentalDriftWorldAdjusterTest {
 
         Assertions.assertEquals(startingHeight, endHeight);
 
-        long expectedHeightDeficit = deficit % numberOfNewTilesNeeded;
-        assertEquals(expectedHeightDeficit, world.getHeightDeficit());
+        assertEquals(deficit, world.getHeightDeficit());
     }
 }

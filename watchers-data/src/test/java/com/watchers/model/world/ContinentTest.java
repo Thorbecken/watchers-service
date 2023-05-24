@@ -42,7 +42,7 @@ class ContinentTest {
         world.getCoordinates().addAll(continent3.getCoordinates());
 
         Assertions.assertEquals(2L, continent1.calculateMostConnectedNeighbouringContinent());
-        Assertions.assertEquals(1L, continent2.calculateMostConnectedNeighbouringContinent());
-        Assertions.assertEquals(1L, continent3.calculateMostConnectedNeighbouringContinent());
+        Assertions.assertEquals(3L, continent2.calculateMostConnectedNeighbouringContinent());
+        Assertions.assertEquals(2L, continent3.calculateMostConnectedNeighbouringContinent());
     }
 }

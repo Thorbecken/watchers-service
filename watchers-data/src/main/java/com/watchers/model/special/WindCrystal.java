@@ -12,24 +12,26 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 
+
 @Getter
 @Setter
 @Slf4j
 @Entity
 @JsonSerialize
-@Table(name = "aquifer_crystal")
+@Table(name = "wind_crystal")
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
-public class AquiferCrystal extends PointOfInterest {
+public class WindCrystal extends PointOfInterest {
+
     @Id
-    @JsonProperty("aquiferCrystalId")
-    @Column(name = "aquifer_crystal_id")
+    @JsonProperty("windCrystalId")
+    @Column(name = "wind_crystal_id")
     @JsonView(Views.Public.class)
-    @GeneratedValue(generator = "Aquifer_Crystal_Gen", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name = "Aquifer_Crystal_Gen", sequenceName = "Aquifer_Crystal_Seq", allocationSize = 1)
+    @GeneratedValue(generator = "Wind_Crystal_Gen", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "Wind_Crystal_Gen", sequenceName = "Wind_Crystal_Seq", allocationSize = 1)
     private Long id;
 
     @Override
     public String getDescription() {
-        return "Gives moisture to a given area";
+        return "Either makes aircurrents towards the windcrystal or aircurrents from the windcrystal";
     }
 }

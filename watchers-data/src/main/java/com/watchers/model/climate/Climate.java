@@ -69,7 +69,8 @@ public class Climate {
 
         this.latitude = ClimateHelper.transformToLatitude(y, wy);
         this.longitude = ClimateHelper.transformToLongitude(x, wx);
-        this.baseMeanTemperature = calculateBaseMeanTemperature(this.latitude);
+        double absoluteLatitudeDiffenceFromEquator = Math.abs(this.latitude);
+        this.baseMeanTemperature = calculateBaseMeanTemperature(absoluteLatitudeDiffenceFromEquator);
         this.meanTemperature = baseMeanTemperature;
 
         this.skyTile = new SkyTile(this);

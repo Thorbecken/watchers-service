@@ -96,6 +96,58 @@ public class NonEuclideanCoordinate extends Coordinate {
 
     @Override
     public double getDistance(Coordinate coordinate) {
-        throw new RuntimeException("not implemented");
+        return Math.abs(this.getAdjustedXDistance(coordinate)) + Math.abs(this.getAdjustedYDistance(coordinate));
+    }
+
+    @Override
+    public long getAdjustedXDistance(Coordinate coordinate) {
+        //10
+        long size = this.getWorld().getXSize();
+        // 5
+        long halfSize = size/2;
+        // 6
+        long rawDifference = this.getXCoord() - coordinate.getXCoord();
+        if(rawDifference > 0){
+            if(rawDifference <= halfSize) {
+                return rawDifference;
+            } else {
+                // 6-10 = -4
+                return rawDifference - size;
+            }
+        } else {
+            // -6 <= -5
+            if(rawDifference <= -halfSize) {
+                return rawDifference;
+            } else {
+                // -6+10 = 4
+                return rawDifference + size;
+            }
+        }
+    }
+
+    @Override
+    public long getAdjustedYDistance(Coordinate coordinate) {
+        //10
+        long size = this.getWorld().getYSize();
+        // 5
+        long halfSize = size/2;
+        // 6
+        long rawDifference = this.getYCoord() - coordinate.getYCoord();
+        if(rawDifference > 0){
+            if(rawDifference <= halfSize) {
+                return rawDifference;
+            } else {
+                // 6-10 = -4
+                return rawDifference - size;
+            }
+        } else {
+            // -6 <= -5
+            if(rawDifference <= -halfSize) {
+                return rawDifference;
+            } else {
+                // -6+10 = 4
+                return rawDifference + size;
+            }
+        }
     }
 }

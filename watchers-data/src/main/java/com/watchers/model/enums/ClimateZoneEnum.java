@@ -11,7 +11,7 @@ public enum ClimateZoneEnum {
     TEMPERATE(-7d, 17d),
     TROPICAL(17d, 30d);
 
-    private double minTemperature;
-    private double maxTemperature;
+    private final double minTemperature;
+    private final double maxTemperature;
 
 }

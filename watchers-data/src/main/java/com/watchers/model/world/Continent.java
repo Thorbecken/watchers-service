@@ -62,7 +62,15 @@ public class Continent {
     public Continent(World world, SurfaceType surfaceType) {
         this.world = world;
         // adding id for equals method to be able to use in hashsets
-        this.id = world.getContinents().size() + 1L;
+        if (world.getContinents().isEmpty()) {
+            this.id = 1L;
+        } else {
+            this.id = world.getContinents().stream()
+                    .mapToLong(Continent::getId)
+                    .max()
+                    .getAsLong()
+                    + 1;
+        }
         this.world.getContinents().add(this);
         this.type = surfaceType;
         this.basicRockType = RockType.getRandomRockType();
@@ -129,18 +137,24 @@ public class Continent {
 
     @JsonIgnore
     public Long calculateMostConnectedNeighbouringContinent() {
+        long largestContinent = world.getContinents().stream()
+                .max(Comparator.comparing(continent -> continent.getCoordinates().size()))
+                .get()
+                .getId();
+
         Map<Long, List<Continent>> list = coordinates.stream()
                 .map(Coordinate::getNeighbours)
                 .flatMap(Collection::stream)
                 .map(Coordinate::getContinent)
                 .filter(continent -> continent.getId() != null
+                        && continent.getId() != largestContinent
                         && !this.id.equals(continent.getId()))
                 .collect(Collectors.groupingBy(Continent::getId));
 
         Optional<Long> mostConnectedNeighbouringContinent = list.keySet().stream()
                 .max(Comparator.comparingInt((Long key) -> list.get(key).size()));
 
-        return mostConnectedNeighbouringContinent.orElseGet(this::getId);
+        return mostConnectedNeighbouringContinent.orElse(largestContinent);
     }
 
     @Override
