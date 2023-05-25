@@ -1,5 +1,6 @@
 package com.watchers.model.environment;
 
+import com.watchers.helper.RandomHelper;
 import com.watchers.model.enums.ClimateZoneEnum;
 import com.watchers.model.enums.FloraTypeEnum;
 import com.watchers.model.enums.FloralImageEnum;
@@ -118,8 +119,15 @@ public enum Flora {
     static public Flora getTreeFlora(double maxTemperature) {
         if (maxTemperature < PINE_TREE.getMaxTemperature())
             return PINE_TREE;
-        if (maxTemperature < LEAF_TREE.getMaxTemperature())
-            return LEAF_TREE;
+        if (maxTemperature < LEAF_TREE.getMaxTemperature()) {
+            int x = RandomHelper.getRandom(3);
+            switch (x){
+                case 0: return LEAF_TREE;
+                case 1: return SAKURA_TREE;
+                case 2: return WISTERIA_TREE;
+                case 3: return JACARANDA_TREE;
+            }
+        }
         if (maxTemperature < PALM_TREE.getMaxTemperature())
             return PALM_TREE;
         return null;

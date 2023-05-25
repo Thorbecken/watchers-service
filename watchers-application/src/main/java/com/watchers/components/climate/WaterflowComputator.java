@@ -150,7 +150,7 @@ public class WaterflowComputator {
 //        7. assign water flow for tiles that have down flowing tiles but no up current tiles
         landTileList.stream()
                 .filter(tile -> tile.getUpwardTiles().isEmpty())
-                .forEach(tile -> tile.setDownFlowAmount(tile.getLandMoisture()));
+                .forEach(tile -> tile.setDownFlowAmount(tile.getRainfall()));
 
 //        8. assign water flow for tiles that have not been assigned and where all up current tiles have been assigned
         boolean allWaterHasFlownDown = landTileList.stream()
@@ -167,7 +167,7 @@ public class WaterflowComputator {
                 double inflow = tile.getUpwardTiles().stream()
                         .mapToDouble(Tile::getDownFlowAmount)
                         .sum();
-                tile.setDownFlowAmount(inflow + tile.getLandMoisture());
+                tile.setDownFlowAmount(inflow + tile.getRainfall());
             }
 
             allWaterHasFlownDown = nextDownStream.isEmpty();

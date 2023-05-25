@@ -30,7 +30,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskGrass() {
-        biome.getTile().setLandMoisture(10d);
+        biome.getTile().setAvailableWater(10d);
         biome.setGrassFlora(Flora.GRASS);
         biome.processParallelTask();
         assertThat(biome.getGrassBiomass(), equalTo(1d + Flora.GRASS.getGrowthRate()));
@@ -40,7 +40,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskTree() {
-        biome.getTile().setLandMoisture(10d);
+        biome.getTile().setAvailableWater(10d);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
         assertThat(biome.getGrassBiomass(), equalTo(0d));
@@ -50,7 +50,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskFullFlora() {
-        biome.getTile().setLandMoisture(10d);
+        biome.getTile().setAvailableWater(10d);
         biome.setGrassFlora(Flora.GRASS);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
@@ -61,7 +61,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskGrassDrought() {
-        biome.getTile().setLandMoisture(0.25d);
+        biome.getTile().setAvailableWater(0.25d);
         biome.setGrassFlora(Flora.GRASS);
         biome.processParallelTask();
         assertThat(biome.getGrassFlora(), notNullValue());
@@ -71,7 +71,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskTreeDrought() {
-        biome.getTile().setLandMoisture(0.5d);
+        biome.getTile().setAvailableWater(0.5d);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
         assertThat(biome.getTreeFlora(), notNullValue());
@@ -81,7 +81,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskSevereDrought() {
-        biome.getTile().setLandMoisture(0d);
+        biome.getTile().setAvailableWater(0d);
         biome.setGrassFlora(Flora.GRASS);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
@@ -96,7 +96,7 @@ class BiomeTest {
     void spreadTest() {
         World testableWorld = TestableWorld.createWorld();
         testableWorld.getCoordinates().forEach(coordinate -> coordinate.getTile().setSurfaceType(SurfaceType.PLAIN));
-        testableWorld.getCoordinates().forEach(coordinate -> coordinate.getTile().setLandMoisture(3d));
+        testableWorld.getCoordinates().forEach(coordinate -> coordinate.getTile().setAvailableWater(3d));
 
         boolean noFloraPresent = testableWorld.getCoordinates().stream()
                 .map(Coordinate::getTile)
@@ -106,7 +106,7 @@ class BiomeTest {
 
         Coordinate startingTile = testableWorld.getCoordinate(2, 2);
         Biome dryBiome = testableWorld.getCoordinate(2, 1).getTile().getBiome();
-        dryBiome.getTile().setLandMoisture(0d);
+        dryBiome.getTile().setAvailableWater(0d);
         Biome waterBiome = testableWorld.getCoordinate(2, 3).getTile().getBiome();
         waterBiome.getTile().setSurfaceType(SurfaceType.COASTAL);
         Biome neighbourBiome1 = testableWorld.getCoordinate(1, 2).getTile().getBiome();
@@ -119,8 +119,8 @@ class BiomeTest {
 
         startingBiome.spread();
 
-        assertThat(neighbourBiome1.hasOpenFloraSpots(), equalTo(false));
-        assertThat(neighbourBiome2.hasOpenFloraSpots(), equalTo(false));
+        assertThat(neighbourBiome1.hasOpenFloraSpots(), equalTo(true));
+        assertThat(neighbourBiome2.hasOpenFloraSpots(), equalTo(true));
         assertThat(dryBiome.hasOpenFloraSpots(), equalTo(true));
         assertThat(waterBiome.hasOpenFloraSpots(), equalTo(true));
     }

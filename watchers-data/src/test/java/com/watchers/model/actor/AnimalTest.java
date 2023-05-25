@@ -30,7 +30,7 @@ class AnimalTest {
             for (int y = 1; y <= 3; y++) {
                 Coordinate coordinate = CoordinateFactory.createCoordinate(x, y, rabbitWorld, rabbitContinent);
                 coordinate.getTile().setBiome(new Biome(coordinate.getTile()));
-                coordinate.getTile().setLandMoisture(100d);
+                coordinate.getTile().setRainfall(100d);
                 coordinate.getTile().getBiome().setGrassFlora(Flora.GRASS);
                 rabbitWorld.getCoordinates().add(coordinate);
             }

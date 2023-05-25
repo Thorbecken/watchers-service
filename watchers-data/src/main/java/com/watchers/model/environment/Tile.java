@@ -45,10 +45,15 @@ public class Tile implements GraphNode {
     @JsonView(Views.Public.class)
     private long height;
 
-    @JsonProperty("landMoisture")
-    @Column(name = "land_moisture")
+    @JsonProperty("rainfall")
+    @Column(name = "rainfall")
     @JsonView(Views.Public.class)
-    private double landMoisture;
+    private double rainfall;
+
+    @JsonProperty("availableWater")
+    @Column(name = "available_water")
+    @JsonView(Views.Public.class)
+    private double availableWater;
 
     @Column(name = "lake")
     @JsonView(Views.Public.class)
@@ -296,7 +301,7 @@ public class Tile implements GraphNode {
     }
 
     public void reduceLandMoisture(double moistureReduction) {
-        this.landMoisture = this.landMoisture - moistureReduction;
+        this.availableWater = this.availableWater - moistureReduction;
     }
 
     @JsonIgnore

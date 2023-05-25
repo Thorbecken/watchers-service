@@ -135,7 +135,7 @@ public class Biome implements ParallelTask {
             double oldBiomass = FloraTypeEnum.GRASS.equals(flora.getType()) ? grassBiomass : treeBiomass;
             double newBiomass;
             double waterUsage = flora.getWaterIntake() * oldBiomass * flora.getGrowthRate();
-            double landMoisture = this.tile.getLandMoisture();
+            double landMoisture = this.tile.getAvailableWater();
             if (waterUsage <= landMoisture) {
                 this.tile.reduceLandMoisture(waterUsage);
                 if ((oldBiomass * flora.getGrowthRate()) > flora.getMaxBiomass()) {
@@ -167,12 +167,14 @@ public class Biome implements ParallelTask {
         if (this.grassFlora != null) {
             if (TERRESTRIAL.equals(this.grassFlora.getNaturalHabitat())) {
                 this.getTile().getNeighbours().stream()
-                        .filter(tile -> tile.getLandMoisture() > 0)
+                        .filter(Tile::isLand)
+                        .filter(tile -> tile.getRainfall() > 0)
                         .map(Tile::getBiome)
                         .filter(Biome::hasOpenGrassSpot)
                         .forEach(openBiome -> openBiome.fillOpenGrassSpots(this.grassFlora));
             } else if (SALT_WATER.equals(this.grassFlora.getNaturalHabitat())) {
                 this.getTile().getNeighbours().stream()
+                        .filter(Tile::isWater)
                         .map(Tile::getBiome)
                         .filter(Biome::hasOpenGrassSpot)
                         .forEach(openBiome -> openBiome.fillOpenGrassSpots(this.grassFlora));
@@ -182,12 +184,14 @@ public class Biome implements ParallelTask {
         if (this.treeFlora != null) {
             if (TERRESTRIAL.equals(this.treeFlora.getNaturalHabitat())) {
                 this.getTile().getNeighbours().stream()
-                        .filter(tile -> tile.getLandMoisture() > 0)
+                        .filter(Tile::isLand)
+                        .filter(tile -> tile.getRainfall() > 0)
                         .map(Tile::getBiome)
                         .filter(Biome::hasOpenTreeSpot)
                         .forEach(openBiome -> openBiome.fillOpenTreeSpots(this.treeFlora));
             } else if (SALT_WATER.equals(this.treeFlora.getNaturalHabitat())) {
                 this.getTile().getNeighbours().stream()
+                        .filter(Tile::isWater)
                         .map(Tile::getBiome)
                         .filter(Biome::hasOpenTreeSpot)
                         .forEach(openBiome -> openBiome.fillOpenTreeSpots(this.treeFlora));

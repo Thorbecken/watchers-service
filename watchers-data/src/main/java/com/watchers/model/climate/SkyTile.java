@@ -108,10 +108,12 @@ public class SkyTile {
     public void reduceAirMoisture(double airmoistureReduction) {
         if (airmoistureReduction > 0d) {
             if (this.getAirMoisture() - airmoistureReduction > 0d) {
-                this.getClimate().getCoordinate().getTile().setLandMoisture(airmoistureReduction);
+                this.getClimate().getCoordinate().getTile().setRainfall(airmoistureReduction);
+                this.getClimate().getCoordinate().getTile().setAvailableWater(airmoistureReduction);
                 this.setAirMoisture(this.getAirMoisture() - airmoistureReduction);
             } else {
-                this.getClimate().getCoordinate().getTile().setLandMoisture(this.getAirMoisture());
+                this.getClimate().getCoordinate().getTile().setRainfall(this.getAirMoisture());
+                this.getClimate().getCoordinate().getTile().setAvailableWater(this.getAirMoisture());
                 this.setAirMoisture(0d);
             }
         }
