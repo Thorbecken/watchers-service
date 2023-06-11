@@ -146,10 +146,28 @@ public enum Flora {
         if (maxTemperature < PINE_TREE.getMaxTemperature())
             return PINE_TREE;
         if (maxTemperature < LEAF_TREE.getMaxTemperature()) {
-            return LEAF_TREE;
+            int random = RandomHelper.getRandom(1);
+            switch (random) {
+                case 0:
+                    return LEAF_TREE;
+                case 1:
+                    return SAKURA_TREE;
+                default:
+                    return LEAF_TREE;
+            }
         }
         if (maxTemperature < PALM_TREE.getMaxTemperature()) {
-            return PALM_TREE;
+            int random = RandomHelper.getRandom(2);
+            switch (random) {
+                case 0:
+                    return PALM_TREE;
+                case 1:
+                    return JACARANDA_TREE;
+                case 2:
+                    return WISTERIA_TREE;
+                default:
+                    return PALM_TREE;
+            }
         }
         return LEAF_TREE;
     }
