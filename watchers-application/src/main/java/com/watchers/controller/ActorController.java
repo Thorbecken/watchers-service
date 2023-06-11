@@ -27,17 +27,38 @@ public class ActorController{
 
     @SuppressWarnings("unused")
     @ApiOperation(value = "Generates a new actor on the chosen coordinate.")
-    @RequestMapping(value = "/actors/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
+    @RequestMapping(value = "/fauna/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
     //TODO: maak hier nog een post method van. of put.
-        public ResponseEntity seedLife(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){
-            log.info("Received request to seed life at coordintae: " + xCoord + "x, " + yCoord + "y");
-            Assert.notNull(worldId, "No world id was found");
-            Assert.notNull(xCoord, "No xCoord was found");
-            Assert.notNull(yCoord, "No yCoord was found");
+    public ResponseEntity seedLife(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){
+        log.info("Received request to seed life at coordintae: " + xCoord + "x, " + yCoord + "y");
+        Assert.notNull(worldId, "No world id was found");
+        Assert.notNull(xCoord, "No xCoord was found");
+        Assert.notNull(yCoord, "No yCoord was found");
 
         if (worldRepository.existsById(worldId)) {
             lifeManager.seedLife(worldId, xCoord, yCoord);
             log.info("Seeded life on world " + worldId + " at coordinates: " + xCoord + "x, " + yCoord + "y");
+            return ResponseEntity.ok().build();
+        } else {
+            log.info("World not found");
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
+    @SuppressWarnings("unused")
+    @ApiOperation(value = "Generates a new great flora on the chosen coordinate.")
+    @RequestMapping(value = "/flora/{worldId}/{xCoord}/{yCoord}", method = RequestMethod.GET)
+    //TODO: maak hier nog een post method van. of put.
+    public ResponseEntity seedPlant(@PathVariable("worldId") Long worldId, @PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord){
+        log.info("Received request to seed life at coordintae: " + xCoord + "x, " + yCoord + "y");
+        Assert.notNull(worldId, "No world id was found");
+        Assert.notNull(xCoord, "No xCoord was found");
+        Assert.notNull(yCoord, "No yCoord was found");
+
+        if (worldRepository.existsById(worldId)) {
+            lifeManager.seedFlora(worldId, xCoord, yCoord);
+            log.info("Seeded plant on world " + worldId + " at coordinates: " + xCoord + "x, " + yCoord + "y");
             return ResponseEntity.ok().build();
         } else {
             log.info("World not found");

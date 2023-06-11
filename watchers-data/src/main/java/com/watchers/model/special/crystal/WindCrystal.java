@@ -1,11 +1,14 @@
-package com.watchers.model.special;
+package com.watchers.model.special.crystal;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.common.Views;
+import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.environment.Tile;
 import com.watchers.model.special.base.PointOfInterest;
+import com.watchers.model.special.life.GreatFlora;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,5 +36,16 @@ public class WindCrystal extends PointOfInterest {
     @Override
     public String getDescription() {
         return "Either makes aircurrents towards the windcrystal or aircurrents from the windcrystal";
+    }
+
+    @Override
+    public PointOfInterest createClone(Coordinate coordinate, Tile tile) {
+        WindCrystal clone = new WindCrystal();
+        clone.setId(this.getId());
+        clone.setCoordinate(coordinate);
+        clone.setEarthBound(this.isEarthBound());
+        clone.setPointOfInterestType(this.getPointOfInterestType());
+
+        return clone;
     }
 }

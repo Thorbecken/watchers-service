@@ -9,6 +9,7 @@ import com.watchers.model.dto.WorldFactoryDTO;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Flora;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.special.life.GreatFlora;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
@@ -76,18 +77,16 @@ class WorldFactory {
                     .findFirst()
                     .ifPresent(LifeManager::seedLife));
 
-            world.getCoordinates().stream()
-                    .map(Coordinate::getTile)
-                    .filter(Tile::isLand)
-                    .map(Tile::getBiome)
-                    .forEach(biome -> {
-                        biome.setGrassFlora(Flora.GRASS);
-                        biome.setTreeFlora(Flora.getTreeFlora(biome.getTile().getCoordinate().getClimate().getMeanTemperature()));
-                    });
+            world.getContinents().stream()
+                    .filter(continent -> !continent.getType().equals(SurfaceType.OCEAN))
+                    .forEach(continent -> continent.getCoordinates().stream()
+                            .findFirst()
+                            .ifPresent(GreatFlora::new));
 
-            world.getCoordinates().stream()
+            world.getContinents().stream()
+                    .filter(continent -> continent.getType().equals(SurfaceType.OCEAN))
+                    .flatMap(continent -> continent.getCoordinates().stream())
                     .map(Coordinate::getTile)
-                    .filter(Tile::isWater)
                     .map(Tile::getBiome)
                     .forEach(biome -> biome.setTreeFlora(Flora.getSeawaterFlora(biome.getTile().getCoordinate().getClimate().getMeanTemperature())));
 

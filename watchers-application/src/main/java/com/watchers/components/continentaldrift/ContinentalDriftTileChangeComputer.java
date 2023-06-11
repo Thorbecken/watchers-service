@@ -27,7 +27,7 @@ public class ContinentalDriftTileChangeComputer {
         taskDto.getNewTileLayout().keySet().forEach(mockCoordinate -> {
                     Coordinate coordinate = world.getCoordinate(mockCoordinate);
                     List<Tile> tiles = taskDto.getCoordinateChangeList(mockCoordinate).stream()
-                            .map(MockTile::getMockCoordinateOfOrigin)
+                            .map(MockTile::getCoordinateOfOrigin)
                             .map(world::getCoordinate)
                             .map(Coordinate::getTile)
                             .collect(Collectors.toList());

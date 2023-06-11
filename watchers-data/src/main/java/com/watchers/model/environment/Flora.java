@@ -120,21 +120,43 @@ public enum Flora {
         if (maxTemperature < PINE_TREE.getMaxTemperature())
             return PINE_TREE;
         if (maxTemperature < LEAF_TREE.getMaxTemperature()) {
-            int x = RandomHelper.getRandom(3);
-            switch (x){
-                case 0: return LEAF_TREE;
-                case 1: return SAKURA_TREE;
-                case 2: return WISTERIA_TREE;
-                case 3: return JACARANDA_TREE;
+            int x = RandomHelper.getRandom(2);
+            switch (x) {
+                case 0:
+                    return LEAF_TREE;
+                case 1:
+                    return SAKURA_TREE;
             }
         }
-        if (maxTemperature < PALM_TREE.getMaxTemperature())
-            return PALM_TREE;
+        if (maxTemperature < PALM_TREE.getMaxTemperature()) {
+            int x = RandomHelper.getRandom(3);
+            switch (x) {
+                case 0:
+                    return PALM_TREE;
+                case 1:
+                    return WISTERIA_TREE;
+                case 2:
+                    return JACARANDA_TREE;
+            }
+        }
         return null;
     }
 
+    static public Flora getBasicTreeFlora(double maxTemperature) {
+        if (maxTemperature < PINE_TREE.getMaxTemperature())
+            return PINE_TREE;
+        if (maxTemperature < LEAF_TREE.getMaxTemperature()) {
+            return LEAF_TREE;
+        }
+        if (maxTemperature < PALM_TREE.getMaxTemperature()) {
+            return PALM_TREE;
+        }
+        return LEAF_TREE;
+    }
+
+
     static public Flora getSeawaterFlora(double maxTemperature) {
-        if(maxTemperature < KELP.getMaxTemperature()){
+        if (maxTemperature > KELP.getMaxTemperature()) {
             return CORAL;
         } else {
             return KELP;

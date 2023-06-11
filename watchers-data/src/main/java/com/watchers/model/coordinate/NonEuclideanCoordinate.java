@@ -79,6 +79,10 @@ public class NonEuclideanCoordinate extends Coordinate {
                         .collect(Collectors.toSet())
         );
 
+        if(this.getPointOfInterest() != null){
+            clone.setPointOfInterest(this.getPointOfInterest().createClone(clone, null));
+        }
+
         return clone;
     }
 

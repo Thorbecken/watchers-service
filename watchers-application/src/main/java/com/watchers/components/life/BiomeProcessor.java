@@ -4,6 +4,7 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.special.life.GreatFlora;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,17 @@ public class BiomeProcessor {
     @Transactional
     public void process(WorldTaskDto taskDto) {
         World world = taskDto.getWorld();
+
+        world.getCoordinates().parallelStream()
+                .map(Coordinate::getTile)
+                .map(Tile::getBiome)
+                .forEach(Biome::checkIntegrity);
+
+        world.getCoordinates().parallelStream()
+                .map(Coordinate::getTile)
+                .filter(tile -> tile.getPointOfInterest() instanceof GreatFlora)
+                .map(tile -> ((GreatFlora) tile.getPointOfInterest()))
+                .forEach(GreatFlora::seedLife);
 
         world.getCoordinates().parallelStream()
                 .map(Coordinate::getTile)

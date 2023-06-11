@@ -60,10 +60,10 @@ public class ContinentalDriftWorldAdjuster {
 
     private void ChangeTileOfCoordinate(ContinentalChangesDto dto, World world) {
         MockTile mockTile = dto.getMockTile();
-        Tile tile = world.getCoordinate(dto.getKey()).getTile();
-        tile.clear();
+        Tile toBeFilledTile = world.getCoordinate(dto.getKey()).getTile();
+        toBeFilledTile.clear();
 
-        Coordinate deletedTileCoordinate = world.getCoordinate(mockTile.getMockCoordinateOfOrigin());
-        tile.setData(mockTile, deletedTileCoordinate);
+        Coordinate coordinateOfOrigin = world.getCoordinate(mockTile.getCoordinateOfOrigin());
+        toBeFilledTile.setData(mockTile, coordinateOfOrigin);
     }
 }

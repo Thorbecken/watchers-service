@@ -7,6 +7,7 @@ import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.special.base.PointOfInterest;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
@@ -251,6 +252,7 @@ public class SaveToDatabaseManager {
         private final Tile tile;
         private final Climate climate;
         private final Set<Actor> actors;
+        private final PointOfInterest pointOfInterest;
 
         CoordinateHolder(Coordinate coordinate) {
             this.id = coordinate.getId();
@@ -258,6 +260,7 @@ public class SaveToDatabaseManager {
             this.tile = coordinate.getTile();
             this.climate = coordinate.getClimate();
             this.actors = coordinate.getActors();
+            this.pointOfInterest = coordinate.getPointOfInterest();
         }
 
         private void clearInformation() {
@@ -265,10 +268,12 @@ public class SaveToDatabaseManager {
             coordinate.setTile(null);
             coordinate.setClimate(null);
             coordinate.setActors(null);
+            coordinate.setPointOfInterest(null);
         }
 
         private void setInformation() {
             coordinate.setActors(this.actors);
+            coordinate.setPointOfInterest(pointOfInterest);
         }
     }
 
@@ -313,6 +318,12 @@ public class SaveToDatabaseManager {
                 .collect(Collectors.toList());
         saveClimates(climates);
 
+        List<PointOfInterest> pointsOfInterest = coordinateHolderList.stream()
+                .map(CoordinateHolder::getPointOfInterest)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        savePointsOfInterestMethod(pointsOfInterest);
+
         List<Tile> tiles = coordinateHolderList.stream()
                 .map(CoordinateHolder::getTile)
                 .collect(Collectors.toList());
@@ -356,15 +367,18 @@ public class SaveToDatabaseManager {
     private static class TileHolder {
         private final Tile tile;
         private final Biome biome;
+        private final PointOfInterest pointOfInterest;
 
         TileHolder(Tile tile) {
             this.tile = tile;
             this.biome = tile.getBiome();
+            this.pointOfInterest = tile.getPointOfInterest();
         }
 
         void clearInformation() {
             tile.setId(null);
             tile.setBiome(null);
+            tile.setPointOfInterest(null);
         }
 
         void setInformation() {
@@ -404,6 +418,12 @@ public class SaveToDatabaseManager {
             tx.commit();
 
             saveBiomes(biomes);
+
+            List<PointOfInterest> pointsOfInterest = tileHolderList.stream()
+                    .map(TileHolder::getPointOfInterest)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            savePointsOfInterestMethod(pointsOfInterest);
 
             tileHolderList.forEach(TileHolder::setInformation);
         }
@@ -568,11 +588,11 @@ public class SaveToDatabaseManager {
                 }
             }
 
-            log.info("commiting coordinates");
+            log.info("committing continents");
 
             tx.commit();
 
-            log.info("coordinates commited");
+            log.info("continents committed");
         }
     }
 
@@ -589,6 +609,38 @@ public class SaveToDatabaseManager {
                     //flush a batch of inserts and release memory:
                     session.flush();
                     session.clear();
+                }
+            }
+
+            session.flush();
+            session.clear();
+            tx.commit();
+        }
+    }
+
+    private void savePointsOfInterestMethod(List<PointOfInterest> pointOfInterests) {
+        for (int i = 0; i < pointOfInterests.size(); i++) {
+            pointOfInterests.get(i).setId(((long) i));
+        }
+
+        pointOfInterests = pointOfInterests.stream()
+                .sorted(Comparator.comparing(PointOfInterest::getId))
+                .collect(Collectors.toList());
+
+        SessionFactory sessionFactory = getCurrentSessionFromJPA();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            for (int i = 0; i < pointOfInterests.size(); i++) {
+                PointOfInterest pointOfInterest = pointOfInterests.get(i);
+                session.save(pointOfInterest);
+
+                if (i == 1000) {
+                    //flush a batch of inserts and release memory:
+                    session.flush();
+                    session.clear();
+
+                    log.info("processed " + (((double) i) / ((double) pointOfInterests.size())) + " procent of points of interest.");
                 }
             }
 

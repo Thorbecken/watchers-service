@@ -9,7 +9,8 @@ public enum PointOfInterestType {
     TECTONIC_CRYSTAL ("TectonicCrystal"),
     HOT_SPOT_CRYSTAL ("HotSpotCrystal"),
     AQUIFER_CRYSTAL ("AquiferCrystal"),
-    WIND_CRYSTAL ("WindCrystal");
+    WIND_CRYSTAL ("WindCrystal"),
+    GREAT_FLORA("GreatFlora");
 
     private final String name;
 }

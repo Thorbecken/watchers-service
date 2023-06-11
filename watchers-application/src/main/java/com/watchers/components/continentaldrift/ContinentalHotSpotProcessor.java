@@ -4,7 +4,7 @@ import com.watchers.helper.RandomHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.special.HotSpotCrystal;
+import com.watchers.model.special.crystal.HotSpotCrystal;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

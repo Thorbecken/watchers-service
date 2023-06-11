@@ -7,7 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ClimateZoneEnum {
 
-    ARCTIC(-24d, -7d),
+    POLAR(-24d, -17d),
+    ARCTIC(-17d, -7d),
     TEMPERATE(-7d, 17d),
     TROPICAL(17d, 30d);
 

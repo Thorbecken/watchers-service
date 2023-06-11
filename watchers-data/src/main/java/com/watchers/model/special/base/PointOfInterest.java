@@ -7,10 +7,11 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
-import com.watchers.model.special.AquiferCrystal;
-import com.watchers.model.special.HotSpotCrystal;
-import com.watchers.model.special.TectonicCrystal;
-import com.watchers.model.special.WindCrystal;
+import com.watchers.model.special.crystal.AquiferCrystal;
+import com.watchers.model.special.crystal.HotSpotCrystal;
+import com.watchers.model.special.crystal.TectonicCrystal;
+import com.watchers.model.special.crystal.WindCrystal;
+import com.watchers.model.special.life.GreatFlora;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -29,7 +30,8 @@ import javax.persistence.*;
         @JsonSubTypes.Type(value = HotSpotCrystal.class, name = "HotSpotCrystal"),
         @JsonSubTypes.Type(value = TectonicCrystal.class, name = "TectonicCrystal"),
         @JsonSubTypes.Type(value = AquiferCrystal.class, name = "AquiferCrystal"),
-        @JsonSubTypes.Type(value = WindCrystal.class, name = "WindCrystal")
+        @JsonSubTypes.Type(value = WindCrystal.class, name = "WindCrystal"),
+        @JsonSubTypes.Type(value = GreatFlora.class, name = "GreatFlora")
 })
 public abstract class PointOfInterest {
 
@@ -61,11 +63,8 @@ public abstract class PointOfInterest {
     public abstract String getDescription();
 
     public void setTile(Tile tile) {
-        if(this.coordinate != null){
-            this.coordinate.setPointOfInterest(null);
-        } else if(this.tile != null) {
-            this.tile.setPointOfInterest(null);
-        }
+        // pointOfInterest is not deleted from the tile
+        // because this would remove it from the database through orphan removal
         this.coordinate = null;
         this.tile = tile;
         tile.setPointOfInterest(this);
@@ -73,14 +72,13 @@ public abstract class PointOfInterest {
     }
 
     public void setCoordinate(Coordinate coordinate) {
-        if(this.coordinate != null){
-            this.coordinate.setPointOfInterest(null);
-        } else if(this.tile != null) {
-            this.tile.setPointOfInterest(null);
-        }
+        // pointOfInterest is not deleted from the tile
+        // because this would remove it from the database through orphan removal
         this.tile = null;
         this.coordinate = coordinate;
         coordinate.setPointOfInterest(this);
         this.earthBound = false;
     }
+
+    public abstract PointOfInterest createClone(Coordinate coordinate, Tile tile);
 }

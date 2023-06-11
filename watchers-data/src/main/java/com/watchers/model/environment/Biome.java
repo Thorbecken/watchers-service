@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.watchers.model.climate.Climate;
 import com.watchers.model.common.Views;
 import com.watchers.model.dto.MockTile;
 import com.watchers.model.enums.FloraTypeEnum;
@@ -292,5 +293,25 @@ public class Biome implements ParallelTask {
                 ", treeBiomass=" + treeBiomass +
                 ", treeFlora=" + treeFlora +
                 '}';
+    }
+
+    public void checkIntegrity() {
+        Climate climate = this.getTile().getCoordinate().getClimate();
+        if(treeFlora != null) {
+            if (treeFlora.getMinTemperature() >= climate.getMeanTemperature()
+                    || treeFlora.getMaxTemperature() < climate.getMeanTemperature()
+                    || !treeFlora.getNaturalHabitat().movableSurfaces.contains(this.tile.getSurfaceType())) {
+                this.treeFlora = null;
+                this.treeBiomass = 0;
+            }
+        }
+        if(grassFlora != null) {
+            if (grassFlora.getMinTemperature() >= climate.getMeanTemperature()
+                    || grassFlora.getMaxTemperature() < climate.getMeanTemperature()
+                    || !grassFlora.getNaturalHabitat().movableSurfaces.contains(this.tile.getSurfaceType())) {
+                this.grassFlora = null;
+                this.grassBiomass = 0;
+            }
+        }
     }
 }

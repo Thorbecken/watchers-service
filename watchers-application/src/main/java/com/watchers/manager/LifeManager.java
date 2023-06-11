@@ -9,6 +9,7 @@ import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.special.life.GreatFlora;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,15 @@ public class LifeManager {
         seedingTile.getCoordinate().getActors().add(new Animal(seedingTile.getCoordinate(), animalType, animalType.getMaxFoodReserve()));
         worldRepository.save(world);
         Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
+    }
+
+    @Transactional
+    public void seedFlora(Long worldId, Long xCoord, Long yCoord) {
+        World world = worldRepository.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        Coordinate seedingCoordinate = world.getCoordinate(xCoord, yCoord);
+        new GreatFlora(seedingCoordinate);
+
+        worldRepository.save(world);
     }
 
     public static void seedLife(Coordinate coordinate) {

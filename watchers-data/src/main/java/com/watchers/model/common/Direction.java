@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.special.TectonicCrystal;
+import com.watchers.model.special.crystal.TectonicCrystal;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

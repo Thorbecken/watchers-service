@@ -236,7 +236,11 @@ public class Tile implements GraphNode {
         this.biome.clear();
     }
 
+    // method that loads the mocktile with all the data it can use
     public void transferData(MockTile mockTile, Coordinate survivingCoordinate) {
+        if(this.pointOfInterest != null && mockTile.getPointOfInterest() == null) {
+            mockTile.setPointOfInterest(this.getPointOfInterest());
+        }
         this.biome.transferData(mockTile);
         survivingCoordinate.getActors().addAll(this.coordinate.getActors());
     }
@@ -262,6 +266,10 @@ public class Tile implements GraphNode {
 
         this.coordinate.getActors().addAll(deletedTileCoordinate.getActors());
         this.coordinate.getActors().forEach(actor -> actor.setCoordinate(coordinate));
+
+        if(this.pointOfInterest == null && mockTile.getPointOfInterest() != null) {
+            mockTile.getPointOfInterest().setTile(this);
+        }
     }
 
     @Override
@@ -294,6 +302,11 @@ public class Tile implements GraphNode {
         clone.setHeight(this.height);
         clone.setId(newCoordinate.getId());
         clone.setBiome(this.biome.createClone(clone));
+
+        if(this.getPointOfInterest() != null){
+            clone.setPointOfInterest(this.getPointOfInterest().createClone(null, clone));
+        }
+
         return clone;
     }
 

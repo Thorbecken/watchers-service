@@ -3,7 +3,7 @@ package com.watchers.components.continentaldrift;
 import com.watchers.helper.RandomHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
-import com.watchers.model.special.TectonicCrystal;
+import com.watchers.model.special.crystal.TectonicCrystal;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
