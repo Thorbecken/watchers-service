@@ -66,6 +66,9 @@ public abstract class Actor implements SerialTask {
 
     @JsonIgnore
     public boolean isCorrectLandType(Coordinate coordinate) {
+        if(coordinate == null){
+            return false;
+        }
         return this.getNaturalHabitat().movableSurfaces
                 .contains(coordinate.getTile().getSurfaceType());
     }

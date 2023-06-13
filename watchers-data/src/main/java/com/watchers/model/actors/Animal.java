@@ -107,7 +107,8 @@ public class Animal extends Actor {
     }
 
     public void handleContinentalMovement() {
-        Optional<Coordinate> optionalCoordinate = getCoordinate().getNeighbours().stream()
+        Optional<Coordinate> optionalCoordinate = Optional.ofNullable(getCoordinate()).stream()
+                .flatMap(coordinate -> coordinate.getNeighbours().stream())
                 .filter(this::isCorrectLandType)
                 .max((coordinate1, coordinate2) -> Math.toIntExact(Math.round(coordinate1.getTile().getBiome().getCurrentFood() - coordinate2.getTile().getBiome().getCurrentFood())));
         if (optionalCoordinate.isPresent()) {

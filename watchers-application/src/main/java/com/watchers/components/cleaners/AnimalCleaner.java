@@ -21,11 +21,16 @@ public class AnimalCleaner {
     public void process(ContinentalDriftTaskDto continentalDriftTaskDto) {
         World world = continentalDriftTaskDto.getWorld();
 
+        world.getActorList().stream()
+                .filter(Actor::isNotOnCorrectLand)
+                .forEach(Actor::handleContinentalMovement);
+
         List<Actor> deadActorsByContinentalDrifting = world.getActorList().stream()
                 .filter(actor -> !StateType.DEAD.equals(actor.getStateType()))
                 .filter(Actor::isNotOnCorrectLand)
                 .collect(Collectors.toList());
         log.debug(deadActorsByContinentalDrifting.size() + " Actors died because of continental movement");
+
         deadActorsByContinentalDrifting.forEach(deadActor -> {
             if (deadActor.getCoordinate() != null) {
                 deadActor.getCoordinate().getActors().remove(deadActor);
@@ -34,20 +39,5 @@ public class AnimalCleaner {
             deadActor.setStateType(StateType.DEAD);
         });
 
-        world.getActorList().removeAll(deadActorsByContinentalDrifting);
     }
-
-//    old code
-//    TODO: fix this so that the sad animals can be saved from extinction
-//    problem was detached entities since the addition of a overwriten hash en equals methode
-//    {
-//        World world = worldRepository.findById(continentalDriftTaskDto.getWorldId()).orElseThrow(() -> new RuntimeException("The world was lost in memoroy"));
-//
-//        world.getActorList().stream()
-//                .filter(Actor::isNotOnCorrectLand)
-//                .forEach(Actor::handleContinentalMovement);
-//
-//        worldRepository.save(world);
-//    }
-
 }
