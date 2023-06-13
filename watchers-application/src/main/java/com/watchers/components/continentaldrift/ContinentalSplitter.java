@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -22,9 +19,9 @@ import java.util.stream.Collectors;
 public class ContinentalSplitter {
 
     @Transactional
-    public void process(ContinentalDriftTaskDto taskDto){
+    public void process(ContinentalDriftTaskDto taskDto) {
         World world = taskDto.getWorld();
-        Set<Continent> continents =  new HashSet<>(world.getContinents());
+        Set<Continent> continents = new HashSet<>(world.getContinents());
 
         continents.stream()
                 .filter(continent -> !continent.getCoordinates().isEmpty())
@@ -32,19 +29,19 @@ public class ContinentalSplitter {
     }
 
     private void checkWidthLenght(Continent continent) {
-        long maxWidth = continent.getWorld().getXSize()/2;
+        long maxWidth = continent.getWorld().getXSize() / 2;
         long width = continent.getCoordinates().stream().map(Coordinate::getXCoord).distinct().count();
-        long maxlength = continent.getWorld().getYSize()/2;
+        long maxlength = continent.getWorld().getYSize() / 2;
         long length = continent.getCoordinates().stream().map(Coordinate::getYCoord).distinct().count();
 
-        if(maxWidth < width) {
-            Coordinate leftBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getXCoord)).get();
-            Coordinate rightBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getXCoord)).get();
-            divideContinentInTwo(continent, leftBound, rightBound);
-        } else if(maxlength < length) {
-            Coordinate upBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getYCoord)).get();
-            Coordinate downBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getYCoord)).get();
-            divideContinentInTwo(continent, upBound, downBound);
+        if (maxWidth < width) {
+            Optional<Coordinate> leftBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getXCoord));
+            Optional<Coordinate> rightBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getXCoord));
+            leftBound.ifPresent(coordinate -> divideContinentInTwo(continent, coordinate, rightBound.get()));
+        } else if (maxlength < length) {
+            Optional<Coordinate> upBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getYCoord));
+            Optional<Coordinate> downBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getYCoord));
+            upBound.ifPresent(coordinate -> divideContinentInTwo(continent, coordinate, downBound.get()));
         }
     }
 
@@ -52,23 +49,21 @@ public class ContinentalSplitter {
         World world = continent.getWorld();
         Continent newContinent = new Continent(world, continent.getType());
 
-        //TODO: make the two continent part direction by changing their directions.
-
         Set<Coordinate> coordinates = new HashSet<>(continent.getCoordinates());
-        Set<Coordinate> parentCoordinates =  new HashSet<>();
+        Set<Coordinate> parentCoordinates = new HashSet<>();
         Set<Coordinate> childCoordinates = new HashSet<>();
 
         parentCoordinates.add(parentCoordinate);
         childCoordinates.add(childCoordinate);
 
         int currentCoordinates = coordinates.size();
-        while (!coordinates.isEmpty()){
+        while (!coordinates.isEmpty()) {
             addAllNeighbouringCoordinatesToSet(coordinates, parentCoordinates);
             coordinates.removeIf(parentCoordinates::contains);
 
             addAllNeighbouringCoordinatesToSet(coordinates, childCoordinates);
             coordinates.removeIf(childCoordinates::contains);
-            if(currentCoordinates == coordinates.size()){
+            if (currentCoordinates == coordinates.size()) {
                 parentCoordinates.addAll(coordinates);
             } else {
                 currentCoordinates = coordinates.size();
@@ -80,7 +75,9 @@ public class ContinentalSplitter {
                 .filter(childCoordinates::contains)
                 .forEach(coordinate -> coordinate.changeContinent(newContinent));
 
-        log.warn("Continent " +  continent.getId() + " is split in two");
+        log.warn("Continent " + continent.getId() + " is split in two");
+
+        partContinentsInDifferentDirections(continent, newContinent);
     }
 
     private void addAllNeighbouringCoordinatesToSet(Set<Coordinate> coordinates, Set<Coordinate> parentCoordinates) {
@@ -92,5 +89,56 @@ public class ContinentalSplitter {
         coordinates.stream()
                 .filter(parentNeightbours::contains)
                 .forEach(parentCoordinates::add);
+    }
+
+    private void partContinentsInDifferentDirections(Continent continent, Continent newContinent) {
+        OptionalDouble averageContinentY = continent.getCoordinates().stream()
+                .mapToLong(Coordinate::getYCoord)
+                .average();
+        OptionalDouble averageContinentX = continent.getCoordinates().stream()
+                .mapToLong(Coordinate::getXCoord)
+                .average();
+        OptionalDouble averageNewContinentY = newContinent.getCoordinates().stream()
+                .mapToLong(Coordinate::getYCoord)
+                .average();
+        OptionalDouble averageNewContinentX = newContinent.getCoordinates().stream()
+                .mapToLong(Coordinate::getXCoord)
+                .average();
+
+        if (averageContinentY.isPresent() && averageNewContinentY.isPresent()) {
+            double meanYDifference = averageContinentY.getAsDouble() - averageNewContinentY.getAsDouble();
+            double halfYSize = continent.getWorld().getYSize() / 2d;
+
+            boolean newContinentAbsolutePositionLeftOfContinent = meanYDifference > 0;
+            boolean inverseBecauseOfLooping = Math.abs(meanYDifference) > (halfYSize);
+            boolean newContinentLeftOfContinent = (newContinentAbsolutePositionLeftOfContinent && !inverseBecauseOfLooping)
+                    || (!newContinentAbsolutePositionLeftOfContinent && inverseBecauseOfLooping);
+
+            if (newContinentLeftOfContinent) {
+                continent.getDirection().setYVelocity(continent.getDirection().getYVelocity() + 1);
+                newContinent.getDirection().setYVelocity(continent.getDirection().getYVelocity() - 1);
+            } else {
+                continent.getDirection().setYVelocity(continent.getDirection().getYVelocity() - 1);
+                newContinent.getDirection().setYVelocity(continent.getDirection().getYVelocity() + 1);
+            }
+        }
+
+        if (averageContinentX.isPresent() && averageNewContinentX.isPresent()) {
+            double meanXDifference = averageContinentX.getAsDouble() - averageNewContinentX.getAsDouble();
+            double halfXSize = continent.getWorld().getXSize() / 2d;
+
+            boolean newContinentAbsolutePositionBelowContinent = meanXDifference > 0;
+            boolean inverseBecauseOfLooping = Math.abs(meanXDifference) > (halfXSize);
+            boolean newContinentBelowContinent = (newContinentAbsolutePositionBelowContinent && !inverseBecauseOfLooping)
+                    || (!newContinentAbsolutePositionBelowContinent && inverseBecauseOfLooping);
+
+            if (newContinentBelowContinent) {
+                continent.getDirection().setXVelocity(continent.getDirection().getXVelocity() + 1);
+                newContinent.getDirection().setXVelocity(continent.getDirection().getXVelocity() - 1);
+            } else {
+                continent.getDirection().setXVelocity(continent.getDirection().getXVelocity() - 1);
+                newContinent.getDirection().setXVelocity(continent.getDirection().getXVelocity() + 1);
+            }
+        }
     }
 }
