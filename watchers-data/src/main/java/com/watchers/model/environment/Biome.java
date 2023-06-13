@@ -66,6 +66,9 @@ public class Biome implements ParallelTask {
             } else {
                 throw new UnsupportedOperationException("GrassFlora needs to be of type Grass");
             }
+        } else {
+            this.grassFlora = null;
+            this.grassBiomass = 0;
         }
     }
 
@@ -77,6 +80,9 @@ public class Biome implements ParallelTask {
             } else {
                 throw new UnsupportedOperationException("TreeFlora needs to be of type Tree");
             }
+        } else {
+            this.treeFlora = null;
+            this.treeBiomass = 0;
         }
     }
 
@@ -275,14 +281,6 @@ public class Biome implements ParallelTask {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    public void removeFlore() {
-        this.grassBiomass = 0;
-        this.grassFlora = null;
-
-        this.treeBiomass = 0;
-        this.treeFlora = null;
     }
 
     @Override

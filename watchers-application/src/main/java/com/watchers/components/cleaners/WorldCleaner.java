@@ -58,28 +58,6 @@ public class WorldCleaner {
                 zeroContinents.stream().map(Continent::getId).forEach(aLong -> ((ContinentalDriftTaskDto) dto).getRemovedContinents.add(aLong));
                 log.info("Started with " + start + " continents and ended with " + world.getContinents().size());
             }
-
-            world.getCoordinates().stream()
-                    .map(Coordinate::getTile)
-                    .filter(Tile::isWater)
-                    .map(Tile::getBiome)
-                    .filter(biome -> biome.getGrassFlora() != null
-                            || biome.getTreeFlora() != null)
-                    .forEach(Biome::removeFlore);
-
-            world.getCoordinates().stream()
-                    .map(Coordinate::getTile)
-                    .map(Tile::getBiome)
-                    .filter(biome -> biome.getGrassFlora() != null
-                            && biome.getGrassBiomass() <= 0)
-                    .forEach(biome -> biome.setGrassFlora(null));
-
-            world.getCoordinates().stream()
-                    .map(Coordinate::getTile)
-                    .map(Tile::getBiome)
-                    .filter(biome -> biome.getTreeFlora() != null
-                            && biome.getTreeBiomass() <= 0)
-                    .forEach(biome -> biome.setTreeFlora(null));
         }
     }
 }
