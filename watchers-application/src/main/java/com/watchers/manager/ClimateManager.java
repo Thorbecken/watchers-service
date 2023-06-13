@@ -15,6 +15,7 @@ public class ClimateManager {
     private final PrecipiationComputator precipiationComputator;
     private final AircurrentRecalibrator aircurrentRecalibrator;
     private final WaterflowComputator waterflowComputator;
+    private final WaterErosionComputator waterErosionComputator;
 
     public void proces(WorldTaskDto taskDto){
         if(taskDto instanceof ContinentalDriftTaskDto) {
@@ -32,5 +33,10 @@ public class ClimateManager {
         StopwatchTimer.start();
         waterflowComputator.process(taskDto);
         StopwatchTimer.stop("waterflowComputator");
+        if(taskDto instanceof ContinentalDriftTaskDto) {
+            StopwatchTimer.start();
+            waterErosionComputator.process(taskDto);
+            StopwatchTimer.stop("waterErosionComputator");
+        }
     }
 }
