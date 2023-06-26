@@ -22,12 +22,12 @@ public class WaterErosionComputator {
             world.getCoordinates().stream()
                     .map(Coordinate::getTile)
                     .filter(Tile::isLand)
-                    .sorted(Comparator.comparing(Tile::getHeight))
-                    .filter(tile -> tile.getDownWardTile()!=null)
+                    .filter(tile -> tile.getDownWardTile() != null
+                            && tile.getHeight() > tile.getDownWardTile().getHeight())
                     .forEach(tile -> {
                         Tile downwardTile = tile.getDownWardTile();
-                        double numberOfErosionCounters = tile.getDownFlowAmount() / 10d;
-                        for (double i = 0; i < numberOfErosionCounters; i++) {
+                        double numberOfErosionCounters = tile.getDownFlowAmount() / 5d;
+                        for (double i = 0; i < numberOfErosionCounters || i < 3; i++) {
                             long heightDifference = tile.getHeight() - downwardTile.getHeight();
                             if (heightDifference > 2) {
                                 downwardTile.setHeight(downwardTile.getHeight() + 1);

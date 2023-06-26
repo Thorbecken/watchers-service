@@ -38,12 +38,12 @@ public class ContinentalHotSpotProcessor {
         }
 
         while (world.getHeightDeficit() > 0) {
-            log.info("Current height deficit: " + world.getHeightDeficit());
+            log.trace("Current height deficit: " + world.getHeightDeficit());
             for (HotSpotCrystal hotSpotCrystal : hotSpotCrystals) {
                 long heightdefecit = world.getHeightDeficit();
                 if(heightdefecit > 0) {
                     long extraHeight = RandomHelper.getRandomLong(world.getHeightDeficit());
-                    log.info("HotSpotCrystal gained " + extraHeight + " height buildup");
+                    log.trace("HotSpotCrystal gained " + extraHeight + " height buildup");
                     hotSpotCrystal.addHeightBuildup(extraHeight);
                     world.setHeightDeficit(world.getHeightDeficit() - extraHeight);
                 }

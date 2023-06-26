@@ -14,7 +14,12 @@ public class StopwatchTimer {
 
     public static void stop(String message){
         stopWatch.stop();
-        log.info("Processed " + message + " in " + stopWatch.getTotalTimeSeconds() + " seconds.");
+        double time = stopWatch.getTotalTimeSeconds();
+        if(time > 1d) {
+            log.info("Processed " + message + " in " + time + " seconds.");
+        } else {
+            log.trace("Processed " + message + " in " + time + " seconds.");
+        }
     }
 
 }

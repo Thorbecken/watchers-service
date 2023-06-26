@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ErosionAdjuster {
 
-    private final int NUMBER_OF_NEIGHBOURS = 4;
+    private final int NUMBER_OF_NEIGHBOURS_PLUS_ONE = 5;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -31,24 +31,26 @@ public class ErosionAdjuster {
 
         Set<Coordinate> coordinates = world.getCoordinates();
 
-        coordinates.stream().map(Coordinate::getTile).forEach(tile -> {
-            List<Tile> neighbouringTiles = tile.getNeighbours();
-            List<Tile> receivingTiles = neighbouringTiles.stream()
-                    .filter(neighbouringTile -> (tile.getHeight() - neighbouringTile.getHeight()) > world.getWorldSettings().getMinHeightDifference())
-                    .collect(Collectors.toList());
+        coordinates.stream()
+                .map(Coordinate::getTile)
+                .forEach(tile -> {
+                    List<Tile> neighbouringTiles = tile.getNeighbours();
+                    List<Tile> receivingTiles = neighbouringTiles.stream()
+                            .filter(neighbouringTile -> (tile.getHeight() - neighbouringTile.getHeight()) > world.getWorldSettings().getMinHeightDifference())
+                            .collect(Collectors.toList());
 
-            for (Tile recievingTile : receivingTiles) {
-                long heightTransfer = (tile.getHeight() - recievingTile.getHeight()) / NUMBER_OF_NEIGHBOURS;
-                if (heightTransfer > world.getWorldSettings().getMaxErosion()) {
-                    heightTransfer = world.getWorldSettings().getMaxErosion();
-                }
+                    for (Tile recievingTile : receivingTiles) {
+                        long heightTransfer = (tile.getHeight() - recievingTile.getHeight()) / NUMBER_OF_NEIGHBOURS_PLUS_ONE;
+                        if (heightTransfer > world.getWorldSettings().getMaxErosion()) {
+                            heightTransfer = world.getWorldSettings().getMaxErosion();
+                        }
 
-                long aLong = erosionMap.get(recievingTile.getCoordinate());
-                erosionMap.put(recievingTile.getCoordinate(), aLong + heightTransfer);
-                long anotherLong = erosionMap.get(tile.getCoordinate());
-                erosionMap.put(tile.getCoordinate(), anotherLong - heightTransfer);
-            }
-        });
+                        long aLong = erosionMap.get(recievingTile.getCoordinate());
+                        erosionMap.put(recievingTile.getCoordinate(), aLong + heightTransfer);
+                        long anotherLong = erosionMap.get(tile.getCoordinate());
+                        erosionMap.put(tile.getCoordinate(), anotherLong - heightTransfer);
+                    }
+                });
 
         erosionMap.forEach((Coordinate coordiante, Long aLong) -> {
                     long currentHeight = world.getCoordinate(coordiante.getXCoord(), coordiante.getYCoord()).getTile().getHeight();

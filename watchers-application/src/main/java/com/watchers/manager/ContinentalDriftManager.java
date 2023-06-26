@@ -2,7 +2,10 @@ package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.*;
 import com.watchers.helper.StopwatchTimer;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
+import com.watchers.model.environment.Tile;
+import com.watchers.model.special.crystal.HotSpotCrystal;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +34,14 @@ public class ContinentalDriftManager {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        Long worldHeight = taskDto.getWorld().getWorldHeight();
         World world = taskDto.getWorld();
+        Long worldHeight = world.getWorldHeight() + world.getCoordinates().stream()
+                .map(Coordinate::getTile)
+                .map(Tile::getPointOfInterest)
+                .filter(pointOfInterest -> pointOfInterest instanceof HotSpotCrystal)
+                .map(pointOfInterest -> ((HotSpotCrystal) pointOfInterest))
+                .mapToLong(HotSpotCrystal::getHeightBuildup)
+                .sum();
         StopwatchTimer.start();
         continentalMantelPlumeProcessor.process(taskDto);
         StopwatchTimer.stop("continentalMantelPlumeProcessor");
@@ -93,14 +102,17 @@ public class ContinentalDriftManager {
     }
 
     private Long checkWorldHeight(String processor, Long currentHeight, World world){
-        Long newHeight = world.getWorldHeight();
-        log.info("HeightDeficit: " + world.getHeightDeficit() + " @" + processor);
+        Long newHeight = world.getWorldHeight() + world.getCoordinates().stream()
+                .map(Coordinate::getTile)
+                .map(Tile::getPointOfInterest)
+                .filter(pointOfInterest -> pointOfInterest instanceof HotSpotCrystal)
+                .map(pointOfInterest -> ((HotSpotCrystal) pointOfInterest))
+                .mapToLong(HotSpotCrystal::getHeightBuildup)
+                .sum();
+        log.trace("HeightDeficit: " + world.getHeightDeficit() + " @" + processor);
         if(newHeight > currentHeight){
-            log.error("-----------------------------------------------------");
-            log.error("-----------------------------------------------------");
             log.error(processor + " changed the current height from " + currentHeight + " to " + newHeight);
-            log.error("-----------------------------------------------------");
-            log.error("-----------------------------------------------------");
+            log.error(processor + " current height deficit from world " + world.getHeightDeficit());
         }
         return newHeight;
     }
