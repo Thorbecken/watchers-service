@@ -63,7 +63,7 @@ class ContinentalDriftNewTileAssignerTest {
 
     @Test
     void processTestLargeNewMockContinent() {
-        World world = TestableWorld.createWorld(WorldTypeEnum.SQUARE);
+        World world = TestableWorld.createWorld(WorldTypeEnum.NON_EUCLIDEAN);
 
         Continent continentX = new Continent(world, SurfaceType.PLAIN);
         Continent continentY = new Continent(world, SurfaceType.PLAIN);

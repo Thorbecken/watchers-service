@@ -1,6 +1,9 @@
 package com.watchers.model.coordinate;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.actors.Actor;
 import com.watchers.model.climate.Climate;
@@ -15,6 +18,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -24,14 +28,7 @@ import java.util.function.BiPredicate;
 @DiscriminatorColumn(name = "coordinate_type", discriminatorType = DiscriminatorType.STRING)
 @SequenceGenerator(name = "Coordinate_Gen", sequenceName = "Coordinate_Seq", allocationSize = 1)
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"hibernateLazyInitializer", "handler"})
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = NonEuclideanCoordinate.class, name = "NonEuclideanCoordinate")
-})
-public abstract class Coordinate {
+public class Coordinate {
 
     public static final BiPredicate<Coordinate, Coordinate> LOWER_OR_EQUAL_HEIGHT_PREDICATE = (x, y) -> y.getTile().getHeight() <= x.getTile().getHeight();
     public static final BiPredicate<Coordinate, Coordinate> LOWER_HEIGHT_PREDICATE = (x, y) -> y.getTile().getHeight() < x.getTile().getHeight();
@@ -47,10 +44,6 @@ public abstract class Coordinate {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "world_id", nullable = false)
     private World world;
-
-    @JsonView(Views.Public.class)
-    @Enumerated(value = EnumType.STRING)
-    private CoordinateType coordinateType;
 
     @JsonProperty("xCoord")
     @Column(name = "xCoord")
@@ -87,12 +80,11 @@ public abstract class Coordinate {
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "coordinate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Climate climate;
 
-    protected Coordinate(long xCoord, long yCoord, CoordinateType coordinateType, World world, Continent continent) {
+    protected Coordinate(long xCoord, long yCoord, World world, Continent continent) {
         this.yCoord = yCoord;
         this.xCoord = xCoord;
         this.world = world;
         this.continent = continent;
-        this.coordinateType = coordinateType;
 
         this.tile = new Tile(this, continent);
         this.climate = new Climate(this);
@@ -109,7 +101,15 @@ public abstract class Coordinate {
     }
 
     @JsonIgnore
-    public abstract List<Coordinate> getNeighbours();
+    public List<Coordinate> getNeighbours() {
+        List<Coordinate> returnCoordinates = new ArrayList<>();
+        returnCoordinates.add(world.getCoordinate(getLeftCoordinate(), yCoord));
+        returnCoordinates.add(world.getCoordinate(getRightCoordinate(), yCoord));
+        returnCoordinates.add(world.getCoordinate(xCoord, getDownCoordinate()));
+        returnCoordinates.add(world.getCoordinate(xCoord, getUpCoordinate()));
+
+        return returnCoordinates;
+    }
 
     @JsonIgnore
     public long getRightCoordinate() {
@@ -277,7 +277,33 @@ public abstract class Coordinate {
         }
     }
 
-    public abstract Coordinate createClone(World newWorld);
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public Coordinate createClone(World newWorld) {
+        Coordinate clone = new Coordinate();
+        clone.setId(getId());
+        clone.setWorld(newWorld);
+        clone.setXCoord(getXCoord());
+        clone.setYCoord(getYCoord());
+        clone.changeContinent(newWorld.getContinents().stream()
+                .filter(oldContinent -> oldContinent.getId().equals(getContinent().getId()))
+                .findFirst().get());
+        clone.setTile(this.getTile().createClone(clone));
+        Climate climate = this.getClimate();
+        Climate climateClone = climate.createClone(clone);
+        clone.setClimate(climateClone);
+
+        clone.getActors().addAll(
+                this.getActors().stream()
+                        .map(actor -> actor.createClone(clone))
+                        .collect(Collectors.toSet())
+        );
+
+        if (this.getPointOfInterest() != null) {
+            clone.setPointOfInterest(this.getPointOfInterest().createClone(clone, null));
+        }
+
+        return clone;
+    }
 
     @Override
     public String toString() {
@@ -307,10 +333,59 @@ public abstract class Coordinate {
         return Objects.hash(xCoord, yCoord);
     }
 
-    public abstract double getDistance(Coordinate coordinate);
+    public double getDistance(Coordinate coordinate) {
+        return Math.abs(this.getAdjustedXDistance(coordinate)) + Math.abs(this.getAdjustedYDistance(coordinate));
+    }
 
-    public abstract long getAdjustedXDistance(Coordinate coordinate);
-    public abstract long getAdjustedYDistance(Coordinate coordinate);
+    public long getAdjustedXDistance(Coordinate coordinate) {
+        //10
+        long size = this.getWorld().getXSize();
+        // 5
+        long halfSize = size / 2;
+        // 6
+        long rawDifference = this.getXCoord() - coordinate.getXCoord();
+        if (rawDifference > 0) {
+            if (rawDifference <= halfSize) {
+                return rawDifference;
+            } else {
+                // 6-10 = -4
+                return rawDifference - size;
+            }
+        } else {
+            // -6 <= -5
+            if (rawDifference <= -halfSize) {
+                return rawDifference;
+            } else {
+                // -6+10 = 4
+                return rawDifference + size;
+            }
+        }
+    }
+
+    public long getAdjustedYDistance(Coordinate coordinate) {
+        //10
+        long size = this.getWorld().getYSize();
+        // 5
+        long halfSize = size / 2;
+        // 6
+        long rawDifference = this.getYCoord() - coordinate.getYCoord();
+        if (rawDifference > 0) {
+            if (rawDifference <= halfSize) {
+                return rawDifference;
+            } else {
+                // 6-10 = -4
+                return rawDifference - size;
+            }
+        } else {
+            // -6 <= -5
+            if (rawDifference <= -halfSize) {
+                return rawDifference;
+            } else {
+                // -6+10 = 4
+                return rawDifference + size;
+            }
+        }
+    }
 
     @JsonIgnore
     public boolean isNeigbour(Coordinate coordinate) {
