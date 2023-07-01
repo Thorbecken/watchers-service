@@ -8,6 +8,8 @@ import com.watchers.model.enums.WorldStatusEnum;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldMetaDataRepository;
 import lombok.AllArgsConstructor;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -19,6 +21,7 @@ import java.util.HashSet;
 @CrossOrigin
 @RestController
 @AllArgsConstructor
+@Api("This controller exposes functionalitie about retrieving all the worlds.")
 public class MapController {
 
     private final MapManager mapManager;
@@ -26,6 +29,7 @@ public class MapController {
 
     @JsonView(Views.Public.class)
     @RequestMapping(value = "/world/{worldId}", method = RequestMethod.GET)
+    @ApiOperation(value = "Returns the json of the chosen world.")
     public ResponseEntity<World> getWorldMap(@PathVariable("worldId") Long worldId) {
         Assert.notNull(worldId, "No world id was found");
         if (worldMetaDataRepository.existsById(worldId) && !worldMetaDataRepository.getOne(worldId).getWorldStatusEnum().equals(WorldStatusEnum.INITIALLIZING)) {

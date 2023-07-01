@@ -5,9 +5,9 @@ import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

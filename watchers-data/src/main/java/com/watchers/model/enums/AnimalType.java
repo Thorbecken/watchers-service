@@ -1,8 +1,11 @@
 package com.watchers.model.enums;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.watchers.model.common.Views;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import javax.persistence.Column;
 
 @Getter
 @AllArgsConstructor

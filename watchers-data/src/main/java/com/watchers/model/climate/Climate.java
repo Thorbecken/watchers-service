@@ -10,7 +10,7 @@ import com.watchers.model.coordinate.Coordinate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 

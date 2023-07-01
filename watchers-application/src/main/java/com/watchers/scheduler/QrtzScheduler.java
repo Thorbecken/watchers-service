@@ -1,7 +1,6 @@
 package com.watchers.scheduler;
 
 import com.watchers.config.AutoWiringSpringBeanJobFactory;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -16,6 +15,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Properties;
 
