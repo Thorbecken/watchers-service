@@ -11,10 +11,6 @@
 
     <artifactId>watchers-application</artifactId>
 
-    <properties>
-        <swagger.version>3.0.0</swagger.version>
-    </properties>
-
     <profiles>
         <profile>
             <id>dev</id>
@@ -79,16 +75,6 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.8.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${swagger.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${swagger.version}</version>
         </dependency>
 
         <dependency>

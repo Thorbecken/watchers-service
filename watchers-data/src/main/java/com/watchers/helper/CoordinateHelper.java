@@ -88,24 +88,29 @@ public class CoordinateHelper {
 
         long usableX = meanX;
         long usableY = meanY;
-        if(abnormalX){
-            long halfXSize = world.getXSize()/2;
-            if(meanX > halfXSize){
+        if (abnormalX) {
+            long halfXSize = world.getXSize() / 2;
+            if (meanX > halfXSize) {
                 usableX = meanX - halfXSize;
             } else {
                 usableX = meanX + halfXSize;
             }
         }
 
-        if(abnormalY){
-            long halfYSize = world.getYSize()/2;
-            if(meanX > halfYSize){
+        if (abnormalY) {
+            long halfYSize = world.getYSize() / 2;
+            if (meanX > halfYSize) {
                 usableY = meanY - halfYSize;
             } else {
                 usableY = meanY + halfYSize;
             }
         }
 
-        return world.getCoordinate(usableX, usableY);
+        Coordinate coordinate = world.getCoordinate(usableX, usableY);
+        if (coordinate == null) {
+            coordinate = coordinates.get(0);
+        }
+
+        return coordinate;
     }
 }
