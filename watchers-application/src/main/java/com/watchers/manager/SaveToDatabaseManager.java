@@ -566,7 +566,6 @@ public class SaveToDatabaseManager {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        aircurrents.forEach(Aircurrent::resetCoordinates);
         saveAircurrentMethod(aircurrents);
     }
 

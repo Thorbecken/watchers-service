@@ -27,22 +27,6 @@ public class Aircurrent {
     @Column(name = "aircurrent_id", nullable = false)
     private Long id;
 
-    @JsonView(Views.Public.class)
-    @Column(name = "starting_x_coordinate", nullable = false)
-    private Long startingXCoordinate;
-
-    @JsonView(Views.Public.class)
-    @Column(name = "ending_x_coordinate", nullable = false)
-    private Long endingXCoordinate;
-
-    @JsonView(Views.Public.class)
-    @Column(name = "starting_y_coordinate", nullable = false)
-    private Long startingYCoordinate;
-
-    @JsonView(Views.Public.class)
-    @Column(name = "ending_y_coordinate", nullable = false)
-    private Long endingYCoordinate;
-
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,22 +53,10 @@ public class Aircurrent {
         this.startingSky = startingSky;
         this.endingSky = endingSky;
 
-        this.startingXCoordinate = startingSky.getClimate().getCoordinate().getXCoord();
-        this.endingXCoordinate = endingSky.getClimate().getCoordinate().getXCoord();
-        this.startingYCoordinate = startingSky.getClimate().getCoordinate().getYCoord();
-        this.endingYCoordinate = endingSky.getClimate().getCoordinate().getYCoord();
-
         startingSky.getOutgoingAircurrents().add(this);
         endingSky.getIncommingAircurrents().add(this);
 
         recalculateHeigthDifference();
-    }
-
-    public void resetCoordinates(){
-        this.startingXCoordinate = this.getStartingSky().getClimate().getCoordinate().getXCoord();
-        this.endingXCoordinate = this.getEndingSky().getClimate().getCoordinate().getXCoord();
-        this.startingYCoordinate = this.getStartingSky().getClimate().getCoordinate().getYCoord();
-        this.endingYCoordinate = this.getEndingSky().getClimate().getCoordinate().getYCoord();
     }
 
     public void transfer(double amountPerStrength) {
