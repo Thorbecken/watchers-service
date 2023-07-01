@@ -106,6 +106,10 @@ public class CoordinateHelper {
             }
         }
 
-        return world.getCoordinate(usableX, usableY);
+        Coordinate meanCoordinate = world.getCoordinate(usableX, usableY);
+        if(meanCoordinate == null){
+            meanCoordinate = coordinates.get(0);
+        }
+        return meanCoordinate;
     }
 }

@@ -10,9 +10,9 @@ import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.MockCoordinate;
 import com.watchers.model.environment.Tile;
+import jakarta.persistence.*;
 import lombok.Data;
 
-import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 

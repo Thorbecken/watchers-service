@@ -9,11 +9,11 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.NaturalHabitat;
 import com.watchers.model.enums.StateType;
 import com.watchers.model.interfaces.SerialTask;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
 import java.util.Objects;
 
 @Data

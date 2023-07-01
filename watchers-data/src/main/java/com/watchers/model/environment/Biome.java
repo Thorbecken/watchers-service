@@ -12,7 +12,7 @@ import com.watchers.model.interfaces.ParallelTask;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 import static com.watchers.model.enums.NaturalHabitat.SALT_WATER;

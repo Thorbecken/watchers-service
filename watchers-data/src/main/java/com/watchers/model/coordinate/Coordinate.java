@@ -12,7 +12,7 @@ import com.watchers.model.world.World;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 import java.util.function.BiPredicate;
 

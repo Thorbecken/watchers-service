@@ -10,24 +10,24 @@ import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.special.life.GreatFlora;
-import com.watchers.model.world.World;
-import com.watchers.repository.WorldRepository;
+import com.watchers.repository.CoordinateRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class LifeManager {
 
-    WorldRepository worldRepository;
-    BiomeProcessor biomeProcessor;
-    ActorProcessor actorProcessor;
+    private final CoordinateRepository coordinateRepository;
+    private final BiomeProcessor biomeProcessor;
+    private final ActorProcessor actorProcessor;
 
-    public void process(WorldTaskDto taskDto){
+    public void process(WorldTaskDto taskDto) {
         StopwatchTimer.start();
         biomeProcessor.process(taskDto);
         StopwatchTimer.stop("BiomeProcessor");
@@ -37,22 +37,19 @@ public class LifeManager {
     }
 
     @Transactional
-    public void seedLife(Long worldId, Long xCoord, Long yCoord) {
-        World world = worldRepository.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
-        Tile seedingTile = world.getCoordinate(xCoord, yCoord).getTile();
-        AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
-        seedingTile.getCoordinate().getActors().add(new Animal(seedingTile.getCoordinate(), animalType, animalType.getMaxFoodReserve()));
-        worldRepository.save(world);
-        Assert.isTrue(world.getCoordinates().size() == world.getXSize()*world.getYSize(), "coordinates were " +world.getCoordinates().size());
+    public void seedLife(Long xCoord, Long yCoord) {
+        Optional<Coordinate> optional = coordinateRepository.findByCoordinates(xCoord, yCoord);
+        optional.ifPresent(coordinate -> {
+            Tile seedingTile = coordinate.getTile();
+            AnimalType animalType = selectAnimalSeed(seedingTile.getSurfaceType());
+            seedingTile.getCoordinate().getActors().add(new Animal(seedingTile.getCoordinate(), animalType, animalType.getMaxFoodReserve()));
+        });
     }
 
     @Transactional
-    public void seedFlora(Long worldId, Long xCoord, Long yCoord) {
-        World world = worldRepository.findById(worldId).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
-        Coordinate seedingCoordinate = world.getCoordinate(xCoord, yCoord);
-        new GreatFlora(seedingCoordinate);
-
-        worldRepository.save(world);
+    public void seedFlora(Long xCoord, Long yCoord) {
+        Optional<Coordinate> optional = coordinateRepository.findByCoordinates(xCoord, yCoord);
+        optional.ifPresent(GreatFlora::new);
     }
 
     public static void seedLife(Coordinate coordinate) {
@@ -61,7 +58,7 @@ public class LifeManager {
     }
 
     private static AnimalType selectAnimalSeed(SurfaceType type) {
-        switch (type){
+        switch (type) {
             case MOUNTAIN:
             case HILL:
             case PLAIN:

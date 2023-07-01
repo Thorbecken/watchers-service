@@ -14,7 +14,7 @@ import com.watchers.model.special.crystal.WindCrystal;
 import com.watchers.model.special.life.GreatFlora;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Data
 @Entity
@@ -67,7 +67,9 @@ public abstract class PointOfInterest {
         // because this would remove it from the database through orphan removal
         this.coordinate = null;
         this.tile = tile;
-        tile.setPointOfInterest(this);
+        if (tile != null) {
+            tile.setPointOfInterest(this);
+        }
         this.earthBound = true;
     }
 
@@ -76,7 +78,9 @@ public abstract class PointOfInterest {
         // because this would remove it from the database through orphan removal
         this.tile = null;
         this.coordinate = coordinate;
-        coordinate.setPointOfInterest(this);
+        if (coordinate != null) {
+            coordinate.setPointOfInterest(this);
+        }
         this.earthBound = false;
     }
 

@@ -12,7 +12,7 @@ import com.watchers.model.world.Continent;
 import com.watchers.pathfinding.GraphNode;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 

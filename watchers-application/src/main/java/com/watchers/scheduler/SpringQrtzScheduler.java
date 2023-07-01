@@ -6,6 +6,7 @@ import com.watchers.scheduler.job.ContinentalshiftTimerJob;
 import com.watchers.scheduler.job.ProcessingUnitJob;
 import com.watchers.scheduler.job.SaveTimerJob;
 import com.watchers.scheduler.job.TurnTimerJob;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -27,7 +28,6 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 @Slf4j
