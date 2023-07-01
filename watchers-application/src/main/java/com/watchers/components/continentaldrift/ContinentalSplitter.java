@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
@@ -34,15 +35,75 @@ public class ContinentalSplitter {
         long maxlength = continent.getWorld().getYSize() / 2;
         long length = continent.getCoordinates().stream().map(Coordinate::getYCoord).distinct().count();
 
-        if (maxWidth < width) {
-            Optional<Coordinate> leftBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getXCoord));
-            Optional<Coordinate> rightBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getXCoord));
-            leftBound.ifPresent(coordinate -> divideContinentInTwo(continent, coordinate, rightBound.get()));
-        } else if (maxlength < length) {
-            Optional<Coordinate> upBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getYCoord));
-            Optional<Coordinate> downBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getYCoord));
-            upBound.ifPresent(coordinate -> divideContinentInTwo(continent, coordinate, downBound.get()));
+        if (maxWidth < width || maxlength < length) {
+            doSomething(continent, maxWidth < width);
         }
+    }
+
+    public void doSomething(Continent continent, boolean tooMuchWidth) {
+        List<Set<Coordinate>> landMasses = CoordinateHelper.getListsOfAdjacentLandCoordinatesFromContinent(continent);
+        if (landMasses.size() > 1) {
+            Set<Coordinate> largestLandmass = landMasses.stream()
+                    .max(Comparator.comparing(Set::size))
+                    .get();
+            Set<Coordinate> secondLargestLandmass = landMasses.stream()
+                    .filter(set -> set != largestLandmass)
+                    .max(Comparator.comparing(Set::size))
+                    .orElseThrow();
+            divideContinentInTwo(continent, largestLandmass, secondLargestLandmass);
+        } else if (landMasses.size() == 1) {
+            Set<Coordinate> landmass = landMasses.get(0);
+            Coordinate meanCoordinate = CoordinateHelper.getMeanCoordinate(new ArrayList<>(landmass), continent.getWorld());
+            Coordinate furthestCoordinateFromLandmass = continent.getCoordinates().stream()
+                    .filter(coordinate -> !landmass.contains(coordinate))
+                    .max(Comparator.comparing(
+                            coordinate -> Math.abs(coordinate.getXCoord() - meanCoordinate.getXCoord())
+                                    + Math.abs(coordinate.getYCoord() - meanCoordinate.getYCoord())))
+                    .orElseThrow();
+            Set<Coordinate> newWatermass = new HashSet<>();
+            newWatermass.add(furthestCoordinateFromLandmass);
+            divideContinentInTwo(continent, landmass, newWatermass);
+        } else {
+            if (tooMuchWidth) {
+                Optional<Coordinate> leftBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getXCoord));
+                Optional<Coordinate> rightBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getXCoord));
+                leftBound.ifPresent(coordinate -> divideContinentInTwo(continent, coordinate, rightBound.get()));
+            } else {
+                Optional<Coordinate> upBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getYCoord));
+                Optional<Coordinate> downBound = continent.getCoordinates().stream().max(Comparator.comparing(Coordinate::getYCoord));
+                upBound.ifPresent(coordinate -> divideContinentInTwo(continent, coordinate, downBound.get()));
+            }
+        }
+    }
+
+    private void divideContinentInTwo(Continent continent, Set<Coordinate> firstSetOfCoordinates, Set<Coordinate> secondSetOfCoordinates) {
+        World world = continent.getWorld();
+        Continent newContinent = new Continent(world, continent.getType());
+
+        Set<Coordinate> coordinates = new HashSet<>(continent.getCoordinates());
+
+        int currentCoordinates = coordinates.size();
+        while (!coordinates.isEmpty()) {
+            addAllNeighbouringCoordinatesToSet(coordinates, firstSetOfCoordinates);
+            coordinates.removeIf(firstSetOfCoordinates::contains);
+
+            addAllNeighbouringCoordinatesToSet(coordinates, secondSetOfCoordinates);
+            coordinates.removeIf(secondSetOfCoordinates::contains);
+            if (currentCoordinates == coordinates.size()) {
+                firstSetOfCoordinates.addAll(coordinates);
+            } else {
+                currentCoordinates = coordinates.size();
+            }
+        }
+
+
+        secondSetOfCoordinates.stream()
+                .filter(secondSetOfCoordinates::contains)
+                .forEach(coordinate -> coordinate.changeContinent(newContinent));
+
+        log.warn("Continent " + continent.getId() + " is split in two");
+
+        partContinentsInDifferentDirections(continent, newContinent);
     }
 
     private void divideContinentInTwo(Continent continent, Coordinate parentCoordinate, Coordinate childCoordinate) {
@@ -69,7 +130,6 @@ public class ContinentalSplitter {
                 currentCoordinates = coordinates.size();
             }
         }
-
 
         childCoordinates.stream()
                 .filter(childCoordinates::contains)

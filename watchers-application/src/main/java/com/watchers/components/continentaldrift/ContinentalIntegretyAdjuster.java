@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.enums.SurfaceType;
@@ -10,8 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -26,33 +29,9 @@ public class ContinentalIntegretyAdjuster {
     }
 
     private void checkContinent(Continent continent) {
-        Map<Coordinate, Set<Coordinate>> checkedCoordinates = new HashMap<>();
-        List<Coordinate> continentCoordinates = new ArrayList<>(continent.getCoordinates());
-        while (!continentCoordinates.isEmpty()) {
-            Coordinate currentRandomCoordinate = continentCoordinates.get(0);
-            Set<Coordinate> adjacendCoordinates = new HashSet<>();
-            adjacendCoordinates.add(currentRandomCoordinate);
-
-            boolean noMoreExtraAdjacentCoordinatesFound = false;
-            while (!noMoreExtraAdjacentCoordinatesFound) {
-                Set<Coordinate> newAdjacentContinentCoordinates = adjacendCoordinates.stream()
-                        .flatMap(coordinate -> coordinate.getNeighbours().stream())
-                        .filter(coordinate -> continent.getId().equals(coordinate.getContinent().getId()))
-                        .filter(coordinate -> !adjacendCoordinates.contains(coordinate))
-                        .collect(Collectors.toSet());
-                adjacendCoordinates.addAll(newAdjacentContinentCoordinates);
-                adjacendCoordinates.forEach(continentCoordinates::remove);
-                if (newAdjacentContinentCoordinates.isEmpty()) {
-                    noMoreExtraAdjacentCoordinatesFound = true;
-                }
-            }
-
-            checkedCoordinates.put(currentRandomCoordinate, adjacendCoordinates);
-        }
-
-        List<Set<Coordinate>> checkedCoordinatesList = new ArrayList<>(checkedCoordinates.values());
+        List<Set<Coordinate>> checkedCoordinatesList = CoordinateHelper.getListsOfAdjacentCoordinatesFromContinent(continent);
         if (checkedCoordinatesList.size() > 1) {
-            log.info("Continent " + continent.getId() + " was split into " + checkedCoordinates.size() + " parts");
+            log.info("Continent " + continent.getId() + " was split into " + checkedCoordinatesList.size() + " parts");
             World world = continent.getWorld();
             for (int i = 0; i < checkedCoordinatesList.size(); i++) {
                 if (i != 0) {

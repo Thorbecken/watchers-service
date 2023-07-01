@@ -1,6 +1,7 @@
 package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.TileDefined;
+import com.watchers.helper.CoordinateHelper;
 import com.watchers.helper.SkyHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
@@ -79,9 +80,8 @@ class WorldFactory {
 
             world.getContinents().stream()
                     .filter(continent -> !continent.getType().equals(SurfaceType.OCEAN))
-                    .forEach(continent -> continent.getCoordinates().stream()
-                            .findFirst()
-                            .ifPresent(GreatFlora::new));
+                    .map(CoordinateHelper::getMeanCoordinate)
+                    .forEach(GreatFlora::new);
 
             world.getContinents().stream()
                     .filter(continent -> continent.getType().equals(SurfaceType.OCEAN))

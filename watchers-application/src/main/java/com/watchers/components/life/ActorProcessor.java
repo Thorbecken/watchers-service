@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -32,15 +33,14 @@ public class ActorProcessor {
                 .count() + " Actors where dead at the start of this turn");
 
         List<Actor> currentActors = world.getActorList();
-        Assert.notNull(currentActors, "There was no list found of Actors!");
+        Assert.notNull(currentActors, "There was no actors found!");
         if (currentActors.size() == 0) {
-            log.info("The actorslist was empty!");
+            log.info("The actorlist was empty!");
             world.getCoordinates().stream()
                     .map(Coordinate::getTile)
                     .filter(Tile::isLand)
                     .map(Tile::getBiome)
-                    .filter(biome -> biome.getCurrentFood() > 1)
-                    .findFirst()
+                    .max(Comparator.comparing(Biome::getCurrentFood))
                     .map(Biome::getTile)
                     .map(Tile::getCoordinate)
                     .ifPresent(coordinate -> coordinate.getActors().add(new Animal(coordinate, AnimalType.RABBIT, AnimalType.RABBIT.getMaxFoodReserve())));
