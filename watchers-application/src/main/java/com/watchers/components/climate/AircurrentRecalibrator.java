@@ -1,7 +1,6 @@
 package com.watchers.components.climate;
 
 import com.watchers.model.climate.Aircurrent;
-import com.watchers.model.climate.Climate;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
@@ -21,7 +20,6 @@ public class AircurrentRecalibrator {
             World world = taskDto.getWorld();
             world.getCoordinates().stream()
                     .map(Coordinate::getClimate)
-                    .map(Climate::getSkyTile)
                     .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
                     .forEach(Aircurrent::recalculateHeigthDifference);
         }

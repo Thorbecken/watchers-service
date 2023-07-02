@@ -77,7 +77,6 @@ public class TestableWorld {
             coordinate.getTile().setId(idNumber);
             coordinate.getTile().getBiome().setId(idNumber);
             coordinate.getClimate().setId(idNumber);
-            coordinate.getClimate().getSkyTile().setId(idNumber);
             coordinate.setId(idNumber++);
             if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
                 coordinate.getTile().setHeight(40);
@@ -189,7 +188,6 @@ public class TestableWorld {
             coordinate.getTile().setId(idNumber);
             coordinate.getTile().getBiome().setId(idNumber);
             coordinate.getClimate().setId(idNumber);
-            coordinate.getClimate().getSkyTile().setId(idNumber);
             coordinate.setId(idNumber++);
             if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
                 coordinate.getTile().setHeight(40);

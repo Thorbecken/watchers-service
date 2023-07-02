@@ -2,7 +2,6 @@ package com.watchers.components.climate;
 
 import com.watchers.model.climate.AircurrentType;
 import com.watchers.model.climate.Climate;
-import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.world.World;
@@ -50,13 +49,12 @@ public class PrecipiationComputator {
 
     @Transactional
     private void procesWaterClimate(Climate climate) {
-        climate.getSkyTile().addAirMoisture(10);
+        climate.addAirMoisture(10);
     }
 
     @Transactional
     protected void moveCloudsAccordingToAirflow(List<Climate> climates, WorldSettings worldSettings) {
         climates.stream()
-                .map(Climate::getSkyTile)
                 .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
                 .forEach(aircurrent -> {
                     AircurrentType aircurrentType = aircurrent.getAircurrentType();
@@ -64,12 +62,8 @@ public class PrecipiationComputator {
                     aircurrent.setCurrentStrength(currentStrength);
                 });
 
-        climates.stream()
-                .map(Climate::getSkyTile)
-                .forEach(SkyTile::moveClouds);
-        climates.stream()
-                .map(Climate::getSkyTile)
-                .forEach(SkyTile::processIncommingMoisture);
+        climates.forEach(Climate::moveClouds);
+        climates.forEach(Climate::processIncommingMoisture);
     }
 
     protected void computePrecipitation(List<Climate> climates) {
@@ -80,11 +74,10 @@ public class PrecipiationComputator {
 
     @Transactional
     private void procesLandClimate(Climate climate) {
-        SkyTile currentSkyTile = climate.getSkyTile();
-        double currentAirmoisture = currentSkyTile.getAirMoisture();
+        double currentAirmoisture = climate.getAirMoisture();
         // the 1 below is diurnal Rainfall
         double precipitation = currentAirmoisture / 10 + 1;
-        currentSkyTile.setAirMoistureLossage(precipitation);
-        currentSkyTile.calculateNewMoistureLevel();
+        climate.setAirMoistureLossage(precipitation);
+        climate.calculateNewMoistureLevel();
     }
 }

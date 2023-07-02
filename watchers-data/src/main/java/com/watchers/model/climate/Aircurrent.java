@@ -30,12 +30,12 @@ public class Aircurrent {
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    private SkyTile endingSky;
+    private Climate endingClimate;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    private SkyTile startingSky;
+    private Climate startingClimate;
 
     @JsonView(Views.Public.class)
     private int currentStrength;
@@ -46,15 +46,15 @@ public class Aircurrent {
     @JsonView(Views.Public.class)
     private long heightDifference;
 
-    public Aircurrent(SkyTile startingSky, SkyTile endingSky, AircurrentType aircurrentType, int currentStrength) {
+    public Aircurrent(Climate startingClimate, Climate endingClimate, AircurrentType aircurrentType, int currentStrength) {
         this.aircurrentType = aircurrentType;
         this.currentStrength = currentStrength;
 
-        this.startingSky = startingSky;
-        this.endingSky = endingSky;
+        this.startingClimate = startingClimate;
+        this.endingClimate = endingClimate;
 
-        startingSky.getOutgoingAircurrents().add(this);
-        endingSky.getIncommingAircurrents().add(this);
+        startingClimate.getOutgoingAircurrents().add(this);
+        endingClimate.getIncommingAircurrents().add(this);
 
         recalculateHeigthDifference();
     }
@@ -63,8 +63,8 @@ public class Aircurrent {
         double amount = amountPerStrength * currentStrength;
         double heightAmount = calculateHeightDifferenceEffect(amount);
 
-        endingSky.addIncommingMoisture(amount);
-        startingSky.addAirMoistureLossage(heightAmount);
+        endingClimate.addIncommingMoisture(amount);
+        startingClimate.addAirMoistureLossage(heightAmount);
     }
 
     public double calculateHeightDifferenceEffect(double airMoisture) {
@@ -79,37 +79,35 @@ public class Aircurrent {
         }
     }
 
-    public Aircurrent createOutgoingClone(SkyTile skyClone) {
+    public Aircurrent createOutgoingClone(Climate climateClone) {
         Aircurrent clone = new Aircurrent();
         clone.setId(this.getId());
         clone.setAircurrentType(this.aircurrentType);
         clone.setCurrentStrength(this.currentStrength);
-        clone.setStartingSky(skyClone);
-        clone.setEndingSky(this.endingSky);
+        clone.setStartingClimate(climateClone);
+        clone.setEndingClimate(this.endingClimate);
         clone.setHeightDifference(this.heightDifference);
         return clone;
     }
 
-    public Aircurrent createIncommingClone(SkyTile skyClone) {
+    public Aircurrent createIncommingClone(Climate climateClone) {
         Aircurrent clone = new Aircurrent();
         clone.setId(this.getId());
         clone.setAircurrentType(this.aircurrentType);
         clone.setCurrentStrength(this.currentStrength);
-        clone.setEndingSky(skyClone);
-        clone.setStartingSky(this.startingSky);
+        clone.setEndingClimate(climateClone);
+        clone.setStartingClimate(this.startingClimate);
         clone.setHeightDifference(this.heightDifference);
         return clone;
     }
 
     public void recalculateHeigthDifference() {
-        SkyTile endingSky = this.getEndingSky();
-        Climate endingClimate = endingSky.getClimate();
+        Climate endingClimate = this.getEndingClimate();
         Coordinate endingCoordinate = endingClimate.getCoordinate();
         Tile endingTile = endingCoordinate.getTile();
         long endingHeight = endingTile.getHeight();
 
-        SkyTile startingSky = this.getStartingSky();
-        Climate startingClimate = startingSky.getClimate();
+        Climate startingClimate = this.getStartingClimate();
         Coordinate startingCoordinate = startingClimate.getCoordinate();
         Tile startingTile = startingCoordinate.getTile();
         long startingHeight = startingTile.getHeight();
@@ -128,7 +126,7 @@ public class Aircurrent {
     }
 
     public double getHeatTransfer(Climate climate, int incommingAirPressure) {
-        double averageTemperature = (climate.getMeanTemperature() + this.startingSky.getClimate().getMeanTemperature()) / 2d;
+        double averageTemperature = (climate.getMeanTemperature() + this.startingClimate.getMeanTemperature()) / 2d;
         double heatChange = (averageTemperature - climate.getMeanTemperature());
         return heatChange / incommingAirPressure * currentStrength;
     }

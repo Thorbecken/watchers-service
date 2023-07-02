@@ -1,8 +1,8 @@
 package com.watchers.manager;
 
 import com.watchers.components.continentaldrift.TileDefined;
+import com.watchers.helper.ClimateHelper;
 import com.watchers.helper.CoordinateHelper;
-import com.watchers.helper.SkyHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.MockContinent;
@@ -69,7 +69,7 @@ class WorldFactory {
         tileDefined.assignStartingType(world);
 
         log.info("Sepperating the skies");
-        SkyHelper.calculateAndWeaveAirflows(world);
+        ClimateHelper.calculateAndWeaveAirflows(world);
         log.info("Skies are sepperated");
 
         if (worldSettings.isLifePreSeeded()) {

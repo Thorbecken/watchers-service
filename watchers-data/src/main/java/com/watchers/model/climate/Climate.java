@@ -8,9 +8,11 @@ import com.watchers.helper.ClimateHelper;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -42,10 +44,26 @@ public class Climate {
     @JsonView(Views.Public.class)
     private double latitude;
 
-    @JsonProperty("skyTile")
+    @JsonProperty("airMoisture")
+    @Column(name = "air_moisture")
     @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "climate", cascade=CascadeType.ALL, orphanRemoval = true)
-    private SkyTile skyTile;
+    private double airMoisture;
+
+    @Transient
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    private double airMoistureLossage;
+
+    @JsonView(Views.Public.class)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "startingClimate", cascade=CascadeType.ALL)
+    private Set<Aircurrent> outgoingAircurrents = new HashSet<>();
+
+    @JsonView(Views.Public.class)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "endingClimate", cascade=CascadeType.ALL)
+    private Set<Aircurrent> incommingAircurrents = new HashSet<>();
+
+    @Transient
+    private double incommingMoisture;
 
     @JsonProperty("meanTemperature")
     @Column(name = "meanTemperature")
@@ -72,8 +90,6 @@ public class Climate {
         double absoluteLatitudeDiffenceFromEquator = Math.abs(this.latitude);
         this.baseMeanTemperature = calculateBaseMeanTemperature(absoluteLatitudeDiffenceFromEquator);
         this.meanTemperature = baseMeanTemperature;
-
-        this.skyTile = new SkyTile(this);
     }
 
     // celcius
@@ -106,12 +122,16 @@ public class Climate {
     public Climate createClone(Coordinate coordinateClone) {
         Climate clone = new Climate();
         clone.setId(coordinateClone.getId());
-        clone.setSkyTile(skyTile.createClone(clone));
         clone.setCoordinate(coordinateClone);
         clone.setLatitude(latitude);
         clone.setLongitude(longitude);
         clone.setBaseMeanTemperature(baseMeanTemperature);
         clone.setMeanTemperature(meanTemperature);
+        clone.setAirMoistureLossage(this.airMoistureLossage);
+        clone.setAirMoisture(this.airMoisture);
+        getOutgoingAircurrents().forEach(aircurrent -> clone.getOutgoingAircurrents().add(aircurrent.createOutgoingClone(clone)));
+        getIncommingAircurrents().forEach(aircurrent -> clone.getIncommingAircurrents().add(aircurrent.createIncommingClone(clone)));
+
         return clone;
     }
 
@@ -136,12 +156,89 @@ public class Climate {
     }
 
     public void transferAirTemperature() {
-        Set<Aircurrent> aircurrents = skyTile.getIncommingAircurrents();
+        Set<Aircurrent> aircurrents = this.getIncommingAircurrents();
         int incommingAirPressure = aircurrents.stream().mapToInt(Aircurrent::getCurrentStrength).sum();
         double averageTemperatureDifference = aircurrents.stream()
                 .mapToDouble(aircurrent -> aircurrent.getHeatTransfer(this, incommingAirPressure))
                 .sum();
         this.heatChange = averageTemperatureDifference / 2d; // 2 is a arbitrary number to deminish the transfer from air.
+    }
+
+    @JsonIgnore
+    public Aircurrent getIncommingLongitudalAirflow() {
+        return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
+    }
+
+    @JsonIgnore
+    public Aircurrent getOutgoingLongitudalAirflow() {
+        return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LONGITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
+    }
+
+    @JsonIgnore
+    public Aircurrent getIncommingLatitudalAirflow() {
+        return incommingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
+    }
+
+    @JsonIgnore
+    public Aircurrent getOutgoingLatitudallAirflow() {
+        return outgoingAircurrents.stream().filter(aircurrent -> AircurrentType
+                .LATITUDAL.equals(aircurrent.getAircurrentType())).findFirst().orElseThrow();
+    }
+
+    public void addIncommingMoisture(double incommingMoisture) {
+        this.incommingMoisture = this.incommingMoisture + incommingMoisture;
+    }
+
+    public void processIncommingMoisture() {
+        addAirMoisture(this.incommingMoisture);
+        this.incommingMoisture = 0;
+    }
+
+    public void addAirMoisture(double extraAirmoisture) {
+        if (extraAirmoisture > 0d) {
+            if (extraAirmoisture + this.getAirMoisture() < 100d) {
+                this.setAirMoisture(this.getAirMoisture() + extraAirmoisture);
+            } else {
+                this.setAirMoisture(100d);
+            }
+        }
+    }
+
+    public void reduceAirMoisture(double airmoistureReduction) {
+        if (airmoistureReduction > 0d) {
+            if (this.getAirMoisture() - airmoistureReduction > 0d) {
+                this.getCoordinate().getTile().setRainfall(airmoistureReduction);
+                this.getCoordinate().getTile().setAvailableWater(airmoistureReduction);
+                this.setAirMoisture(this.getAirMoisture() - airmoistureReduction);
+            } else {
+                this.getCoordinate().getTile().setRainfall(this.getAirMoisture());
+                this.getCoordinate().getTile().setAvailableWater(this.getAirMoisture());
+                this.setAirMoisture(0d);
+            }
+        }
+    }
+
+    public void calculateNewMoistureLevel() {
+        reduceAirMoisture(airMoistureLossage);
+    }
+
+    public void moveClouds() {
+        double diffider = this.outgoingAircurrents.stream()
+                .mapToInt(Aircurrent::getCurrentStrength)
+                .sum();
+        if (diffider != 0) {
+            double transfer = this.getAirMoisture() / diffider;
+            this.setAirMoisture(this.getAirMoisture() - (transfer * diffider));
+
+            outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transfer));
+        }
+    }
+
+    public void addAirMoistureLossage(double heightAmount) {
+        this.airMoistureLossage = this.airMoistureLossage + heightAmount;
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.watchers.manager;
 import com.watchers.model.actors.Actor;
 import com.watchers.model.climate.Aircurrent;
 import com.watchers.model.climate.Climate;
-import com.watchers.model.climate.SkyTile;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Biome;
 import com.watchers.model.environment.Tile;
@@ -70,8 +69,7 @@ public class SaveToDatabaseManager {
 
         List<Aircurrent> aircurrents = persistentWorld.getCoordinates().stream()
                 .map(Coordinate::getClimate)
-                .map(Climate::getSkyTile)
-                .map(SkyTile::getIncommingAircurrents)
+                .map(Climate::getIncommingAircurrents)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
@@ -95,7 +93,6 @@ public class SaveToDatabaseManager {
         coordinate.getTile().getBiome().setId(id);
 
         coordinate.getClimate().setId(id);
-        coordinate.getClimate().getSkyTile().setId(id);
     }
 
     /**
@@ -114,9 +111,9 @@ public class SaveToDatabaseManager {
 
     /**
      * This method is needed so that the continents in the World object are linked with the Continents in the Coordinate object.
-     * Also this methode adjusts the Id's and orders them accordingly.
-     * Otherwise Hibernate will persist a Continent with a generated Id that is not in accordince with its given Id.
-     * By inserting them in order of their new Id's, Hibernate will not accidentily merge a Continent with an already
+     * Also, this methode adjusts the Id's and orders them accordingly.
+     * Otherwise, Hibernate will persist a Continent with a generated id that is not in accordance with its given id.
+     * By inserting them in order of their new id's, Hibernate will not accidentally merge a Continent with an already
      * persisted Continent.
      *
      * @param persistentWorld the world that is provided from a persistent source
@@ -141,24 +138,23 @@ public class SaveToDatabaseManager {
     }
 
     /**
-     * Because the world from the json has sepperated the aircurrents to their ending en starting skies,
-     * this link needs to be reset. Otherwise the aircurrent link within the skies are not the same entity.
-     * This would lead to problems with saving to the inmemory database with hibernate. This method is also used to
-     * prepare for creating clones of the skies with the correct aircurrents.
+     * Because the world from the json has separated the air currents to their ending en starting skies,
+     * this link needs to be reset. Otherwise, the air current link within the skies are not the same entity.
+     * This would lead to problems with saving to the in memory database with hibernate. This method is also used to
+     * prepare for creating clones of the skies with the correct air currents.
      *
      * @param world world
      */
     private void adjustAndMergeAircurrents(World world, boolean newWorld, boolean freshlyCreated) {
-        List<SkyTile> skyTiles = world.getCoordinates().stream()
+        List<Climate> climates = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
-                .map(Climate::getSkyTile)
                 .collect(Collectors.toList());
 
         if (!newWorld) {
             if (freshlyCreated) {
-                Map<Long, List<Aircurrent>> outgoingAircurrentsOfStartingskiesFromIncommingAircurrents = skyTiles.stream()
+                Map<Long, List<Aircurrent>> outgoingAircurrentsOfStartingskiesFromIncommingAircurrents = climates.stream()
                         .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
-                        .collect(Collectors.toMap(incommingAircurrent -> incommingAircurrent.getStartingSky().getId()
+                        .collect(Collectors.toMap(incommingAircurrent -> incommingAircurrent.getStartingClimate().getId()
                                 , Collections::singletonList
                                 , (x, y) -> {
                                     List<Aircurrent> aircurrents = new ArrayList<>(x);
@@ -166,58 +162,58 @@ public class SaveToDatabaseManager {
                                     return aircurrents;
                                 }));
 
-                skyTiles.forEach(skyTile -> {
-                    skyTile.getOutgoingAircurrents().clear();
-                    skyTile.getOutgoingAircurrents().addAll(outgoingAircurrentsOfStartingskiesFromIncommingAircurrents.get(skyTile.getId()));
-                    skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingSky(skyTile));
+                climates.forEach(climate -> {
+                    climate.getOutgoingAircurrents().clear();
+                    climate.getOutgoingAircurrents().addAll(outgoingAircurrentsOfStartingskiesFromIncommingAircurrents.get(climate.getId()));
+                    climate.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingClimate(climate));
                 });
 
                 return;
             } else {
-                skyTiles.forEach(skyTile -> {
-                    skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingSky(skyTile));
-                    skyTile.getIncommingAircurrents().forEach(aircurrent -> aircurrent.setEndingSky(skyTile));
+                climates.forEach(climate -> {
+                    climate.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingClimate(climate));
+                    climate.getIncommingAircurrents().forEach(aircurrent -> aircurrent.setEndingClimate(climate));
                 });
 
-                Map<Long, SkyTile> endingSkyIdForAircurrents = skyTiles.stream()
+                Map<Long, Climate> endingClimateIdForAircurrents = climates.stream()
                         .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
-                        .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getEndingSky));
-                skyTiles.stream()
-                        .map(SkyTile::getOutgoingAircurrents)
+                        .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getEndingClimate));
+                climates.stream()
+                        .map(Climate::getOutgoingAircurrents)
                         .flatMap(Collection::stream)
-                        .forEach(outgoingAircurrent -> outgoingAircurrent.setStartingSky(
-                                endingSkyIdForAircurrents.get(outgoingAircurrent.getStartingSky().getId())));
+                        .forEach(outgoingAircurrent -> outgoingAircurrent.setStartingClimate(
+                                endingClimateIdForAircurrents.get(outgoingAircurrent.getStartingClimate().getId())));
                 return;
             }
         }
 
-        List<Aircurrent> incommingAircurrents = skyTiles.stream()
-                .map(SkyTile::getIncommingAircurrents)
+        List<Aircurrent> incommingAircurrents = climates.stream()
+                .map(Climate::getIncommingAircurrents)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        Map<Long, Aircurrent> outgoingAircurrentIdMap = skyTiles.stream()
-                .map(SkyTile::getOutgoingAircurrents)
+        Map<Long, Aircurrent> outgoingAircurrentIdMap = climates.stream()
+                .map(Climate::getOutgoingAircurrents)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toMap(Aircurrent::getId, aircurrent -> aircurrent));
-        skyTiles.forEach(skyTile -> skyTile.getOutgoingAircurrents().clear());
+        climates.forEach(climate -> climate.getOutgoingAircurrents().clear());
         incommingAircurrents.forEach(incommingAircurrent -> {
             Aircurrent outgoingAircurrent = outgoingAircurrentIdMap.get(incommingAircurrent.getId());
-            SkyTile startingSky = outgoingAircurrent.getStartingSky();
-            incommingAircurrent.setStartingSky(startingSky);
+            Climate startingSky = outgoingAircurrent.getStartingClimate();
+            incommingAircurrent.setStartingClimate(startingSky);
             startingSky.getOutgoingAircurrents().add(incommingAircurrent);
         });
 
-        Map<Long, SkyTile> skyTileMap = skyTiles.stream()
-                .collect(Collectors.toMap(SkyTile::getId, x -> x));
+        Map<Long, Climate> climateMap = climates.stream()
+                .collect(Collectors.toMap(Climate::getId, x -> x));
 
-        skyTiles.forEach(skyTile -> {
-            skyTile.getOutgoingAircurrents().forEach(aircurrent -> {
-                aircurrent.setEndingSky(skyTileMap.get(aircurrent.getEndingSky().getId()));
-                aircurrent.setStartingSky(skyTileMap.get(aircurrent.getStartingSky().getId()));
+        climates.forEach(climate -> {
+            climate.getOutgoingAircurrents().forEach(aircurrent -> {
+                aircurrent.setEndingClimate(climateMap.get(aircurrent.getEndingClimate().getId()));
+                aircurrent.setStartingClimate(climateMap.get(aircurrent.getStartingClimate().getId()));
             });
-            skyTile.getIncommingAircurrents().forEach(aircurrent -> {
-                aircurrent.setEndingSky(skyTileMap.get(aircurrent.getEndingSky().getId()));
-                aircurrent.setStartingSky(skyTileMap.get(aircurrent.getStartingSky().getId()));
+            climate.getIncommingAircurrents().forEach(aircurrent -> {
+                aircurrent.setEndingClimate(climateMap.get(aircurrent.getEndingClimate().getId()));
+                aircurrent.setStartingClimate(climateMap.get(aircurrent.getStartingClimate().getId()));
             });
         });
     }
@@ -459,16 +455,24 @@ public class SaveToDatabaseManager {
     @Data
     private static class ClimateHolder {
         private final Climate climate;
-        private final SkyTile skyTile;
+        private final Set<Aircurrent> incommingAircurrent;
+        private final Set<Aircurrent> outgoingAircurrent;
 
         ClimateHolder(Climate climate) {
             this.climate = climate;
-            this.skyTile = climate.getSkyTile();
+            this.incommingAircurrent = climate.getIncommingAircurrents();
+            this.outgoingAircurrent = climate.getOutgoingAircurrents();
         }
 
         void clearInformation() {
             climate.setId(null);
-            climate.setSkyTile(null);
+            climate.setOutgoingAircurrents(null);
+            climate.setIncommingAircurrents(null);
+        }
+
+        void setInformation() {
+            climate.setOutgoingAircurrents(outgoingAircurrent);
+            climate.setIncommingAircurrents(incommingAircurrent);
         }
     }
 
@@ -500,69 +504,10 @@ public class SaveToDatabaseManager {
             tx.commit();
         }
 
-        List<SkyTile> skyTiles = climateHolderList.stream()
-                .map(ClimateHolder::getSkyTile)
-                .collect(Collectors.toList());
-        saveSkyTiles(skyTiles);
-    }
+        climateHolderList.forEach(ClimateHolder::setInformation);
 
-    @Data
-    private static class SkyTileHolder {
-        private final SkyTile skyTile;
-        private final Set<Aircurrent> incommingAircurrent;
-        private final Set<Aircurrent> outgoingAircurrent;
-
-        SkyTileHolder(SkyTile skyTile) {
-            this.skyTile = skyTile;
-            this.incommingAircurrent = skyTile.getIncommingAircurrents();
-            this.outgoingAircurrent = skyTile.getOutgoingAircurrents();
-        }
-
-        void clearInformation() {
-            skyTile.setId(null);
-            skyTile.setOutgoingAircurrents(null);
-            skyTile.setIncommingAircurrents(null);
-        }
-
-        void setInformation() {
-            skyTile.setOutgoingAircurrents(outgoingAircurrent);
-            skyTile.setIncommingAircurrents(incommingAircurrent);
-        }
-    }
-
-    private void saveSkyTiles(List<SkyTile> skyTiles) {
-        skyTiles.forEach(skyTile -> skyTile.getClimate().setSkyTile(skyTile));
-        List<SkyTileHolder> skyTileHolderList = skyTiles.stream()
-                .map(SkyTileHolder::new)
-                .collect(Collectors.toList());
-        skyTileHolderList.forEach(SkyTileHolder::clearInformation);
-
-        SessionFactory sessionFactory = getCurrentSessionFromJPA();
-        try (Session session = sessionFactory.openSession()) {
-            Transaction tx = session.beginTransaction();
-
-            for (int i = 0; i < skyTiles.size(); i++) {
-                SkyTile skyTile = skyTiles.get(i);
-                session.save(skyTile);
-
-                if (i == 1000) {
-                    //flush a batch of inserts and release memory:
-                    session.flush();
-                    session.clear();
-
-                    log.info("processed " + (((double) i) / ((double) skyTiles.size())) + " procent of skyTiles.");
-                }
-            }
-
-            session.flush();
-            session.clear();
-            tx.commit();
-        }
-
-        skyTileHolderList.forEach(SkyTileHolder::setInformation);
-
-        List<Aircurrent> aircurrents = skyTileHolderList.stream()
-                .map(SkyTileHolder::getIncommingAircurrent)
+        List<Aircurrent> aircurrents = climateHolderList.stream()
+                .map(ClimateHolder::getIncommingAircurrent)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
