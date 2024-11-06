@@ -169,6 +169,7 @@ public class Climate {
         clone.setCoordinate(coordinateClone);
         clone.setLatitude(latitude);
         clone.setLongitude(longitude);
+        clone.setSolarTemperature(solarTemperature);
         clone.setAltitudeAdjustedTemperature(altitudeAdjustedTemperature);
         clone.setMeanTemperature(meanTemperature);
         clone.setAirMoistureLossage(this.airMoistureLossage);
