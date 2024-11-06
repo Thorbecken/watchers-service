@@ -40,6 +40,7 @@ public class Tile implements GraphNode {
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade = CascadeType.ALL, orphanRemoval = true)
     private PointOfInterest pointOfInterest;
 
+    // height in meters
     @JsonProperty("height")
     @Column(name = "height")
     @JsonView(Views.Public.class)

@@ -12,8 +12,8 @@ watch:
   minContinents: 8
 # watch.maxContinentsize <- this one is currently generated from the number of continents divided by the minimum number of continents
   erosion: # erosion settings
-    minHeightDifference: 10
-    max: 10
+    minHeightDifference: 1000
+    max: 1000
 # world generation settings
   lifePresSeeded: true
   coastalZone: 2
@@ -23,12 +23,12 @@ watch:
     ySize: 15 #54
     numberOfContinents: 8
 # World settings
-  oceanHight: 10
-  seaHight: 20
-  coastalHight: 30
-  plainsHight: 40
-  hillHight: 50
-  mountainHight: 60
+  oceanHight: 1000
+  seaHight: 2000
+  coastalHight: 3000
+  plainsHight: 4000
+  hillHight: 5000
+  mountainHight: 6000
 
 #Logging
 logging:

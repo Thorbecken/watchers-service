@@ -54,7 +54,7 @@ public class Aircurrent {
         this.endingClimate = endingClimate;
 
         startingClimate.getOutgoingAircurrents().add(this);
-        endingClimate.getIncommingAircurrents().add(this);
+        endingClimate.getIncomingAircurrents().add(this);
 
         recalculateHeigthDifference();
     }

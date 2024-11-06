@@ -36,7 +36,7 @@ public class CoordinateHelper {
     public static List<Set<Coordinate>> getListsOfAdjacentLandCoordinatesFromContinent(Continent continent) {
         return getListsOfAdjacentCoordinates(new ArrayList<>(continent.getCoordinates())
                 , coordinate -> coordinate.getContinent().getId().equals(continent.getId())
-                        && coordinate.getTile().getHeight() >= 40);
+                        && coordinate.getTile().getHeight() >= continent.getWorld().getSeaLevel());
     }
 
     public static List<Set<Coordinate>> getListsOfAdjacentCoordinates(List<Coordinate> coordinates, Predicate<Coordinate> predicate) {

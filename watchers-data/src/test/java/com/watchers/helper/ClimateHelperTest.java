@@ -117,7 +117,7 @@ class ClimateHelperTest {
 
         boolean allSkytilesHaveTwoIncommingAircurrents = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
-                .map(Climate::getIncommingAircurrents)
+                .map(Climate::getIncomingAircurrents)
                 .allMatch(incommingAircurrent -> incommingAircurrent.size() == 2);
 
         boolean allSkytilesHasOneLongitudalAircurrent = world.getCoordinates().stream()
@@ -137,7 +137,7 @@ class ClimateHelperTest {
 
         Long incommingAircurrents = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
-                .mapToLong(skyTile -> skyTile.getIncommingAircurrents().size())
+                .mapToLong(skyTile -> skyTile.getIncomingAircurrents().size())
                 .sum();
 
         assertThat(allSkytilesHaveTwoIncommingAircurrents, equalTo(true));

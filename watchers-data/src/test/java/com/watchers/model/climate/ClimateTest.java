@@ -18,6 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClimateTest {
 
+    private static final long LOW_HEIGHT = 2;
+    private static final long MEDIUM_HEIGHT = 4;
+    private static final long HIGH_HEIGHT = 8;
+    private static final long NO_HEIGHT = 0;
+
     @Test
     void assertionsWater() {
         World world = new World(1,1);
@@ -138,12 +143,12 @@ class ClimateTest {
                 .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
                 .forEach(aircurrent -> aircurrent.setCurrentStrength(1));
 
-        // preperation for heightdifference check
-        sky1.getCoordinate().getTile().setHeight(2);
-        sky2.getCoordinate().getTile().setHeight(4);
-        sky3.getCoordinate().getTile().setHeight(8);
-        sky4.getCoordinate().getTile().setHeight(0);
-        sky5.getCoordinate().getTile().setHeight(0);
+        // preparation for height difference check
+        sky1.getCoordinate().getTile().setHeight(LOW_HEIGHT);
+        sky2.getCoordinate().getTile().setHeight(MEDIUM_HEIGHT);
+        sky3.getCoordinate().getTile().setHeight(HIGH_HEIGHT);
+        sky4.getCoordinate().getTile().setHeight(NO_HEIGHT);
+        sky5.getCoordinate().getTile().setHeight(NO_HEIGHT);
 
         assertEquals(0, sky1.getAirMoisture());
         assertEquals(0, sky2.getAirMoisture());

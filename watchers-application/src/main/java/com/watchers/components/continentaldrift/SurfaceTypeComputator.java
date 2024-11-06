@@ -11,23 +11,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class SurfaceTypeComputator {
 
-    private final long seaHight;
-    private final long coastalHight;
-    private final long plainsHight;
-    private final long hillHight;
-    private final long mountainHight;
+    private final long seaHeight;
+    private final long coastalHeight;
+    private final long plainsHeight;
+    private final long hillHeight;
+    private final long mountainHeight;
 
     public SurfaceTypeComputator(
-                       @Value("${watch.seaHight}") long seaHight,
-                       @Value("${watch.coastalHight}") long coastalHight,
-                       @Value("${watch.plainsHight}") long plainsHight,
-                       @Value("${watch.hillHight}") long hillHight,
-                       @Value("${watch.mountainHight}") long mountainHight){
-        this.seaHight = seaHight;
-        this.coastalHight = coastalHight;
-        this.plainsHight = plainsHight;
-        this.hillHight = hillHight;
-        this.mountainHight = mountainHight;
+                       @Value("${watch.seaHeight}") long seaHeight,
+                       @Value("${watch.coastalHeight}") long coastalHeight,
+                       @Value("${watch.plainsHeight}") long plainsHeight,
+                       @Value("${watch.hillHeight}") long hillHeight,
+                       @Value("${watch.mountainHeight}") long mountainHeight){
+        this.seaHeight = seaHeight;
+        this.coastalHeight = coastalHeight;
+        this.plainsHeight = plainsHeight;
+        this.hillHeight = hillHeight;
+        this.mountainHeight = mountainHeight;
     }
 
     @Transactional
@@ -36,15 +36,15 @@ public class SurfaceTypeComputator {
 
         world.getCoordinates().parallelStream().map(Coordinate::getTile).forEach(tile -> {
             long height = tile.getHeight();
-            if(height >= mountainHight){
+            if(height >= mountainHeight){
                 tile.setSurfaceType(SurfaceType.MOUNTAIN);
-            } else if (height >= hillHight){
+            } else if (height >= hillHeight){
                 tile.setSurfaceType(SurfaceType.HILL);
-            } else if (height >= plainsHight){
+            } else if (height >= plainsHeight){
                 tile.setSurfaceType(SurfaceType.PLAIN);
-            } else if (height >= coastalHight){
+            } else if (height >= coastalHeight){
                 tile.setSurfaceType(SurfaceType.COASTAL);
-            } else if (height >= seaHight){
+            } else if (height >= seaHeight){
                 tile.setSurfaceType(SurfaceType.SEA);
             } else {
                 tile.setSurfaceType(SurfaceType.OCEAN);

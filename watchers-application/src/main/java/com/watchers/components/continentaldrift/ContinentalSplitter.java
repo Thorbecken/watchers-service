@@ -51,18 +51,20 @@ public class ContinentalSplitter {
                     .max(Comparator.comparing(Set::size))
                     .orElseThrow();
             divideContinentInTwo(continent, largestLandmass, secondLargestLandmass);
-        } else if (landMasses.size() == 1) {
-            Set<Coordinate> landmass = landMasses.get(0);
-            Coordinate meanCoordinate = CoordinateHelper.getMeanCoordinate(new ArrayList<>(landmass), continent.getWorld());
-            Coordinate furthestCoordinateFromLandmass = continent.getCoordinates().stream()
-                    .filter(coordinate -> !landmass.contains(coordinate))
-                    .max(Comparator.comparing(
-                            coordinate -> Math.abs(coordinate.getXCoord() - meanCoordinate.getXCoord())
-                                    + Math.abs(coordinate.getYCoord() - meanCoordinate.getYCoord())))
-                    .orElseThrow();
-            Set<Coordinate> newWatermass = new HashSet<>();
-            newWatermass.add(furthestCoordinateFromLandmass);
-            divideContinentInTwo(continent, landmass, newWatermass);
+//        } else if (landMasses.size() == 1) {
+//            // how can the coordinates be split in two if there is only one landmass?
+//            Set<Coordinate> landmass = landMasses.get(0);
+//            Coordinate meanCoordinate = CoordinateHelper.getMeanCoordinate(new ArrayList<>(landmass), continent.getWorld());
+//            Coordinate furthestCoordinateFromLandmass = continent.getCoordinates().stream()
+//            // the filter below is always false since the landmasses are always from one continent
+//                    .filter(coordinate -> !landmass.contains(coordinate))
+//                    .max(Comparator.comparing(
+//                            coordinate -> Math.abs(coordinate.getXCoord() - meanCoordinate.getXCoord())
+//                                    + Math.abs(coordinate.getYCoord() - meanCoordinate.getYCoord())))
+//                    .orElseThrow();
+//            Set<Coordinate> newWatermass = new HashSet<>();
+//            newWatermass.add(furthestCoordinateFromLandmass);
+//            divideContinentInTwo(continent, landmass, newWatermass);
         } else {
             if (tooMuchWidth) {
                 Optional<Coordinate> leftBound = continent.getCoordinates().stream().min(Comparator.comparing(Coordinate::getXCoord));

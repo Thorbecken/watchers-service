@@ -4,12 +4,10 @@ import com.watchers.model.climate.Climate;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.world.World;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@AllArgsConstructor
 public class TemperatureZoneComputator {
 
     @Transactional
@@ -25,12 +23,13 @@ public class TemperatureZoneComputator {
             // proces transfer
             processTemperatureTransfer(world);
         }
+        recalculateMaximalAirMoisture(world);
     }
 
     private void restoreBaseTemperature(World world) {
         world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
-                .forEach(Climate::restoreBaseTemperature);
+                .forEach(climate -> climate.restoreBaseTemperature(world.getSeaLevel()));
     }
 
     private void processTemperatureTransfer(World world) {
@@ -50,5 +49,11 @@ public class TemperatureZoneComputator {
         world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .forEach(Climate::transferAirTemperature);
+    }
+
+    private void recalculateMaximalAirMoisture(World world) {
+        world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .forEach(Climate::calculateNewMoistureLevel);
     }
 }

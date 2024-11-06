@@ -11,6 +11,9 @@ import java.util.HashSet;
 
 public class TestableWorld {
 
+    private static final long PLAIN_HEIGHT = 4000;
+    private static final long SEA_HEIGHT = 2000;
+
     public static World createWorld() {
         return createWorld(WorldTypeEnum.NON_EUCLIDEAN);
     }
@@ -79,9 +82,9 @@ public class TestableWorld {
             coordinate.getClimate().setId(idNumber);
             coordinate.setId(idNumber++);
             if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
-                coordinate.getTile().setHeight(40);
+                coordinate.getTile().setHeight(PLAIN_HEIGHT);
             } else {
-                coordinate.getTile().setHeight(20);
+                coordinate.getTile().setHeight(SEA_HEIGHT);
             }
         }
 
@@ -190,9 +193,9 @@ public class TestableWorld {
             coordinate.getClimate().setId(idNumber);
             coordinate.setId(idNumber++);
             if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
-                coordinate.getTile().setHeight(40);
+                coordinate.getTile().setHeight(PLAIN_HEIGHT);
             } else {
-                coordinate.getTile().setHeight(20);
+                coordinate.getTile().setHeight(SEA_HEIGHT);
             }
         }
 

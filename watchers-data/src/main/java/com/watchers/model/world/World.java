@@ -71,6 +71,11 @@ public class World {
     @Column(name = "current_height_deficit")
     private long heightDeficit;
 
+    @JsonProperty("seaLevel")
+    @JsonView(Views.Internal.class)
+    @Column(name = "sea_level")
+    private double seaLevel = 4000;
+
     @Transient
     @JsonIgnore
     private Map<Long, Map<Long, Coordinate>> coordinateMap = new HashMap<>();

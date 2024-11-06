@@ -69,7 +69,7 @@ public class SaveToDatabaseManager {
 
         List<Aircurrent> aircurrents = persistentWorld.getCoordinates().stream()
                 .map(Coordinate::getClimate)
-                .map(Climate::getIncommingAircurrents)
+                .map(Climate::getIncomingAircurrents)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
@@ -153,7 +153,7 @@ public class SaveToDatabaseManager {
         if (!newWorld) {
             if (freshlyCreated) {
                 Map<Long, List<Aircurrent>> outgoingAircurrentsOfStartingskiesFromIncommingAircurrents = climates.stream()
-                        .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
+                        .flatMap(skyTile -> skyTile.getIncomingAircurrents().stream())
                         .collect(Collectors.toMap(incommingAircurrent -> incommingAircurrent.getStartingClimate().getId()
                                 , Collections::singletonList
                                 , (x, y) -> {
@@ -172,11 +172,11 @@ public class SaveToDatabaseManager {
             } else {
                 climates.forEach(climate -> {
                     climate.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setStartingClimate(climate));
-                    climate.getIncommingAircurrents().forEach(aircurrent -> aircurrent.setEndingClimate(climate));
+                    climate.getIncomingAircurrents().forEach(aircurrent -> aircurrent.setEndingClimate(climate));
                 });
 
                 Map<Long, Climate> endingClimateIdForAircurrents = climates.stream()
-                        .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
+                        .flatMap(skyTile -> skyTile.getIncomingAircurrents().stream())
                         .collect(Collectors.toMap(Aircurrent::getId, Aircurrent::getEndingClimate));
                 climates.stream()
                         .map(Climate::getOutgoingAircurrents)
@@ -188,7 +188,7 @@ public class SaveToDatabaseManager {
         }
 
         List<Aircurrent> incommingAircurrents = climates.stream()
-                .map(Climate::getIncommingAircurrents)
+                .map(Climate::getIncomingAircurrents)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
         Map<Long, Aircurrent> outgoingAircurrentIdMap = climates.stream()
@@ -211,7 +211,7 @@ public class SaveToDatabaseManager {
                 aircurrent.setEndingClimate(climateMap.get(aircurrent.getEndingClimate().getId()));
                 aircurrent.setStartingClimate(climateMap.get(aircurrent.getStartingClimate().getId()));
             });
-            climate.getIncommingAircurrents().forEach(aircurrent -> {
+            climate.getIncomingAircurrents().forEach(aircurrent -> {
                 aircurrent.setEndingClimate(climateMap.get(aircurrent.getEndingClimate().getId()));
                 aircurrent.setStartingClimate(climateMap.get(aircurrent.getStartingClimate().getId()));
             });
@@ -460,19 +460,19 @@ public class SaveToDatabaseManager {
 
         ClimateHolder(Climate climate) {
             this.climate = climate;
-            this.incommingAircurrent = climate.getIncommingAircurrents();
+            this.incommingAircurrent = climate.getIncomingAircurrents();
             this.outgoingAircurrent = climate.getOutgoingAircurrents();
         }
 
         void clearInformation() {
             climate.setId(null);
             climate.setOutgoingAircurrents(null);
-            climate.setIncommingAircurrents(null);
+            climate.setIncomingAircurrents(null);
         }
 
         void setInformation() {
             climate.setOutgoingAircurrents(outgoingAircurrent);
-            climate.setIncommingAircurrents(incommingAircurrent);
+            climate.setIncomingAircurrents(incommingAircurrent);
         }
     }
 

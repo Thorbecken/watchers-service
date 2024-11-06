@@ -20,7 +20,7 @@ public class AircurrentRecalibrator {
             World world = taskDto.getWorld();
             world.getCoordinates().stream()
                     .map(Coordinate::getClimate)
-                    .flatMap(skyTile -> skyTile.getIncommingAircurrents().stream())
+                    .flatMap(skyTile -> skyTile.getIncomingAircurrents().stream())
                     .forEach(Aircurrent::recalculateHeigthDifference);
         }
     }

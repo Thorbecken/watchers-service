@@ -25,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ContinentalDriftNewTileAssignerTest {
 
+    private static final long HIGH_HEIGHT = 800;
+    private static final long MEDIUM_HEIGHT = 400;
+    private static final long LOW_HEIGHT = 200;
     private ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner;
     private ContinentalDriftTaskDto taskDto;
     private final ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
@@ -222,15 +225,15 @@ class ContinentalDriftNewTileAssignerTest {
         CoordinateHelper.getAllPossibleCoordinates(world).forEach(
                 coordinate -> {
                     if (coordinate.getXCoord() + coordinate.getYCoord() < 4) {
-                        coordinate.getTile().setHeight(8);
+                        coordinate.getTile().setHeight(HIGH_HEIGHT);
                         coordinate.changeContinent(x);
                         x.getCoordinates().add(coordinate);
                     } else if (coordinate.getYCoord() == 3 && coordinate.getXCoord() == 3) {
-                        coordinate.getTile().setHeight(2);
+                        coordinate.getTile().setHeight(LOW_HEIGHT);
                         coordinate.changeContinent(z);
                         z.getCoordinates().add(coordinate);
                     } else {
-                        coordinate.getTile().setHeight(4);
+                        coordinate.getTile().setHeight(MEDIUM_HEIGHT);
                         coordinate.changeContinent(y);
                         y.getCoordinates().add(coordinate);
                     }

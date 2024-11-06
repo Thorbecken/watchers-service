@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ContinentalHotSpotProcessor {
 
+    private static final long MINIMUM_HEIGHT_BUILDUP_FOR_ERUPTION = 60;
+    private static final long NUMBER_OF_TURNS_BEFORE_REALLOCATION = 178L;
+
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = taskDto.getWorld();
@@ -38,12 +41,12 @@ public class ContinentalHotSpotProcessor {
         }
 
         while (world.getHeightDeficit() > 0) {
-            log.trace("Current height deficit: " + world.getHeightDeficit());
+            log.trace("Current height deficit: " + world.getHeightDeficit() + " meter(s).");
             for (HotSpotCrystal hotSpotCrystal : hotSpotCrystals) {
                 long heightdefecit = world.getHeightDeficit();
                 if(heightdefecit > 0) {
                     long extraHeight = RandomHelper.getRandomLong(world.getHeightDeficit());
-                    log.trace("HotSpotCrystal gained " + extraHeight + " height buildup");
+                    log.trace("HotSpotCrystal gained " + extraHeight + " meter(s) height buildup.");
                     hotSpotCrystal.addHeightBuildup(extraHeight);
                     world.setHeightDeficit(world.getHeightDeficit() - extraHeight);
                 }
@@ -52,7 +55,7 @@ public class ContinentalHotSpotProcessor {
 
         for (HotSpotCrystal hotSpotCrystal : hotSpotCrystals) {
             long heightBuildup = hotSpotCrystal.getHeightBuildup();
-            if (heightBuildup > 60) {
+            if (heightBuildup > MINIMUM_HEIGHT_BUILDUP_FOR_ERUPTION) {
                 Tile tile = hotSpotCrystal.getCoordinate().getTile();
                 tile.setHeight(tile.getHeight() + heightBuildup);
                 hotSpotCrystal.setHeightBuildup(0);
@@ -64,7 +67,7 @@ public class ContinentalHotSpotProcessor {
                 long y = RandomHelper.getRandomNonZero(world.getYSize());
                 Coordinate coordinate = world.getCoordinate(x, y);
                 hotSpotCrystal.setCoordinate(coordinate);
-                hotSpotCrystal.setTimer(178L);
+                hotSpotCrystal.setTimer(NUMBER_OF_TURNS_BEFORE_REALLOCATION);
             }
         }
     }

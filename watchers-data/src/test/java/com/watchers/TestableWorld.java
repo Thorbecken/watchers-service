@@ -9,6 +9,9 @@ import java.util.*;
 
 public class TestableWorld {
 
+    private static final long SEA_HEIGHT = 2000;
+    private static final long LAND_HEIGHT = 4000;
+
     public static World createWorld() {
         return createWorld(WorldTypeEnum.NON_EUCLIDEAN);
     }
@@ -96,9 +99,9 @@ public class TestableWorld {
         world.getCoordinates().forEach(coordinate -> {
                     coordinate.setWorld(coordinate.getWorld());
                     if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
-                        coordinate.getTile().setHeight(40);
+                        coordinate.getTile().setHeight(LAND_HEIGHT);
                     } else {
-                        coordinate.getTile().setHeight(20);
+                        coordinate.getTile().setHeight(SEA_HEIGHT);
                     }
                 }
         );
@@ -155,9 +158,9 @@ public class TestableWorld {
         world.getCoordinates().forEach(coordinate -> {
                     coordinate.setWorld(coordinate.getWorld());
                     if (coordinate.getTile().getSurfaceType() == SurfaceType.PLAIN) {
-                        coordinate.getTile().setHeight(40);
+                        coordinate.getTile().setHeight(LAND_HEIGHT);
                     } else {
-                        coordinate.getTile().setHeight(20);
+                        coordinate.getTile().setHeight(SEA_HEIGHT);
                     }
                 }
         );

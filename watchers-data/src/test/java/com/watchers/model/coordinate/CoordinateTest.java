@@ -16,6 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CoordinateTest {
 
+    private static final long HILL_HEIGHT = 6000;
+    private static final long LOW_SEA_HEIGHT = 1000;
+    private static final long MEDIUM_SEA_HEIGHT = 2000;
+
     @Test
     void testCalculation() {
         World world = new World(58, 28);
@@ -112,12 +116,12 @@ class CoordinateTest {
         Coordinate startCoordinate = world.getCoordinate(2L, 2L);
         Coordinate endCoordinate = world.getCoordinate(1L, 2L);
 
-        startCoordinate.getTile().setHeight(10);
-        endCoordinate.getTile().setHeight(20);
+        startCoordinate.getTile().setHeight(LOW_SEA_HEIGHT);
+        endCoordinate.getTile().setHeight(MEDIUM_SEA_HEIGHT);
         assertThat(Coordinate.LOWER_OR_EQUAL_HEIGHT_PREDICATE.test(startCoordinate, endCoordinate), equalTo(false));
         assertThat(Coordinate.LOWER_OR_EQUAL_HEIGHT_PREDICATE.test(endCoordinate, startCoordinate), equalTo(true));
 
-        endCoordinate.getTile().setHeight(10);
+        endCoordinate.getTile().setHeight(LOW_SEA_HEIGHT);
         assertThat(Coordinate.LOWER_OR_EQUAL_HEIGHT_PREDICATE.test(startCoordinate, endCoordinate), equalTo(true));
         assertThat(Coordinate.LOWER_OR_EQUAL_HEIGHT_PREDICATE.test(endCoordinate, startCoordinate), equalTo(true));
     }
@@ -125,15 +129,15 @@ class CoordinateTest {
     @Test
     public void getLowerOrEqualHeightCoordinatesWithinRangeTest() {
         World world = TestableWorld.createWorld();
-        world.getCoordinate(1L, 1L).getTile().setHeight(10);
-        world.getCoordinate(1L, 2L).getTile().setHeight(10);
-        world.getCoordinate(1L, 3L).getTile().setHeight(10);
-        world.getCoordinate(2L, 1L).getTile().setHeight(10);
-        world.getCoordinate(2L, 2L).getTile().setHeight(10);
-        world.getCoordinate(2L, 3L).getTile().setHeight(10);
-        world.getCoordinate(3L, 1L).getTile().setHeight(10);
-        world.getCoordinate(3L, 2L).getTile().setHeight(10);
-        world.getCoordinate(3L, 3L).getTile().setHeight(10);
+        world.getCoordinate(1L, 1L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(1L, 2L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(1L, 3L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(2L, 1L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(2L, 2L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(2L, 3L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(3L, 1L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(3L, 2L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(3L, 3L).getTile().setHeight(LOW_SEA_HEIGHT);
         Coordinate startCoordinate = world.getCoordinate(2L, 2L);
         Set<Coordinate> coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1);
         assertThat(coordinatesInRange, hasSize(2));
@@ -149,12 +153,12 @@ class CoordinateTest {
         assertThat(coordinatesInRange, hasSize(8));
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
 
-        world.getCoordinate(1L, 1L).getTile().setHeight(60);
-        world.getCoordinate(1L, 2L).getTile().setHeight(60);
-        world.getCoordinate(1L, 3L).getTile().setHeight(60);
-        world.getCoordinate(2L, 1L).getTile().setHeight(60);
-        world.getCoordinate(3L, 1L).getTile().setHeight(60);
-        world.getCoordinate(3L, 2L).getTile().setHeight(60);
+        world.getCoordinate(1L, 1L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(1L, 2L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(1L, 3L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(2L, 1L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(3L, 1L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(3L, 2L).getTile().setHeight(HILL_HEIGHT);
 
         coordinatesInRange = startCoordinate.getLowerOrEqualHeightLandCoordinatesWithinRange(1);
         assertThat(coordinatesInRange, hasSize(1));
@@ -169,15 +173,15 @@ class CoordinateTest {
     public void getCoordinatesWithinRangeWithQualifierTest() {
         BiPredicate<Coordinate, Coordinate> predicate = (x, y) -> y.getTile().getHeight() <= x.getTile().getHeight();
         World world = TestableWorld.createWorld();
-        world.getCoordinate(1L, 1L).getTile().setHeight(10);
-        world.getCoordinate(1L, 2L).getTile().setHeight(10);
-        world.getCoordinate(1L, 3L).getTile().setHeight(10);
-        world.getCoordinate(2L, 1L).getTile().setHeight(10);
-        world.getCoordinate(2L, 2L).getTile().setHeight(10);
-        world.getCoordinate(2L, 3L).getTile().setHeight(10);
-        world.getCoordinate(3L, 1L).getTile().setHeight(10);
-        world.getCoordinate(3L, 2L).getTile().setHeight(10);
-        world.getCoordinate(3L, 3L).getTile().setHeight(10);
+        world.getCoordinate(1L, 1L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(1L, 2L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(1L, 3L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(2L, 1L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(2L, 2L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(2L, 3L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(3L, 1L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(3L, 2L).getTile().setHeight(LOW_SEA_HEIGHT);
+        world.getCoordinate(3L, 3L).getTile().setHeight(LOW_SEA_HEIGHT);
         Coordinate startCoordinate = world.getCoordinate(2L, 2L);
         Set<Coordinate> coordinatesInRange = startCoordinate.getCoordinatesWithinRangeWithQualifier(1, predicate);
         assertThat(coordinatesInRange, hasSize(4));
@@ -187,12 +191,12 @@ class CoordinateTest {
         assertThat(coordinatesInRange, hasSize(8));
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
 
-        world.getCoordinate(1L, 1L).getTile().setHeight(60);
-        world.getCoordinate(1L, 2L).getTile().setHeight(60);
-        world.getCoordinate(1L, 3L).getTile().setHeight(60);
-        world.getCoordinate(2L, 1L).getTile().setHeight(60);
-        world.getCoordinate(3L, 1L).getTile().setHeight(60);
-        world.getCoordinate(3L, 2L).getTile().setHeight(60);
+        world.getCoordinate(1L, 1L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(1L, 2L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(1L, 3L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(2L, 1L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(3L, 1L).getTile().setHeight(HILL_HEIGHT);
+        world.getCoordinate(3L, 2L).getTile().setHeight(HILL_HEIGHT);
 
         coordinatesInRange = startCoordinate.getCoordinatesWithinRangeWithQualifier(1, predicate);
         assertThat(coordinatesInRange, hasSize(1));

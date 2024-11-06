@@ -35,7 +35,7 @@ public class MapManager {
        Optional<World> optionalWorld = worldRepository.findById(worldId);
        if(optionalWorld.isPresent()) {
            World world = optionalWorld.get();
-           log.trace("world loaden from memory with: " + (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, Long::sum) + world.getHeightDeficit()) + " height");
+           log.trace("world loaden from memory with: " + (world.getCoordinates().stream().map(Coordinate::getTile).map(Tile::getHeight).reduce(0L, Long::sum) + world.getHeightDeficit()) + " meters of height");
            log.trace("the loaded world contains: " + world.getCoordinates().size() + " number of coordinates");
            if (initiated) {
                world.fillTransactionals();

@@ -18,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -81,7 +79,7 @@ public class WorldService {
                 .mapToLong(Tile::getHeight)
                 .sum();
         long totalHeight = currentHeight + world.getHeightDeficit();
-        return "Current height is: " + totalHeight + ".";
+        return "Current height is: " + totalHeight + " meters.";
     }
 
     /**
