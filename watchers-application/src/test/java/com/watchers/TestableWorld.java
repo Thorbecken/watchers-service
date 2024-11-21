@@ -27,6 +27,7 @@ public class TestableWorld {
         worldSettings.setId(1L);
         worldSettings.setHeigtDivider(2);
         worldSettings.setMinimumContinents(5);
+        worldSettings.setLifePreSeeded(true);
         world.setWorldSettings(worldSettings);
 
         WorldMetaData worldMetaData = new WorldMetaData();

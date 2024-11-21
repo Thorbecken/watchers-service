@@ -79,6 +79,32 @@ public class Tile implements GraphNode {
     @JsonIgnore
     private Tile downWardTile;
 
+    @Column(name = "down_flow_Amount")
+    @JsonView(Views.Public.class)
+    private double downFlowAmount;
+
+    @Column(name = "flow_direction")
+    @JsonView(Views.Public.class)
+    private DirectionEnum flowDirection;
+
+    @JsonProperty("biome")
+    @JsonView(Views.Public.class)
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Biome biome;
+
+
+    @JsonProperty("surfaceType")
+    @Column(name = "surfaceType")
+    @JsonView(Views.Public.class)
+    @Enumerated(value = EnumType.STRING)
+    private SurfaceType surfaceType;
+
+    @JsonProperty("rockType")
+    @Column(name = "rock_type")
+    @JsonView(Views.Public.class)
+    @Enumerated(value = EnumType.STRING)
+    private RockType rockType;
+
     public void setDownWardTile(Tile downWardTile) {
         this.downWardTile = downWardTile;
         downWardTile.getUpwardTiles().add(this);
@@ -94,14 +120,6 @@ public class Tile implements GraphNode {
             this.flowDirection = DirectionEnum.LEFT;
         }
     }
-
-    @Column(name = "down_flow_Amount")
-    @JsonView(Views.Public.class)
-    private double downFlowAmount;
-
-    @Column(name = "flow_direction")
-    @JsonView(Views.Public.class)
-    private DirectionEnum flowDirection;
 
     @Transient
     @JsonIgnore
@@ -124,24 +142,6 @@ public class Tile implements GraphNode {
                 && upwardTiles.stream()
                 .allMatch(tile -> tile.downFlowAmount != 0d);
     }
-
-    @JsonProperty("biome")
-    @JsonView(Views.Public.class)
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "tile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Biome biome;
-
-
-    @JsonProperty("surfaceType")
-    @Column(name = "surfaceType")
-    @JsonView(Views.Public.class)
-    @Enumerated(value = EnumType.STRING)
-    private SurfaceType surfaceType;
-
-    @JsonProperty("rockType")
-    @Column(name = "rock_type")
-    @JsonView(Views.Public.class)
-    @Enumerated(value = EnumType.STRING)
-    private RockType rockType;
 
     public Tile(Coordinate coordinate, Continent continent) {
         this.coordinate = coordinate;

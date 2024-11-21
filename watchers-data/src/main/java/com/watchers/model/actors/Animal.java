@@ -53,10 +53,10 @@ public class Animal extends Actor {
     }
 
     private void metabolize() {
-        if (animalType.getMetabolisme() > foodReserve) {
+        if (animalType.getMetabolism() > foodReserve) {
             setStateType(StateType.DEAD);
         } else {
-            foodReserve = foodReserve - animalType.getMetabolisme();
+            foodReserve = foodReserve - animalType.getMetabolism();
         }
     }
 

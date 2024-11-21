@@ -176,12 +176,14 @@ public class ContinentalSplitter {
             boolean newContinentLeftOfContinent = (newContinentAbsolutePositionLeftOfContinent && !inverseBecauseOfLooping)
                     || (!newContinentAbsolutePositionLeftOfContinent && inverseBecauseOfLooping);
 
-            if (newContinentLeftOfContinent) {
-                continent.getDirection().setYVelocity(continent.getDirection().getYVelocity() + 1);
-                newContinent.getDirection().setYVelocity(continent.getDirection().getYVelocity() - 1);
-            } else {
-                continent.getDirection().setYVelocity(continent.getDirection().getYVelocity() - 1);
-                newContinent.getDirection().setYVelocity(continent.getDirection().getYVelocity() + 1);
+            if(continent.getWorld().getWorldSettings().isLifePreSeeded()) {
+                if (newContinentLeftOfContinent) {
+                    continent.getDirection().setYVelocity(continent.getDirection().getYVelocity() + 1);
+                    newContinent.getDirection().setYVelocity(continent.getDirection().getYVelocity() - 1);
+                } else {
+                    continent.getDirection().setYVelocity(continent.getDirection().getYVelocity() - 1);
+                    newContinent.getDirection().setYVelocity(continent.getDirection().getYVelocity() + 1);
+                }
             }
         }
 
@@ -194,12 +196,14 @@ public class ContinentalSplitter {
             boolean newContinentBelowContinent = (newContinentAbsolutePositionBelowContinent && !inverseBecauseOfLooping)
                     || (!newContinentAbsolutePositionBelowContinent && inverseBecauseOfLooping);
 
-            if (newContinentBelowContinent) {
-                continent.getDirection().setXVelocity(continent.getDirection().getXVelocity() + 1);
-                newContinent.getDirection().setXVelocity(continent.getDirection().getXVelocity() - 1);
-            } else {
-                continent.getDirection().setXVelocity(continent.getDirection().getXVelocity() - 1);
-                newContinent.getDirection().setXVelocity(continent.getDirection().getXVelocity() + 1);
+            if(continent.getWorld().getWorldSettings().isLifePreSeeded()){
+                if (newContinentBelowContinent) {
+                    continent.getDirection().setXVelocity(continent.getDirection().getXVelocity() + 1);
+                    newContinent.getDirection().setXVelocity(continent.getDirection().getXVelocity() - 1);
+                } else {
+                    continent.getDirection().setXVelocity(continent.getDirection().getXVelocity() - 1);
+                    newContinent.getDirection().setXVelocity(continent.getDirection().getXVelocity() + 1);
+                }
             }
         }
     }

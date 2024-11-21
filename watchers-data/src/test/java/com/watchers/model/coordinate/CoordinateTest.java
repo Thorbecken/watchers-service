@@ -4,6 +4,7 @@ import com.watchers.TestableWorld;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -23,6 +24,8 @@ class CoordinateTest {
     @Test
     void testCalculation() {
         World world = new World(58, 28);
+        world.setWorldSettings(new WorldSettings());
+        world.getWorldSettings().setLifePreSeeded(true);
 
         Coordinate coordinate = CoordinateFactory.createCoordinate(30, 10, world, new Continent(world, SurfaceType.OCEAN));
         Coordinate soughtCoordinate = CoordinateFactory.createCoordinate(30, 9, world, new Continent(world, SurfaceType.COASTAL));

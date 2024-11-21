@@ -68,9 +68,10 @@ public class Aircurrent {
     }
 
     public double calculateHeightDifferenceEffect(double airMoisture) {
-        if (airMoisture > 0L && heightDifference > 0L) {
-            if (airMoisture > heightDifference) {
-                return heightDifference;
+        long heightEffect = heightDifference / 100;
+        if (airMoisture > 0L && heightEffect > 0L) {
+            if (airMoisture > heightEffect) {
+                return heightEffect;
             } else {
                 return airMoisture;
             }

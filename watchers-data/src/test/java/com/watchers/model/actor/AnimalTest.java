@@ -10,6 +10,7 @@ import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.*;
 import com.watchers.model.world.World;
 import com.watchers.model.world.Continent;
+import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,8 @@ class AnimalTest {
     @SuppressWarnings("all")
     void setRabbit(){
         rabbitWorld = new World(3, 3);
+        rabbitWorld.setWorldSettings(new WorldSettings());
+        this.rabbitWorld.getWorldSettings().setLifePreSeeded(true);
         Continent rabbitContinent = new Continent(rabbitWorld, SurfaceType.PLAIN);
 
         for (int x = 1; x <= 3; x++) {

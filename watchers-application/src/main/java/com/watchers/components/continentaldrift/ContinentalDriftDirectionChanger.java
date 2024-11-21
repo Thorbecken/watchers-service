@@ -14,11 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContinentalDriftDirectionChanger {
 
     public void assignFirstOrNewDriftDirections(World world) {
-        world.getContinents().forEach(continent -> continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world));
+        if(world.getWorldSettings().isLifePreSeeded()) {
+            world.getContinents().forEach(continent -> continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world));
+        }
     }
 
     public void assignFirstDriftDirrecion(Continent continent, World world) {
-        continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world);
+        if(world.getWorldSettings().isLifePreSeeded()) {
+            continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world);
+        }
     }
 
     @Transactional

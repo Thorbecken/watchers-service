@@ -16,7 +16,6 @@ select count(1) from "climate";
 select count(1) from "sky";
 
 # todo
- - make height affect temperature
  - make extra an extra air current towards the hottest neighbour or towards itself if no hotter neighbour exists of about half total current strength.
  - make rain based on temperature differences
  - make water evaporate on land
@@ -54,3 +53,5 @@ Watch-019: Rework ContinentalSplitter class
         - Let the method split the coordinates of these new continents based if there connected.
         - Let the method add coordinates of continents that are surrounded by another continent to the surrounding continent.
         - If only one continent survives split the continent with the default method.
+
+Watch-020: Rework the API's to allow for more nuanced interactions with the world and make is possible for the frontend to use these.

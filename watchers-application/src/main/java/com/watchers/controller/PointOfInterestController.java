@@ -32,18 +32,6 @@ public class PointOfInterestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/hotspot/{xCoord}/{yCoord}", method = RequestMethod.DELETE)
-    public ResponseEntity removeHotSpot(@PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord) {
-        log.info("Received request to delete a hotspot at coordinate: " + xCoord + "x, " + yCoord + "y");
-        Assert.notNull(xCoord, "No xCoord was found");
-        Assert.notNull(yCoord, "No yCoord was found");
-
-        pointOfInterestManager.removeHotspot(xCoord, yCoord);
-        log.info("Deleted a hotpsot at coordinates: " + xCoord + "x, " + yCoord + "y");
-        return ResponseEntity.ok().build();
-    }
-
-
     @RequestMapping(value = "/tectonicPlume/{xCoord}/{yCoord}", method = RequestMethod.PUT)
     public ResponseEntity addTectonicPlume(@PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord) {
         log.info("Received request to create a tectonic plume at coordinate: " + xCoord + "x, " + yCoord + "y");
@@ -55,14 +43,14 @@ public class PointOfInterestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/tectonicPlume/{xCoord}/{yCoord}", method = RequestMethod.DELETE)
-    public ResponseEntity removeTectonicPlume(@PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord) {
-        log.info("Received request to delete a tectonic plume at coordinate: " + xCoord + "x, " + yCoord + "y");
+    @RequestMapping(value = "/{xCoord}/{yCoord}", method = RequestMethod.DELETE)
+    public ResponseEntity removePointOfInterest(@PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord) {
+        log.info("Received request to delete a point of interest at coordinate: " + xCoord + "x, " + yCoord + "y");
         Assert.notNull(xCoord, "No xCoord was found");
         Assert.notNull(yCoord, "No yCoord was found");
 
-        pointOfInterestManager.removeTectonicPlume(xCoord, yCoord);
-        log.info("Deleted a tectonic plume at coordinates: " + xCoord + "x, " + yCoord + "y");
+        String removedPointOfInterest = pointOfInterestManager.removePointOfInterest(xCoord, yCoord);
+        log.info("Deleted a " + removedPointOfInterest + " at coordinates: " + xCoord + "x, " + yCoord + "y");
         return ResponseEntity.ok().build();
     }
 }

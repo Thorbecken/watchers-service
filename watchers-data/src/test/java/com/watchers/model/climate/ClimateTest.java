@@ -7,6 +7,7 @@ import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -26,6 +27,8 @@ class ClimateTest {
     @Test
     void assertionsWater() {
         World world = new World(1,1);
+        world.setWorldSettings(new WorldSettings());
+        world.getWorldSettings().setLifePreSeeded(true);
         Continent continent = new Continent(world, SurfaceType.OCEAN);
         Coordinate coordinate = CoordinateFactory.createCoordinate(1,1, world, continent);
         Climate climate = coordinate.getClimate();
@@ -37,6 +40,8 @@ class ClimateTest {
     @Test
     void assertionsLand() {
         World world = new World(1,1);
+        world.setWorldSettings(new WorldSettings());
+        world.getWorldSettings().setLifePreSeeded(true);
         Continent continent = new Continent(world, SurfaceType.PLAIN);
         Coordinate coordinate = CoordinateFactory.createCoordinate(1,1, world, continent);
         Climate climate = coordinate.getClimate();

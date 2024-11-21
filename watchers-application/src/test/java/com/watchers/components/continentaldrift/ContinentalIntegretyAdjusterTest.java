@@ -8,6 +8,7 @@ import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldMetaData;
+import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +48,8 @@ class ContinentalIntegretyAdjusterTest {
 
     private World createWorld() {
         World world = new World();
+        world.setWorldSettings(new WorldSettings());
+        world.getWorldSettings().setLifePreSeeded(true);
         world.setXSize(3L);
         world.setYSize(5L);
 

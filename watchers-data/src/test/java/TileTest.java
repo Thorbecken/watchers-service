@@ -3,6 +3,7 @@ import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
+import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -18,6 +19,9 @@ class TileTest {
     @BeforeEach
     void setup(){
         this.world = new World(3, 3);
+        this.world.setWorldSettings(new WorldSettings());
+        this.world.getWorldSettings().setLifePreSeeded(true);
+
         Continent continent = new Continent(world, SurfaceType.OCEAN);
 
         for (int x = 1; x <= 3; x++) {
