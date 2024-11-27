@@ -19,12 +19,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -115,30 +113,46 @@ class WorldFactory {
 
     private void fillInWorld(World world) {
         WorldFactoryDTO dto = new WorldFactoryDTO(world);
-        List<MockContinent> mockContinents = new ArrayList<>();
-        world.getContinents().forEach(
-                continent -> mockContinents.add(new MockContinent(continent))
-        );
+        List<MockContinent> mockContinents = world.getContinents().stream()
+                .map(MockContinent::new)
+                .collect(Collectors.toList());
 
         long numberOfCoordinateToSplit = world.getXSize() * world.getYSize();
-        log.info("Sepperating the earth.");
+        log.info("Separating the earth.");
 
         int counter = 0;
-        while (dto.getOpenCoordinates().size() >= 1) {
+        Queue<Coordinate> openCoordinates = new LinkedList<>(dto.getOpenCoordinates());
+
+        while (!openCoordinates.isEmpty()) {
             if (++counter == 25) {
                 counter = 0;
-                double percentageDone = 1 - (double) dto.getOpenCoordinates().size() / (double) numberOfCoordinateToSplit;
-                log.info("Sepperated " + NumberFormat.getPercentInstance().format(percentageDone) + " of the earth.");
+                double percentageDone = 1 - (double) openCoordinates.size() / (double) numberOfCoordinateToSplit;
+                log.info("Separated " + NumberFormat.getPercentInstance().format(percentageDone) + " of the earth.");
             }
 
-            mockContinents.stream()
-                    .filter(mockContinent -> !CollectionUtils.isEmpty(mockContinent.getPossibleCoordinates()))
-                    .forEach(
-                            mockContinent -> mockContinent.addRandomCoordinate(dto)
-                    );
+            // Randomly shuffle the continents to ensure fair distribution
+            Collections.shuffle(mockContinents);
+
+            // Process each continent
+            for (MockContinent mockContinent : mockContinents) {
+                Set<Coordinate> possibleCoordinates = mockContinent.getPossibleCoordinates();
+                if (!possibleCoordinates.isEmpty() && !openCoordinates.isEmpty()) {
+                    // Start with a random coordinate from the open coordinates
+                    Coordinate openCoordinate = openCoordinates.poll(); // Get and remove the head of the queue
+                    if (openCoordinate != null) {
+                        if (possibleCoordinates.contains(openCoordinate)) {
+                            mockContinent.getCoordinates().add(openCoordinate);
+                            mockContinent.getPossibleCoordinates().addAll(openCoordinate.getNeighbours());
+                            mockContinent.getCoordinates().forEach(mockContinent.getPossibleCoordinates()::remove);
+                        } else {
+                            openCoordinates.add(openCoordinate);
+                        }
+                    }
+                }
+            }
         }
 
-        log.info("Earth is sepperated");
+        log.info("Earth is separated");
 
         world.getCoordinates().clear();
         world.getContinents().removeIf(continent -> continent.getType() == null);
