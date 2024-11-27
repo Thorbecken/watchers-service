@@ -55,3 +55,8 @@ Watch-019: Rework ContinentalSplitter class
         - If only one continent survives split the continent with the default method.
 
 Watch-020: Rework the API's to allow for more nuanced interactions with the world and make is possible for the frontend to use these.
+
+Watch-021: Rework the Biome and Flora class. Make it more realistic.
+    - Make it that sunlight is used to calculate maximum growth, which in turn needs water.
+    - Sunlight can be inferred from the latitude of the climate. The climate could hold the amount of sunlight.
+    - Trees have priority on sunlight uptake and grass has priority on water uptake. So if any sunlight is left over for the grass, the grass gets the first chance to grow, and use water.

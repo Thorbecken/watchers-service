@@ -34,18 +34,6 @@ public class ActorProcessor {
 
         List<Actor> currentActors = world.getActorList();
         Assert.notNull(currentActors, "There was no actors found!");
-        if (currentActors.size() == 0) {
-            log.info("The actorlist was empty!");
-            world.getCoordinates().stream()
-                    .map(Coordinate::getTile)
-                    .filter(Tile::isLand)
-                    .map(Tile::getBiome)
-                    .max(Comparator.comparing(Biome::getCurrentFood))
-                    .map(Biome::getTile)
-                    .map(Tile::getCoordinate)
-                    .ifPresent(coordinate -> coordinate.getActors().add(new Animal(coordinate, AnimalType.RABBIT, AnimalType.RABBIT.getMaxFoodReserve())));
-        } else {
-            currentActors.forEach(Actor::processSerialTask);
-        }
+        currentActors.forEach(Actor::processSerialTask);
     }
 }

@@ -74,12 +74,8 @@ public class Continent {
         this.world.getContinents().add(this);
         this.type = surfaceType;
         this.basicRockType = RockType.getRandomRockType();
-        if(world.getWorldSettings().isLifePreSeeded()) {
-            this.assignNewDriftDirection(1, world);
-        } else {
-            Direction direction = new Direction(0, 0);
-            this.setDirection(direction);
-        }
+        Direction direction = new Direction(0, 0);
+        this.setDirection(direction);
     }
 
     @JsonCreator
