@@ -238,11 +238,13 @@ public class Tile implements GraphNode {
     }
 
     // method that loads the mocktile with all the data it can use
-    public void transferData(MockTile mockTile, Coordinate survivingCoordinate) {
-        if(this.pointOfInterest != null && mockTile.getPointOfInterest() == null) {
-            mockTile.setPointOfInterest(this.getPointOfInterest());
+    public void transferData(MockTile transferTarget, Coordinate survivingCoordinate) {
+        if(this.pointOfInterest != null && transferTarget.getPointOfInterest() == null) {
+            transferTarget.setPointOfInterest(this.getPointOfInterest());
         }
-        this.biome.transferData(mockTile);
+        this.biome.transferData(transferTarget);
+        transferTarget.setRainFall(transferTarget.getRainFall() + this.rainfall);
+        transferTarget.setAvailableWater(transferTarget.getAvailableWater() + this.availableWater);
         survivingCoordinate.getActors().addAll(this.coordinate.getActors());
     }
 
@@ -257,6 +259,9 @@ public class Tile implements GraphNode {
         }
         this.coordinate.changeContinent(continent);
         this.coordinate.getContinent().getCoordinates().add(this.coordinate);
+
+        this.rainfall = mockTile.getRainFall();
+        this.availableWater = mockTile.getAvailableWater();
 
         this.biome.addGrassBiomass(mockTile.getGrassBiomass());
         this.biome.setGrassFlora(mockTile.getGrassFlora());

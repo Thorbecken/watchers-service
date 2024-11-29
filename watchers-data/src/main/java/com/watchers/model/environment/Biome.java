@@ -216,14 +216,20 @@ public class Biome implements ParallelTask {
         this.treeBiomass = 0;
     }
 
-    public void transferData(MockTile mockTile) {
-        mockTile.setGrassBiomass(mockTile.getGrassBiomass() + grassBiomass);
-        mockTile.setTreeBiomass(mockTile.getTreeBiomass() + treeBiomass);
-        if (mockTile.getGrassFlora() == null) {
-            mockTile.setGrassFlora(grassFlora);
+    public void transferData(MockTile transferTarget) {
+        transferTarget.setGrassBiomass(transferTarget.getGrassBiomass() + this.grassBiomass);
+        transferTarget.setTreeBiomass(transferTarget.getTreeBiomass() + this.treeBiomass);
+        if (transferTarget.getGrassFlora() == null) {
+            transferTarget.setGrassFlora(this.grassFlora);
+            transferTarget.setGrassBiomass(this.grassBiomass);
+        } else {
+            transferTarget.setGrassBiomass(transferTarget.getGrassBiomass() + this.grassBiomass);
         }
-        if (mockTile.getTreeFlora() == null) {
-            mockTile.setTreeFlora(treeFlora);
+        if (transferTarget.getTreeFlora() == null) {
+            transferTarget.setTreeFlora(this.treeFlora);
+            transferTarget.setTreeBiomass(this.treeBiomass);
+        } else {
+            transferTarget.setTreeBiomass(transferTarget.getTreeBiomass() + this.treeBiomass);
         }
     }
 
