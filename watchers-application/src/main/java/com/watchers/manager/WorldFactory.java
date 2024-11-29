@@ -143,7 +143,7 @@ class WorldFactory {
                         if (possibleCoordinates.contains(openCoordinate)) {
                             mockContinent.getCoordinates().add(openCoordinate);
                             mockContinent.getPossibleCoordinates().addAll(openCoordinate.getNeighbours());
-                            mockContinent.getCoordinates().forEach(mockContinent.getPossibleCoordinates()::remove);
+                            mockContinents.stream().map(MockContinent::getPossibleCoordinates).forEach(coordinateSet -> coordinateSet.remove(openCoordinate));
                         } else {
                             openCoordinates.add(openCoordinate);
                         }
