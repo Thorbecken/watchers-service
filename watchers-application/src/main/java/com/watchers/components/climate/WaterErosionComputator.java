@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-
 @Service
 @AllArgsConstructor
 public class WaterErosionComputator {
@@ -26,7 +24,7 @@ public class WaterErosionComputator {
                             && tile.getHeight() > tile.getDownWardTile().getHeight())
                     .forEach(tile -> {
                         Tile downwardTile = tile.getDownWardTile();
-                        double numberOfErosionCounters = tile.getDownFlowAmount() / 5d;
+                        double numberOfErosionCounters = tile.getSurfaceWater() / 5d;
                         for (double i = 0; i < numberOfErosionCounters || i < 3; i++) {
                             long heightDifference = tile.getHeight() - downwardTile.getHeight();
                             if (heightDifference > 2) {

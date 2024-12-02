@@ -35,10 +35,10 @@ Watch-016: Calculate the day heath difference on a tile on basis on how many til
     Use the lower temperature to calculate the rainfall and the higher number to calculate the moisture transfer to the next tile.
 
 Watch-017: Change the water cycle to the following:
-    - First calculate the rainfall on the lowest temperature.
-    - Second let the plants drink and evaporate their usage.
-    - Third use the max temperature to transfer an amount of moisture.
-    - fourthly use the over excess amount of water to create rivers.
+    - First calculate the rainfall on water holding capacity of the air.
+    - Second use the difference between max temperature to transfer an amount of moisture.
+    - Third let the plants drink and evaporate their usage.
+    - Fourthly use the over excess amount of water to create rivers.
 
 Watch-018: Make two types of players:
     - Demiurge (Solo) that can have one of grass, plant and animal life.

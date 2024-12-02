@@ -80,7 +80,7 @@ class ClimateTest {
         assertEquals(2, sky4.getAirMoisture());
 
         skyTileList.parallelStream().forEach(Climate::moveClouds);
-        skyTileList.parallelStream().forEach(Climate::processIncommingMoisture);
+        skyTileList.parallelStream().forEach(Climate::processIncomingMoisture);
 
         assertEquals(2, sky1.getAirMoisture());
         assertEquals(2, sky2.getAirMoisture());
@@ -188,7 +188,7 @@ class ClimateTest {
                 .sum();
 
         skyTileList.parallelStream().forEach(Climate::moveClouds);
-        skyTileList.parallelStream().forEach(Climate::processIncommingMoisture);
+        skyTileList.parallelStream().forEach(Climate::processIncomingMoisture);
 
         double totalAirmoistureAfter = skyTileList.stream()
                 .mapToDouble(Climate::getAirMoisture)

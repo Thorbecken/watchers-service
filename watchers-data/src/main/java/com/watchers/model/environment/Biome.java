@@ -53,6 +53,11 @@ public class Biome implements ParallelTask {
     @JsonProperty("treeFlora")
     private Flora treeFlora;
 
+    @JsonView(Views.Public.class)
+    @Column(name = "water_desire")
+    @JsonProperty("waterDesire")
+    private double waterDesire;
+
     @OneToOne
     @JsonIgnore
     @JoinColumn(name = "tile_id", nullable = false)
@@ -133,26 +138,29 @@ public class Biome implements ParallelTask {
 
     @Override
     public void processParallelTask() {
-        grow(grassFlora);
-        grow(treeFlora);
+        this.grow(grassFlora);
+        this.grow(treeFlora);
+        this.evaluateWaterDesire();
     }
 
     private void grow(Flora flora) {
         if (flora != null) {
             double oldBiomass = FloraTypeEnum.GRASS.equals(flora.getType()) ? grassBiomass : treeBiomass;
             double newBiomass;
-            double waterUsage = flora.getWaterIntake() * oldBiomass * flora.getGrowthRate();
-            double landMoisture = this.tile.getAvailableWater();
-            if (waterUsage <= landMoisture) {
-                this.tile.reduceLandMoisture(waterUsage);
-                if ((oldBiomass * flora.getGrowthRate()) > flora.getMaxBiomass()) {
+            double growthRate = flora.getGrowthRate();
+            double waterUsage = flora.getWaterIntake() * oldBiomass * growthRate;
+            double groundWater = this.tile.getGroundWater();
+
+            if (waterUsage <= groundWater) {
+                this.tile.absorbAndTranspireWater(waterUsage);
+                if ((oldBiomass * growthRate) > flora.getMaxBiomass()) {
                     newBiomass = flora.getMaxBiomass();
                 } else {
-                    newBiomass = oldBiomass + (oldBiomass * flora.getGrowthRate());
+                    newBiomass = oldBiomass * growthRate;
                 }
             } else {
-                newBiomass = landMoisture / flora.getWaterIntake();
-                this.tile.reduceLandMoisture(landMoisture);
+                newBiomass = groundWater / flora.getWaterIntake();
+                this.tile.absorbAndTranspireWater(groundWater);
                 if (newBiomass <= 0d) {
                     if (FloraTypeEnum.GRASS.equals(flora.getType())) {
                         this.grassFlora = null;
@@ -175,7 +183,7 @@ public class Biome implements ParallelTask {
             if (TERRESTRIAL.equals(this.grassFlora.getNaturalHabitat())) {
                 this.getTile().getNeighbours().stream()
                         .filter(Tile::isLand)
-                        .filter(tile -> tile.getRainfall() > 0)
+                        .filter(tile -> tile.getGroundWater() > 0)
                         .map(Tile::getBiome)
                         .filter(Biome::hasOpenGrassSpot)
                         .forEach(openBiome -> openBiome.fillOpenGrassSpots(this.grassFlora));
@@ -239,6 +247,7 @@ public class Biome implements ParallelTask {
         clone.setGrassFlora(this.grassFlora);
         clone.setTreeBiomass(this.treeBiomass);
         clone.setTreeFlora(this.treeFlora);
+        clone.setWaterDesire(this.waterDesire);
         clone.setTile(newTile);
         clone.setId(this.id);
         return clone;
@@ -317,5 +326,11 @@ public class Biome implements ParallelTask {
                 this.grassBiomass = 0;
             }
         }
+    }
+
+    public void evaluateWaterDesire() {
+        double treeWaterDesire = treeFlora == null? 0 : treeFlora.getWaterIntake() * treeBiomass * treeFlora.getGrowthRate();
+        double grassWaterDesire = grassFlora == null? 0 : grassFlora.getWaterIntake() * grassBiomass * grassFlora.getGrowthRate();
+        this.waterDesire = treeWaterDesire + grassWaterDesire;
     }
 }

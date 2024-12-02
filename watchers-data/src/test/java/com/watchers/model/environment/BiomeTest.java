@@ -30,38 +30,38 @@ class BiomeTest {
 
     @Test
     void processParallelTaskGrass() {
-        biome.getTile().setAvailableWater(10d);
+        biome.getTile().setGroundWater(10d);
         biome.setGrassFlora(Flora.GRASS);
         biome.processParallelTask();
-        assertThat(biome.getGrassBiomass(), equalTo(1d + Flora.GRASS.getGrowthRate()));
+        assertThat(biome.getGrassBiomass(), equalTo(Flora.GRASS.getGrowthRate()));
         assertThat(biome.getTreeBiomass(), equalTo(0d));
-        assertThat(biome.getCurrentFood(), equalTo(1d + Flora.GRASS.getGrowthRate()));
+        assertThat(biome.getCurrentFood(), equalTo(Flora.GRASS.getGrowthRate()));
     }
 
     @Test
     void processParallelTaskTree() {
-        biome.getTile().setAvailableWater(10d);
+        biome.getTile().setGroundWater(10d);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
         assertThat(biome.getGrassBiomass(), equalTo(0d));
-        assertThat(biome.getTreeBiomass(), equalTo(1d + Flora.LEAF_TREE.getGrowthRate()));
-        assertThat(biome.getCurrentFood(), equalTo(1d + Flora.LEAF_TREE.getGrowthRate()));
+        assertThat(biome.getTreeBiomass(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
+        assertThat(biome.getCurrentFood(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
     }
 
     @Test
     void processParallelTaskFullFlora() {
-        biome.getTile().setAvailableWater(10d);
+        biome.getTile().setGroundWater(10d);
         biome.setGrassFlora(Flora.GRASS);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
-        assertThat(biome.getGrassBiomass(), equalTo(1d + Flora.GRASS.getGrowthRate()));
-        assertThat(biome.getTreeBiomass(), equalTo(1d + Flora.LEAF_TREE.getGrowthRate()));
-        assertThat(biome.getCurrentFood(), equalTo(2d + Flora.GRASS.getGrowthRate() + Flora.LEAF_TREE.getGrowthRate()));
+        assertThat(biome.getGrassBiomass(), equalTo(Flora.GRASS.getGrowthRate()));
+        assertThat(biome.getTreeBiomass(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
+        assertThat(biome.getCurrentFood(), equalTo(Flora.GRASS.getGrowthRate() + Flora.LEAF_TREE.getGrowthRate()));
     }
 
     @Test
     void processParallelTaskGrassDrought() {
-        biome.getTile().setAvailableWater(0.25d);
+        biome.getTile().setGroundWater(0.25d);
         biome.setGrassFlora(Flora.GRASS);
         biome.processParallelTask();
         assertThat(biome.getGrassFlora(), notNullValue());
@@ -71,7 +71,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskTreeDrought() {
-        biome.getTile().setAvailableWater(0.5d);
+        biome.getTile().setGroundWater(0.5d);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
         assertThat(biome.getTreeFlora(), notNullValue());
@@ -81,7 +81,7 @@ class BiomeTest {
 
     @Test
     void processParallelTaskSevereDrought() {
-        biome.getTile().setAvailableWater(0d);
+        biome.getTile().setGroundWater(0d);
         biome.setGrassFlora(Flora.GRASS);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
@@ -96,7 +96,7 @@ class BiomeTest {
     void spreadTest() {
         World testableWorld = TestableWorld.createWorld();
         testableWorld.getCoordinates().forEach(coordinate -> coordinate.getTile().setSurfaceType(SurfaceType.PLAIN));
-        testableWorld.getCoordinates().forEach(coordinate -> coordinate.getTile().setAvailableWater(3d));
+        testableWorld.getCoordinates().forEach(coordinate -> coordinate.getTile().setGroundWater(3d));
 
         boolean noFloraPresent = testableWorld.getCoordinates().stream()
                 .map(Coordinate::getTile)
@@ -106,7 +106,7 @@ class BiomeTest {
 
         Coordinate startingTile = testableWorld.getCoordinate(2, 2);
         Biome dryBiome = testableWorld.getCoordinate(2, 1).getTile().getBiome();
-        dryBiome.getTile().setAvailableWater(0d);
+        dryBiome.getTile().setGroundWater(0d);
         Biome waterBiome = testableWorld.getCoordinate(2, 3).getTile().getBiome();
         waterBiome.getTile().setSurfaceType(SurfaceType.COASTAL);
         Biome neighbourBiome1 = testableWorld.getCoordinate(1, 2).getTile().getBiome();

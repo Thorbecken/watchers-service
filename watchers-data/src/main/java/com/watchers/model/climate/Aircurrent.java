@@ -63,8 +63,8 @@ public class Aircurrent {
         double amount = amountPerStrength * currentStrength;
         double heightAmount = calculateHeightDifferenceEffect(amount);
 
-        endingClimate.addIncommingMoisture(amount);
-        startingClimate.addAirMoistureLossage(heightAmount);
+        endingClimate.addIncomingMoisture(amount);
+        startingClimate.addAirMoistureLoss(heightAmount);
     }
 
     public double calculateHeightDifferenceEffect(double airMoisture) {
@@ -126,10 +126,10 @@ public class Aircurrent {
                 '}';
     }
 
-    public double getHeatTransfer(Climate climate, int incommingAirPressure) {
+    public double getHeatTransfer(Climate climate, int incomingAirPressure) {
         double averageTemperature = (climate.getMeanTemperature() + this.startingClimate.getMeanTemperature()) / 2d;
         double heatChange = (averageTemperature - climate.getMeanTemperature());
-        return heatChange / incommingAirPressure * currentStrength;
+        return heatChange / incomingAirPressure * currentStrength;
     }
 
     @Override

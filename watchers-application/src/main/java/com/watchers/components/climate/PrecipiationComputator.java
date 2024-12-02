@@ -41,14 +41,15 @@ public class PrecipiationComputator {
         computePrecipitation(climates);
     }
 
+    @Transactional
     private void computeEvaporation(List<Climate> climates) {
         climates.stream()
                 .filter(Climate::isWater)
-                .forEach(this::procesWaterClimate);
+                .forEach(this::processWaterClimate);
     }
 
     @Transactional
-    private void procesWaterClimate(Climate climate) {
+    private void processWaterClimate(Climate climate) {
         climate.addAirMoisture(10);
     }
 
@@ -63,21 +64,13 @@ public class PrecipiationComputator {
                 });
 
         climates.forEach(Climate::moveClouds);
-        climates.forEach(Climate::processIncommingMoisture);
-    }
-
-    protected void computePrecipitation(List<Climate> climates) {
-        climates.parallelStream()
-                .filter(Climate::isLand)
-                .forEach(this::procesLandClimate);
+        climates.forEach(Climate::processIncomingMoisture);
     }
 
     @Transactional
-    private void procesLandClimate(Climate climate) {
-        double currentAirmoisture = climate.getAirMoisture();
-        // the 1 below is diurnal Rainfall
-        double precipitation = currentAirmoisture / 10 + 1;
-        climate.setAirMoistureLossage(precipitation);
-        climate.calculateNewMoistureLevel();
+    protected void computePrecipitation(List<Climate> climates) {
+        climates.parallelStream()
+                .filter(Climate::isLand)
+                .forEach(Climate::processRainfallAndCondensation);
     }
 }

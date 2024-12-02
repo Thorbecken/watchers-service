@@ -14,7 +14,8 @@ public class MockTile {
     private MockContinentObject mockContinentObject;
     private SurfaceType surfaceType;
     private double rainFall;
-    private double availableWater;
+    private double surfaceWater;
+    private double groundWater;
     private double grassBiomass;
     private Flora grassFlora;
     private double treeBiomass;
@@ -27,7 +28,8 @@ public class MockTile {
         this.mockContinentObject = new MockContinentObject(tile.getCoordinate().getContinent());
         this.surfaceType = tile.getSurfaceType();
         this.rainFall = tile.getRainfall();
-        this.availableWater = tile.getAvailableWater();
+        this.surfaceWater = tile.getSurfaceWater();
+        this.groundWater = tile.getGroundWater();
         this.grassBiomass = tile.getBiome().getGrassBiomass();
         this.grassFlora = tile.getBiome().getGrassFlora();
         this.treeBiomass = tile.getBiome().getTreeBiomass();

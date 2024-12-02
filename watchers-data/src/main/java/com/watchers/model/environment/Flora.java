@@ -36,7 +36,7 @@ public enum Flora {
             , ClimateZoneEnum.ARCTIC.getMinTemperature()
             , ClimateZoneEnum.ARCTIC.getMaxTemperature()
             , 0.5
-            , 0.5
+            , 1.5
             , 30),
     LEAF_TREE(3L
             , "Leaf"

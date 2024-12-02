@@ -14,38 +14,39 @@ public class TemperatureZoneComputator {
     public void process(WorldTaskDto taskDto) {
         World world = taskDto.getWorld();
 
-        restoreBaseTemperature(world);
+        adjustTemperaturesForCurrentAltitudesAndSeaLevel(world);
         for (int i = 0; i < 3; i++) {
             // waterflow transfer
-            transferWaterTemperature(world);
+            calculateTemperatureTransferForLargeBodiesOfWater(world);
             // airflow transfer
-            transferAirTemperature(world);
+            calculateTemperatureTransferByAir(world);
             // proces transfer
-            processTemperatureTransfer(world);
+            processTemperatureTransfers(world);
         }
+
         recalculateMaximalAirMoisture(world);
     }
 
-    private void restoreBaseTemperature(World world) {
+    private void adjustTemperaturesForCurrentAltitudesAndSeaLevel(World world) {
         world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
-                .forEach(climate -> climate.restoreBaseTemperature(world.getSeaLevel()));
+                .forEach(climate -> climate.calculateAdjustedTemperatureForAltitude(world.getSeaLevel()));
     }
 
-    private void processTemperatureTransfer(World world) {
+    private void processTemperatureTransfers(World world) {
         world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .forEach(Climate::processHeatChange);
     }
 
-    private void transferWaterTemperature(World world) {
+    private void calculateTemperatureTransferForLargeBodiesOfWater(World world) {
         world.getCoordinates().stream()
                 .filter(Coordinate::isWater)
                 .map(Coordinate::getClimate)
                 .forEach(Climate::transferWaterTemperature);
     }
 
-    private void transferAirTemperature(World world) {
+    private void calculateTemperatureTransferByAir(World world) {
         world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .forEach(Climate::transferAirTemperature);

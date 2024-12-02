@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 public class WaterflowComputator {
 
     private final TileDefined tileDefined;
+        private static final double RIVER_THRESHOLD = 50d;
+        private static final double LARGE_RIVER_THRESHOLD = 100d;
 
     @Transactional
     public void process(WorldTaskDto taskDto) {
@@ -54,7 +56,7 @@ public class WaterflowComputator {
         List<Tile> worldTiles = world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .collect(Collectors.toList());
-        worldTiles.forEach(Tile::resetDownflowValues);
+        worldTiles.forEach(Tile::resetWaterValues);
         tileDefined.assignStartingType(world);
 
 //        2. create a list of all land tiles, ordered by height
@@ -150,7 +152,7 @@ public class WaterflowComputator {
 //        7. assign water flow for tiles that have down flowing tiles but no up current tiles
         landTileList.stream()
                 .filter(tile -> tile.getUpwardTiles().isEmpty())
-                .forEach(tile -> tile.setDownFlowAmount(tile.getRainfall()));
+                .forEach(Tile::processMovementOfWater);
 
 //        8. assign water flow for tiles that have not been assigned and where all up current tiles have been assigned
         boolean allWaterHasFlownDown = landTileList.stream()
@@ -159,27 +161,21 @@ public class WaterflowComputator {
 
         while (!allWaterHasFlownDown) {
             log.debug("River loop counter, round: " + ++riverCounter);
-            List<Tile> nextDownStream = landTileList.stream()
+            landTileList.stream()
                     .filter(Tile::readyToFlow)
-                    .collect(Collectors.toList());
+                    .forEach(Tile::processMovementOfWater);
 
-            for (Tile tile : nextDownStream) {
-                double inflow = tile.getUpwardTiles().stream()
-                        .mapToDouble(Tile::getDownFlowAmount)
-                        .sum();
-                tile.setDownFlowAmount(inflow + tile.getRainfall());
-            }
-
-            allWaterHasFlownDown = nextDownStream.isEmpty();
+            allWaterHasFlownDown = landTileList.stream()
+                    .noneMatch(Tile::readyToFlow);
         }
 
 //        9. calculate mean water level of lakes
         for (Lake lake : lakes) {
-            double totalDownflow = lake.getLakeTiles().stream()
-                    .mapToDouble(Tile::getDownFlowAmount)
+            double totalSurfaceWater = lake.getLakeTiles().stream()
+                    .mapToDouble(Tile::getSurfaceWater)
                     .sum();
 
-            lake.setMeanLakeHeight(totalDownflow / lake.getLakeTiles().size());
+            lake.setMeanLakeHeight(totalSurfaceWater / lake.getLakeTiles().size());
         }
 
 //        10. assign markers of rivers and lakes
@@ -192,12 +188,12 @@ public class WaterflowComputator {
                 });
 
         worldTiles.stream()
-                .filter(tile -> tile.getDownFlowAmount() >= 50d
-                        && tile.getDownFlowAmount() < 100d)
+                .filter(tile -> tile.getSurfaceWater() >= RIVER_THRESHOLD
+                        && tile.getSurfaceWater() < LARGE_RIVER_THRESHOLD)
                 .forEach(tile -> tile.setRiver(true));
 
         worldTiles.stream()
-                .filter(tile -> tile.getDownFlowAmount() >= 100d)
+                .filter(tile -> tile.getSurfaceWater() >= LARGE_RIVER_THRESHOLD)
                 .forEach(tile -> {
                     tile.setRiver(true);
                     tile.setLargeRiver(true);

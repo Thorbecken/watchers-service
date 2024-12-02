@@ -51,10 +51,17 @@ public class Tile implements GraphNode {
     @JsonView(Views.Public.class)
     private double rainfall;
 
-    @JsonProperty("availableWater")
-    @Column(name = "available_water")
+    // the water that runs along the surface like a river or lake and is not available for plant life
+    @JsonProperty("surfaceWater")
+    @Column(name = "surface_water")
     @JsonView(Views.Public.class)
-    private double availableWater;
+    private double surfaceWater;
+
+    // The water that is available for plant life
+    @JsonProperty("groundWater")
+    @Column(name = "ground_water")
+    @JsonView(Views.Public.class)
+    private double groundWater;
 
     @Column(name = "lake")
     @JsonView(Views.Public.class)
@@ -79,9 +86,9 @@ public class Tile implements GraphNode {
     @JsonIgnore
     private Tile downWardTile;
 
-    @Column(name = "down_flow_Amount")
-    @JsonView(Views.Public.class)
-    private double downFlowAmount;
+    @Transient
+    @JsonIgnore
+    private boolean hasProcessedWaterMovement;
 
     @Column(name = "flow_direction")
     @JsonView(Views.Public.class)
@@ -125,22 +132,24 @@ public class Tile implements GraphNode {
     @JsonIgnore
     private List<Tile> upwardTiles = new ArrayList<>();
 
-    public void resetDownflowValues() {
+    public void resetWaterValues() {
         upwardTiles.clear();
         downWardTile = null;
-        downFlowAmount = 0d;
+        surfaceWater = 0d;
         isRiver = false;
         isLakeTile = false;
         isLargeRiver = false;
         flowDirection = null;
+        hasProcessedWaterMovement = false;
     }
 
     @JsonIgnore
     public boolean readyToFlow() {
-        return downFlowAmount == 0d
+        return !hasProcessedWaterMovement
+                && surfaceWater == 0d
                 && !upwardTiles.isEmpty()
                 && upwardTiles.stream()
-                .allMatch(tile -> tile.downFlowAmount != 0d);
+                .allMatch(tile -> tile.hasProcessedWaterMovement);
     }
 
     public Tile(Coordinate coordinate, Continent continent) {
@@ -244,7 +253,8 @@ public class Tile implements GraphNode {
         }
         this.biome.transferData(transferTarget);
         transferTarget.setRainFall(transferTarget.getRainFall() + this.rainfall);
-        transferTarget.setAvailableWater(transferTarget.getAvailableWater() + this.availableWater);
+        transferTarget.setSurfaceWater(transferTarget.getSurfaceWater() + this.surfaceWater);
+        transferTarget.setGroundWater(transferTarget.getGroundWater() + this.groundWater);
         survivingCoordinate.getActors().addAll(this.coordinate.getActors());
     }
 
@@ -261,12 +271,14 @@ public class Tile implements GraphNode {
         this.coordinate.getContinent().getCoordinates().add(this.coordinate);
 
         this.rainfall = mockTile.getRainFall();
-        this.availableWater = mockTile.getAvailableWater();
+        this.surfaceWater = mockTile.getSurfaceWater();
+        this.groundWater = mockTile.getGroundWater();
 
         this.biome.addGrassBiomass(mockTile.getGrassBiomass());
         this.biome.setGrassFlora(mockTile.getGrassFlora());
         this.biome.addTreeBiomass(mockTile.getTreeBiomass());
         this.biome.setTreeFlora(mockTile.getTreeFlora());
+        this.biome.evaluateWaterDesire();
         this.height = mockTile.getHeight();
         this.surfaceType = mockTile.getSurfaceType();
 
@@ -307,6 +319,8 @@ public class Tile implements GraphNode {
         clone.setCoordinate(newCoordinate);
         clone.setHeight(this.height);
         clone.setId(newCoordinate.getId());
+        clone.setSurfaceWater(this.surfaceWater);
+        clone.setGroundWater(this.groundWater);
         clone.setBiome(this.biome.createClone(clone));
 
         if(this.getPointOfInterest() != null){
@@ -319,8 +333,10 @@ public class Tile implements GraphNode {
     public void checkIntegrity() {
     }
 
-    public void reduceLandMoisture(double moistureReduction) {
-        this.availableWater = this.availableWater - moistureReduction;
+    // Methode for plants to drink and evaporate water
+    public void absorbAndTranspireWater(double consumption) {
+        this.groundWater = this.groundWater - consumption;
+        this.coordinate.getClimate().addAirMoisture(consumption);
     }
 
     @JsonIgnore
@@ -375,5 +391,15 @@ public class Tile implements GraphNode {
         return this.getNeighbours().stream()
                 .filter(neighbour -> neighbour.getHeight() == this.height)
                 .collect(Collectors.toList());
+    }
+
+    public void processMovementOfWater() {
+        double inflow = this.getUpwardTiles().stream()
+                .mapToDouble(Tile::getSurfaceWater)
+                .sum();
+        double incomingWater = inflow + this.rainfall;
+        this.groundWater = biome.getWaterDesire() <= incomingWater? biome.getWaterDesire() :  incomingWater;
+        this.surfaceWater = incomingWater - groundWater;
+        this.hasProcessedWaterMovement = true;
     }
 }
