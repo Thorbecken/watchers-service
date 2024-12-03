@@ -9,6 +9,8 @@ import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
 import com.watchers.model.world.WorldSettings;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,11 +28,11 @@ class ClimateTest {
 
     @Test
     void assertionsWater() {
-        World world = new World(1,1);
+        World world = new World(1, 1);
         world.setWorldSettings(new WorldSettings());
         world.getWorldSettings().setLifePreSeeded(true);
         Continent continent = new Continent(world, SurfaceType.OCEAN);
-        Coordinate coordinate = CoordinateFactory.createCoordinate(1,1, world, continent);
+        Coordinate coordinate = CoordinateFactory.createCoordinate(1, 1, world, continent);
         Climate climate = coordinate.getClimate();
 
         assertTrue(climate.isWater());
@@ -39,11 +41,11 @@ class ClimateTest {
 
     @Test
     void assertionsLand() {
-        World world = new World(1,1);
+        World world = new World(1, 1);
         world.setWorldSettings(new WorldSettings());
         world.getWorldSettings().setLifePreSeeded(true);
         Continent continent = new Continent(world, SurfaceType.PLAIN);
-        Coordinate coordinate = CoordinateFactory.createCoordinate(1,1, world, continent);
+        Coordinate coordinate = CoordinateFactory.createCoordinate(1, 1, world, continent);
         Climate climate = coordinate.getClimate();
 
         assertTrue(climate.isLand());
@@ -195,6 +197,42 @@ class ClimateTest {
                 .sum();
 
         assertThat(totalAirmoistureAfter, is(totalAirmoistureBefore));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "-25, 0.64",
+            "-20, 1.05",
+            "-15, 1.58",
+            "-10, 2.31",
+            "-5, 3.37",
+            "0, 4.89",
+            "5, 6.82",
+            "10, 9.39",
+            "15, 12.8",
+            "20, 17.3",
+            "30, 30.4",
+            "40, 51.1",
+            "50, 83.0",
+            "60, 130"
+    })
+    public void testCalculateMaximumGramsOfWaterVapor(double temperature, double expected) {
+        double result = new Climate().calculateMaximumGramsOfWaterVaporPerCubicMeter(temperature);
+        assertEquals(expected, result, ((expected * 0.05) + 0.5));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 0.6113",
+            "20, 2.3388",
+            "35, 5.6267",
+            "50, 12.344",
+            "75, 38.563",
+            "100, 101.32"
+    })
+    public void testCalculateSaturatedVaporPressure(double temperature, double expectedPressure) {
+        double calculatedPressure = new Climate().calculateSaturatedVaporPressure(temperature);
+        assertEquals(expectedPressure, calculatedPressure, ((expectedPressure * 0.05) + 0.5));
     }
 
 }

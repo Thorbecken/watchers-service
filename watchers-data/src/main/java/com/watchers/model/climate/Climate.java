@@ -32,8 +32,10 @@ public class Climate {
     private static final double MAXIMUM_PROCENT = 100;
     private static final double ZERO_CELSIUS_IN_KELVIN = 273.15d;
     private static final double GRAMS_PER_MOLE_OF_WATER = 18.01528d;
-    private static final double MOLAR_GAS_CONSTANT = 0.0821;
+    private static final double MOLAR_GAS_CONSTANT = 8.314d;
     private static final double DIURNAL_TEMPERATURE_CHANGE_PER_DEGREE_OF_LONGITUDE = 0.1d;
+    private static final double HECTO_MULTIPLIER = 1000;
+    private static final double MMHG_TO_KPA_MULTIPLIER = 0.133322;
 
 
     @Id
@@ -159,18 +161,27 @@ public class Climate {
     }
 
     protected void setMeanDayAndNightMaximalAirMoister(){
-        this.maximalAirMoisture = calculateMaximumGramsOfWaterVaporPerSquareMeter(meanTemperature);
-        this.maximalAirMoistureDay = calculateMaximumGramsOfWaterVaporPerSquareMeter(dayTemperature);
-        this.maximalAirMoistureNight = calculateMaximumGramsOfWaterVaporPerSquareMeter(nightTemperature);
+        this.maximalAirMoisture = calculateMaximumGramsOfWaterVaporPerCubicMeter(meanTemperature);
+        this.maximalAirMoistureDay = calculateMaximumGramsOfWaterVaporPerCubicMeter(dayTemperature);
+        this.maximalAirMoistureNight = calculateMaximumGramsOfWaterVaporPerCubicMeter(nightTemperature);
     }
 
-    // function inspired by AI
-    protected double calculateMaximumGramsOfWaterVaporPerSquareMeter(double temperature){
-        double currentTemperatureInKelvin = ZERO_CELSIUS_IN_KELVIN + temperature;
-        // pws = 6.112×e(T−29.6517.67×(T−273.15))
-        double pws = 6.112 * Math.exp((17.67 * (currentTemperatureInKelvin - 273.15)) / (currentTemperatureInKelvin - 29.65));
-        //  (pws×100) / (R×T)
-        return this.maximalAirMoisture = (pws * 100) / (MOLAR_GAS_CONSTANT * currentTemperatureInKelvin) * 1000;
+    protected double calculateMaximumGramsOfWaterVaporPerCubicMeter(double celsius) {
+        double kelvin = celsius + ZERO_CELSIUS_IN_KELVIN;
+        double pwsInHPA = calculateSaturatedVaporPressure(celsius);
+        double pwsInPA = pwsInHPA * HECTO_MULTIPLIER;
+
+        return calculateWaterVaporDensity(pwsInPA, kelvin);
+    }
+
+    public double calculateSaturatedVaporPressure(double celsius) {
+        // De formule is P = exp(20.386 - 5132 / T)
+        double mmHg = Math.exp(20.386 - (5132 / (celsius + ZERO_CELSIUS_IN_KELVIN)));
+        return mmHg * MMHG_TO_KPA_MULTIPLIER;
+    }
+
+    public double calculateWaterVaporDensity(double pressure, double temperature) {
+        return (pressure * GRAMS_PER_MOLE_OF_WATER) / (MOLAR_GAS_CONSTANT * temperature);
     }
 
     @JsonIgnore
