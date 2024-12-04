@@ -42,7 +42,7 @@ public class PrecipiationComputator {
     }
 
     @Transactional
-    private void computeEvaporation(List<Climate> climates) {
+    protected void computeEvaporation(List<Climate> climates) {
         climates.stream()
                 .filter(Climate::isWater)
                 .forEach(this::processWaterClimate);
@@ -56,7 +56,7 @@ public class PrecipiationComputator {
     @Transactional
     protected void moveCloudsAccordingToAirflow(List<Climate> climates, WorldSettings worldSettings) {
         climates.stream()
-                .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
+                .flatMap(climate -> climate.getOutgoingAircurrents().stream())
                 .forEach(aircurrent -> {
                     AircurrentType aircurrentType = aircurrent.getAircurrentType();
                     int currentStrength = airCurrentStrengthSetter.get(aircurrentType).apply(worldSettings);

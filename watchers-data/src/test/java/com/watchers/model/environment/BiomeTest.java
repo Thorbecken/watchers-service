@@ -26,6 +26,8 @@ class BiomeTest {
         assertThat(biome.getGrassBiomass(), equalTo(0d));
         assertThat(biome.getTreeBiomass(), equalTo(0d));
         assertThat(biome.getCurrentFood(), equalTo(0d));
+        assertThat(biome.getWaterDesire(), equalTo(0d));
+        assertThat(biome.getTile().getCoordinate().getClimate().getAirMoisture(), equalTo(0d));
     }
 
     @Test
@@ -36,6 +38,9 @@ class BiomeTest {
         assertThat(biome.getGrassBiomass(), equalTo(Flora.GRASS.getGrowthRate()));
         assertThat(biome.getTreeBiomass(), equalTo(0d));
         assertThat(biome.getCurrentFood(), equalTo(Flora.GRASS.getGrowthRate()));
+        assertThat(biome.getWaterDesire(), equalTo(biome.getGrassBiomass() * Flora.GRASS.getGrowthRate() * Flora.GRASS.getWaterIntake()));
+        assertThat(biome.getTile().getGroundWater(), equalTo(10d-Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate()));
+        assertThat(biome.getTile().getCoordinate().getClimate().getAirMoisture(), equalTo(Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate()));
     }
 
     @Test
@@ -46,6 +51,9 @@ class BiomeTest {
         assertThat(biome.getGrassBiomass(), equalTo(0d));
         assertThat(biome.getTreeBiomass(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
         assertThat(biome.getCurrentFood(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
+        assertThat(biome.getWaterDesire(), equalTo(biome.getTreeBiomass() * Flora.LEAF_TREE.getGrowthRate() * Flora.LEAF_TREE.getWaterIntake()));
+        assertThat(biome.getTile().getGroundWater(), equalTo(10d-Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate()));
+        assertThat(biome.getTile().getCoordinate().getClimate().getAirMoisture(), equalTo(Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate()));
     }
 
     @Test
@@ -57,6 +65,9 @@ class BiomeTest {
         assertThat(biome.getGrassBiomass(), equalTo(Flora.GRASS.getGrowthRate()));
         assertThat(biome.getTreeBiomass(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
         assertThat(biome.getCurrentFood(), equalTo(Flora.GRASS.getGrowthRate() + Flora.LEAF_TREE.getGrowthRate()));
+        assertThat(biome.getWaterDesire(), equalTo((biome.getTreeBiomass() * Flora.LEAF_TREE.getGrowthRate() * Flora.LEAF_TREE.getWaterIntake())+biome.getGrassBiomass() * Flora.GRASS.getGrowthRate() * Flora.GRASS.getWaterIntake()));
+        assertThat(biome.getTile().getGroundWater(), equalTo(10d-(Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate())-(Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate())));
+        assertThat(biome.getTile().getCoordinate().getClimate().getAirMoisture(), equalTo(((Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate())+(Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate()))));
     }
 
     @Test

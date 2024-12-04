@@ -286,9 +286,9 @@ public class Climate {
 
     public void processRainfallAndCondensation() {
         // temperature rainfall is the rainfall that occurs because of drop in temperature across distances.
-        double temperatureRainfall = Math.min(0, (this.airMoisture - this.maximalAirMoisture));
+        double temperatureRainfall = Math.max(0, (this.maximalAirMoisture - this.airMoisture));
         // diurnal rainfall is the rainfall that occurs because of the drop in temperature at night.
-        double diurnalRainfall = Math.min(0, (this.maximalAirMoisture - this.maximalAirMoistureNight));
+        double diurnalRainfall = Math.max(0, (this.maximalAirMoisture - temperatureRainfall - this.maximalAirMoistureNight));
         double totalRainfall = temperatureRainfall + diurnalRainfall;
 
         this.setAirMoistureLoss(totalRainfall);
@@ -318,10 +318,10 @@ public class Climate {
                 .mapToInt(Aircurrent::getCurrentStrength)
                 .sum();
         if (divider != 0) {
-            double transfer = this.getAirMoisture() / divider;
-            this.setAirMoisture(this.getAirMoisture() - (transfer * divider));
-
-            outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transfer));
+            double transferPerStrength = this.getAirMoisture() / divider;
+            // below is for leftovers because of rounding down to ints.
+            this.setAirMoisture(this.getAirMoisture() - (transferPerStrength * divider));
+            outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transferPerStrength));
         }
     }
 

@@ -1,5 +1,6 @@
 package com.watchers;
 
+import com.watchers.helper.ClimateHelper;
 import com.watchers.model.common.Direction;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
@@ -88,6 +89,8 @@ public class TestableWorld {
                 coordinate.getTile().setHeight(SEA_HEIGHT);
             }
         }
+
+        ClimateHelper.calculateAndWeaveAirflows(world);
 
         return world;
     }
@@ -199,6 +202,8 @@ public class TestableWorld {
                 coordinate.getTile().setHeight(SEA_HEIGHT);
             }
         }
+
+        ClimateHelper.calculateAndWeaveAirflows(world);
 
         return world;
     }

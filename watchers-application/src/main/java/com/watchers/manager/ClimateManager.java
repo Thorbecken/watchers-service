@@ -13,16 +13,11 @@ public class ClimateManager {
 
     private final TemperatureZoneComputator temperatureZoneComputator;
     private final PrecipiationComputator precipiationComputator;
-    private final AircurrentRecalibrator aircurrentRecalibrator;
     private final WaterflowComputator waterflowComputator;
     private final WaterErosionComputator waterErosionComputator;
 
     public void proces(WorldTaskDto taskDto){
         if(taskDto instanceof ContinentalDriftTaskDto) {
-            StopwatchTimer.start();
-            aircurrentRecalibrator.process(taskDto);
-            StopwatchTimer.stop("aircurrentRecalibrator");
-
             StopwatchTimer.start();
             temperatureZoneComputator.process(taskDto);
             StopwatchTimer.stop("temperatureZoneComputator");

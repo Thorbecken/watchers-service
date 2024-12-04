@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
-import com.watchers.model.coordinate.Coordinate;
-import com.watchers.model.environment.Tile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -43,9 +41,6 @@ public class Aircurrent {
     @JsonView(Views.Public.class)
     private AircurrentType aircurrentType;
 
-    @JsonView(Views.Public.class)
-    private long heightDifference;
-
     public Aircurrent(Climate startingClimate, Climate endingClimate, AircurrentType aircurrentType, int currentStrength) {
         this.aircurrentType = aircurrentType;
         this.currentStrength = currentStrength;
@@ -55,30 +50,12 @@ public class Aircurrent {
 
         startingClimate.getOutgoingAircurrents().add(this);
         endingClimate.getIncomingAircurrents().add(this);
-
-        recalculateHeigthDifference();
     }
 
-    public void transfer(double amountPerStrength) {
-        double amount = amountPerStrength * currentStrength;
-        double heightAmount = calculateHeightDifferenceEffect(amount);
-
-        endingClimate.addIncomingMoisture(amount);
-        startingClimate.addAirMoistureLoss(heightAmount);
+    public void transfer(double transferPerStrength) {
+        endingClimate.addIncomingMoisture(transferPerStrength * currentStrength);
     }
 
-    public double calculateHeightDifferenceEffect(double airMoisture) {
-        long heightEffect = heightDifference / 100;
-        if (airMoisture > 0L && heightEffect > 0L) {
-            if (airMoisture > heightEffect) {
-                return heightEffect;
-            } else {
-                return airMoisture;
-            }
-        } else {
-            return 0;
-        }
-    }
 
     public Aircurrent createOutgoingClone(Climate climateClone) {
         Aircurrent clone = new Aircurrent();
@@ -87,7 +64,6 @@ public class Aircurrent {
         clone.setCurrentStrength(this.currentStrength);
         clone.setStartingClimate(climateClone);
         clone.setEndingClimate(this.endingClimate);
-        clone.setHeightDifference(this.heightDifference);
         return clone;
     }
 
@@ -98,22 +74,7 @@ public class Aircurrent {
         clone.setCurrentStrength(this.currentStrength);
         clone.setEndingClimate(climateClone);
         clone.setStartingClimate(this.startingClimate);
-        clone.setHeightDifference(this.heightDifference);
         return clone;
-    }
-
-    public void recalculateHeigthDifference() {
-        Climate endingClimate = this.getEndingClimate();
-        Coordinate endingCoordinate = endingClimate.getCoordinate();
-        Tile endingTile = endingCoordinate.getTile();
-        long endingHeight = endingTile.getHeight();
-
-        Climate startingClimate = this.getStartingClimate();
-        Coordinate startingCoordinate = startingClimate.getCoordinate();
-        Tile startingTile = startingCoordinate.getTile();
-        long startingHeight = startingTile.getHeight();
-
-        this.heightDifference = endingHeight - startingHeight;
     }
 
     @Override
@@ -122,7 +83,6 @@ public class Aircurrent {
                 "id=" + id +
                 ", currentStrength=" + currentStrength +
                 ", aircurrentType=" + aircurrentType +
-                ", heightDifference=" + heightDifference +
                 '}';
     }
 
