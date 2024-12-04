@@ -8,7 +8,6 @@ import com.watchers.helper.ClimateHelper;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -69,11 +68,6 @@ public class Climate {
     @JsonView(Views.Public.class)
     // maximal grams/milliliter of water per cubic meter
     private double maximalAirMoisture;
-
-    @Transient
-    @JsonIgnore
-    @EqualsAndHashCode.Exclude
-    private double airMoistureLoss;
 
     @JsonView(Views.Public.class)
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "startingClimate", cascade=CascadeType.ALL)
@@ -212,7 +206,6 @@ public class Climate {
         clone.setSolarTemperature(solarTemperature);
         clone.setAltitudeAdjustedTemperature(altitudeAdjustedTemperature);
         clone.setMeanTemperature(meanTemperature);
-        clone.setAirMoistureLoss(this.airMoistureLoss);
         clone.setAirMoisture(this.airMoisture);
         getOutgoingAircurrents().forEach(aircurrent -> clone.getOutgoingAircurrents().add(aircurrent.createOutgoingClone(clone)));
         getIncomingAircurrents().forEach(aircurrent -> clone.getIncomingAircurrents().add(aircurrent.createIncommingClone(clone)));
@@ -290,27 +283,13 @@ public class Climate {
         // diurnal rainfall is the rainfall that occurs because of the drop in temperature at night.
         double diurnalRainfall = Math.max(0, (this.maximalAirMoisture - temperatureRainfall - this.maximalAirMoistureNight));
         double totalRainfall = temperatureRainfall + diurnalRainfall;
-
-        this.setAirMoistureLoss(totalRainfall);
-        this.reduceAirMoisture();
+        this.getCoordinate().getTile().setRainfall(totalRainfall);
+        this.setAirMoisture(this.getAirMoisture() - totalRainfall);
     }
 
     public void calculateNewMoistureLevel() {
         this.setMeanDayAndNightMaximalAirMoister();
         this.processRainfallAndCondensation();
-        this.reduceAirMoisture();
-    }
-
-    public void reduceAirMoisture() {
-        if (this.airMoistureLoss > 0d) {
-            if ((this.getAirMoisture() - this.airMoistureLoss) > 0d) {
-                this.getCoordinate().getTile().setRainfall(this.airMoistureLoss);
-                this.setAirMoisture(this.getAirMoisture() - this.airMoistureLoss);
-            } else {
-                this.getCoordinate().getTile().setRainfall(this.getAirMoisture());
-                this.setAirMoisture(0d);
-            }
-        }
     }
 
     public void moveClouds() {
@@ -323,10 +302,6 @@ public class Climate {
             this.setAirMoisture(this.getAirMoisture() - (transferPerStrength * divider));
             outgoingAircurrents.forEach(aircurrent -> aircurrent.transfer(transferPerStrength));
         }
-    }
-
-    public void addAirMoistureLoss(double heightAmount) {
-        this.airMoistureLoss = this.airMoistureLoss + heightAmount;
     }
 
     @Override
