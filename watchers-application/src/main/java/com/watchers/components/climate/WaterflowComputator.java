@@ -80,11 +80,6 @@ public class WaterflowComputator {
             if (!lowerHeightTilesOrderedByHeightDescending.isEmpty()) {
                 Tile downwardTile = tile.getLowerHeightTilesOrderedByHeightDescending().get(0);
                 tile.setDownWardTile(downwardTile);
-                if (downwardTile.isSea()) {
-                    tile.setCoastalLand(true);
-                } else {
-                    downwardTile.getUpwardTiles().add(tile);
-                }
             }
         }
 
@@ -106,6 +101,7 @@ public class WaterflowComputator {
                         .findFirst()
                         .ifPresent(target -> downFlowMap.put(tile, target));
             }
+
             downFlowMap.forEach(Tile::setDownWardTile);
 
             noChanges = tilesWithDownwardTileNeighbour.isEmpty();

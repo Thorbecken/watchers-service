@@ -114,7 +114,11 @@ public class Tile implements GraphNode {
 
     public void setDownWardTile(Tile downWardTile) {
         this.downWardTile = downWardTile;
-        downWardTile.getUpwardTiles().add(this);
+        if (downWardTile.isSea()) {
+            this.setCoastalLand(true);
+        } else {
+            downWardTile.getUpwardTiles().add(this);
+        }
         long yDifference = this.downWardTile.getCoordinate().getYCoord() - this.coordinate.getYCoord();
         long xDifference = this.downWardTile.getCoordinate().getXCoord() - this.coordinate.getXCoord();
         if (yDifference > 0L) {
@@ -130,12 +134,11 @@ public class Tile implements GraphNode {
 
     @Transient
     @JsonIgnore
-    private List<Tile> upwardTiles = new ArrayList<>();
+    private Set<Tile> upwardTiles = new HashSet<>();
 
     public void resetWaterValues() {
         upwardTiles.clear();
         downWardTile = null;
-        surfaceWater = 0d;
         isRiver = false;
         isLakeTile = false;
         isLargeRiver = false;
@@ -350,7 +353,7 @@ public class Tile implements GraphNode {
         return coordinate.getLowerHeightCoordinatesNeighbours().stream()
                 .map(Coordinate::getTile)
                 .filter(tile -> tile != this)
-                .sorted(Comparator.comparing(Tile::getHeight).reversed())
+                .sorted(Comparator.comparing(Tile::getHeight))
                 .collect(Collectors.toList());
     }
 
@@ -377,7 +380,7 @@ public class Tile implements GraphNode {
     @JsonIgnore
     public boolean isLowestPoint() {
         return this.getNeighbours().stream()
-                .noneMatch(neighbour -> neighbour.getHeight() <= this.height);
+                .allMatch(neighbour -> neighbour.getHeight() >= this.height);
     }
 
     @JsonIgnore

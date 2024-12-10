@@ -7,13 +7,31 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.helper.ClimateHelper;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.world.World;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -36,6 +54,8 @@ public class Climate {
     private static final double HECTO_MULTIPLIER = 1000;
     private static final double MMHG_TO_KPA_MULTIPLIER = 0.133322;
 
+    private static final Cache<Double, Double> WATER_VAPOR_CALCULATION_CACHE = CacheBuilder.newBuilder()
+            .build();
 
     @Id
     @JsonView(Views.Internal.class)
@@ -96,7 +116,7 @@ public class Climate {
     private double meanTemperature;
 
     @Transient
-    private double heatChange;
+    private double temporaryTemperature;
 
     @JsonProperty("dayTemperature")
     @Column(name = "day_temperature")
@@ -154,6 +174,60 @@ public class Climate {
         this.altitudeAdjustedTemperature = Math.min(this.solarTemperature, this.solarTemperature - temperatureChange);
     }
 
+    static public void recalculateTemperatures(World world){
+        List<Climate> climateList = world.getCoordinates().stream()
+                .map(Coordinate::getClimate)
+                .collect(Collectors.toList());
+
+        // recalculate new base temperatures
+        climateList.parallelStream().forEach(climate -> climate.calculateAdjustedTemperatureForAltitude(world.getSeaLevel()));
+        // calculate new mean temperatures
+        climateList.parallelStream().forEach(Climate::calculateMeanTemperature);
+        // set new mean temperatures and adjust air moisture for new temperatures
+        climateList.parallelStream().forEach(Climate::adjustTemperatureAndMoistureLevel);
+    }
+
+    private static void  calculateMeanTemperature(Climate climate){
+        double incomingHeathFromAirCurrents = calculateIncomingHeathFromAirCurrents(climate);
+        if(climate.isLand()) {
+            climate.temporaryTemperature = (climate.meanTemperature + climate.altitudeAdjustedTemperature + incomingHeathFromAirCurrents) / 3;
+        } else {
+            Optional<Double> incomingHeathFromWaterCurrents = calculateIncomingHeathFromWaterCurrents(climate);
+            if (incomingHeathFromWaterCurrents.isPresent()) {
+                climate.temporaryTemperature = (climate.meanTemperature + climate.altitudeAdjustedTemperature + incomingHeathFromAirCurrents + incomingHeathFromWaterCurrents.get()) / 4;
+            } else {
+                climate.temporaryTemperature = (climate.meanTemperature + climate.altitudeAdjustedTemperature + incomingHeathFromAirCurrents) / 3;
+            }
+        }
+    }
+
+    private static double calculateIncomingHeathFromAirCurrents(Climate climate){
+        double incomingHeathTotal = climate.incomingAircurrents.stream()
+                .mapToDouble(aircurrent -> aircurrent.getStartingClimate().getMeanTemperature() * aircurrent.getCurrentStrength())
+                .sum();
+        double totalIncomingAirCurrentStrength = climate.incomingAircurrents.stream().mapToDouble(Aircurrent::getCurrentStrength).sum();
+        return incomingHeathTotal / totalIncomingAirCurrentStrength;
+    }
+
+    private static Optional<Double> calculateIncomingHeathFromWaterCurrents(Climate climate){
+        List<Climate> waterNeighbours = climate.getCoordinate().getNeighbours().stream()
+                .filter(Coordinate::isWater)
+                .map(Coordinate::getClimate)
+                .collect(Collectors.toList());
+
+        double incomingHeathTotal = waterNeighbours.stream()
+                .mapToDouble(Climate::getMeanTemperature)
+                .sum();
+        return waterNeighbours.size() > 0d ? Optional.of(incomingHeathTotal / waterNeighbours.size()) : Optional.empty();
+
+
+    }
+
+    private static void adjustTemperatureAndMoistureLevel(Climate climate){
+        climate.meanTemperature = climate.temporaryTemperature;
+        climate.calculateNewMoistureLevel();
+    }
+
     protected void setMeanDayAndNightMaximalAirMoister(){
         this.maximalAirMoisture = calculateMaximumGramsOfWaterVaporPerCubicMeter(meanTemperature);
         this.maximalAirMoistureDay = calculateMaximumGramsOfWaterVaporPerCubicMeter(dayTemperature);
@@ -161,11 +235,18 @@ public class Climate {
     }
 
     protected double calculateMaximumGramsOfWaterVaporPerCubicMeter(double celsius) {
-        double kelvin = celsius + ZERO_CELSIUS_IN_KELVIN;
-        double pwsInHPA = calculateSaturatedVaporPressure(celsius);
-        double pwsInPA = pwsInHPA * HECTO_MULTIPLIER;
+        Double cacheResult = WATER_VAPOR_CALCULATION_CACHE.getIfPresent(celsius);
+        if(cacheResult != null){
+            return cacheResult;
+        } else {
+            double kelvin = celsius + ZERO_CELSIUS_IN_KELVIN;
+            double pwsInHPA = calculateSaturatedVaporPressure(celsius);
+            double pwsInPA = pwsInHPA * HECTO_MULTIPLIER;
 
-        return calculateWaterVaporDensity(pwsInPA, kelvin);
+            double maximumGramsOfWaterVaporPerCubicMeter = calculateWaterVaporDensity(pwsInPA, kelvin);
+            WATER_VAPOR_CALCULATION_CACHE.put(celsius, maximumGramsOfWaterVaporPerCubicMeter);
+            return maximumGramsOfWaterVaporPerCubicMeter;
+        }
     }
 
     public double calculateSaturatedVaporPressure(double celsius) {
@@ -211,31 +292,6 @@ public class Climate {
         getIncomingAircurrents().forEach(aircurrent -> clone.getIncomingAircurrents().add(aircurrent.createIncommingClone(clone)));
 
         return clone;
-    }
-
-    public void processHeatChange(){
-        this.meanTemperature += this.heatChange;
-    }
-
-    public void transferWaterTemperature() {
-        coordinate.getNeighbours().stream()
-                .filter(Coordinate::isWater)
-                .map(Coordinate::getClimate)
-                .forEach(this::transferTemperatureThroughWater);
-    }
-
-    private void transferTemperatureThroughWater(Climate neighbouringClimate){
-        double averageTemperature = (neighbouringClimate.meanTemperature + this.meanTemperature) / 2d;
-        // There are four possible neighbours and by dividing by four allows to get to the mean temperature changes
-        this.heatChange = (this.meanTemperature - averageTemperature) / 4d;
-    }
-
-    public void transferAirTemperature() {
-        int incomingAirPressure = this.getIncomingAircurrents().stream().mapToInt(Aircurrent::getCurrentStrength).sum();
-        double averageTemperatureDifference = this.getIncomingAircurrents().stream()
-                .mapToDouble(aircurrent -> aircurrent.getHeatTransfer(this, incomingAirPressure))
-                .sum();
-        this.heatChange = averageTemperatureDifference / 2d; // 2 is an arbitrary number to diminish the transfer from air.
     }
 
     @JsonIgnore
