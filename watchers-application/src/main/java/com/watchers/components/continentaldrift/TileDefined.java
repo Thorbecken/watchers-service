@@ -55,18 +55,18 @@ public class TileDefined {
     public void assignStartingType(World world){
         world.getCoordinates().parallelStream().map(Coordinate::getTile).forEach(tile -> {
             long height = tile.getHeight();
-            if(height <= oceanHeight){
-                tile.setSurfaceType(SurfaceType.OCEAN);
-            } else if (height <= seaHeight){
-                tile.setSurfaceType(SurfaceType.SEA);
-            } else if (height <= coastalHeight){
-                tile.setSurfaceType(SurfaceType.COASTAL);
-            } else if (height <= hillHeight){
-                tile.setSurfaceType(SurfaceType.PLAIN);
-            } else if (height <= mountainHeight){
-                tile.setSurfaceType(SurfaceType.HILL);
-            } else {
+            if(height >= mountainHeight) {
                 tile.setSurfaceType(SurfaceType.MOUNTAIN);
+            } else if (height >= hillHeight){
+                tile.setSurfaceType(SurfaceType.HILL);
+            } else if (height >= plainsHeight){
+                tile.setSurfaceType(SurfaceType.PLAIN);
+            } else if (height >= coastalHeight){
+                tile.setSurfaceType(SurfaceType.COASTAL);
+            } else if (height >= seaHeight){
+                tile.setSurfaceType(SurfaceType.SEA);
+            } else {
+                tile.setSurfaceType(SurfaceType.OCEAN);
             }
         });
     }

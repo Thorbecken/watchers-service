@@ -26,8 +26,9 @@ import java.util.stream.Collectors;
 public class WaterflowComputator {
 
     private final TileDefined tileDefined;
-        private static final double RIVER_THRESHOLD = 50d;
-        private static final double LARGE_RIVER_THRESHOLD = 100d;
+    protected static final double LAKE_THRESHOLD = 0.1d;
+    protected static final double RIVER_THRESHOLD = 10d;
+    protected static final double LARGE_RIVER_THRESHOLD = 100d;
 
     @Transactional
     public void process(WorldTaskDto taskDto) {
@@ -110,7 +111,7 @@ public class WaterflowComputator {
 //        6. create lakes from tiles that can not get a down flowing tile
         List<Lake> lakes = new ArrayList<>();
         List<Tile> largeLakeTiles = landTileList.stream()
-                .filter(tile -> !tile.isLakeTile()
+                .filter(tile -> tile.isLakeTile()
                         && tile.getDownWardTile() == null)
                 .collect(Collectors.toList());
         boolean allLargeLakeTilesHaveBeenAssigned = largeLakeTiles.stream()
@@ -126,6 +127,7 @@ public class WaterflowComputator {
                     .orElseThrow();
             Set<Tile> lakeTiles = new HashSet<>();
             lakeTiles.add(lakeStartingTile);
+            lake.getLakeTiles().add(lakeStartingTile);
 
             boolean lakeIsComplete = false;
             while (!lakeIsComplete) {
@@ -139,6 +141,7 @@ public class WaterflowComputator {
                 lakeIsComplete = newLakeTiles.isEmpty();
             }
             lake.setLakeTiles(lakeTiles);
+            lakeTiles.forEach(tile -> tile.setLake(lake));
 
             allLargeLakeTilesHaveBeenAssigned = largeLakeTiles.stream()
                     .noneMatch(tile -> tile.getLake() == null);
@@ -146,6 +149,7 @@ public class WaterflowComputator {
 
 
 //        7. assign water flow for tiles that have down flowing tiles but no up current tiles
+//           These are the tiles at which the water streams start.
         landTileList.stream()
                 .filter(tile -> tile.getUpwardTiles().isEmpty())
                 .forEach(Tile::processMovementOfWater);
@@ -171,24 +175,26 @@ public class WaterflowComputator {
                     .mapToDouble(Tile::getSurfaceWater)
                     .sum();
 
-            lake.setMeanLakeHeight(totalSurfaceWater / lake.getLakeTiles().size());
+            double lakeSize = lake.getLakeTiles().size();
+            double lakeHeight = totalSurfaceWater / lakeSize;
+            lake.setMeanLakeHeight(lakeHeight);
+            lake.getLakeTiles().forEach(tile -> tile.setSurfaceWater(lakeHeight));
         }
 
 //        10. assign markers of rivers and lakes
         worldTiles.stream()
                 .filter(tile -> tile.getLake() != null
-                        && tile.getLake().getMeanLakeHeight() > 5d)
-                .forEach(tile -> {
-                    tile.setLakeTile(true);
-                    tile.setSurfaceType(SurfaceType.LAKE);
-                });
+                        && tile.getLake().getMeanLakeHeight() > LAKE_THRESHOLD)
+                .forEach(tile -> tile.setSurfaceType(SurfaceType.LAKE));
 
         worldTiles.stream()
+                .filter(tile -> !tile.isLakeTile())
                 .filter(tile -> tile.getSurfaceWater() >= RIVER_THRESHOLD
                         && tile.getSurfaceWater() < LARGE_RIVER_THRESHOLD)
                 .forEach(tile -> tile.setRiver(true));
 
         worldTiles.stream()
+                .filter(tile -> !tile.isLakeTile())
                 .filter(tile -> tile.getSurfaceWater() >= LARGE_RIVER_THRESHOLD)
                 .forEach(tile -> {
                     tile.setRiver(true);
