@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -29,22 +28,21 @@ public class ErosionAdjuster {
         CoordinateHelper.getAllPossibleCoordinates(world)
                 .forEach(coordinate -> erosionMap.put(coordinate, 0L));
 
-        Set<Coordinate> coordinates = world.getCoordinates();
+        int maxErosion = world.getWorldSettings().getMaxErosion();
+        int minHeightDifference = world.getWorldSettings().getMinHeightDifference();
 
-        coordinates.stream()
+        world.getCoordinates().stream()
                 .map(Coordinate::getTile)
                 .forEach(tile -> {
                     List<Tile> neighbouringTiles = tile.getNeighbours();
                     List<Tile> receivingTiles = neighbouringTiles.stream()
-                            .filter(neighbouringTile -> (tile.getHeight() - neighbouringTile.getHeight()) > world.getWorldSettings().getMinHeightDifference())
+                            .filter(neighbouringTile -> (tile.getHeight() - neighbouringTile.getHeight()) > minHeightDifference)
                             .collect(Collectors.toList());
 
                     for (Tile recievingTile : receivingTiles) {
                         long heightTransfer = (tile.getHeight() - recievingTile.getHeight()) / NUMBER_OF_NEIGHBOURS_PLUS_ONE;
-                        if (heightTransfer > world.getWorldSettings().getMaxErosion()) {
-                            heightTransfer = world.getWorldSettings().getMaxErosion();
-                        }
-
+                        heightTransfer = Math.min(heightTransfer, maxErosion);
+                        heightTransfer = Math.max(0, heightTransfer);
                         long aLong = erosionMap.get(recievingTile.getCoordinate());
                         erosionMap.put(recievingTile.getCoordinate(), aLong + heightTransfer);
                         long anotherLong = erosionMap.get(tile.getCoordinate());

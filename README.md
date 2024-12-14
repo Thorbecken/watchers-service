@@ -34,12 +34,6 @@ Watch-016: Calculate the day heath difference on a tile on basis on how many til
     Detract the mean temperature with the magic number to calculate the lower night temperature and add it to create the higher day temperature.
     Use the lower temperature to calculate the rainfall and the higher number to calculate the moisture transfer to the next tile.
 
-Watch-017: Change the water cycle to the following:
-    - First calculate the rainfall on water holding capacity of the air.
-    - Second use the difference between max temperature to transfer an amount of moisture.
-    - Third let the plants drink and evaporate their usage.
-    - Fourthly use the over excess amount of water to create rivers.
-
 Watch-018: Make two types of players:
     - Demiurge (Solo) that can have one of grass, plant and animal life.
     - Council (Team) that is a team of multiple players that can have one grass, plant or animal life.
