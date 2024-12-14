@@ -1,4 +1,4 @@
-    package com.watchers.model.world;
+package com.watchers.model.world;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.Objects;
 
-    @Data
+@Data
 @Entity
 @JsonSerialize
 @AllArgsConstructor
@@ -57,6 +57,7 @@ public class WorldSettings {
     // Erosion configuration
     private int minHeightDifference;
     private int maxErosion;
+    private int waterErosionStrength;
 
     // Climate configuration
     private int latitudinalStrength;
@@ -70,7 +71,7 @@ public class WorldSettings {
 
         // World configuration
         clone.xSize = this.xSize;
-        clone.ySize = this. ySize;
+        clone.ySize = this.ySize;
         clone.numberOfContinents = this.numberOfContinents;
         clone.lifePreSeeded = this.lifePreSeeded;
         clone.coastalZone = this.coastalZone;
@@ -91,6 +92,7 @@ public class WorldSettings {
         // Erosion configuration
         clone.minHeightDifference = this.minHeightDifference;
         clone.maxErosion = this.maxErosion;
+        clone.waterErosionStrength = this.waterErosionStrength;
 
         // Climate configuration
         clone.latitudinalStrength = this.latitudinalStrength;
@@ -99,16 +101,16 @@ public class WorldSettings {
         return clone;
     }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            WorldSettings that = (WorldSettings) o;
-            return Objects.equals(id, that.id);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id);
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WorldSettings that = (WorldSettings) o;
+        return Objects.equals(id, that.id);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+}

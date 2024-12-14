@@ -30,6 +30,7 @@ public class WorldSettingFactory {
     // Erosion configuration
     private final int minHeightDifference;
     private final int maxErosion;
+    private final int waterErosionStrength;
 
     public WorldSettingFactory(
             @Value("${watch.worldsettings.xSize}") long xSize,
@@ -50,7 +51,8 @@ public class WorldSettingFactory {
             @Value("${watch.continentalshift.continentalToOcceanicRatio}") int continentalToOcceanicRatio,
             @Value("${watch.continentalshift.continentalContinentWeight}") int continentalContinentWeight,
             @Value("${watch.erosion.minHeightDifference}") int minHeightDifference,
-            @Value("${watch.erosion.max}") int maxErosion) {
+            @Value("${watch.erosion.max}") int maxErosion,
+            @Value("${watch.erosion.waterErosionStrength}") int waterErosionStrength) {
         this.xSize = xSize;
         this.ySize = ySize;
 
@@ -72,6 +74,7 @@ public class WorldSettingFactory {
 
         this.minHeightDifference = minHeightDifference;
         this.maxErosion = maxErosion;
+        this.waterErosionStrength = waterErosionStrength;
     }
 
     public WorldSettings createWorldSetting() {
@@ -102,6 +105,7 @@ public class WorldSettingFactory {
                 // Erosion configuration
                 minHeightDifference,
                 maxErosion,
+                waterErosionStrength,
 
                 // Climate settings
                 7,

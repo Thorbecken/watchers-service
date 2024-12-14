@@ -232,6 +232,7 @@ public class TestableWorld {
                 3,
                 5,
                 10,
+                10,
 
                 // Climate settings
                 7,
