@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class WaterflowComputator {
 
     private final TileDefined tileDefined;
-    protected static final double LAKE_THRESHOLD = 0.1d;
+    protected static final double LAKE_THRESHOLD = 0.0d;
     protected static final double RIVER_THRESHOLD = 10d;
     protected static final double LARGE_RIVER_THRESHOLD = 100d;
 
@@ -80,7 +80,7 @@ public class WaterflowComputator {
             List<Tile> lowerHeightTilesOrderedByHeightDescending = tile.getLowerHeightTilesOrderedByHeightDescending();
             if (!lowerHeightTilesOrderedByHeightDescending.isEmpty()) {
                 Tile downwardTile = tile.getLowerHeightTilesOrderedByHeightDescending().get(0);
-                tile.setDownWardTile(downwardTile);
+                tile.setDownWardTileAndSetFlowDirection(downwardTile);
             }
         }
 
@@ -103,7 +103,7 @@ public class WaterflowComputator {
                         .ifPresent(target -> downFlowMap.put(tile, target));
             }
 
-            downFlowMap.forEach(Tile::setDownWardTile);
+            downFlowMap.forEach(Tile::setDownWardTileAndSetFlowDirection);
 
             noChanges = tilesWithDownwardTileNeighbour.isEmpty();
         }
@@ -182,18 +182,18 @@ public class WaterflowComputator {
         }
 
 //        10. assign markers of rivers and lakes
-        worldTiles.stream()
+        landTileList.stream()
                 .filter(tile -> tile.getLake() != null
                         && tile.getLake().getMeanLakeHeight() > LAKE_THRESHOLD)
                 .forEach(tile -> tile.setSurfaceType(SurfaceType.LAKE));
 
-        worldTiles.stream()
+        landTileList.stream()
                 .filter(tile -> !tile.isLakeTile())
                 .filter(tile -> tile.getSurfaceWater() >= RIVER_THRESHOLD
                         && tile.getSurfaceWater() < LARGE_RIVER_THRESHOLD)
                 .forEach(tile -> tile.setRiver(true));
 
-        worldTiles.stream()
+        landTileList.stream()
                 .filter(tile -> !tile.isLakeTile())
                 .filter(tile -> tile.getSurfaceWater() >= LARGE_RIVER_THRESHOLD)
                 .forEach(tile -> {

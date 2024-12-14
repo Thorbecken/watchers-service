@@ -75,11 +75,8 @@ public class Tile implements GraphNode {
     @JsonView(Views.Public.class)
     private boolean isLargeRiver;
 
-    @Column(name = "coastal_land")
-    @JsonView(Views.Public.class)
-    private boolean isCoastalLand;
-
     @Transient
+    @JsonIgnore
     private Lake lake;
 
     @Transient
@@ -112,13 +109,9 @@ public class Tile implements GraphNode {
     @Enumerated(value = EnumType.STRING)
     private RockType rockType;
 
-    public void setDownWardTile(Tile downWardTile) {
+    public void setDownWardTileAndSetFlowDirection(Tile downWardTile) {
         this.downWardTile = downWardTile;
-        if (downWardTile.isSea()) {
-            this.setCoastalLand(true);
-        } else {
-            downWardTile.getUpwardTiles().add(this);
-        }
+        downWardTile.getUpwardTiles().add(this);
         long yDifference = this.downWardTile.getCoordinate().getYCoord() - this.coordinate.getYCoord();
         long xDifference = this.downWardTile.getCoordinate().getXCoord() - this.coordinate.getXCoord();
         if (yDifference > 0L) {
@@ -139,9 +132,13 @@ public class Tile implements GraphNode {
     public void resetWaterValues() {
         upwardTiles.clear();
         downWardTile = null;
+        surfaceWater = 0;
+
         isRiver = false;
-        isLakeTile = false;
         isLargeRiver = false;
+
+        isLakeTile = false;
+        lake = null;
         flowDirection = null;
         hasProcessedWaterMovement = false;
     }

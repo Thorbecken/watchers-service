@@ -136,6 +136,9 @@ class WaterflowComputatorTest {
 
         assertEquals(5, middleMiddle.getSurfaceWater());
         assertEquals(0, lowerMiddle.getSurfaceWater());
+
+        // assertion that indeed all the rivers flow into the sea.
+        assertEquals(8, lowerMiddle.getUpwardTiles().stream().mapToDouble(Tile::getSurfaceWater).sum());
     }
 
     @Test

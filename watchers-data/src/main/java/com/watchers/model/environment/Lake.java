@@ -1,5 +1,6 @@
 package com.watchers.model.environment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import java.util.Set;
 @Setter
 public class Lake {
 
+    @JsonIgnore
     private Set<Tile> lakeTiles = new HashSet<>();
     private double meanLakeHeight;
 }
