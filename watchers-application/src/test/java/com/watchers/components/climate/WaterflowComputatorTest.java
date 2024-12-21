@@ -49,6 +49,7 @@ class WaterflowComputatorTest {
 
         world.getCoordinates().forEach(coordinate -> coordinate.getTile().setHeight(MOUNTAIN_HEIGHT));
         world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(1));
+        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setGroundWater(coordinate.getTile().getRockType().getMaxWaterRetention()));
     }
 
     @Test
@@ -67,6 +68,21 @@ class WaterflowComputatorTest {
         assertEquals(1, lowerLeft.getSurfaceWater());
         assertEquals(1,lowerMiddle.getSurfaceWater());
         assertEquals(1,lowerRight.getSurfaceWater());
+    }
+
+    @Test
+    void processNoGroundWater() {
+        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setGroundWater(0d));
+        world.getCoordinates().forEach(coordinate -> assertEquals(0, coordinate.getTile().getSurfaceWater()));
+        world.getCoordinates().forEach(coordinate -> assertEquals(1, coordinate.getTile().getRainfall()));
+
+        waterflowComputator.process(world);
+
+        world.getCoordinates().forEach(coordinate -> {
+            assertTrue(coordinate.getTile().getRockType().getMaxWaterRetention() >= 1d);
+            assertEquals(0d, coordinate.getTile().getSurfaceWater());
+            assertEquals(1d, coordinate.getTile().getGroundWater());
+        });
     }
 
     @Test

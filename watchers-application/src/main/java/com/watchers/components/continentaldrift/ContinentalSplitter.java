@@ -5,8 +5,8 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,17 +16,23 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@AllArgsConstructor
 public class ContinentalSplitter {
+
+    public ContinentalSplitter(@Value("${watch.continent.splitter}") boolean splitLargeContinents){
+        this.splitLargeContinents = splitLargeContinents;
+    }
+    private final boolean splitLargeContinents;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
-        World world = taskDto.getWorld();
-        Set<Continent> continents = new HashSet<>(world.getContinents());
+        if(splitLargeContinents) {
+            World world = taskDto.getWorld();
+            Set<Continent> continents = new HashSet<>(world.getContinents());
 
-        continents.stream()
-                .filter(continent -> !continent.getCoordinates().isEmpty())
-                .forEach(this::checkWidthLenght);
+            continents.stream()
+                    .filter(continent -> !continent.getCoordinates().isEmpty())
+                    .forEach(this::checkWidthLenght);
+        }
     }
 
     private void checkWidthLenght(Continent continent) {

@@ -6,6 +6,7 @@ import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Lake;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.special.crystal.AquiferCrystal;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-    /*
-    inspirations:
-    https://www.researchgate.net/figure/D8-algorithm-for-determining-the-flow-direction-and-flow-accumulation_fig1_348667327
-    https://developers.arcgis.com/rest/services-reference/enterprise/flow-direction.htm
-     */
+/*
+inspirations:
+https://www.researchgate.net/figure/D8-algorithm-for-determining-the-flow-direction-and-flow-accumulation_fig1_348667327
+https://developers.arcgis.com/rest/services-reference/enterprise/flow-direction.htm
+ */
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -29,6 +30,7 @@ public class WaterflowComputator {
     protected static final double LAKE_THRESHOLD = 0.0d;
     protected static final double RIVER_THRESHOLD = 10d;
     protected static final double LARGE_RIVER_THRESHOLD = 100d;
+    private static final double UNDERWATER_RIVER_THRESHOLD = 50d;
 
     @Transactional
     public void process(WorldTaskDto taskDto) {
@@ -60,9 +62,17 @@ public class WaterflowComputator {
         worldTiles.forEach(Tile::resetWaterValues);
         tileDefined.assignStartingType(world);
 
-//        2. create a list of all land tiles, ordered by height
+        worldTiles.stream()
+                .filter(tile -> tile.getPointOfInterest() instanceof AquiferCrystal)
+                .forEach(aquiferTile -> this.processAquiferTile(aquiferTile, worldTiles));
+
+//        2. create a lists of all land and water tiles, ordered by height
         List<Tile> landTileList = worldTiles.stream()
                 .filter(Tile::isLand)
+                .sorted(Comparator.comparing(Tile::getHeight).reversed())
+                .collect(Collectors.toList());
+        List<Tile> waterTileList = worldTiles.stream()
+                .filter(Tile::isWater)
                 .sorted(Comparator.comparing(Tile::getHeight).reversed())
                 .collect(Collectors.toList());
 
@@ -109,6 +119,27 @@ public class WaterflowComputator {
         }
 
 //        6. create lakes from tiles that can not get a down flowing tile
+        List<Lake> lakes = this.createLakes(landTileList);
+
+
+//        7. assign water flow for tiles that have down flowing tiles but no up current tiles
+//           These are the tiles at which the water streams start.
+        landTileList.stream()
+                .filter(tile -> tile.getUpwardTiles().isEmpty())
+                .forEach(Tile::processMovementOfWater);
+
+//        8. assign water flow for tiles that have not been assigned and where all up current tiles have been assigned
+        this.assignWaterFlow(landTileList);
+        this.assignUnderWaterWaterFlow(waterTileList);
+
+//        9. calculate mean water level of lakes
+        this.calculateMeanWaterLevelOfLakes(lakes);
+
+//        10. assign markers of rivers and lakes
+        this.assignRiverAndLakeMarkers(landTileList);
+    }
+
+    private List<Lake> createLakes(List<Tile> landTileList) {
         List<Lake> lakes = new ArrayList<>();
         List<Tile> largeLakeTiles = landTileList.stream()
                 .filter(tile -> tile.isLakeTile()
@@ -146,15 +177,10 @@ public class WaterflowComputator {
             allLargeLakeTilesHaveBeenAssigned = largeLakeTiles.stream()
                     .noneMatch(tile -> tile.getLake() == null);
         }
+        return lakes;
+    }
 
-
-//        7. assign water flow for tiles that have down flowing tiles but no up current tiles
-//           These are the tiles at which the water streams start.
-        landTileList.stream()
-                .filter(tile -> tile.getUpwardTiles().isEmpty())
-                .forEach(Tile::processMovementOfWater);
-
-//        8. assign water flow for tiles that have not been assigned and where all up current tiles have been assigned
+    private void assignWaterFlow(List<Tile> landTileList) {
         boolean allWaterHasFlownDown = landTileList.stream()
                 .noneMatch(Tile::readyToFlow);
         int riverCounter = 0;
@@ -168,8 +194,35 @@ public class WaterflowComputator {
             allWaterHasFlownDown = landTileList.stream()
                     .noneMatch(Tile::readyToFlow);
         }
+    }
 
-//        9. calculate mean water level of lakes
+    private void assignUnderWaterWaterFlow(List<Tile> waterTileList) {
+        Set<Tile> processedTiles = new HashSet<>();
+        boolean tilesInNeedOfProcessing = true;
+        while (tilesInNeedOfProcessing) {
+            List<Tile> underwaterFlowingTiles = waterTileList.stream()
+                    .filter(tile -> tile.getSurfaceWater() >= UNDERWATER_RIVER_THRESHOLD)
+                    .filter(tile -> !processedTiles.contains(tile))
+                    .collect(Collectors.toList());
+            tilesInNeedOfProcessing = !underwaterFlowingTiles.isEmpty();
+            processedTiles.addAll(underwaterFlowingTiles);
+
+            underwaterFlowingTiles.forEach(tile -> {
+                List<Tile> lowerTiles = tile.getLowerHeightTilesOrderedByHeightDescending();
+                lowerTiles.stream()
+                        .filter(lowerTile -> lowerTile.getSurfaceWater() >= 0)
+                        .min(Comparator.comparing(Tile::getHeight))
+                        .ifPresent(lowerTile -> {
+                            long heightDifference = tile.getHeight() - lowerTile.getHeight();
+                            double lowestValueOfWaterOrHeight = Math.min(tile.getSurfaceWater(), heightDifference);
+                            lowerTile.setSurfaceWater(lowestValueOfWaterOrHeight);
+                            tile.setDownWardTile(lowerTile);
+                        });
+            });
+        }
+    }
+
+    private void calculateMeanWaterLevelOfLakes(List<Lake> lakes) {
         for (Lake lake : lakes) {
             double totalSurfaceWater = lake.getLakeTiles().stream()
                     .mapToDouble(Tile::getSurfaceWater)
@@ -180,8 +233,9 @@ public class WaterflowComputator {
             lake.setMeanLakeHeight(lakeHeight);
             lake.getLakeTiles().forEach(tile -> tile.setSurfaceWater(lakeHeight));
         }
+    }
 
-//        10. assign markers of rivers and lakes
+    private void assignRiverAndLakeMarkers(List<Tile> landTileList) {
         landTileList.stream()
                 .filter(tile -> tile.getLake() != null
                         && tile.getLake().getMeanLakeHeight() > LAKE_THRESHOLD)
@@ -201,5 +255,14 @@ public class WaterflowComputator {
                     tile.setLargeRiver(true);
                     tile.setSurfaceType(SurfaceType.LARGE_RIVER);
                 });
+    }
+
+    private void processAquiferTile(Tile aquiferTile, List<Tile> worldTiles) {
+        worldTiles.stream()
+                .filter(tile -> tile.getDistance(aquiferTile) <= 4)
+                .forEach(tile -> tile.addRainfall(RIVER_THRESHOLD));
+        worldTiles.stream()
+                .filter(tile -> tile.getDistance(aquiferTile) <= 1)
+                .forEach(tile -> tile.addRainfall(LARGE_RIVER_THRESHOLD));
     }
 }

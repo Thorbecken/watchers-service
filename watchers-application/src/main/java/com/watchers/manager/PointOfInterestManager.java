@@ -2,6 +2,7 @@ package com.watchers.manager;
 
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.special.base.PointOfInterest;
+import com.watchers.model.special.crystal.AquiferCrystal;
 import com.watchers.model.special.crystal.HotSpotCrystal;
 import com.watchers.model.special.crystal.TectonicCrystal;
 import com.watchers.model.world.World;
@@ -31,6 +32,14 @@ public class PointOfInterestManager {
         World world = worldRepository.findById(1L).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Coordinate coordinate = world.getCoordinate(xCoord, yCoord);
         new TectonicCrystal(coordinate);
+        worldRepository.save(world);
+    }
+
+    @Transactional
+    public void addAquifer(Long xCoord, Long yCoord) {
+        World world = worldRepository.findById(1L).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        Coordinate coordinate = world.getCoordinate(xCoord, yCoord);
+        new AquiferCrystal(coordinate.getTile());
         worldRepository.save(world);
     }
 

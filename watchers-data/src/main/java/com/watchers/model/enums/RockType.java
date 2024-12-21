@@ -8,16 +8,18 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum RockType {
-    GRANITE("GRANITE", "Grey rock"),
-    QUARTZ("QUARTZ", "Quartz"),
-    ORANGE_SANDSTONE("SANDSTONE", "Orange rock"),
-    RED_SANDSTONE("SANDSTONE", "Red rock"),
-    BROWNSTONE("BROWNSTONE", "Brown rock"),
-    BASALT("BASALT", "Black rock"),
-    CHALK("CHALk", "White rock");
+    GRANITE("GRANITE", "Grey rock", 25d),
+    QUARTZ("QUARTZ", "Quartz", 25d),
+    ORANGE_SANDSTONE("SANDSTONE", "Orange rock", 25d),
+    RED_SANDSTONE("SANDSTONE", "Red rock", 25d),
+    BROWNSTONE("BROWNSTONE", "Brown rock", 25d),
+    BASALT("BASALT", "Black rock", 25d),
+    CHALK("CHALk", "White rock", 25d);
 
-    private String type;
-    private String description;
+    private final String type;
+    private final String description;
+
+    private final double maxWaterRetention;
 
     @JsonIgnore
     public static RockType getRandomRockType() {

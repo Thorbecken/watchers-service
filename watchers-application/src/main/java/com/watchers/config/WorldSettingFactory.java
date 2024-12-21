@@ -11,6 +11,7 @@ public class WorldSettingFactory {
     private final long xSize;
     private final long ySize;
     private final boolean lifePreSeeded;
+    private final long startingSeaLevel;
     private final int coastalZone;
     private final int oceanicZone;
     private final int numberOfContinents;
@@ -27,16 +28,12 @@ public class WorldSettingFactory {
     private final int maxContinentSize;
     private final int maxWidthLenghtBalance;
 
-    // Erosion configuration
-    private final int minHeightDifference;
-    private final int maxErosion;
-    private final int waterErosionStrength;
-
     public WorldSettingFactory(
             @Value("${watch.worldsettings.xSize}") long xSize,
             @Value("${watch.worldsettings.ySize}") long ySize,
             @Value("${watch.worldsettings.numberOfContinents}") int numberOfContinents,
             @Value("${watch.worldsettings.lifePresSeeded}") boolean lifePreSeeded,
+            @Value("${watch.plainsHeight}") long startingSeaLevel,
             @Value("${watch.worldsettings.coastalZone}") int coastalZone,
             @Value("${watch.worldsettings.oceanicZone}") int oceanicZone,
 
@@ -49,10 +46,7 @@ public class WorldSettingFactory {
             @Value("${watch.continentalshift.maxWidthLenghtBalance:3}") int maxWidthLenghtBalance,
             @Value("${watch.continentalshift.maxContinentsize:0}") int maxContinentSize,
             @Value("${watch.continentalshift.continentalToOcceanicRatio}") int continentalToOcceanicRatio,
-            @Value("${watch.continentalshift.continentalContinentWeight}") int continentalContinentWeight,
-            @Value("${watch.erosion.minHeightDifference}") int minHeightDifference,
-            @Value("${watch.erosion.max}") int maxErosion,
-            @Value("${watch.erosion.waterErosionStrength}") int waterErosionStrength) {
+            @Value("${watch.continentalshift.continentalContinentWeight}") int continentalContinentWeight) {
         this.xSize = xSize;
         this.ySize = ySize;
 
@@ -61,6 +55,7 @@ public class WorldSettingFactory {
         this.maxWidthLenghtBalance = maxWidthLenghtBalance;
         this.numberOfContinents = numberOfContinents;
         this.lifePreSeeded = lifePreSeeded;
+        this.startingSeaLevel = startingSeaLevel;
         this.coastalZone = coastalZone;
         this.oceanicZone = oceanicZone;
 
@@ -71,10 +66,6 @@ public class WorldSettingFactory {
         this.maxContinentSize = maxContinentSize;
         this.continentalToOcceanicRatio = continentalToOcceanicRatio;
         this.continentalContinentWeight = continentalContinentWeight;
-
-        this.minHeightDifference = minHeightDifference;
-        this.maxErosion = maxErosion;
-        this.waterErosionStrength = waterErosionStrength;
     }
 
     public WorldSettings createWorldSetting() {
@@ -87,6 +78,7 @@ public class WorldSettingFactory {
                 ySize,
                 numberOfContinents,
                 lifePreSeeded,
+                startingSeaLevel,
                 coastalZone,
                 oceanicZone,
                 continentalToOcceanicRatio,
@@ -101,11 +93,6 @@ public class WorldSettingFactory {
                 maximumContinents,
                 maxContinentSize,
                 maxWidthLenghtBalance,
-
-                // Erosion configuration
-                minHeightDifference,
-                maxErosion,
-                waterErosionStrength,
 
                 // Climate settings
                 7,

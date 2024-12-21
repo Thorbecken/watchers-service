@@ -43,6 +43,17 @@ public class PointOfInterestController {
         return ResponseEntity.ok().build();
     }
 
+    @RequestMapping(value = "/aquifer/{xCoord}/{yCoord}", method = RequestMethod.PUT)
+    public ResponseEntity addAquifer(@PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord) {
+        log.info("Received request to create a aquifer at coordinate: " + xCoord + "x, " + yCoord + "y");
+        Assert.notNull(xCoord, "No xCoord was found");
+        Assert.notNull(yCoord, "No yCoord was found");
+
+        pointOfInterestManager.addAquifer(xCoord, yCoord);
+        log.info("Created a aquifer at coordinates: " + xCoord + "x, " + yCoord + "y");
+        return ResponseEntity.ok().build();
+    }
+
     @RequestMapping(value = "/{xCoord}/{yCoord}", method = RequestMethod.DELETE)
     public ResponseEntity removePointOfInterest(@PathVariable("xCoord") Long xCoord, @PathVariable("yCoord") Long yCoord) {
         log.info("Received request to delete a point of interest at coordinate: " + xCoord + "x, " + yCoord + "y");

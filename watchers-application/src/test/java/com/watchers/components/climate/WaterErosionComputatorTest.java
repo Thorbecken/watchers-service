@@ -38,7 +38,7 @@ class WaterErosionComputatorTest {
         world = TestableWorld.createWorld();
         continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
         continentalDriftTaskDto.setWorld(world);
-        waterErosionComputator = new WaterErosionComputator();
+        waterErosionComputator = new WaterErosionComputator(1);
 
         upperLeft = world.getCoordinate(1L, 1L).getTile();
         upperMiddle = world.getCoordinate(1L, 2L).getTile();

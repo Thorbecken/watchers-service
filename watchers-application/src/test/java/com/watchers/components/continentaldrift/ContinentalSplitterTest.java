@@ -18,10 +18,11 @@ class ContinentalSplitterTest {
 
     @BeforeEach
     void setUp() {
-        continentalSplitter = new ContinentalSplitter();
+        continentalSplitter = new ContinentalSplitter(true);
 
         world = new World();
         world.setWorldSettings(TestableWorld.createWorldSettings());
+        world.setSeaLevel(world.getWorldSettings().getStartingSeaLevel());
         world.setYSize(5L);
         world.setXSize(3L);
 
@@ -98,5 +99,38 @@ class ContinentalSplitterTest {
                 .filter(coordinate -> coordinate.getContinent() != null && coordinate.getContinent().getId() != null)
                 .filter(coordinate -> coordinate.getContinent().getId().equals(4L)).count());
         Assertions.assertEquals(7, world.getContinents().size());
+    }
+
+    @Test
+    void processSplitterOff() {
+        world.getWorldSettings().setMaxWidthLenghtBalance(2);
+        world.getWorldSettings().setHeigtDivider(1);
+        world.getWorldSettings().setMinimumContinents(1);
+
+        Assertions.assertEquals(8, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(1L)).count());
+        Assertions.assertEquals(3, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(2L)).count());
+        Assertions.assertEquals(1, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(3L)).count());
+        Assertions.assertEquals(3, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(4L)).count());
+        Assertions.assertEquals(4, world.getContinents().size());
+
+        ContinentalDriftTaskDto continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
+        continentalDriftTaskDto.setWorld(world);
+        ContinentalSplitter offSplitter = new ContinentalSplitter(false);
+        offSplitter.process(continentalDriftTaskDto);
+
+        Assertions.assertEquals(8, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(1L)).count());
+        Assertions.assertEquals(3, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(2L)).count());
+        Assertions.assertEquals(1, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(3L)).count());
+        Assertions.assertEquals(3, world.getCoordinates().stream()
+                .filter(coordinate -> coordinate.getContinent().getId().equals(4L)).count());
+        Assertions.assertEquals(4, world.getContinents().size());
+
     }
 }

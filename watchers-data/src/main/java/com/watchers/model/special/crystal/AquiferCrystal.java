@@ -8,7 +8,7 @@ import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.special.base.PointOfInterest;
-import com.watchers.model.special.life.GreatFlora;
+import com.watchers.model.special.base.PointOfInterestType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +31,13 @@ public class AquiferCrystal extends PointOfInterest {
     @SequenceGenerator(name = "Aquifer_Crystal_Gen", sequenceName = "Aquifer_Crystal_Seq", allocationSize = 1)
     private Long id;
 
+    private AquiferCrystal(){
+    }
+
+    public AquiferCrystal(Tile tile){
+        setTile(tile);
+        setPointOfInterestType(PointOfInterestType.AQUIFER_CRYSTAL);
+    }
     @Override
     public String getDescription() {
         return "Gives moisture to a given area";

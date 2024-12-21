@@ -30,6 +30,7 @@ public class TestableWorld {
         worldSettings.setMinimumContinents(5);
         worldSettings.setLifePreSeeded(true);
         world.setWorldSettings(worldSettings);
+        world.setSeaLevel(worldSettings.getStartingSeaLevel());
 
         WorldMetaData worldMetaData = new WorldMetaData();
         worldMetaData.setId(1L);
@@ -217,6 +218,7 @@ public class TestableWorld {
                 6,
                 3,
                 true,
+                PLAIN_HEIGHT,
                 2,
                 5,
 
@@ -230,9 +232,6 @@ public class TestableWorld {
                 9000,
                 2,
                 3,
-                5,
-                10,
-                10,
 
                 // Climate settings
                 7,

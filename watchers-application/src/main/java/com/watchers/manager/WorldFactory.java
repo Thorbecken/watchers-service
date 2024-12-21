@@ -7,6 +7,7 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.coordinate.CoordinateFactory;
 import com.watchers.model.dto.MockContinent;
 import com.watchers.model.dto.WorldFactoryDTO;
+import com.watchers.model.enums.RockType;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Flora;
 import com.watchers.model.environment.Tile;
@@ -33,6 +34,7 @@ class WorldFactory {
 
     World generateWorld(WorldSettings worldSettings, WorldMetaData worldMetaData) {
         World world = new World(worldSettings.getXSize(), worldSettings.getYSize());
+        world.setSeaLevel(worldSettings.getStartingSeaLevel());
         world.setWorldMetaData(worldMetaData);
         world.setWorldSettings(worldSettings);
         worldSettings.setWorld(world);
@@ -41,15 +43,15 @@ class WorldFactory {
         worldMetaData.setYSize(world.getYSize());
 
         int continental = 0;
-        int oceeanic = 0;
+        int oceanic = 0;
         for (int i = 0; i < worldSettings.getNumberOfContinents(); i++) {
             SurfaceType surfaceType;
-            if (oceeanic * worldSettings.getContinentalToOcceanicRatio() >= continental) {
+            if (continental / worldSettings.getContinentalToOcceanicRatio() >= oceanic) {
+                surfaceType = SurfaceType.OCEAN;
+                oceanic++;
+            } else {
                 surfaceType = SurfaceType.PLAIN;
                 continental++;
-            } else {
-                surfaceType = SurfaceType.OCEAN;
-                oceeanic++;
             }
             Continent generatedContinent = new Continent(world, surfaceType);
 
@@ -88,6 +90,10 @@ class WorldFactory {
                     .map(Tile::getBiome)
                     .forEach(biome -> biome.setTreeFlora(Flora.getSeawaterFlora(biome.getTile().getCoordinate().getClimate().getMeanTemperature())));
 
+            world.getCoordinates().stream()
+                    .map(Coordinate::getTile)
+                    .forEach(tile -> tile.setGroundWater(tile.getRockType().getMaxWaterRetention() * 10));
+
             log.info("Pre seeded the world with life");
         }
 
@@ -98,7 +104,7 @@ class WorldFactory {
         log.info("Sepperating the oceans");
         world.getCoordinates().stream()
                 .map(Coordinate::getTile)
-                .filter(tile -> SurfaceType.SEA.equals(tile.getSurfaceType()))
+                .filter(Tile::isWater)
                 .forEach(
                         tile -> {
                             if (tile.getNeighboursWithinRange(Collections.singletonList(tile), world.getWorldSettings().getCoastalZone()).stream().anyMatch(streamTile -> SurfaceType.PLAIN.equals(streamTile.getSurfaceType()))) {
@@ -158,6 +164,10 @@ class WorldFactory {
         world.getContinents().removeIf(continent -> continent.getType() == null);
 
         mockContinents.forEach(mockContinent -> mockContinent.generateContinent(world));
+        world.getCoordinates().forEach(coordinate -> {
+            RockType rockType = coordinate.getContinent().getBasicRockType();
+            coordinate.getTile().setRockType(rockType);
+        });
     }
 
     private Coordinate generateStartingCoordinate(World world, Continent continent) {

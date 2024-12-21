@@ -74,7 +74,7 @@ public class World {
     @JsonProperty("seaLevel")
     @JsonView(Views.Internal.class)
     @Column(name = "sea_level")
-    private double seaLevel = 4000;
+    private double seaLevel;
 
     @Transient
     @JsonIgnore
@@ -94,7 +94,6 @@ public class World {
         this.ySize = ySize;
     }
 
-    @SuppressWarnings("unused")
     public World() {
     }
 
@@ -187,6 +186,7 @@ public class World {
         newWorld.setId(this.id);
         newWorld.setHeightDeficit(this.heightDeficit);
         newWorld.setLastContinentInFlux(this.lastContinentInFlux);
+        newWorld.setSeaLevel(this.seaLevel);
 
         newWorld.setWorldSettings(worldSettings.createClone(newWorld));
         newWorld.setWorldMetaData(worldMetaData.createClone(newWorld));

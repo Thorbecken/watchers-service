@@ -39,6 +39,7 @@ public class WorldSettings {
     private long ySize;
     private int numberOfContinents;
     private boolean lifePreSeeded;
+    private double startingSeaLevel;
     private int coastalZone;
     private int oceanicZone;
     private int continentalToOcceanicRatio;
@@ -53,11 +54,6 @@ public class WorldSettings {
     private int maximumContinents;
     private int maxContinentSize;
     private int maxWidthLenghtBalance;
-
-    // Erosion configuration
-    private int minHeightDifference;
-    private int maxErosion;
-    private int waterErosionStrength;
 
     // Climate configuration
     private int latitudinalStrength;
@@ -88,11 +84,6 @@ public class WorldSettings {
         clone.maximumContinents = this.maximumContinents;
         clone.maxContinentSize = this.maxContinentSize;
         clone.maxWidthLenghtBalance = this.maxWidthLenghtBalance;
-
-        // Erosion configuration
-        clone.minHeightDifference = this.minHeightDifference;
-        clone.maxErosion = this.maxErosion;
-        clone.waterErosionStrength = this.waterErosionStrength;
 
         // Climate configuration
         clone.latitudinalStrength = this.latitudinalStrength;
