@@ -82,8 +82,8 @@ public class CoordinateHelper {
                 .average()
                 .getAsDouble();
 
-        boolean abnormalX = coordinates.stream().anyMatch(coordinate -> coordinate.getXCoord() == meanX);
-        boolean abnormalY = coordinates.stream().anyMatch(coordinate -> coordinate.getYCoord() == meanY);
+        boolean abnormalX = coordinates.stream().noneMatch(coordinate -> coordinate.getXCoord() == meanX);
+        boolean abnormalY = coordinates.stream().noneMatch(coordinate -> coordinate.getYCoord() == meanY);
 
 
         long usableX = meanX;
