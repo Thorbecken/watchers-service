@@ -1,11 +1,14 @@
 package com.watchers.model.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.watchers.model.common.Views;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -183,5 +186,13 @@ public enum AnimalType {
         throw new IllegalArgumentException("No AnimalType found with name: " + name);
     }
 
+    @JsonCreator
+    public static AnimalType fromObject(final Map<String, Object> obj) {
+        if (obj != null && obj.containsKey("name")) {
+            String name = (String)obj.get("name");
+            return fromName(name);
+        }
+        return null;
+    }
 
 }

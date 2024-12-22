@@ -1,17 +1,13 @@
 package com.watchers.model.environment;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.*;
 import com.watchers.helper.RandomHelper;
 import com.watchers.model.common.Views;
-import com.watchers.model.enums.ClimateZoneEnum;
-import com.watchers.model.enums.FloraTypeEnum;
-import com.watchers.model.enums.FloralImageEnum;
-import com.watchers.model.enums.NaturalHabitat;
+import com.watchers.model.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -199,6 +195,15 @@ public enum Flora {
             }
         }
         throw new IllegalArgumentException("No Flora found with name: " + name);
+    }
+
+    @JsonCreator
+    public static Flora fromObject(final Map<String, Object> obj) {
+        if (obj != null && obj.containsKey("name")) {
+            String name = (String)obj.get("name");
+            return fromName(name);
+        }
+        return null;
     }
 
 }
