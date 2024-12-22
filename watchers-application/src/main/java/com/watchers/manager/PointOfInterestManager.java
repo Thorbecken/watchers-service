@@ -60,6 +60,7 @@ public class PointOfInterestManager {
         if(pointOfInterest != null){
             pointOfInterest.setCoordinate(null);
             pointOfInterest.setTile(null);
+            worldRepository.save(world);
             return pointOfInterest.getClass().getName();
         } else {
             return "non existing point of interest";
