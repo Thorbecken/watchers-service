@@ -1,10 +1,12 @@
 package com.watchers.manager;
 
 import com.watchers.model.coordinate.Coordinate;
+import com.watchers.model.environment.Flora;
 import com.watchers.model.special.base.PointOfInterest;
 import com.watchers.model.special.crystal.AquiferCrystal;
 import com.watchers.model.special.crystal.HotSpotCrystal;
 import com.watchers.model.special.crystal.TectonicCrystal;
+import com.watchers.model.special.life.GreatFlora;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
@@ -40,6 +42,13 @@ public class PointOfInterestManager {
         World world = worldRepository.findById(1L).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Coordinate coordinate = world.getCoordinate(xCoord, yCoord);
         new AquiferCrystal(coordinate.getTile());
+        worldRepository.save(world);
+    }
+
+    public void plantGreatFlora(Long xCoord, Long yCoord, Flora flora) {
+        World world = worldRepository.findById(1L).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
+        Coordinate coordinate = world.getCoordinate(xCoord, yCoord);
+        new GreatFlora(coordinate.getTile(), flora);
         worldRepository.save(world);
     }
 

@@ -1,6 +1,8 @@
 package com.watchers.controller;
 
 import com.watchers.manager.PointOfInterestManager;
+import com.watchers.model.enums.AnimalType;
+import com.watchers.model.environment.Flora;
 import com.watchers.repository.WorldRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,4 +66,18 @@ public class PointOfInterestController {
         log.info("Deleted a " + removedPointOfInterest + " at coordinates: " + xCoord + "x, " + yCoord + "y");
         return ResponseEntity.ok().build();
     }
+
+    @RequestMapping(value = "/greatFlora/{xCoordinate}/{yCoordinate}/{type}", method = RequestMethod.PUT)
+    public ResponseEntity seedTreeSpirit(@PathVariable("xCoordinate") Long xCoordinate, @PathVariable("yCoordinate") Long yCoordinate, @PathVariable("type") String type) {
+        log.info("Received request to seed great flora at coordinate: " + xCoordinate + "x, " + yCoordinate + "y");
+        Assert.notNull(xCoordinate, "No xCoordinate was found");
+        Assert.notNull(yCoordinate, "No yCoordinate was found");
+        Assert.notNull(Flora.fromName(type), "No type was found for " + type);
+
+        pointOfInterestManager.plantGreatFlora(xCoordinate, yCoordinate, Flora.fromName(type));
+        log.info("Seeded a " + type + " great flora at coordinates: " + xCoordinate + "x, " + yCoordinate + "y");
+        return ResponseEntity.ok().build();
+    }
+
+
 }
