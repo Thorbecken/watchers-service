@@ -9,23 +9,33 @@ import com.watchers.model.special.crystal.TectonicCrystal;
 import com.watchers.model.special.life.GreatFlora;
 import com.watchers.model.world.World;
 import com.watchers.repository.WorldRepository;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class PointOfInterestManager {
 
     private final WorldRepository worldRepository;
+
+    private final int numberOfTurnsBeforeReallocationOfMantlePlume;
+    private final int numberOfTurnsBeforeReallocationOfVolcano;
+
+    public PointOfInterestManager(WorldRepository worldRepository,
+                                  @Value("${watch.continent.mantle-plume.turn-limit}") int numberOfTurnsBeforeReallocationOfMantlePlume,
+                                  @Value("${watch.continent.volcano.turn-limit}") int numberOfTurnsBeforeReallocationOfVolcano){
+        this.worldRepository = worldRepository;
+        this.numberOfTurnsBeforeReallocationOfMantlePlume = numberOfTurnsBeforeReallocationOfMantlePlume;
+        this.numberOfTurnsBeforeReallocationOfVolcano = numberOfTurnsBeforeReallocationOfVolcano;
+    }
 
     @Transactional
     public void addHotspot(Long xCoord, Long yCoord) {
         World world = worldRepository.findById(1L).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Coordinate coordinate = world.getCoordinate(xCoord, yCoord);
-        new HotSpotCrystal(coordinate);
+        new HotSpotCrystal(coordinate, numberOfTurnsBeforeReallocationOfVolcano);
         worldRepository.save(world);
     }
 
@@ -33,7 +43,7 @@ public class PointOfInterestManager {
     public void addTectonicPlume(Long xCoord, Long yCoord) {
         World world = worldRepository.findById(1L).orElseThrow(() -> new RuntimeException("The world was lost in memory."));
         Coordinate coordinate = world.getCoordinate(xCoord, yCoord);
-        new TectonicCrystal(coordinate);
+        new TectonicCrystal(coordinate, numberOfTurnsBeforeReallocationOfMantlePlume);
         worldRepository.save(world);
     }
 

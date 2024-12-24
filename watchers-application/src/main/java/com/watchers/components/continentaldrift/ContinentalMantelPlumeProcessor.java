@@ -6,8 +6,8 @@ import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.special.crystal.TectonicCrystal;
 import com.watchers.model.world.World;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +17,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@AllArgsConstructor
 public class ContinentalMantelPlumeProcessor {
+
+    private final int numberOfTurnsBeforeReallocation;
+
+    public ContinentalMantelPlumeProcessor(
+            @Value("${watch.continent.mantle-plume.turn-limit}") int numberOfTurnsBeforeReallocation){
+        this.numberOfTurnsBeforeReallocation = numberOfTurnsBeforeReallocation;
+    }
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -33,7 +39,7 @@ public class ContinentalMantelPlumeProcessor {
             long x = RandomHelper.getRandomNonZero(world.getXSize());
             long y = RandomHelper.getRandomNonZero(world.getYSize());
             Coordinate coordinate = world.getCoordinate(x, y);
-            tectonicCrystals.add(new TectonicCrystal(coordinate));
+            tectonicCrystals.add(new TectonicCrystal(coordinate, numberOfTurnsBeforeReallocation));
             log.info("created tectonicecrystal with coordinate " + coordinate.toString());
             log.info(coordinate.getPointOfInterest().getDescription());
         }
@@ -44,7 +50,7 @@ public class ContinentalMantelPlumeProcessor {
                 long y = RandomHelper.getRandomNonZero(world.getYSize());
                 Coordinate coordinate = world.getCoordinate(x, y);
                 tectonicCrystal.setCoordinate(coordinate);
-                tectonicCrystal.setTimer(178L);
+                tectonicCrystal.setTimer(numberOfTurnsBeforeReallocation);
             }
         }
 

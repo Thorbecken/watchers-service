@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.watchers.helper.RandomHelper;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.special.base.PointOfInterest;
 import com.watchers.model.special.base.PointOfInterestType;
-import com.watchers.model.special.life.GreatFlora;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -37,15 +35,15 @@ public class TectonicCrystal extends PointOfInterest {
     @JsonProperty("timer")
     @Column(name = "timer")
     @JsonView(Views.Public.class)
-    private long timer;
+    private int timer;
 
     private TectonicCrystal() {
     }
 
-    public TectonicCrystal(Coordinate coordinate) {
+    public TectonicCrystal(Coordinate coordinate, int numberOfTurnsBeforeReallocation) {
         setCoordinate(coordinate);
         setPointOfInterestType(PointOfInterestType.TECTONIC_CRYSTAL);
-        setTimer(178);
+        setTimer(numberOfTurnsBeforeReallocation);
     }
 
     @Override
@@ -55,9 +53,8 @@ public class TectonicCrystal extends PointOfInterest {
 
     @Override
     public PointOfInterest createClone(Coordinate coordinate, Tile tile) {
-        TectonicCrystal clone = new TectonicCrystal();
+        TectonicCrystal clone = new TectonicCrystal(coordinate, this.timer);
         clone.setId(this.getId());
-        clone.setTimer(this.getTimer());
         clone.setCoordinate(coordinate);
         clone.setEarthBound(this.isEarthBound());
         clone.setPointOfInterestType(this.getPointOfInterestType());

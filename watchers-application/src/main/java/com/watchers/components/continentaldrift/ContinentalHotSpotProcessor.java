@@ -20,13 +20,13 @@ public class ContinentalHotSpotProcessor {
 
     public ContinentalHotSpotProcessor(
             @Value("${watch.continent.volcano.buildup.minimum}") long minimumHeightBuildupForEruption,
-            @Value("${watch.continent.volcano.turn-limit}") long numberOfTurnsBeforeReallocation){
+            @Value("${watch.continent.volcano.turn-limit}") int numberOfTurnsBeforeReallocation){
         this.minimumHeightBuildupForEruption = minimumHeightBuildupForEruption;
         this.numberOfTurnsBeforeReallocation = numberOfTurnsBeforeReallocation;
     }
 
     private final long minimumHeightBuildupForEruption;
-    private final long numberOfTurnsBeforeReallocation;
+    private final int numberOfTurnsBeforeReallocation;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
@@ -41,7 +41,7 @@ public class ContinentalHotSpotProcessor {
             long x = RandomHelper.getRandomNonZero(world.getXSize());
             long y = RandomHelper.getRandomNonZero(world.getYSize());
             Coordinate coordinate = world.getCoordinate(x, y);
-            hotSpotCrystals.add(new HotSpotCrystal(coordinate));
+            hotSpotCrystals.add(new HotSpotCrystal(coordinate, numberOfTurnsBeforeReallocation));
             log.info("created hotSpotCrystal with coordinate " + coordinate.toString());
             log.info(coordinate.getPointOfInterest().getDescription());
         }
@@ -49,8 +49,8 @@ public class ContinentalHotSpotProcessor {
         while (world.getHeightDeficit() > 0) {
             log.trace("Current height deficit: " + world.getHeightDeficit() + " meter(s).");
             for (HotSpotCrystal hotSpotCrystal : hotSpotCrystals) {
-                long heightdefecit = world.getHeightDeficit();
-                if (heightdefecit > 0) {
+                long heightDeficit = world.getHeightDeficit();
+                if (heightDeficit > 0) {
                     long extraHeight = RandomHelper.getRandomLong(world.getHeightDeficit());
                     log.trace("HotSpotCrystal gained " + extraHeight + " meter(s) height buildup.");
                     hotSpotCrystal.addHeightBuildup(extraHeight);

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 class ContinentalDriftManagerTest {
     private static final long MINIMUM_HEIGHT_BUILDUP_FOR_ERUPTION = 60;
-    private static final long NUMBER_OF_TURNS_BEFORE_REALLOCATION = 178L;
+    private static final int NUMBER_OF_TURNS_BEFORE_REALLOCATION = 178;
     private static final int EROSION_STRENGTH = 10;
     private static final int EROSION_MAX = 10000;
     private static final int EROSION_MIN = 1000;
@@ -27,7 +27,7 @@ class ContinentalDriftManagerTest {
         world = TestableWorld.createWorld();
         ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
         WorldMetaDataRepository worldMetaDataRepository = Mockito.mock(WorldMetaDataRepository.class);
-        ContinentalMantelPlumeProcessor continentalMantelPlumeProcessor = new ContinentalMantelPlumeProcessor();
+        ContinentalMantelPlumeProcessor continentalMantelPlumeProcessor = new ContinentalMantelPlumeProcessor(NUMBER_OF_TURNS_BEFORE_REALLOCATION);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter();
         ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger();
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer();

@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.watchers.helper.RandomHelper;
 import com.watchers.model.common.Views;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.environment.Tile;
 import com.watchers.model.special.base.PointOfInterest;
 import com.watchers.model.special.base.PointOfInterestType;
-import com.watchers.model.special.life.GreatFlora;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -47,10 +45,10 @@ public class HotSpotCrystal extends PointOfInterest {
     private HotSpotCrystal() {
     }
 
-    public HotSpotCrystal(Coordinate coordinate) {
+    public HotSpotCrystal(Coordinate coordinate, int timer) {
         setCoordinate(coordinate);
         setPointOfInterestType(PointOfInterestType.TECTONIC_CRYSTAL);
-        setTimer(RandomHelper.getRandomNonZero(178));
+        setTimer(timer);
     }
 
     @Override
