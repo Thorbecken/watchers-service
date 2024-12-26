@@ -398,8 +398,10 @@ public class Tile implements GraphNode {
                 .mapToDouble(Tile::getSurfaceWater)
                 .sum();
         double incomingWater = inflow + this.rainfall;
-        this.groundWater = Math.min(Math.max(0, rockType.getMaxWaterRetention() - groundWater), incomingWater);
-        this.surfaceWater = incomingWater - groundWater;
+        double waterNeed = Math.abs(Math.min(0, this.groundWater - rockType.getMaxWaterRetention()));
+        double addedGroundWater = Math.min(waterNeed, incomingWater);
+        this.groundWater = this.groundWater + addedGroundWater;
+        this.surfaceWater = incomingWater - addedGroundWater;
         this.hasProcessedWaterMovement = true;
     }
 

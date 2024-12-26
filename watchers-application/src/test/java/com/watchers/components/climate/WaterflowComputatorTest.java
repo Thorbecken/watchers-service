@@ -32,7 +32,7 @@ class WaterflowComputatorTest {
     WaterflowComputator waterflowComputator;
 
     @BeforeEach
-    void setupTest(){
+    void setupTest() {
         world = TestableWorld.createWorld();
         TileDefined tileDefined = new TileDefined(OCEAN_HEIGHT, SEA_HEIGHT, COASTAL_HEIGHT, PLAIN_HEIGHT, HILL_HEIGHT, MOUNTAIN_HEIGHT);
         waterflowComputator = new WaterflowComputator(tileDefined);
@@ -59,15 +59,15 @@ class WaterflowComputatorTest {
 
         waterflowComputator.process(world);
 
-        assertEquals(1,upperLeft.getSurfaceWater());
-        assertEquals(1,upperMiddle.getSurfaceWater());
-        assertEquals(1,upperLeft.getSurfaceWater());
-        assertEquals(1,middleRight.getSurfaceWater());
-        assertEquals(1,upperLeft.getSurfaceWater());
-        assertEquals(1,middleLeft.getSurfaceWater());
+        assertEquals(1, upperLeft.getSurfaceWater());
+        assertEquals(1, upperMiddle.getSurfaceWater());
+        assertEquals(1, upperLeft.getSurfaceWater());
+        assertEquals(1, middleRight.getSurfaceWater());
+        assertEquals(1, upperLeft.getSurfaceWater());
+        assertEquals(1, middleLeft.getSurfaceWater());
         assertEquals(1, lowerLeft.getSurfaceWater());
-        assertEquals(1,lowerMiddle.getSurfaceWater());
-        assertEquals(1,lowerRight.getSurfaceWater());
+        assertEquals(1, lowerMiddle.getSurfaceWater());
+        assertEquals(1, lowerRight.getSurfaceWater());
     }
 
     @Test
@@ -117,6 +117,55 @@ class WaterflowComputatorTest {
 
         assertEquals(5, middleMiddle.getSurfaceWater());
         assertEquals(9, lowerMiddle.getSurfaceWater());
+    }
+
+    @Test
+    void processMiddleSlopeMultipleTurns() {
+        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setGroundWater(0d));
+
+        upperLeft.setHeight(MOUNTAIN_HEIGHT);
+        upperRight.setHeight(MOUNTAIN_HEIGHT);
+        lowerLeft.setHeight(MOUNTAIN_HEIGHT);
+        lowerRight.setHeight(MOUNTAIN_HEIGHT);
+        upperMiddle.setHeight(MOUNTAIN_HEIGHT);
+
+        middleLeft.setHeight(HILL_HEIGHT);
+        middleRight.setHeight(HILL_HEIGHT);
+
+        middleMiddle.setHeight(HILL_HEIGHT - 1);
+        lowerMiddle.setHeight(PLAIN_HEIGHT);
+
+        for (int i = 0; i < 25; i++) {
+            world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(1));
+            waterflowComputator.process(world);
+
+            int counter = i + 1;
+            world.getCoordinates().forEach(coordinate -> {
+                assertEquals(counter, coordinate.getTile().getGroundWater());
+            });
+        }
+
+
+        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(1));
+        waterflowComputator.process(world);
+
+//      Expected flow values with 1,1 as upper left coordinate
+//      1,1,1
+//      2,5,2
+//      1,9,1
+
+        assertEquals(1, upperLeft.getSurfaceWater());
+        assertEquals(1, upperRight.getSurfaceWater());
+        assertEquals(1, lowerLeft.getSurfaceWater());
+        assertEquals(1, lowerRight.getSurfaceWater());
+        assertEquals(1, upperMiddle.getSurfaceWater());
+
+        assertEquals(2, middleLeft.getSurfaceWater());
+        assertEquals(2, middleRight.getSurfaceWater());
+
+        assertEquals(5, middleMiddle.getSurfaceWater());
+        assertEquals(9, lowerMiddle.getSurfaceWater());
+
     }
 
     @Test
@@ -196,7 +245,7 @@ class WaterflowComputatorTest {
 
     @Test
     void processSurfaceTypeDefinitions() {
-        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(WaterflowComputator.RIVER_THRESHOLD/2));
+        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(WaterflowComputator.RIVER_THRESHOLD / 2));
         middleMiddle.setRainfall(WaterflowComputator.LARGE_RIVER_THRESHOLD);
 
         upperLeft.setHeight(MOUNTAIN_HEIGHT);
@@ -208,7 +257,7 @@ class WaterflowComputatorTest {
         middleLeft.setHeight(HILL_HEIGHT);
         middleRight.setHeight(HILL_HEIGHT);
 
-        middleMiddle.setHeight(PLAIN_HEIGHT+1);
+        middleMiddle.setHeight(PLAIN_HEIGHT + 1);
         lowerMiddle.setHeight(PLAIN_HEIGHT);
 
         waterflowComputator.process(world);
