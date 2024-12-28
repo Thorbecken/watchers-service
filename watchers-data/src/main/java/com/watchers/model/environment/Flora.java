@@ -21,7 +21,7 @@ public enum Flora {
             , FloralImageEnum.GRASS
             , ClimateZoneEnum.ARCTIC.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 0.25
+            , 0.025
             , 3
             , 10),
     PINE_TREE(2L
@@ -31,7 +31,7 @@ public enum Flora {
             , FloralImageEnum.PINE
             , ClimateZoneEnum.ARCTIC.getMinTemperature()
             , ClimateZoneEnum.ARCTIC.getMaxTemperature()
-            , 0.5
+            , 0.05
             , 1.5
             , 30),
     LEAF_TREE(3L
@@ -41,7 +41,7 @@ public enum Flora {
             , FloralImageEnum.LEAF
             , ClimateZoneEnum.TEMPERATE.getMinTemperature()
             , ClimateZoneEnum.TEMPERATE.getMaxTemperature()
-            , 0.5
+            , 0.05
             , 1.5
             , 30),
     PALM_TREE(4L
@@ -51,7 +51,7 @@ public enum Flora {
             , FloralImageEnum.PALM
             , ClimateZoneEnum.TROPICAL.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 0.5
+            , 0.05
             , 1.5
             , 30),
     SAKURA_TREE(5L
@@ -61,7 +61,7 @@ public enum Flora {
             , FloralImageEnum.SAKURA
             , ClimateZoneEnum.TEMPERATE.getMinTemperature()
             , ClimateZoneEnum.TEMPERATE.getMaxTemperature()
-            , 0.5
+            , 0.05
             , 1.5
             , 30),
     WISTERIA_TREE(6L
@@ -71,7 +71,7 @@ public enum Flora {
             , FloralImageEnum.WISTERIA
             , ClimateZoneEnum.TROPICAL.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 0.5
+            , 0.05
             , 1.5
             , 30),
     JACARANDA_TREE(7L
@@ -81,7 +81,7 @@ public enum Flora {
             , FloralImageEnum.JACARANDA
             , ClimateZoneEnum.TROPICAL.getMinTemperature()
             , ClimateZoneEnum.TROPICAL.getMaxTemperature()
-            , 0.5
+            , 0.05
             , 1.5
             , 30),
 

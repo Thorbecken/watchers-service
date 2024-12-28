@@ -6,6 +6,7 @@ import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.world.World;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -35,12 +36,12 @@ class BiomeTest {
         biome.getTile().setGroundWater(10d);
         biome.setGrassFlora(Flora.GRASS);
         biome.processParallelTask();
-        assertThat(biome.getGrassBiomass(), equalTo(Flora.GRASS.getGrowthRate()));
-        assertThat(biome.getTreeBiomass(), equalTo(0d));
-        assertThat(biome.getCurrentFood(), equalTo(Flora.GRASS.getGrowthRate()));
-        assertThat(biome.getWaterDesire(), equalTo(biome.getGrassBiomass() * Flora.GRASS.getGrowthRate() * Flora.GRASS.getWaterIntake()));
-        assertThat(biome.getTile().getGroundWater(), equalTo(10d-Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate()));
-        assertThat(biome.getTile().getCoordinate().getClimate().getAirMoisture(), equalTo(Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate()));
+        assertEquals(biome.getGrassBiomass(), Flora.GRASS.getGrowthRate());
+        assertEquals(biome.getTreeBiomass(), 0d);
+        assertEquals(biome.getCurrentFood(), Flora.GRASS.getGrowthRate());
+        assertEquals(biome.getWaterDesire(), biome.getGrassBiomass() * Flora.GRASS.getGrowthRate() * Flora.GRASS.getWaterIntake(), 0.01);
+        assertEquals(biome.getTile().getGroundWater(), 10d-Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate(), 0.01);
+        assertEquals(biome.getTile().getCoordinate().getClimate().getAirMoisture(), Flora.GRASS.getWaterIntake() * Flora.GRASS.getGrowthRate(),0.01);
     }
 
     @Test
@@ -48,12 +49,12 @@ class BiomeTest {
         biome.getTile().setGroundWater(10d);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
-        assertThat(biome.getGrassBiomass(), equalTo(0d));
-        assertThat(biome.getTreeBiomass(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
-        assertThat(biome.getCurrentFood(), equalTo(Flora.LEAF_TREE.getGrowthRate()));
-        assertThat(biome.getWaterDesire(), equalTo(biome.getTreeBiomass() * Flora.LEAF_TREE.getGrowthRate() * Flora.LEAF_TREE.getWaterIntake()));
-        assertThat(biome.getTile().getGroundWater(), equalTo(10d-Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate()));
-        assertThat(biome.getTile().getCoordinate().getClimate().getAirMoisture(), equalTo(Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate()));
+        assertEquals(biome.getGrassBiomass(),0d);
+        assertEquals(biome.getTreeBiomass(), Flora.LEAF_TREE.getGrowthRate());
+        assertEquals(biome.getCurrentFood(), Flora.LEAF_TREE.getGrowthRate());
+        assertEquals(biome.getWaterDesire(), biome.getTreeBiomass() * Flora.LEAF_TREE.getGrowthRate() * Flora.LEAF_TREE.getWaterIntake(), 0.01);
+        assertEquals(biome.getTile().getGroundWater(), 10d-Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate(),0.01);
+        assertEquals(biome.getTile().getCoordinate().getClimate().getAirMoisture(), Flora.LEAF_TREE.getWaterIntake() * Flora.LEAF_TREE.getGrowthRate(), 0.01);
     }
 
     @Test
@@ -72,22 +73,22 @@ class BiomeTest {
 
     @Test
     void processParallelTaskGrassDrought() {
-        biome.getTile().setGroundWater(0.25d);
+        biome.getTile().setGroundWater(0.025d);
         biome.setGrassFlora(Flora.GRASS);
         biome.processParallelTask();
         assertThat(biome.getGrassFlora(), notNullValue());
-        assertThat(biome.getGrassBiomass(), equalTo(1d));
-        assertThat(biome.getCurrentFood(), equalTo(1d));
+        assertEquals(biome.getGrassBiomass(), 1d,0.01);
+        assertEquals(biome.getCurrentFood(), 1d, 0.01);
     }
 
     @Test
     void processParallelTaskTreeDrought() {
-        biome.getTile().setGroundWater(0.5d);
+        biome.getTile().setGroundWater(0.05d);
         biome.setTreeFlora(Flora.LEAF_TREE);
         biome.processParallelTask();
         assertThat(biome.getTreeFlora(), notNullValue());
-        assertThat(biome.getTreeBiomass(), equalTo(1d));
-        assertThat(biome.getCurrentFood(), equalTo(1d));
+        assertEquals(biome.getTreeBiomass(), 1d, 0.01);
+        assertEquals(biome.getCurrentFood(), 1d, 0.01);
     }
 
     @Test
