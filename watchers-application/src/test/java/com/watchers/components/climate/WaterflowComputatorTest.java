@@ -2,11 +2,16 @@ package com.watchers.components.climate;
 
 import com.watchers.TestableWorld;
 import com.watchers.components.continentaldrift.TileDefined;
+import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.enums.SurfaceType;
 import com.watchers.model.environment.Tile;
+import com.watchers.model.special.crystal.AquiferCrystal;
 import com.watchers.model.world.World;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -140,9 +145,7 @@ class WaterflowComputatorTest {
             waterflowComputator.process(world);
 
             int counter = i + 1;
-            world.getCoordinates().forEach(coordinate -> {
-                assertEquals(counter, coordinate.getTile().getGroundWater());
-            });
+            world.getCoordinates().forEach(coordinate -> assertEquals(counter, coordinate.getTile().getGroundWater()));
         }
 
 
@@ -298,5 +301,55 @@ class WaterflowComputatorTest {
         assertFalse(middleMiddle.isLakeTile());
 
         assertTrue(lowerMiddle.isLakeTile());
+    }
+
+    @Test
+    void testAquifer(){
+        upperLeft.setHeight(MOUNTAIN_HEIGHT);
+        upperRight.setHeight(MOUNTAIN_HEIGHT);
+        lowerLeft.setHeight(MOUNTAIN_HEIGHT);
+        lowerRight.setHeight(MOUNTAIN_HEIGHT);
+        upperMiddle.setHeight(MOUNTAIN_HEIGHT);
+
+        middleLeft.setHeight(HILL_HEIGHT);
+        middleRight.setHeight(HILL_HEIGHT);
+
+        middleMiddle.setHeight(HILL_HEIGHT - 1);
+        lowerMiddle.setHeight(PLAIN_HEIGHT);
+
+        List<Tile> tileList = world.getCoordinates().stream().map(Coordinate::getTile).collect(Collectors.toList());
+        tileList.forEach(tile -> tile.setRainfall(0));
+
+        AquiferCrystal aquiferCrystal = new AquiferCrystal(middleMiddle);
+        assertEquals(middleMiddle.getPointOfInterest(), aquiferCrystal);
+
+        waterflowComputator.process(world);
+
+        tileList.forEach(tile -> assertTrue(tile.getSurfaceWater() >= WaterflowComputator.RIVER_THRESHOLD));
+
+        assertTrue(upperLeft.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
+        assertTrue(upperRight.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
+        assertTrue(lowerLeft.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
+        assertTrue(lowerRight.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
+
+
+
+//        Expected flow values with 1,1 as upper left coordinate
+//        10,110,10
+//        120,350,120
+//        10,490,10
+
+        assertEquals(10, upperLeft.getSurfaceWater());
+        assertEquals(10, upperRight.getSurfaceWater());
+        assertEquals(10, lowerRight.getSurfaceWater());
+        assertEquals(10, lowerLeft.getSurfaceWater());
+
+        assertEquals(110, upperMiddle.getSurfaceWater());
+
+        assertEquals(120, middleLeft.getSurfaceWater());
+        assertEquals(120, middleRight.getSurfaceWater());
+
+        assertEquals(350, middleMiddle.getSurfaceWater());
+        assertEquals(590, lowerMiddle.getSurfaceWater());
     }
 }
