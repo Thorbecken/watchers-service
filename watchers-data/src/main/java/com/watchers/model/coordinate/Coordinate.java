@@ -341,24 +341,14 @@ public class Coordinate {
         //10
         long size = this.getWorld().getXSize();
         // 5
-        long halfSize = size / 2;
+        double halfSize = size / 2d;
         // 6
-        long rawDifference = this.getXCoord() - coordinate.getXCoord();
-        if (rawDifference > 0) {
-            if (rawDifference <= halfSize) {
-                return rawDifference;
-            } else {
-                // 6-10 = -4
-                return rawDifference - size;
-            }
+        long absoluteDifference = Math.abs(this.getXCoord() - coordinate.getXCoord());
+        if (absoluteDifference <= halfSize) {
+            return absoluteDifference;
         } else {
-            // -6 <= -5
-            if (rawDifference <= -halfSize) {
-                return rawDifference;
-            } else {
-                // -6+10 = 4
-                return rawDifference + size;
-            }
+            // 6-10 = -4
+            return absoluteDifference - size;
         }
     }
 
@@ -366,24 +356,14 @@ public class Coordinate {
         //10
         long size = this.getWorld().getYSize();
         // 5
-        long halfSize = size / 2;
+        double halfSize = size / 2d;
         // 6
-        long rawDifference = this.getYCoord() - coordinate.getYCoord();
-        if (rawDifference > 0) {
-            if (rawDifference <= halfSize) {
-                return rawDifference;
-            } else {
-                // 6-10 = -4
-                return rawDifference - size;
-            }
+        long absoluteDifference = Math.abs(this.getYCoord() - coordinate.getYCoord());
+        if (absoluteDifference <= halfSize) {
+            return absoluteDifference;
         } else {
-            // -6 <= -5
-            if (rawDifference <= -halfSize) {
-                return rawDifference;
-            } else {
-                // -6+10 = 4
-                return rawDifference + size;
-            }
+            // 6-10 = -4
+            return absoluteDifference - size;
         }
     }
 

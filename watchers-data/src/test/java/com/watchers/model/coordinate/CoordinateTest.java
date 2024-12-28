@@ -210,4 +210,46 @@ class CoordinateTest {
         assertThat(coordinatesInRange.contains(startCoordinate), equalTo(false));
     }
 
+    @Test
+    void testDistance(){
+        World world = TestableWorld.createMediumWorld();
+
+        Coordinate middleCoordinate = world.getCoordinate(2,3);
+        assertEquals(0, middleCoordinate.getDistance(middleCoordinate));
+
+        Coordinate leftCoordinate = world.getCoordinate(1, 3);
+        assertEquals(1, middleCoordinate.getDistance(leftCoordinate));
+        assertEquals(1, leftCoordinate.getDistance(middleCoordinate));
+
+        Coordinate rightCoordinate = world.getCoordinate(3,3);
+        assertEquals(1, middleCoordinate.getDistance(rightCoordinate));
+        assertEquals(1, rightCoordinate.getDistance(middleCoordinate));
+
+        assertEquals(1, leftCoordinate.getDistance(rightCoordinate));
+        assertEquals(1, rightCoordinate.getDistance(leftCoordinate));
+        assertEquals(leftCoordinate.getDistance(rightCoordinate), rightCoordinate.getDistance(leftCoordinate));
+
+        Coordinate upperCoordinate = world.getCoordinate(2, 1);
+        assertEquals(2, middleCoordinate.getDistance(upperCoordinate));
+        assertEquals(2, upperCoordinate.getDistance(middleCoordinate));
+
+        Coordinate lowerCoordinate = world.getCoordinate(2,6);
+        assertEquals(3, middleCoordinate.getDistance(lowerCoordinate));
+        assertEquals(3, lowerCoordinate.getDistance(middleCoordinate));
+
+        assertEquals(1, lowerCoordinate.getDistance(upperCoordinate));
+        assertEquals(1, upperCoordinate.getDistance(lowerCoordinate));
+
+        Coordinate upperLeftCoordinate = world.getCoordinate(1,1);
+        assertEquals(3, middleCoordinate.getDistance(upperLeftCoordinate));
+        assertEquals(3, upperLeftCoordinate.getDistance(middleCoordinate));
+
+        Coordinate lowerRightCoordinate = world.getCoordinate(3, 6);
+        assertEquals(4, middleCoordinate.getDistance(lowerRightCoordinate));
+        assertEquals(4, lowerRightCoordinate.getDistance(middleCoordinate));
+
+        assertEquals(2, lowerRightCoordinate.getDistance(upperLeftCoordinate));
+        assertEquals(2, upperLeftCoordinate.getDistance(lowerRightCoordinate));
+    }
+
 }
