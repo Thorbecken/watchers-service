@@ -41,7 +41,7 @@ class AnimalTest {
 
         startingTile = rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).findFirst().get();
 
-        rabbit = new Animal(startingTile.getCoordinate(), AnimalType.RABBIT, 1f);
+        rabbit = new Animal(startingTile.getCoordinate(), AnimalType.RABBIT, AnimalType.RABBIT.getForaging());
         startingTile.getCoordinate().getActors().add(rabbit);
     }
 
@@ -50,26 +50,26 @@ class AnimalTest {
     void processTurnTillReproduction(){
         assertEquals(1, rabbitWorld.getActorList().size());
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().setGrassFlora(Flora.GRASS));
-        assertEquals(1f, rabbit.getFoodReserve());
+        assertEquals(AnimalType.RABBIT.getForaging(), rabbit.getFoodReserve());
         rabbit.processSerialTask();
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
-        assertEquals(1.5f, rabbit.getFoodReserve());
+        assertEquals(2 * AnimalType.RABBIT.getForaging() - 1 * AnimalType.RABBIT.getMetabolism(), rabbit.getFoodReserve(), 0.001);
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
-        assertEquals(2.0f, rabbit.getFoodReserve());
+        assertEquals(3 * AnimalType.RABBIT.getForaging() - 2 * AnimalType.RABBIT.getMetabolism(), rabbit.getFoodReserve(), 0.001);
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
-        assertEquals(2.5f, rabbit.getFoodReserve());
+        assertEquals(4 * AnimalType.RABBIT.getForaging() - 3 * AnimalType.RABBIT.getMetabolism(), rabbit.getFoodReserve(), 0.001);
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
-        assertEquals(3.0f, rabbit.getFoodReserve());
+        assertEquals(5 * AnimalType.RABBIT.getForaging() - 4 * AnimalType.RABBIT.getMetabolism(), rabbit.getFoodReserve(), 0.001);
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         rabbit.processSerialTask();
-        assertEquals(3.5f, rabbit.getFoodReserve());
+        assertEquals(6 * AnimalType.RABBIT.getForaging() - 5 * AnimalType.RABBIT.getMetabolism(), rabbit.getFoodReserve(), 0.001);
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         assertEquals(1, rabbitWorld.getActorList().size());
         rabbit.processSerialTask();
-        assertEquals(2.0f, rabbit.getFoodReserve());
+        assertEquals(((7 * AnimalType.RABBIT.getForaging() - 6 * AnimalType.RABBIT.getMetabolism()) / 2 ), rabbit.getFoodReserve(), 0.001);
         rabbitWorld.getCoordinates().stream().map(Coordinate::getTile).forEach(tile -> tile.getBiome().addGrassBiomass(1));
         assertEquals(2, rabbitWorld.getNewActors().size());
         startingTile.getCoordinate().getActors().forEach(Actor::processSerialTask);
@@ -83,7 +83,7 @@ class AnimalTest {
         }
 
         assertEquals(StateType.DEAD,rabbit.getStateType());
-        assertEquals(0f, rabbit.getFoodReserve());
+        assertEquals(0f, rabbit.getFoodReserve(), 0.001);
     }
 
 }

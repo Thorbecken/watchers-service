@@ -16,130 +16,130 @@ import java.util.Map;
 public enum AnimalType {
     RABBIT(1L
             , "Rabbit"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     BIRD(2L
             , "Bird"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     BOAR(3L
             , "Boar"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     CAMEL(4L
             , "Camel"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     COW(5L
             , "Cow"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     DEER(6L
             , "Deer"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     EAGLE(7L
             , "Eagle"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     GOAT(8L
             , "Goat"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     HORSE(9L
             , "Horse"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     LION(10L
             , "Lion"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     MONKEY(11L
             , "Monkey"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     PENGUIN(12L
             , "Penguin"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     SHEEP(13L
             , "Sheep"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     TIGER(14L
             , "Tiger"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
     WOLF(15L
             , "Wolf"
-            , 5f
-            , 1f
             , 0.5f
+            , 0.1f
+            , 0.05f
             , 0.8f
             , 1
             , NaturalHabitat.TERRESTRIAL),
 
     WHALE(16L
             , "Whale"
-            , 20f
             , 2f
-            , 1f
+            , 0.2f
+            , 0.1f
             , 0.9f
             , 1
             , NaturalHabitat.AQUATIC);
