@@ -37,6 +37,8 @@ public class PrecipiationComputatorTest {
                 .map(Coordinate::getClimate)
                 .collect(Collectors.toList());
 
+        climates.forEach(climate -> climate.setMaximalAirMoisture(100));
+
         // Roep de methode aan om verdamping te verwerken
         computator.computeEvaporation(climates);
 

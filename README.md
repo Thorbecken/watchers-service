@@ -17,9 +17,7 @@ select count(1) from "sky";
 
 # todo
  - make extra an extra air current towards the hottest neighbour or towards itself if no hotter neighbour exists of about half total current strength.
- - make rain based on temperature differences
  - make water evaporate on land
- - make erosion more harsh
 
 WATCH-014: Make a 12-year cycle in which each year represents a month. Calculate the max height in which the equator moves.
     Take this as the quarter height and move the other half year to the lowest height in which the equator moves.
@@ -47,8 +45,6 @@ Watch-019: Rework ContinentalSplitter class
         - Let the method split the coordinates of these new continents based if there connected.
         - Let the method add coordinates of continents that are surrounded by another continent to the surrounding continent.
         - If only one continent survives split the continent with the default method.
-
-Watch-020: Rework the API's to allow for more nuanced interactions with the world and make is possible for the frontend to use these.
 
 Watch-021: Rework the Biome and Flora class. Make it more realistic.
     - Make it that sunlight is used to calculate maximum growth, which in turn needs water.

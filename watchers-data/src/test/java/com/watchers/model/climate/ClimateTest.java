@@ -53,7 +53,7 @@ class ClimateTest {
     }
 
     @Test
-    void moveCloudsSimmple() {
+    void moveCloudsSimple() {
         World world = new World();
         world.setWorldSettings(TestableWorld.createWorldSettings());
         world.setXSize(2L);
@@ -72,6 +72,7 @@ class ClimateTest {
 
         skyTileList.forEach(skyTile -> {
             assertEquals(2, skyTile.getOutgoingAircurrents().size());
+            skyTile.setMaximalAirMoisture(100);
             skyTile.addAirMoisture(2);
             skyTile.getOutgoingAircurrents().forEach(aircurrent -> aircurrent.setCurrentStrength(1));
         });
@@ -145,7 +146,10 @@ class ClimateTest {
                 sky26, sky27, sky28, sky29, sky30
         );
 
-        skyTileList.forEach(skyTile -> assertEquals(2, skyTile.getOutgoingAircurrents().size()));
+        skyTileList.forEach(skyTile -> {
+            assertEquals(2, skyTile.getOutgoingAircurrents().size());
+            skyTile.setMaximalAirMoisture(100);
+        });
         skyTileList.stream()
                 .flatMap(skyTile -> skyTile.getOutgoingAircurrents().stream())
                 .forEach(aircurrent -> aircurrent.setCurrentStrength(1));

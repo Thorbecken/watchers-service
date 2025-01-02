@@ -193,6 +193,7 @@ public class Climate {
         this.adiabaticTemperatureAdjustment = 0;
     }
 
+    @SuppressWarnings("OptionalIsPresent")
     private static void  calculateMeanTemperature(Climate climate){
         double incomingHeathFromAirCurrents = calculateIncomingHeathFromAirCurrents(climate);
         if(climate.isLand()) {
@@ -335,7 +336,7 @@ public class Climate {
 
     public void addAirMoisture(double extraAirmoisture) {
         if (extraAirmoisture > 0d) {
-            this.setAirMoisture(Math.min(extraAirmoisture + this.getAirMoisture(), 100d));
+            this.setAirMoisture(Math.min(extraAirmoisture + this.getAirMoisture(), this.maximalAirMoisture));
         }
     }
 
