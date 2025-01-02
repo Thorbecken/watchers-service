@@ -15,11 +15,14 @@ import java.util.Comparator;
 public class WaterErosionComputator {
 
     public WaterErosionComputator(
-            @Value("${watch.continent.water.erosion.strength}") int erosionStrength){
+            @Value("${watch.continent.water.erosion.strength}") int erosionStrength,
+            @Value("${watch.continent.water.erosion.multiplier}") int erosionMultiplier){
         this.erosionStrength = erosionStrength;
+        this.erosionMultiplier = erosionMultiplier;
     }
 
     private final int erosionStrength;
+    private final int erosionMultiplier;
 
 
     @Transactional
@@ -46,7 +49,7 @@ public class WaterErosionComputator {
         Tile downwardTile = tile.getDownWardTile();
         double halfWayErosionPoint = (double) ((tile.getHeight() - downwardTile.getHeight()) / 2);
         double maxErosion = Math.max(0, halfWayErosionPoint);
-        double waterErosion = Math.min(maxErosion, tile.getSurfaceWater());
+        double waterErosion = Math.min(maxErosion, (tile.getSurfaceWater() * erosionMultiplier));
 
         downwardTile.setHeight((long) (downwardTile.getHeight() + waterErosion));
         tile.setHeight((long) (tile.getHeight() - waterErosion));

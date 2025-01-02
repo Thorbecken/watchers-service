@@ -18,6 +18,7 @@ class WaterErosionComputatorTest {
     private static final long PLAIN_HEIGHT = 4000;
     private static final long HILL_HEIGHT = 5000;
     private static final long MOUNTAIN_HEIGHT = 6000;
+    private static final int MULTIPLIER = 1;
 
     Tile upperLeft;
     Tile upperMiddle;
@@ -38,7 +39,7 @@ class WaterErosionComputatorTest {
         world = TestableWorld.createWorld();
         continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
         continentalDriftTaskDto.setWorld(world);
-        waterErosionComputator = new WaterErosionComputator(1);
+        waterErosionComputator = new WaterErosionComputator(1, MULTIPLIER);
 
         upperLeft = world.getCoordinate(1L, 1L).getTile();
         upperMiddle = world.getCoordinate(1L, 2L).getTile();
@@ -95,7 +96,7 @@ class WaterErosionComputatorTest {
                 .filter(tile -> tile.getDownWardTile() != null)
                 .forEach(tile -> tile.getDownWardTile().getUpwardTiles().add(tile));
 
-        Function<Tile, Double> expectedHeightCalculator = (Tile tile) -> tile.getHeight() + tile.getUpwardTiles().stream().mapToDouble(Tile::getSurfaceWater).sum() - tile.getSurfaceWater();
+        Function<Tile, Double> expectedHeightCalculator = (Tile tile) -> tile.getHeight() + tile.getUpwardTiles().stream().mapToDouble(Tile::getSurfaceWater).sum() - tile.getSurfaceWater() * MULTIPLIER;
 
         double upperLeftHeightChange = expectedHeightCalculator.apply(upperLeft);
         double upperMiddleHeightChange = expectedHeightCalculator.apply(upperMiddle);
