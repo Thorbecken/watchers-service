@@ -50,7 +50,7 @@ public class Climate {
     private static final double ZERO_CELSIUS_IN_KELVIN = 273.15d;
     private static final double GRAMS_PER_MOLE_OF_WATER = 18.01528d;
     private static final double MOLAR_GAS_CONSTANT = 8.314d;
-    private static final double DIURNAL_TEMPERATURE_CHANGE_PER_DEGREE_OF_LONGITUDE = 0.1d;
+    protected static final double DIURNAL_TEMPERATURE_CHANGE_PER_DEGREE_OF_LATITUDE = 0.1d;
     private static final double HECTO_MULTIPLIER = 1000;
     private static final double MMHG_TO_KPA_MULTIPLIER = 0.133322;
 
@@ -116,7 +116,7 @@ public class Climate {
     private double meanTemperature;
 
     @Transient
-    private double temporaryTemperature;
+    private double temporaryMeanTemperature;
 
     @JsonProperty("dayTemperature")
     @Column(name = "day_temperature")
@@ -158,8 +158,11 @@ public class Climate {
         double latitudeDifferenceFromEquator = Math.abs(this.latitude);
         this.solarTemperature = MAX_MEAN_TEMPERATURE - (TEMPERATURE_DIFFERENCE_PER_LATITUDE * latitudeDifferenceFromEquator);
         this.meanTemperature = this.solarTemperature;
+        this.setDayNightTemperatures();
+    }
 
-        double temperatureSwing = DIURNAL_TEMPERATURE_CHANGE_PER_DEGREE_OF_LONGITUDE * Math.abs(latitude);
+    protected void setDayNightTemperatures() {
+        double temperatureSwing = DIURNAL_TEMPERATURE_CHANGE_PER_DEGREE_OF_LATITUDE * Math.abs(latitude);
         this.nightTemperature = this.meanTemperature - temperatureSwing;
         this.dayTemperature = this.meanTemperature + temperatureSwing;
 
@@ -168,56 +171,57 @@ public class Climate {
 
     // the temperature that is based on the latitude is adjusted for the height of the tile.
     // tile height in meters needs to be adjusted to Celsius change. (6.5 Celsius per 1000 meters)
-    public void calculateAdjustedTemperatureForAltitude(double seaLevel){
-        this.adiabaticTemperatureAdjustment = (this.getCoordinate().getTile().getHeight() - seaLevel) / METERS_PER_KILOMETER * TEMPERATURE_CHANGE_PER_KILOMETER * -1;
+    protected void calculateAdjustedTemperatureForAltitude(double seaLevel){
+        this.adiabaticTemperatureAdjustment = Math.min(-0d, (this.getCoordinate().getTile().getHeight() - seaLevel) / METERS_PER_KILOMETER * TEMPERATURE_CHANGE_PER_KILOMETER * -1);
     }
 
     static public void recalculateTemperatures(World world){
         List<Climate> climateList = world.getCoordinates().stream()
                 .map(Coordinate::getClimate)
                 .collect(Collectors.toList());
+        double seaLevel = world.getSeaLevel();
         // reset temperature for adiabatic temperature adjustment.
         // as higher altitudes reduce temperature, so do lower altitudes increase temperature.
         // so the adiabatic temperature is tile specific.
         climateList.parallelStream().forEach(Climate::resetTemperature);
         // recalculate new base temperatures
-        climateList.parallelStream().forEach(climate -> climate.calculateAdjustedTemperatureForAltitude(world.getSeaLevel()));
+        climateList.parallelStream().forEach(climate -> climate.calculateAdjustedTemperatureForAltitude(seaLevel));
         // calculate new mean temperatures
-        climateList.parallelStream().forEach(Climate::calculateMeanTemperature);
+        climateList.parallelStream().forEach(Climate::calculateAndSetTemporaryMeanTemperature);
         // set new mean temperatures with adiabatic adjustment and adjust air moisture for new temperatures
         climateList.parallelStream().forEach(Climate::adjustTemperatureAndMoistureLevel);
     }
 
-    private void resetTemperature() {
+    protected void resetTemperature() {
         this.meanTemperature = this.meanTemperature - adiabaticTemperatureAdjustment;
         this.adiabaticTemperatureAdjustment = 0;
     }
 
     @SuppressWarnings("OptionalIsPresent")
-    private static void  calculateMeanTemperature(Climate climate){
-        double incomingHeathFromAirCurrents = calculateIncomingHeathFromAirCurrents(climate);
-        if(climate.isLand()) {
-            climate.temporaryTemperature = (climate.meanTemperature + incomingHeathFromAirCurrents) / 2;
+    protected void calculateAndSetTemporaryMeanTemperature(){
+        double incomingHeathFromAirCurrents = this.calculateIncomingHeathFromAirCurrents();
+        if(this.isLand()) {
+            temporaryMeanTemperature = (meanTemperature + incomingHeathFromAirCurrents) / 2;
         } else {
-            Optional<Double> incomingHeathFromWaterCurrents = calculateIncomingHeathFromWaterCurrents(climate);
+            Optional<Double> incomingHeathFromWaterCurrents = this.calculateIncomingHeathFromWaterCurrents();
             if (incomingHeathFromWaterCurrents.isPresent()) {
-                climate.temporaryTemperature = (climate.meanTemperature + incomingHeathFromAirCurrents + incomingHeathFromWaterCurrents.get()) / 3;
+                temporaryMeanTemperature = (meanTemperature + incomingHeathFromAirCurrents + incomingHeathFromWaterCurrents.get()) / 3;
             } else {
-                climate.temporaryTemperature = (climate.meanTemperature + incomingHeathFromAirCurrents) / 2;
+                temporaryMeanTemperature = (meanTemperature + incomingHeathFromAirCurrents) / 2;
             }
         }
     }
 
-    private static double calculateIncomingHeathFromAirCurrents(Climate climate){
-        double incomingHeathTotal = climate.incomingAircurrents.stream()
+    protected double calculateIncomingHeathFromAirCurrents(){
+        double incomingHeathTotal = incomingAircurrents.stream()
                 .mapToDouble(aircurrent -> aircurrent.getStartingClimate().getMeanTemperature() * aircurrent.getCurrentStrength())
                 .sum();
-        double totalIncomingAirCurrentStrength = climate.incomingAircurrents.stream().mapToDouble(Aircurrent::getCurrentStrength).sum();
+        double totalIncomingAirCurrentStrength = incomingAircurrents.stream().mapToDouble(Aircurrent::getCurrentStrength).sum();
         return incomingHeathTotal / totalIncomingAirCurrentStrength;
     }
 
-    private static Optional<Double> calculateIncomingHeathFromWaterCurrents(Climate climate){
-        List<Climate> waterNeighbours = climate.getCoordinate().getNeighbours().stream()
+    protected Optional<Double> calculateIncomingHeathFromWaterCurrents(){
+        List<Climate> waterNeighbours = coordinate.getNeighbours().stream()
                 .filter(Coordinate::isWater)
                 .map(Coordinate::getClimate)
                 .collect(Collectors.toList());
@@ -225,17 +229,16 @@ public class Climate {
         double incomingHeathTotal = waterNeighbours.stream()
                 .mapToDouble(Climate::getMeanTemperature)
                 .sum();
-        return waterNeighbours.size() > 0d ? Optional.of(incomingHeathTotal / waterNeighbours.size()) : Optional.empty();
-
-
+        return waterNeighbours.size() > 0 ? Optional.of(incomingHeathTotal / waterNeighbours.size()) : Optional.empty();
     }
 
-    private static void adjustTemperatureAndMoistureLevel(Climate climate){
-        climate.meanTemperature = climate.temporaryTemperature + climate.adiabaticTemperatureAdjustment;
-        climate.calculateNewMoistureLevel();
+    protected void adjustTemperatureAndMoistureLevel(){
+        meanTemperature = temporaryMeanTemperature + adiabaticTemperatureAdjustment;
+        this.setDayNightTemperatures();
+        this.processRainfallAndCondensation();
     }
 
-    protected void setMeanDayAndNightMaximalAirMoister(){
+    private void setMeanDayAndNightMaximalAirMoister(){
         this.maximalAirMoisture = calculateMaximumGramsOfWaterVaporPerCubicMeter(meanTemperature);
         this.maximalAirMoistureDay = calculateMaximumGramsOfWaterVaporPerCubicMeter(dayTemperature);
         this.maximalAirMoistureNight = calculateMaximumGramsOfWaterVaporPerCubicMeter(nightTemperature);
@@ -256,13 +259,13 @@ public class Climate {
         }
     }
 
-    public double calculateSaturatedVaporPressure(double celsius) {
+    protected double calculateSaturatedVaporPressure(double celsius) {
         // De formule is P = exp(20.386 - 5132 / T)
         double mmHg = Math.exp(20.386 - (5132 / (celsius + ZERO_CELSIUS_IN_KELVIN)));
         return mmHg * MMHG_TO_KPA_MULTIPLIER;
     }
 
-    public double calculateWaterVaporDensity(double pressure, double temperature) {
+    private double calculateWaterVaporDensity(double pressure, double temperature) {
         return (pressure * GRAMS_PER_MOLE_OF_WATER) / (MOLAR_GAS_CONSTANT * temperature);
     }
 
@@ -342,17 +345,12 @@ public class Climate {
 
     public void processRainfallAndCondensation() {
         // temperature rainfall is the rainfall that occurs because of drop in temperature across distances.
-        double temperatureRainfall = Math.max(0, (this.maximalAirMoisture - this.airMoisture));
+        double temperatureRainfall = Math.max(0, (this.airMoisture - this.maximalAirMoisture));
         // diurnal rainfall is the rainfall that occurs because of the drop in temperature at night.
-        double diurnalRainfall = Math.max(0, (this.maximalAirMoisture - temperatureRainfall - this.maximalAirMoistureNight));
+        double diurnalRainfall = Math.max(0, (this.airMoisture - temperatureRainfall - this.maximalAirMoistureNight));
         double totalRainfall = temperatureRainfall + diurnalRainfall;
         this.getCoordinate().getTile().setRainfall(totalRainfall);
         this.setAirMoisture(this.getAirMoisture() - totalRainfall);
-    }
-
-    public void calculateNewMoistureLevel() {
-        this.setMeanDayAndNightMaximalAirMoister();
-        this.processRainfallAndCondensation();
     }
 
     public void moveClouds() {
