@@ -391,6 +391,7 @@ class ClimateTest {
 
         world.getCoordinates().forEach(coordinate -> {
             coordinate.getClimate().setMeanTemperature(10d);
+            coordinate.getClimate().setSolarTemperature(10d);
             coordinate.getTile().setSurfaceType(SurfaceType.PLAIN);
         });
 
@@ -568,7 +569,7 @@ class ClimateTest {
             coordinate.getTile().setSurfaceType(SurfaceType.PLAIN);
         });
 
-        middleClimate.setMeanTemperature(10d);
+        middleClimate.setSolarTemperature(10d);
 
         Climate.recalculateTemperatures(world);
 

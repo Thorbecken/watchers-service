@@ -201,13 +201,13 @@ public class Climate {
     protected void calculateAndSetTemporaryMeanTemperature(){
         double incomingHeathFromAirCurrents = this.calculateIncomingHeathFromAirCurrents();
         if(this.isLand()) {
-            temporaryMeanTemperature = (meanTemperature + incomingHeathFromAirCurrents) / 2;
+            temporaryMeanTemperature = (solarTemperature + incomingHeathFromAirCurrents) / 2;
         } else {
             Optional<Double> incomingHeathFromWaterCurrents = this.calculateIncomingHeathFromWaterCurrents();
             if (incomingHeathFromWaterCurrents.isPresent()) {
-                temporaryMeanTemperature = (meanTemperature + incomingHeathFromAirCurrents + incomingHeathFromWaterCurrents.get()) / 3;
+                temporaryMeanTemperature = (solarTemperature + incomingHeathFromAirCurrents + incomingHeathFromWaterCurrents.get()) / 3;
             } else {
-                temporaryMeanTemperature = (meanTemperature + incomingHeathFromAirCurrents) / 2;
+                temporaryMeanTemperature = (solarTemperature + incomingHeathFromAirCurrents) / 2;
             }
         }
     }
