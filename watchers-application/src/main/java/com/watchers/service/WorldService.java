@@ -57,10 +57,10 @@ public class WorldService {
         log.trace(getTotalHeight(world));
         if (worldTaskDto instanceof ContinentalDriftTaskDto) {
             continentalDriftManager.process((ContinentalDriftTaskDto) worldTaskDto);
-            climateManager.proces(worldTaskDto);
+            climateManager.process(worldTaskDto);
             cleansingManager.process(worldTaskDto);
         } else {
-            climateManager.proces(worldTaskDto);
+            climateManager.process(worldTaskDto);
         }
 
         lifeManager.process(worldTaskDto);
