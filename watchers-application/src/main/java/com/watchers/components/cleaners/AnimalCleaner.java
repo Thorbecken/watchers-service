@@ -1,7 +1,8 @@
 package com.watchers.components.cleaners;
 
+import com.watchers.components.Computer;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.dto.ContinentalDriftTaskDto;
+import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.StateType;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
@@ -15,10 +16,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class AnimalCleaner {
+public class AnimalCleaner implements Computer {
 
     @Transactional
-    public void process(ContinentalDriftTaskDto continentalDriftTaskDto) {
+    public void process(WorldTaskDto continentalDriftTaskDto) {
         World world = continentalDriftTaskDto.getWorld();
 
         world.getActorList().stream()

@@ -11,27 +11,19 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ClimateManager {
 
-    private final TemperatureZoneComputator temperatureZoneComputator;
-    private final PrecipiationComputator precipiationComputator;
-    private final WaterflowComputator waterflowComputator;
-    private final WaterErosionComputator waterErosionComputator;
+    private final TemperatureZoneComputer temperatureZoneComputator;
+    private final PrecipiationComputer precipiationComputer;
+    private final WaterflowComputer waterflowComputer;
+    private final WaterErosionComputer waterErosionComputer;
 
-    public void proces(WorldTaskDto taskDto){
+    public void process(WorldTaskDto taskDto){
         if(taskDto instanceof ContinentalDriftTaskDto) {
-            StopwatchTimer.start();
-            temperatureZoneComputator.process(taskDto);
-            StopwatchTimer.stop("temperatureZoneComputator");
+            StopwatchTimer.processAndTime(temperatureZoneComputator, taskDto);
         }
-        StopwatchTimer.start();
-        precipiationComputator.process(taskDto);
-        StopwatchTimer.stop("precipiationComputator");
-        StopwatchTimer.start();
-        waterflowComputator.process(taskDto);
-        StopwatchTimer.stop("waterflowComputator");
+        StopwatchTimer.processAndTime(precipiationComputer, taskDto);
+        StopwatchTimer.processAndTime(waterflowComputer, taskDto);
         if(taskDto instanceof ContinentalDriftTaskDto) {
-            StopwatchTimer.start();
-            waterErosionComputator.process(taskDto);
-            StopwatchTimer.stop("waterErosionComputator");
+            StopwatchTimer.processAndTime(waterErosionComputer, taskDto);
         }
     }
 }

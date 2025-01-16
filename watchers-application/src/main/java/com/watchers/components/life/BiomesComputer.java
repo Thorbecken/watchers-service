@@ -1,5 +1,6 @@
 package com.watchers.components.life;
 
+import com.watchers.components.Computer;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.environment.Biome;
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class BiomeProcessor {
+public class BiomesComputer implements Computer {
 
     @Transactional
     public void process(WorldTaskDto taskDto) {

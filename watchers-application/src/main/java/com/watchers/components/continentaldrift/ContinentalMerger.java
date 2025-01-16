@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
@@ -17,7 +18,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class ContinentalMerger {
+public class ContinentalMerger implements ContinentalComputer {
 
     private final ContinentRepository continentRepository;
 

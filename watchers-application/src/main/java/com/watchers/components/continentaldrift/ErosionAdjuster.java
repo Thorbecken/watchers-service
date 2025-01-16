@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -16,7 +17,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Component
-public class ErosionAdjuster {
+public class ErosionAdjuster implements ContinentalComputer {
 
     private final int NUMBER_OF_NEIGHBOURS_PLUS_ONE = 5;
 

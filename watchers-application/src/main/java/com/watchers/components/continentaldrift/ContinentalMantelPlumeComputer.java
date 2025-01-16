@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.helper.RandomHelper;
 import com.watchers.model.coordinate.Coordinate;
@@ -17,12 +18,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class ContinentalMantelPlumeProcessor {
+public class ContinentalMantelPlumeComputer implements ContinentalComputer {
 
     private final int numberOfTurnsBeforeReallocation;
     private final int minimumNumberOfPlume;
 
-    public ContinentalMantelPlumeProcessor(
+    public ContinentalMantelPlumeComputer(
             @Value("${watch.continent.mantle-plume.turn-limit}") int numberOfTurnsBeforeReallocation,
             @Value("${watch.continent.mantle-plume.amount.minimum}") int minimumNumberOfPlume){
         this.numberOfTurnsBeforeReallocation = numberOfTurnsBeforeReallocation;

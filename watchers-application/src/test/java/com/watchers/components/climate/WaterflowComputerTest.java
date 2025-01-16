@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class WaterflowComputatorTest {
+class WaterflowComputerTest {
     private static final long OCEAN_HEIGHT = 1000;
     private static final long SEA_HEIGHT = 2000;
     private static final long COASTAL_HEIGHT = 3000;
@@ -34,13 +34,13 @@ class WaterflowComputatorTest {
     Tile lowerRight;
 
     World world;
-    WaterflowComputator waterflowComputator;
+    WaterflowComputer waterflowComputer;
 
     @BeforeEach
     void setupTest() {
         world = TestableWorld.createWorld();
         TileDefined tileDefined = new TileDefined(OCEAN_HEIGHT, SEA_HEIGHT, COASTAL_HEIGHT, PLAIN_HEIGHT, HILL_HEIGHT, MOUNTAIN_HEIGHT);
-        waterflowComputator = new WaterflowComputator(tileDefined);
+        waterflowComputer = new WaterflowComputer(tileDefined);
 
         upperLeft = world.getCoordinate(1L, 1L).getTile();
         upperMiddle = world.getCoordinate(1L, 2L).getTile();
@@ -62,7 +62,7 @@ class WaterflowComputatorTest {
         world.getCoordinates().forEach(coordinate -> assertEquals(0, coordinate.getTile().getSurfaceWater()));
         world.getCoordinates().forEach(coordinate -> assertEquals(1, coordinate.getTile().getRainfall()));
 
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
         assertEquals(1, upperLeft.getSurfaceWater());
         assertEquals(1, upperMiddle.getSurfaceWater());
@@ -81,7 +81,7 @@ class WaterflowComputatorTest {
         world.getCoordinates().forEach(coordinate -> assertEquals(0, coordinate.getTile().getSurfaceWater()));
         world.getCoordinates().forEach(coordinate -> assertEquals(1, coordinate.getTile().getRainfall()));
 
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
         world.getCoordinates().forEach(coordinate -> {
             assertTrue(coordinate.getTile().getRockType().getMaxWaterRetention() >= 1d);
@@ -104,7 +104,7 @@ class WaterflowComputatorTest {
         middleMiddle.setHeight(HILL_HEIGHT - 1);
         lowerMiddle.setHeight(PLAIN_HEIGHT);
 
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
 //        Expected flow values with 1,1 as upper left coordinate
 //        1,1,1
@@ -142,7 +142,7 @@ class WaterflowComputatorTest {
 
         for (int i = 0; i < 25; i++) {
             world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(1));
-            waterflowComputator.process(world);
+            waterflowComputer.process(world);
 
             int counter = i + 1;
             world.getCoordinates().forEach(coordinate -> assertEquals(counter, coordinate.getTile().getGroundWater()));
@@ -150,7 +150,7 @@ class WaterflowComputatorTest {
 
 
         world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(1));
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
 //      Expected flow values with 1,1 as upper left coordinate
 //      1,1,1
@@ -186,7 +186,7 @@ class WaterflowComputatorTest {
         lowerMiddle.setHeight(OCEAN_HEIGHT);
         lowerMiddle.setSurfaceType(SurfaceType.OCEAN);
 
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
 //        Expected flow values with 1,1 as upper left coordinate
 //        1,1,1
@@ -223,7 +223,7 @@ class WaterflowComputatorTest {
         middleMiddle.setHeight(PLAIN_HEIGHT);
         lowerMiddle.setHeight(PLAIN_HEIGHT);
 
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
 //        Expected flow values with 1,1 as upper left coordinate
 //        1,1,1
@@ -248,8 +248,8 @@ class WaterflowComputatorTest {
 
     @Test
     void processSurfaceTypeDefinitions() {
-        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(WaterflowComputator.RIVER_THRESHOLD / 2));
-        middleMiddle.setRainfall(WaterflowComputator.LARGE_RIVER_THRESHOLD);
+        world.getCoordinates().forEach(coordinate -> coordinate.getTile().setRainfall(WaterflowComputer.RIVER_THRESHOLD / 2));
+        middleMiddle.setRainfall(WaterflowComputer.LARGE_RIVER_THRESHOLD);
 
         upperLeft.setHeight(MOUNTAIN_HEIGHT);
         upperRight.setHeight(MOUNTAIN_HEIGHT);
@@ -263,7 +263,7 @@ class WaterflowComputatorTest {
         middleMiddle.setHeight(PLAIN_HEIGHT + 1);
         lowerMiddle.setHeight(PLAIN_HEIGHT);
 
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
         // surface type assertions
         assertEquals(SurfaceType.MOUNTAIN, upperLeft.getSurfaceType());
@@ -323,14 +323,14 @@ class WaterflowComputatorTest {
         AquiferCrystal aquiferCrystal = new AquiferCrystal(middleMiddle);
         assertEquals(middleMiddle.getPointOfInterest(), aquiferCrystal);
 
-        waterflowComputator.process(world);
+        waterflowComputer.process(world);
 
-        tileList.forEach(tile -> assertTrue(tile.getSurfaceWater() >= WaterflowComputator.RIVER_THRESHOLD));
+        tileList.forEach(tile -> assertTrue(tile.getSurfaceWater() >= WaterflowComputer.RIVER_THRESHOLD));
 
-        assertTrue(upperLeft.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
-        assertTrue(upperRight.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
-        assertTrue(lowerLeft.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
-        assertTrue(lowerRight.getSurfaceWater() < WaterflowComputator.LARGE_RIVER_THRESHOLD);
+        assertTrue(upperLeft.getSurfaceWater() < WaterflowComputer.LARGE_RIVER_THRESHOLD);
+        assertTrue(upperRight.getSurfaceWater() < WaterflowComputer.LARGE_RIVER_THRESHOLD);
+        assertTrue(lowerLeft.getSurfaceWater() < WaterflowComputer.LARGE_RIVER_THRESHOLD);
+        assertTrue(lowerRight.getSurfaceWater() < WaterflowComputer.LARGE_RIVER_THRESHOLD);
 
 
 

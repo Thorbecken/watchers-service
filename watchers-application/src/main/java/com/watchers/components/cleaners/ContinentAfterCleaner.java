@@ -1,5 +1,6 @@
 package com.watchers.components.cleaners;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class ContinentAfterCleaner {
+public class ContinentAfterCleaner implements ContinentalComputer {
 
     @Transactional
     public void process(ContinentalDriftTaskDto dto) {

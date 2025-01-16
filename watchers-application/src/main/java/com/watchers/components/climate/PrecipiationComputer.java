@@ -1,5 +1,6 @@
 package com.watchers.components.climate;
 
+import com.watchers.components.Computer;
 import com.watchers.model.climate.AircurrentType;
 import com.watchers.model.climate.Climate;
 import com.watchers.model.coordinate.Coordinate;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class PrecipiationComputator {
+public class PrecipiationComputer implements Computer {
 
     static Map<AircurrentType, Function<WorldSettings, Integer>> airCurrentStrengthSetter = new HashMap<>();
 

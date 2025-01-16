@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-class ContinentalIntegretyAdjusterTest {
+class ContinentalIntegrityAdjusterTest {
 
-    private final ContinentalIntegretyAdjuster continentalIntegretyAdjuster = new ContinentalIntegretyAdjuster();
+    private final ContinentalIntegrityAdjuster continentalIntegrityAdjuster = new ContinentalIntegrityAdjuster();
 
     @Test
     void process() {
@@ -38,7 +38,7 @@ class ContinentalIntegretyAdjusterTest {
         continentalDriftTaskDto.setWorld(world);
         world.getWorldSettings().setHeigtDivider(1);
         world.getWorldSettings().setMinimumContinents(1);
-        continentalIntegretyAdjuster.process(continentalDriftTaskDto);
+        continentalIntegrityAdjuster.process(continentalDriftTaskDto);
 
         Assertions.assertEquals(1, toBeSplitContinent.getCoordinates().size());
         Assertions.assertEquals(13, fillerContinent.getCoordinates().size());

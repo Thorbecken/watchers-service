@@ -1,7 +1,7 @@
 package com.watchers.manager;
 
-import com.watchers.components.life.ActorProcessor;
-import com.watchers.components.life.BiomeProcessor;
+import com.watchers.components.life.ActorComputer;
+import com.watchers.components.life.BiomesComputer;
 import com.watchers.helper.StopwatchTimer;
 import com.watchers.model.actors.Animal;
 import com.watchers.model.coordinate.Coordinate;
@@ -24,16 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class LifeManager {
 
     private final WorldRepository worldRepository;
-    private final BiomeProcessor biomeProcessor;
-    private final ActorProcessor actorProcessor;
+    private final BiomesComputer biomesComputer;
+    private final ActorComputer actorComputer;
 
     public void process(WorldTaskDto taskDto) {
-        StopwatchTimer.start();
-        biomeProcessor.process(taskDto);
-        StopwatchTimer.stop("BiomeProcessor");
-        StopwatchTimer.start();
-        actorProcessor.process(taskDto);
-        StopwatchTimer.stop("ActorProcessor");
+        StopwatchTimer.processAndTime(biomesComputer, taskDto);
+        StopwatchTimer.processAndTime(actorComputer, taskDto);
     }
 
     @Transactional

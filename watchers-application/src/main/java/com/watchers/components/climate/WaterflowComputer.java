@@ -1,5 +1,6 @@
 package com.watchers.components.climate;
 
+import com.watchers.components.Computer;
 import com.watchers.components.continentaldrift.TileDefined;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
@@ -24,7 +25,7 @@ https://developers.arcgis.com/rest/services-reference/enterprise/flow-direction.
 @Slf4j
 @Component
 @AllArgsConstructor
-public class WaterflowComputator {
+public class WaterflowComputer implements Computer {
 
     private final TileDefined tileDefined;
     protected static final double LAKE_THRESHOLD = 0.0d;

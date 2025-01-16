@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.MockCoordinate;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Component
 @AllArgsConstructor
-public class ContinentalDriftPredicter {
+public class ContinentalDriftPredicter implements ContinentalComputer {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {

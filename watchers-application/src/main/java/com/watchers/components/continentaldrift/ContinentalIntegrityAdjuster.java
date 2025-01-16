@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -19,7 +20,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class ContinentalIntegretyAdjuster {
+public class ContinentalIntegrityAdjuster implements ContinentalComputer {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {

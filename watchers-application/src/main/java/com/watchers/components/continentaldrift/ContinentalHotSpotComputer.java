@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.helper.RandomHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -17,9 +18,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class ContinentalHotSpotProcessor {
+public class ContinentalHotSpotComputer implements ContinentalComputer {
 
-    public ContinentalHotSpotProcessor(
+    public ContinentalHotSpotComputer(
             @Value("${watch.continent.volcano.buildup.minimum}") long minimumHeightBuildupForEruption,
             @Value("${watch.continent.volcano.height.maximum}") int maximumHeight,
             @Value("${watch.continent.volcano.turn-limit}") int numberOfTurnsBeforeReallocation,

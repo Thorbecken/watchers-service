@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class WaterErosionComputatorTest {
+class WaterErosionComputerTest {
     private static final long OCEAN_HEIGHT = 1000;
     private static final long PLAIN_HEIGHT = 4000;
     private static final long HILL_HEIGHT = 5000;
@@ -31,7 +31,7 @@ class WaterErosionComputatorTest {
     Tile lowerRight;
 
     World world;
-    WaterErosionComputator waterErosionComputator;
+    WaterErosionComputer waterErosionComputer;
     ContinentalDriftTaskDto continentalDriftTaskDto;
 
     @BeforeEach
@@ -39,7 +39,7 @@ class WaterErosionComputatorTest {
         world = TestableWorld.createWorld();
         continentalDriftTaskDto = new ContinentalDriftTaskDto(world.getWorldMetaData());
         continentalDriftTaskDto.setWorld(world);
-        waterErosionComputator = new WaterErosionComputator(1, MULTIPLIER);
+        waterErosionComputer = new WaterErosionComputer(1, MULTIPLIER);
 
         upperLeft = world.getCoordinate(1L, 1L).getTile();
         upperMiddle = world.getCoordinate(1L, 2L).getTile();
@@ -108,7 +108,7 @@ class WaterErosionComputatorTest {
         double lowerMiddleHeightChange = expectedHeightCalculator.apply(lowerMiddle);
         double lowerRightHeightChange = expectedHeightCalculator.apply(lowerRight);
 
-        waterErosionComputator.process(world);
+        waterErosionComputer.process(world);
 
         assertEquals(upperLeftHeightChange, upperLeft.getHeight());
         assertEquals(upperMiddleHeightChange, upperMiddle.getHeight());
@@ -134,7 +134,7 @@ class WaterErosionComputatorTest {
                 .filter(tile -> tile.getDownWardTile() != null)
                 .forEach(tile -> tile.getDownWardTile().getUpwardTiles().add(tile));
 
-        waterErosionComputator.process(world);
+        waterErosionComputer.process(world);
 
         assertEquals(MOUNTAIN_HEIGHT, upperLeft.getHeight());
         assertEquals(MOUNTAIN_HEIGHT, upperRight.getHeight());
@@ -155,7 +155,7 @@ class WaterErosionComputatorTest {
                 .filter(tile -> tile.getDownWardTile() != null)
                 .forEach(tile -> tile.getDownWardTile().getUpwardTiles().add(tile));
 
-        waterErosionComputator.process(world);
+        waterErosionComputer.process(world);
 
         assertEquals(averageHeight, upperLeft.getHeight());
         assertEquals(averageHeight, upperRight.getHeight());
@@ -174,7 +174,7 @@ class WaterErosionComputatorTest {
                 .filter(tile -> tile.getDownWardTile() != null)
                 .forEach(tile -> tile.getDownWardTile().getUpwardTiles().add(tile));
 
-        waterErosionComputator.process(world);
+        waterErosionComputer.process(world);
 
         assertEquals(MOUNTAIN_HEIGHT, upperLeft.getHeight());
         assertEquals(PLAIN_HEIGHT, upperRight.getHeight());
@@ -194,7 +194,7 @@ class WaterErosionComputatorTest {
                 .filter(tile -> tile.getDownWardTile() != null)
                 .forEach(tile -> tile.getDownWardTile().getUpwardTiles().add(tile));
 
-        waterErosionComputator.process(world);
+        waterErosionComputer.process(world);
 
         assertEquals(PLAIN_HEIGHT, upperLeft.getHeight());
         assertEquals(MOUNTAIN_HEIGHT, upperRight.getHeight());

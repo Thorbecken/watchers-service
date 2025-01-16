@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PrecipiationComputatorTest {
-    private PrecipiationComputator computator;
+public class PrecipiationComputerTest {
+    private PrecipiationComputer computator;
     private World world;
     private WorldTaskDto taskDto;
 
@@ -26,7 +26,7 @@ public class PrecipiationComputatorTest {
         world = TestableWorld.createWorld();  // Gebruik de gegenereerde wereld
         taskDto = new WorldTaskDto(world.getWorldMetaData());  // Maak de taskDto voor de test
         taskDto.setWorld(world);
-        computator = new PrecipiationComputator();  // Instantieer de PrecipiationComputator
+        computator = new PrecipiationComputer();  // Instantieer de PrecipiationComputator
     }
 
     // Testen voor de methoden volgen hieronder

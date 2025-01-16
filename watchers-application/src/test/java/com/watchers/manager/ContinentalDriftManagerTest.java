@@ -27,23 +27,23 @@ class ContinentalDriftManagerTest {
         world = TestableWorld.createWorld();
         ContinentRepository continentRepository = Mockito.mock(ContinentRepository.class);
         WorldMetaDataRepository worldMetaDataRepository = Mockito.mock(WorldMetaDataRepository.class);
-        ContinentalMantelPlumeProcessor continentalMantelPlumeProcessor = new ContinentalMantelPlumeProcessor(NUMBER_OF_TURNS_BEFORE_REALLOCATION, 8);
+        ContinentalMantelPlumeComputer continentalMantelPlumeComputer = new ContinentalMantelPlumeComputer(NUMBER_OF_TURNS_BEFORE_REALLOCATION, 8);
         ContinentalDriftPredicter continentalDriftPredicter = new ContinentalDriftPredicter();
         ContinentalDriftDirectionChanger continentalDriftDirectionChanger = new ContinentalDriftDirectionChanger();
         ContinentalDriftTileChangeComputer continentalDriftTileChangeComputer = new ContinentalDriftTileChangeComputer();
         ContinentalDriftWorldAdjuster continentalDriftWorldAdjuster = new ContinentalDriftWorldAdjuster();
         ContinentalDriftNewTileAssigner continentalDriftNewTileAssigner = new ContinentalDriftNewTileAssigner(continentalDriftDirectionChanger);
-        SurfaceTypeComputator surfaceTypeComputator = new SurfaceTypeComputator(20, 30, 40, 50, 60);
-        ContinentalHotSpotProcessor continentalHotSpotProcessor = new ContinentalHotSpotProcessor(MINIMUM_HEIGHT_BUILDUP_FOR_ERUPTION, 1000, NUMBER_OF_TURNS_BEFORE_REALLOCATION, 8);
+        SurfaceTypeComputer surfaceTypeComputer = new SurfaceTypeComputer(20, 30, 40, 50, 60);
+        ContinentalHotSpotComputer continentalHotSpotComputer = new ContinentalHotSpotComputer(MINIMUM_HEIGHT_BUILDUP_FOR_ERUPTION, 1000, NUMBER_OF_TURNS_BEFORE_REALLOCATION, 8);
         ErosionAdjuster erosionAdjuster = new ErosionAdjuster(EROSION_STRENGTH, EROSION_MAX, EROSION_MIN);
         ContinentalCorrector continentalCorrector = new ContinentalCorrector();
         WorldSettingManager worldSettingManager = new WorldSettingManager(worldMetaDataRepository);
-        ContinentalIntegretyAdjuster continentalIntegretyAdjuster = new ContinentalIntegretyAdjuster();
+        ContinentalIntegrityAdjuster continentalIntegrityAdjuster = new ContinentalIntegrityAdjuster();
         ContinentalSplitter continentalSplitter = new ContinentalSplitter(true);
         ContinentalMerger continentalMerger = new ContinentalMerger(continentRepository);
 
         Mockito.when(continentRepository.findAll()).thenReturn(new ArrayList<>(world.getContinents()));
-        continentalDriftManager = new ContinentalDriftManager(continentalMantelPlumeProcessor, continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputator, continentalHotSpotProcessor, erosionAdjuster, worldSettingManager, continentalIntegretyAdjuster, continentalSplitter, continentalMerger);
+        continentalDriftManager = new ContinentalDriftManager(continentalMantelPlumeComputer, continentalDriftPredicter, continentalDriftTileChangeComputer, continentalDriftDirectionChanger, continentalDriftWorldAdjuster, continentalDriftNewTileAssigner, continentalCorrector, surfaceTypeComputer, continentalHotSpotComputer, erosionAdjuster, worldSettingManager, continentalIntegrityAdjuster, continentalSplitter, continentalMerger);
     }
 
     @Test

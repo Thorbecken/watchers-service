@@ -1,5 +1,6 @@
 package com.watchers.components.climate;
 
+import com.watchers.components.Computer;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.dto.WorldTaskDto;
@@ -12,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 
 @Service
-public class WaterErosionComputator {
+public class WaterErosionComputer implements Computer {
 
-    public WaterErosionComputator(
+    public WaterErosionComputer(
             @Value("${watch.continent.water.erosion.strength}") int erosionStrength,
             @Value("${watch.continent.water.erosion.multiplier}") int erosionMultiplier){
         this.erosionStrength = erosionStrength;

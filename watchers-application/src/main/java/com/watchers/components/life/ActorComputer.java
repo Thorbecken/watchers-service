@@ -1,13 +1,9 @@
 package com.watchers.components.life;
 
+import com.watchers.components.Computer;
 import com.watchers.model.actors.Actor;
-import com.watchers.model.actors.Animal;
-import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
-import com.watchers.model.enums.AnimalType;
 import com.watchers.model.enums.StateType;
-import com.watchers.model.environment.Biome;
-import com.watchers.model.environment.Tile;
 import com.watchers.model.world.World;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
 @Service
 @AllArgsConstructor
-public class ActorProcessor {
+public class ActorComputer implements Computer {
 
     @Transactional
     public void process(WorldTaskDto taskDto) {

@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.Computer;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.WorldTaskDto;
 import com.watchers.model.enums.SurfaceType;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class SurfaceTypeComputator {
+public class SurfaceTypeComputer implements Computer {
 
     private final long seaHeight;
     private final long coastalHeight;
@@ -17,7 +18,7 @@ public class SurfaceTypeComputator {
     private final long hillHeight;
     private final long mountainHeight;
 
-    public SurfaceTypeComputator(
+    public SurfaceTypeComputer(
                        @Value("${watch.seaHeight}") long seaHeight,
                        @Value("${watch.coastalHeight}") long coastalHeight,
                        @Value("${watch.plainsHeight}") long plainsHeight,

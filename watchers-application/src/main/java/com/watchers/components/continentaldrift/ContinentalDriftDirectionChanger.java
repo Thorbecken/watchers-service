@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
 import com.watchers.model.world.Continent;
 import com.watchers.model.world.World;
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class ContinentalDriftDirectionChanger {
+public class ContinentalDriftDirectionChanger implements ContinentalComputer {
 
     public void assignFirstOrNewDriftDirections(World world) {
         world.getContinents().forEach(continent -> continent.assignNewDriftDirection(world.getWorldSettings().getDriftVelocity(), world));

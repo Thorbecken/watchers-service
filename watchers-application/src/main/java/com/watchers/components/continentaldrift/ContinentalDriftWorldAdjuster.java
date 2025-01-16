@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalChangesDto;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @AllArgsConstructor
-public class ContinentalDriftWorldAdjuster {
+public class ContinentalDriftWorldAdjuster implements ContinentalComputer {
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {

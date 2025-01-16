@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.*;
@@ -20,7 +21,7 @@ import static com.watchers.model.enums.SurfaceType.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContinentalDriftNewTileAssigner {
+public class ContinentalDriftNewTileAssigner implements ContinentalComputer {
 
     private final ContinentalDriftDirectionChanger continentalDriftDirectionChanger;
 

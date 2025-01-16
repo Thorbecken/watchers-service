@@ -1,5 +1,6 @@
 package com.watchers.components.continentaldrift;
 
+import com.watchers.components.ContinentalComputer;
 import com.watchers.helper.CoordinateHelper;
 import com.watchers.model.coordinate.Coordinate;
 import com.watchers.model.dto.ContinentalDriftTaskDto;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class ContinentalSplitter {
+public class ContinentalSplitter implements ContinentalComputer {
 
     public ContinentalSplitter(@Value("${watch.continent.splitter}") boolean splitLargeContinents){
         this.splitLargeContinents = splitLargeContinents;
