@@ -20,22 +20,24 @@ import java.util.stream.Collectors;
 public class ContinentalMantelPlumeProcessor {
 
     private final int numberOfTurnsBeforeReallocation;
+    private final int minimumNumberOfPlume;
 
     public ContinentalMantelPlumeProcessor(
-            @Value("${watch.continent.mantle-plume.turn-limit}") int numberOfTurnsBeforeReallocation){
+            @Value("${watch.continent.mantle-plume.turn-limit}") int numberOfTurnsBeforeReallocation,
+            @Value("${watch.continent.mantle-plume.amount.minimum}") int minimumNumberOfPlume){
         this.numberOfTurnsBeforeReallocation = numberOfTurnsBeforeReallocation;
+        this.minimumNumberOfPlume = minimumNumberOfPlume;
     }
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = taskDto.getWorld();
-        int numberOfMantlePlumes = world.getWorldSettings().getNumberOfMantlePlumes();
         List<TectonicCrystal> tectonicCrystals = world.getCoordinates().stream()
                 .map(Coordinate::getPointOfInterest)
                 .filter(pointOfInterest -> pointOfInterest instanceof TectonicCrystal)
                 .map(pointOfInterest -> ((TectonicCrystal) pointOfInterest))
                 .collect(Collectors.toList());
-        while (numberOfMantlePlumes > (tectonicCrystals.size())) {
+        while (tectonicCrystals.size() < minimumNumberOfPlume) {
             long x = RandomHelper.getRandomNonZero(world.getXSize());
             long y = RandomHelper.getRandomNonZero(world.getYSize());
             Coordinate coordinate = world.getCoordinate(x, y);

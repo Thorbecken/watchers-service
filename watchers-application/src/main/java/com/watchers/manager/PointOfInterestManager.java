@@ -70,8 +70,11 @@ public class PointOfInterestManager {
         if(pointOfInterest != null){
             pointOfInterest.setCoordinate(null);
             pointOfInterest.setTile(null);
+            if(pointOfInterest instanceof HotSpotCrystal) {
+                world.setHeightDeficit(world.getHeightDeficit() + ((HotSpotCrystal) pointOfInterest).getHeightBuildup());
+            }
             worldRepository.save(world);
-            return pointOfInterest.getClass().getName();
+            return pointOfInterest.getClass().getSimpleName();
         } else {
             return "non existing point of interest";
         }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,24 +21,29 @@ public class ContinentalHotSpotProcessor {
 
     public ContinentalHotSpotProcessor(
             @Value("${watch.continent.volcano.buildup.minimum}") long minimumHeightBuildupForEruption,
-            @Value("${watch.continent.volcano.turn-limit}") int numberOfTurnsBeforeReallocation){
+            @Value("${watch.continent.volcano.height.maximum}") int maximumHeight,
+            @Value("${watch.continent.volcano.turn-limit}") int numberOfTurnsBeforeReallocation,
+            @Value("${watch.continent.volcano.number.minimum}") int minimumNumberOfVolcano){
         this.minimumHeightBuildupForEruption = minimumHeightBuildupForEruption;
         this.numberOfTurnsBeforeReallocation = numberOfTurnsBeforeReallocation;
+        this.minimumNumberOfVolcano = minimumNumberOfVolcano;
+        this.maximumHeight = maximumHeight;
     }
 
     private final long minimumHeightBuildupForEruption;
     private final int numberOfTurnsBeforeReallocation;
+    private final int minimumNumberOfVolcano;
+    private final int maximumHeight;
 
     @Transactional
     public void process(ContinentalDriftTaskDto taskDto) {
         World world = taskDto.getWorld();
-        int numberOfHotSpots = world.getWorldSettings().getNumberOfMantlePlumes();
         List<HotSpotCrystal> hotSpotCrystals = world.getCoordinates().stream()
                 .map(Coordinate::getPointOfInterest)
                 .filter(pointOfInterest -> pointOfInterest instanceof HotSpotCrystal)
                 .map(pointOfInterest -> ((HotSpotCrystal) pointOfInterest))
                 .collect(Collectors.toList());
-        while (numberOfHotSpots > (hotSpotCrystals.size())) {
+        while (hotSpotCrystals.size() < minimumNumberOfVolcano) {
             long x = RandomHelper.getRandomNonZero(world.getXSize());
             long y = RandomHelper.getRandomNonZero(world.getYSize());
             Coordinate coordinate = world.getCoordinate(x, y);
@@ -48,6 +54,7 @@ public class ContinentalHotSpotProcessor {
 
         while (world.getHeightDeficit() > 0) {
             log.trace("Current height deficit: " + world.getHeightDeficit() + " meter(s).");
+            hotSpotCrystals.sort(Comparator.comparing(HotSpotCrystal::getHeightBuildup));
             for (HotSpotCrystal hotSpotCrystal : hotSpotCrystals) {
                 long heightDeficit = world.getHeightDeficit();
                 if (heightDeficit > 0) {
@@ -63,8 +70,10 @@ public class ContinentalHotSpotProcessor {
             long heightBuildup = hotSpotCrystal.getHeightBuildup();
             if (heightBuildup >= minimumHeightBuildupForEruption) {
                 Tile tile = hotSpotCrystal.getCoordinate().getTile();
-                tile.setHeight(tile.getHeight() + heightBuildup);
-                hotSpotCrystal.setHeightBuildup(0);
+                if(tile.getHeight() < maximumHeight) {
+                    tile.setHeight(tile.getHeight() + heightBuildup);
+                    hotSpotCrystal.setHeightBuildup(0);
+                }
             }
 
             hotSpotCrystal.setTimer(hotSpotCrystal.getTimer() - 1);
